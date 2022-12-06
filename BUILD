@@ -9,9 +9,6 @@ load(
     "xcodeproj",
 )
 
-# buildifier: disable=bzl-visibility
-load("@io_bazel_rules_kotlin//kotlin/internal:toolchains.bzl", "define_kt_toolchain")
-
 buildifier(
     name = "buildifier.check",
     exclude_patterns = [
