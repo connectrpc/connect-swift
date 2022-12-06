@@ -1,0 +1,12 @@
+.DS_Store
+.idea
+*.iml
+*.xcodeproj
+bazel-*
+protoc-gen-connect-kotlin
+protoc-gen-connect-swift
+vendor
+
+# buf set up requires a github token to prevent a rate limit.
+# TODO: We're currently checking in generated code to side-step this problem.
+# gen/proto
