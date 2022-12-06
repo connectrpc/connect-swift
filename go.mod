@@ -1,4 +1,4 @@
-module github.com/bufbuild/connect-kotlin
+module github.com/bufbuild/connect-swift
 
 go 1.18
 
