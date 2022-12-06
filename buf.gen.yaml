@@ -1,0 +1,13 @@
+version: v1
+managed:
+  enabled: true
+  optimize_for: LITE_RUNTIME
+  go_package_prefix:
+    default: plugins/protoc-gen-connect-mobile
+plugins:
+  # TODO: Actually manage the remote plugins on Buf main
+  - name: connect-swift
+    out: gen/proto/connectswift
+    path: ./protoc-gen-connect-swift
+  - remote: buf.build/achiu/plugins/pg-wire-swift:v0.0.1-4
+    out: gen/proto/wire-swift

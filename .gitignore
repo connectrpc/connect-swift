@@ -3,8 +3,7 @@
 *.iml
 *.xcodeproj
 bazel-*
-protoc-gen-connect-kotlin
-protoc-gen-connect-swift
+/protoc-gen-connect-swift
 vendor
 
 # buf set up requires a github token to prevent a rate limit.
