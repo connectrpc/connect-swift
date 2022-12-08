@@ -34,18 +34,18 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-enum Server_V1_Protocol: SwiftProtobuf.Enum {
-  typealias RawValue = Int
+public enum Server_V1_Protocol: SwiftProtobuf.Enum {
+  public typealias RawValue = Int
   case unspecified // = 0
   case grpc // = 1
   case grpcWeb // = 2
   case UNRECOGNIZED(Int)
 
-  init() {
+  public init() {
     self = .unspecified
   }
 
-  init?(rawValue: Int) {
+  public init?(rawValue: Int) {
     switch rawValue {
     case 0: self = .unspecified
     case 1: self = .grpc
@@ -54,7 +54,7 @@ enum Server_V1_Protocol: SwiftProtobuf.Enum {
     }
   }
 
-  var rawValue: Int {
+  public var rawValue: Int {
     switch self {
     case .unspecified: return 0
     case .grpc: return 1
@@ -69,7 +69,7 @@ enum Server_V1_Protocol: SwiftProtobuf.Enum {
 
 extension Server_V1_Protocol: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Server_V1_Protocol] = [
+  public static var allCases: [Server_V1_Protocol] = [
     .unspecified,
     .grpc,
     .grpcWeb,
@@ -79,48 +79,48 @@ extension Server_V1_Protocol: CaseIterable {
 #endif  // swift(>=4.2)
 
 /// ServerMetadata is the metadata returned from the server started by the server binary.
-struct Server_V1_ServerMetadata {
+public struct Server_V1_ServerMetadata {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var host: String = String()
+  public var host: String = String()
 
-  var protocols: [Server_V1_ProtocolSupport] = []
+  public var protocols: [Server_V1_ProtocolSupport] = []
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Server_V1_ProtocolSupport {
+public struct Server_V1_ProtocolSupport {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var `protocol`: Server_V1_Protocol = .unspecified
+  public var `protocol`: Server_V1_Protocol = .unspecified
 
-  var httpVersions: [Server_V1_HTTPVersion] = []
+  public var httpVersions: [Server_V1_HTTPVersion] = []
 
-  var port: String = String()
+  public var port: String = String()
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
-struct Server_V1_HTTPVersion {
+public struct Server_V1_HTTPVersion {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var major: Int32 = 0
+  public var major: Int32 = 0
 
-  var minor: Int32 = 0
+  public var minor: Int32 = 0
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
@@ -135,7 +135,7 @@ extension Server_V1_HTTPVersion: @unchecked Sendable {}
 fileprivate let _protobuf_package = "server.v1"
 
 extension Server_V1_Protocol: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     0: .same(proto: "PROTOCOL_UNSPECIFIED"),
     1: .same(proto: "PROTOCOL_GRPC"),
     2: .same(proto: "PROTOCOL_GRPC_WEB"),
@@ -143,13 +143,13 @@ extension Server_V1_Protocol: SwiftProtobuf._ProtoNameProviding {
 }
 
 extension Server_V1_ServerMetadata: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ServerMetadata"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+  public static let protoMessageName: String = _protobuf_package + ".ServerMetadata"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "host"),
     2: .same(proto: "protocols"),
   ]
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -162,7 +162,7 @@ extension Server_V1_ServerMetadata: SwiftProtobuf.Message, SwiftProtobuf._Messag
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if !self.host.isEmpty {
       try visitor.visitSingularStringField(value: self.host, fieldNumber: 1)
     }
@@ -172,7 +172,7 @@ extension Server_V1_ServerMetadata: SwiftProtobuf.Message, SwiftProtobuf._Messag
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Server_V1_ServerMetadata, rhs: Server_V1_ServerMetadata) -> Bool {
+  public static func ==(lhs: Server_V1_ServerMetadata, rhs: Server_V1_ServerMetadata) -> Bool {
     if lhs.host != rhs.host {return false}
     if lhs.protocols != rhs.protocols {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -181,14 +181,14 @@ extension Server_V1_ServerMetadata: SwiftProtobuf.Message, SwiftProtobuf._Messag
 }
 
 extension Server_V1_ProtocolSupport: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ProtocolSupport"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+  public static let protoMessageName: String = _protobuf_package + ".ProtocolSupport"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "protocol"),
     2: .standard(proto: "http_versions"),
     3: .same(proto: "port"),
   ]
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -202,7 +202,7 @@ extension Server_V1_ProtocolSupport: SwiftProtobuf.Message, SwiftProtobuf._Messa
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.`protocol` != .unspecified {
       try visitor.visitSingularEnumField(value: self.`protocol`, fieldNumber: 1)
     }
@@ -215,7 +215,7 @@ extension Server_V1_ProtocolSupport: SwiftProtobuf.Message, SwiftProtobuf._Messa
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Server_V1_ProtocolSupport, rhs: Server_V1_ProtocolSupport) -> Bool {
+  public static func ==(lhs: Server_V1_ProtocolSupport, rhs: Server_V1_ProtocolSupport) -> Bool {
     if lhs.`protocol` != rhs.`protocol` {return false}
     if lhs.httpVersions != rhs.httpVersions {return false}
     if lhs.port != rhs.port {return false}
@@ -225,13 +225,13 @@ extension Server_V1_ProtocolSupport: SwiftProtobuf.Message, SwiftProtobuf._Messa
 }
 
 extension Server_V1_HTTPVersion: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".HTTPVersion"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+  public static let protoMessageName: String = _protobuf_package + ".HTTPVersion"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "major"),
     2: .same(proto: "minor"),
   ]
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -244,7 +244,7 @@ extension Server_V1_HTTPVersion: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.major != 0 {
       try visitor.visitSingularInt32Field(value: self.major, fieldNumber: 1)
     }
@@ -254,7 +254,7 @@ extension Server_V1_HTTPVersion: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Server_V1_HTTPVersion, rhs: Server_V1_HTTPVersion) -> Bool {
+  public static func ==(lhs: Server_V1_HTTPVersion, rhs: Server_V1_HTTPVersion) -> Bool {
     if lhs.major != rhs.major {return false}
     if lhs.minor != rhs.minor {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}

@@ -38,22 +38,22 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 ///
 /// This struct must remain binary-compatible with
 /// https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto.
-struct Grpc_Status_V1_Status {
+public struct Grpc_Status_V1_Status {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   /// a google.rpc.Code
-  var code: Int32 = 0
+  public var code: Int32 = 0
 
   /// developer-facing, English (localize in details or client-side)
-  var message: String = String()
+  public var message: String = String()
 
-  var details: [SwiftProtobuf.Google_Protobuf_Any] = []
+  public var details: [SwiftProtobuf.Google_Protobuf_Any] = []
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
@@ -65,14 +65,14 @@ extension Grpc_Status_V1_Status: @unchecked Sendable {}
 fileprivate let _protobuf_package = "grpc.status.v1"
 
 extension Grpc_Status_V1_Status: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".Status"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+  public static let protoMessageName: String = _protobuf_package + ".Status"
+  public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "code"),
     2: .same(proto: "message"),
     3: .same(proto: "details"),
   ]
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       // The use of inline closures is to circumvent an issue where the compiler
       // allocates stack space for every case branch when no optimizations are
@@ -86,7 +86,7 @@ extension Grpc_Status_V1_Status: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     if self.code != 0 {
       try visitor.visitSingularInt32Field(value: self.code, fieldNumber: 1)
     }
@@ -99,7 +99,7 @@ extension Grpc_Status_V1_Status: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Grpc_Status_V1_Status, rhs: Grpc_Status_V1_Status) -> Bool {
+  public static func ==(lhs: Grpc_Status_V1_Status, rhs: Grpc_Status_V1_Status) -> Bool {
     if lhs.code != rhs.code {return false}
     if lhs.message != rhs.message {return false}
     if lhs.details != rhs.details {return false}

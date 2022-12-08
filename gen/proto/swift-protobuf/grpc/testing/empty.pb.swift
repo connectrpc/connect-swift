@@ -43,14 +43,14 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 ///   service Foo {
 ///     rpc Bar (grpc.testing.Empty) returns (grpc.testing.Empty) { };
 ///   };
-struct Grpc_Testing_Empty {
+public struct Grpc_Testing_Empty {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var unknownFields = SwiftProtobuf.UnknownStorage()
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  init() {}
+  public init() {}
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
@@ -62,19 +62,19 @@ extension Grpc_Testing_Empty: @unchecked Sendable {}
 fileprivate let _protobuf_package = "grpc.testing"
 
 extension Grpc_Testing_Empty: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".Empty"
-  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+  public static let protoMessageName: String = _protobuf_package + ".Empty"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let _ = try decoder.nextFieldNumber() {
     }
   }
 
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Grpc_Testing_Empty, rhs: Grpc_Testing_Empty) -> Bool {
+  public static func ==(lhs: Grpc_Testing_Empty, rhs: Grpc_Testing_Empty) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

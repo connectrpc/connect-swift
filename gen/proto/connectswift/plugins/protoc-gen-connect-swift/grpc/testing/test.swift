@@ -10,48 +10,48 @@ import Foundation
 public protocol TestServiceClientInterface {
 
 	// One empty request followed by one empty response.
-	func emptyCall(request: Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Empty>) -> Void)
+	func emptyCall(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void)
 
 	// One request followed by one response.
-	func unaryCall(request: SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<SimpleResponse>) -> Void)
+	func unaryCall(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void)
 
 	// One request followed by one response. This RPC always fails.
-	func failUnaryCall(request: SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<SimpleResponse>) -> Void)
+	func failUnaryCall(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void)
 
 	// One request followed by one response. Response has cache control
 	// headers set such that a caching HTTP proxy (such as GFE) can
 	// satisfy subsequent requests.
-	func cacheableUnaryCall(request: SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<SimpleResponse>) -> Void)
+	func cacheableUnaryCall(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void)
 
 	// One request followed by a sequence of responses (streamed download).
 	// The server returns the payload with client desired type and sizes.
-	func streamingOutputCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<StreamingOutputCallRequest>
+	func streamingOutputCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_StreamingOutputCallRequest>
 
 	// One request followed by a sequence of responses (streamed download). This RPC always fails.
-	func failStreamingOutputCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<StreamingOutputCallRequest>
+	func failStreamingOutputCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_StreamingOutputCallRequest>
 
 	// A sequence of requests followed by one response (streamed upload).
 	// The server returns the aggregated size of client payload as the result.
-	func streamingInputCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<StreamingInputCallResponse>) -> Void) -> any Connect.ClientOnlyStreamInterface<StreamingInputCallRequest>
+	func streamingInputCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingInputCallResponse>) -> Void) -> any Connect.ClientOnlyStreamInterface<Grpc_Testing_StreamingInputCallRequest>
 
 	// A sequence of requests with each request served by the server immediately.
 	// As one request could lead to multiple responses, this interface
 	// demonstrates the idea of full duplexing.
-	func fullDuplexCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<StreamingOutputCallRequest>
+	func fullDuplexCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Grpc_Testing_StreamingOutputCallRequest>
 
 	// A sequence of requests followed by a sequence of responses.
 	// The server buffers all the client requests and then serves them in order. A
 	// stream of responses are returned to the client when the server starts with
 	// first request.
-	func halfDuplexCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<StreamingOutputCallRequest>
+	func halfDuplexCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Grpc_Testing_StreamingOutputCallRequest>
 
 	// The test server will not implement this method. It will be used
 	// to test the behavior when clients call unimplemented methods.
-	func unimplementedCall(request: Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Empty>) -> Void)
+	func unimplementedCall(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void)
 
 	// The test server will not implement this method. It will be used
 	// to test the behavior when clients call unimplemented streaming output methods.
-	func unimplementedStreamingOutputCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Empty>
+	func unimplementedStreamingOutputCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty>
 }
 
 // Concrete implementation of TestServiceClientInterface.
@@ -62,47 +62,47 @@ public final class TestServiceClient: TestServiceClientInterface {
 		self.client = client
 	}
 
-	public func emptyCall(request: Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Empty>) -> Void) {
+	public func emptyCall(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) {
 		self.client.unary(path: "grpc.testing.TestService/EmptyCall", request: request, headers: headers, completion: completion)
 	}
 
-	public func unaryCall(request: SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<SimpleResponse>) -> Void) {
+	public func unaryCall(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) {
 		self.client.unary(path: "grpc.testing.TestService/UnaryCall", request: request, headers: headers, completion: completion)
 	}
 
-	public func failUnaryCall(request: SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<SimpleResponse>) -> Void) {
+	public func failUnaryCall(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) {
 		self.client.unary(path: "grpc.testing.TestService/FailUnaryCall", request: request, headers: headers, completion: completion)
 	}
 
-	public func cacheableUnaryCall(request: SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<SimpleResponse>) -> Void) {
+	public func cacheableUnaryCall(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) {
 		self.client.unary(path: "grpc.testing.TestService/CacheableUnaryCall", request: request, headers: headers, completion: completion)
 	}
 
-	public func streamingOutputCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<StreamingOutputCallRequest> {
+	public func streamingOutputCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_StreamingOutputCallRequest> {
 		return self.client.serverOnlyStream(path: "grpc.testing.TestService/StreamingOutputCall", headers: headers, onResult: onResult)
 	}
 
-	public func failStreamingOutputCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<StreamingOutputCallRequest> {
+	public func failStreamingOutputCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_StreamingOutputCallRequest> {
 		return self.client.serverOnlyStream(path: "grpc.testing.TestService/FailStreamingOutputCall", headers: headers, onResult: onResult)
 	}
 
-	public func streamingInputCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<StreamingInputCallResponse>) -> Void) -> any Connect.ClientOnlyStreamInterface<StreamingInputCallRequest> {
+	public func streamingInputCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingInputCallResponse>) -> Void) -> any Connect.ClientOnlyStreamInterface<Grpc_Testing_StreamingInputCallRequest> {
 		return self.client.clientOnlyStream(path: "grpc.testing.TestService/StreamingInputCall", headers: headers, onResult: onResult)
 	}
 
-	public func fullDuplexCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<StreamingOutputCallRequest> {
+	public func fullDuplexCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Grpc_Testing_StreamingOutputCallRequest> {
 		return self.client.bidirectionalStream(path: "grpc.testing.TestService/FullDuplexCall", headers: headers, onResult: onResult)
 	}
 
-	public func halfDuplexCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<StreamingOutputCallRequest> {
+	public func halfDuplexCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Grpc_Testing_StreamingOutputCallRequest> {
 		return self.client.bidirectionalStream(path: "grpc.testing.TestService/HalfDuplexCall", headers: headers, onResult: onResult)
 	}
 
-	public func unimplementedCall(request: Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Empty>) -> Void) {
+	public func unimplementedCall(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) {
 		self.client.unary(path: "grpc.testing.TestService/UnimplementedCall", request: request, headers: headers, completion: completion)
 	}
 
-	public func unimplementedStreamingOutputCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Empty> {
+	public func unimplementedStreamingOutputCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty> {
 		return self.client.serverOnlyStream(path: "grpc.testing.TestService/UnimplementedStreamingOutputCall", headers: headers, onResult: onResult)
 	}
 }
@@ -111,10 +111,10 @@ public final class TestServiceClient: TestServiceClientInterface {
 public protocol UnimplementedServiceClientInterface {
 
 	// A call that no server should implement
-	func unimplementedCall(request: Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Empty>) -> Void)
+	func unimplementedCall(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void)
 
 	// A call that no server should implement
-	func unimplementedStreamingOutputCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Empty>
+	func unimplementedStreamingOutputCall(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty>
 }
 
 // Concrete implementation of UnimplementedServiceClientInterface.
@@ -125,11 +125,11 @@ public final class UnimplementedServiceClient: UnimplementedServiceClientInterfa
 		self.client = client
 	}
 
-	public func unimplementedCall(request: Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Empty>) -> Void) {
+	public func unimplementedCall(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) {
 		self.client.unary(path: "grpc.testing.UnimplementedService/UnimplementedCall", request: request, headers: headers, completion: completion)
 	}
 
-	public func unimplementedStreamingOutputCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Empty> {
+	public func unimplementedStreamingOutputCall(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty> {
 		return self.client.serverOnlyStream(path: "grpc.testing.UnimplementedService/UnimplementedStreamingOutputCall", headers: headers, onResult: onResult)
 	}
 }
@@ -137,10 +137,10 @@ public final class UnimplementedServiceClient: UnimplementedServiceClientInterfa
 public protocol ReconnectServiceClientInterface {
 
 	
-	func start(request: ReconnectParams, headers: Connect.Headers, completion: @escaping (ResponseMessage<Empty>) -> Void)
+	func start(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void)
 
 	
-	func stop(request: Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<ReconnectInfo>) -> Void)
+	func stop(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_ReconnectInfo>) -> Void)
 }
 
 // Concrete implementation of ReconnectServiceClientInterface.
@@ -151,11 +151,11 @@ public final class ReconnectServiceClient: ReconnectServiceClientInterface {
 		self.client = client
 	}
 
-	public func start(request: ReconnectParams, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Empty>) -> Void) {
+	public func start(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) {
 		self.client.unary(path: "grpc.testing.ReconnectService/Start", request: request, headers: headers, completion: completion)
 	}
 
-	public func stop(request: Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<ReconnectInfo>) -> Void) {
+	public func stop(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_ReconnectInfo>) -> Void) {
 		self.client.unary(path: "grpc.testing.ReconnectService/Stop", request: request, headers: headers, completion: completion)
 	}
 }
@@ -163,10 +163,10 @@ public final class ReconnectServiceClient: ReconnectServiceClientInterface {
 public protocol LoadBalancerStatsServiceClientInterface {
 
 	// Gets the backend distribution for RPCs sent by a test client.
-	func getClientStats(request: LoadBalancerStatsRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<LoadBalancerStatsResponse>) -> Void)
+	func getClientStats(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>) -> Void)
 
 	// Gets the accumulated stats for RPCs sent by a test client.
-	func getClientAccumulatedStats(request: LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<LoadBalancerAccumulatedStatsResponse>) -> Void)
+	func getClientAccumulatedStats(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>) -> Void)
 }
 
 // Concrete implementation of LoadBalancerStatsServiceClientInterface.
@@ -177,11 +177,11 @@ public final class LoadBalancerStatsServiceClient: LoadBalancerStatsServiceClien
 		self.client = client
 	}
 
-	public func getClientStats(request: LoadBalancerStatsRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<LoadBalancerStatsResponse>) -> Void) {
+	public func getClientStats(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>) -> Void) {
 		self.client.unary(path: "grpc.testing.LoadBalancerStatsService/GetClientStats", request: request, headers: headers, completion: completion)
 	}
 
-	public func getClientAccumulatedStats(request: LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<LoadBalancerAccumulatedStatsResponse>) -> Void) {
+	public func getClientAccumulatedStats(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>) -> Void) {
 		self.client.unary(path: "grpc.testing.LoadBalancerStatsService/GetClientAccumulatedStats", request: request, headers: headers, completion: completion)
 	}
 }
@@ -189,10 +189,10 @@ public final class LoadBalancerStatsServiceClient: LoadBalancerStatsServiceClien
 public protocol XdsUpdateHealthServiceClientInterface {
 
 	
-	func setServing(request: Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Empty>) -> Void)
+	func setServing(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void)
 
 	
-	func setNotServing(request: Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Empty>) -> Void)
+	func setNotServing(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void)
 }
 
 // Concrete implementation of XdsUpdateHealthServiceClientInterface.
@@ -203,11 +203,11 @@ public final class XdsUpdateHealthServiceClient: XdsUpdateHealthServiceClientInt
 		self.client = client
 	}
 
-	public func setServing(request: Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Empty>) -> Void) {
+	public func setServing(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) {
 		self.client.unary(path: "grpc.testing.XdsUpdateHealthService/SetServing", request: request, headers: headers, completion: completion)
 	}
 
-	public func setNotServing(request: Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Empty>) -> Void) {
+	public func setNotServing(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) {
 		self.client.unary(path: "grpc.testing.XdsUpdateHealthService/SetNotServing", request: request, headers: headers, completion: completion)
 	}
 }
@@ -215,7 +215,7 @@ public final class XdsUpdateHealthServiceClient: XdsUpdateHealthServiceClientInt
 public protocol XdsUpdateClientConfigureServiceClientInterface {
 
 	// Update the tes client's configuration.
-	func configure(request: ClientConfigureRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<ClientConfigureResponse>) -> Void)
+	func configure(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_ClientConfigureResponse>) -> Void)
 }
 
 // Concrete implementation of XdsUpdateClientConfigureServiceClientInterface.
@@ -226,7 +226,7 @@ public final class XdsUpdateClientConfigureServiceClient: XdsUpdateClientConfigu
 		self.client = client
 	}
 
-	public func configure(request: ClientConfigureRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<ClientConfigureResponse>) -> Void) {
+	public func configure(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_ClientConfigureResponse>) -> Void) {
 		self.client.unary(path: "grpc.testing.XdsUpdateClientConfigureService/Configure", request: request, headers: headers, completion: completion)
 	}
 }

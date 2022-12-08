@@ -4,6 +4,12 @@ import Dispatch
 import os.log
 import SwiftGenerated
 
+private typealias ConverseRequest = Buf_Connect_Demo_Eliza_V1_ConverseRequest
+private typealias ConverseResponse = Buf_Connect_Demo_Eliza_V1_ConverseResponse
+
+private typealias SayRequest = Buf_Connect_Demo_Eliza_V1_SayRequest
+private typealias SayResponse = Buf_Connect_Demo_Eliza_V1_SayResponse
+
 /// View model that can be injected into a `MessagingView`.
 protocol MessagingViewModel: ObservableObject {
     /// The current set of messages. Observable by storing the view model as an `@ObservedObject`.
@@ -36,8 +42,9 @@ final class UnaryMessagingViewModel: MessagingViewModel {
     }
 
     func send(_ sentence: String) {
+        let request = SayRequest.with { $0.sentence = sentence }
         self.messages.append(Message(message: sentence, author: .user))
-        self.elizaClient.say(request: SayRequest(sentence: sentence)) { [weak self] response in
+        self.elizaClient.say(request: request) { [weak self] response in
             os_log(.debug, "Eliza unary response: %@", String(describing: response))
 
             // UI updates must be performed on the main thread.
@@ -71,8 +78,9 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
 
     func send(_ sentence: String) {
         do {
+            let request = ConverseRequest.with { $0.sentence = sentence }
             self.messages.append(Message(message: sentence, author: .user))
-            try self.getOrCreateStream().send(ConverseRequest(sentence: sentence))
+            try self.getOrCreateStream().send(request)
         } catch let error {
             os_log(
                 .error, "Failed to write message to stream: %@", error.localizedDescription

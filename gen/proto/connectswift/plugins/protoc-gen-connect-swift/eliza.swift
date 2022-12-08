@@ -15,15 +15,15 @@ public protocol ElizaServiceClientInterface {
 
 	// Say is a unary request demo. This method should allow for a one sentence
 	// response given a one sentence request.
-	func say(request: SayRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<SayResponse>) -> Void)
+	func say(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>) -> Void)
 
 	// Converse is a bi-directional streaming request demo. This method should allow for
 	// many requests and many responses.
-	func converse(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<ConverseResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<ConverseRequest>
+	func converse(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_ConverseResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Buf_Connect_Demo_Eliza_V1_ConverseRequest>
 
 	// Introduce is a server-streaming request demo.  This method allows for a single request that will return a series
 	// of responses
-	func introduce(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<IntroduceResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<IntroduceRequest>
+	func introduce(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest>
 }
 
 // Concrete implementation of ElizaServiceClientInterface.
@@ -34,15 +34,15 @@ public final class ElizaServiceClient: ElizaServiceClientInterface {
 		self.client = client
 	}
 
-	public func say(request: SayRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<SayResponse>) -> Void) {
+	public func say(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>) -> Void) {
 		self.client.unary(path: "buf.connect.demo.eliza.v1.ElizaService/Say", request: request, headers: headers, completion: completion)
 	}
 
-	public func converse(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<ConverseResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<ConverseRequest> {
+	public func converse(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_ConverseResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Buf_Connect_Demo_Eliza_V1_ConverseRequest> {
 		return self.client.bidirectionalStream(path: "buf.connect.demo.eliza.v1.ElizaService/Converse", headers: headers, onResult: onResult)
 	}
 
-	public func introduce(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<IntroduceResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<IntroduceRequest> {
+	public func introduce(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest> {
 		return self.client.serverOnlyStream(path: "buf.connect.demo.eliza.v1.ElizaService/Introduce", headers: headers, onResult: onResult)
 	}
 }
