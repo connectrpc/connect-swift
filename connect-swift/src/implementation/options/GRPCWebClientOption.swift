@@ -1,5 +1,4 @@
 import Foundation
-import Wire
 
 /// Enables the client to speak using the gRPC Web protocol:
 /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
@@ -205,7 +204,9 @@ private extension Trailers {
         return self[HeaderConstants.grpcStatusDetails]?
             .first
             .flatMap { Data(base64Encoded: $0) }
-            .flatMap { try? ProtoDecoder().decode(Status.self, from: $0) }?
+            .flatMap { data -> Grpc_Status_V1_Status? in
+                return try? ProtoCodec().deserialize(source: data)
+            }?
             .details
             .compactMap { protoDetail in
                 return ConnectError.Detail(

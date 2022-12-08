@@ -1,4 +1,4 @@
-# connect-mobile
+# connect-swift
 
 ## Prerequisites
 

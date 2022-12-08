@@ -1,7 +1,7 @@
-import Wire
+import SwiftProtobuf
 
 public protocol ClientOnlyStreamInterface<Input> {
-    associatedtype Input: Wire.ProtoEncodable & Swift.Encodable
+    associatedtype Input: SwiftProtobuf.Message
 
     @discardableResult
     func send(_ input: Input) throws -> Self

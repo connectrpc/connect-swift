@@ -1,9 +1,9 @@
 import Foundation
-import Wire
+import SwiftProtobuf
 
 public protocol ProtocolClientInterface {
     func unary<
-        Input: Wire.ProtoEncodable & Swift.Encodable, Output: Wire.ProtoDecodable & Swift.Decodable
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
         path: String,
         request: Input,
@@ -12,7 +12,7 @@ public protocol ProtocolClientInterface {
     )
 
     func bidirectionalStream<
-        Input: Wire.ProtoEncodable & Swift.Encodable, Output: Wire.ProtoDecodable & Swift.Decodable
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
         path: String,
         headers: Headers,
@@ -20,7 +20,7 @@ public protocol ProtocolClientInterface {
     ) -> any BidirectionalStreamInterface<Input>
 
     func clientOnlyStream<
-        Input: Wire.ProtoEncodable & Swift.Encodable, Output: Wire.ProtoDecodable & Swift.Decodable
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
         path: String,
         headers: Headers,
@@ -28,7 +28,7 @@ public protocol ProtocolClientInterface {
     ) -> any ClientOnlyStreamInterface<Input>
 
     func serverOnlyStream<
-        Input: Wire.ProtoEncodable & Swift.Encodable, Output: Wire.ProtoDecodable & Swift.Decodable
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
         path: String,
         headers: Headers,

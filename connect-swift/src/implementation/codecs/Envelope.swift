@@ -1,5 +1,5 @@
 import Foundation
-import Wire
+import SwiftProtobuf
 
 /// Provides functionality for packing and unpacking (headers and length prefixed) messages.
 public enum Envelope {

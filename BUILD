@@ -34,8 +34,8 @@ buildifier(
 ## Swift ##
 
 swift_library(
-    name = "Wire",
-    srcs = ["@wire_swift//:WireSwift"],
+    name = "SwiftProtobuf",
+    srcs = ["@swift_protobuf//:SwiftProtobuf"],
     features = [
         "swift.emit_symbol_graph",
         "swift.enable_library_evolution",
@@ -59,8 +59,8 @@ xcodeproj(
             build_action = xcode_schemes.build_action(["//connect-swift/src:ConnectLibrary"]),
         ),
         xcode_schemes.scheme(
-            name = "Wire Runtime",
-            build_action = xcode_schemes.build_action(["//:Wire"]),
+            name = "SwiftProtobuf Runtime",
+            build_action = xcode_schemes.build_action(["//:SwiftProtobuf"]),
         ),
         # xcode_schemes.scheme(
         #     name = "Basic Tests",

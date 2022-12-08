@@ -2,7 +2,7 @@ CROSSTEST_VERSION := 4f4e96d8fea3ed9473b90a964a5ba429e7ea5649
 
 .PHONY: build
 build:
-	@echo "Building Swift plugin..."
+	@echo "Building Connect-Swift plugin..."
 	@go build -o protoc-gen-connect-swift ./cmd/protoc-gen-connect-swift/main.go
 
 .PHONY: buildifier-check

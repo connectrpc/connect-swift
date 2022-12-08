@@ -1,7 +1,7 @@
-import Wire
+import SwiftProtobuf
 
 /// Concrete implementation of `ServerOnlyStreamInterface`.
-final class ServerOnlyStream<Message: Wire.ProtoEncodable & Swift.Encodable> {
+final class ServerOnlyStream<Message: SwiftProtobuf.Message> {
     private let bidirectionalStream: BidirectionalStream<Message>
 
     init(bidirectionalStream: BidirectionalStream<Message>) {

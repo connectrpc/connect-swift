@@ -6,7 +6,7 @@ swift_library(
     srcs = glob(["*.swift"]),
     visibility = ["//visibility:private"],
     deps = [
-        "//:Wire",
+        "//:SwiftProtobuf",
         "//connect-swift/src:ConnectLibrary",
         "//gen:SwiftGenerated",
     ],

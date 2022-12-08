@@ -1,5 +1,5 @@
 import Foundation
-import Wire
+import SwiftProtobuf
 
 public struct ProtoCodec {
     public init() {}
@@ -10,12 +10,11 @@ extension ProtoCodec: Codec {
         return "proto"
     }
 
-    public func serialize<Input: ProtoEncodable & Encodable>(message: Input) throws -> Data {
-        return try ProtoEncoder().encode(message)
+    public func serialize<Input: SwiftProtobuf.Message>(message: Input) throws -> Data {
+        return try message.serializedData()
     }
 
-    public func deserialize<Output: ProtoDecodable & Decodable>(source: Data) throws -> Output {
-        return try ProtoDecoder(enumDecodingStrategy: .returnNil)
-            .decode(Output.self, from: source)
+    public func deserialize<Output: SwiftProtobuf.Message>(source: Data) throws -> Output {
+        return try Output(serializedData: source)
     }
 }
