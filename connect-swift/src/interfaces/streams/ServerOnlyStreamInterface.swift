@@ -1,7 +1,7 @@
-import Wire
+import SwiftProtobuf
 
 public protocol ServerOnlyStreamInterface<Input> {
-    associatedtype Input: Wire.ProtoEncodable & Swift.Encodable
+    associatedtype Input: SwiftProtobuf.Message
 
     func send(_ input: Input) throws
 }

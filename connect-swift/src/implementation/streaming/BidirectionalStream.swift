@@ -1,8 +1,8 @@
 import os.log
-import Wire
+import SwiftProtobuf
 
 /// Concrete implementation of `BidirectionalStreamInterface`.
-final class BidirectionalStream<Message: Wire.ProtoEncodable & Swift.Encodable> {
+final class BidirectionalStream<Message: SwiftProtobuf.Message> {
     private let requestCallbacks: RequestCallbacks
     private let codec: Codec
 

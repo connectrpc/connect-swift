@@ -1,6 +1,6 @@
 import Foundation
 import os.log
-import Wire
+import SwiftProtobuf
 
 /// Concrete implementation of the `ProtocolClientInterface`.
 public final class ProtocolClient {
@@ -29,7 +29,7 @@ public final class ProtocolClient {
 
 extension ProtocolClient: ProtocolClientInterface {
     public func unary<
-        Input: Wire.ProtoEncodable & Swift.Encodable, Output: Wire.ProtoDecodable & Swift.Decodable
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
         path: String,
         request: Input,
@@ -107,7 +107,7 @@ extension ProtocolClient: ProtocolClientInterface {
     }
 
     public func bidirectionalStream<
-        Input: Wire.ProtoEncodable & Swift.Encodable, Output: Wire.ProtoDecodable & Swift.Decodable
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
         path: String,
         headers: Headers,
@@ -119,7 +119,7 @@ extension ProtocolClient: ProtocolClientInterface {
     }
 
     public func clientOnlyStream<
-        Input: Wire.ProtoEncodable & Swift.Encodable, Output: Wire.ProtoDecodable & Swift.Decodable
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
         path: String,
         headers: Headers,
@@ -131,7 +131,7 @@ extension ProtocolClient: ProtocolClientInterface {
     }
 
     public func serverOnlyStream<
-        Input: Wire.ProtoEncodable & Swift.Encodable, Output: Wire.ProtoDecodable & Swift.Decodable
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
         path: String,
         headers: Headers,
@@ -145,7 +145,7 @@ extension ProtocolClient: ProtocolClientInterface {
     // MARK: - Private
 
     private func createBidirectionalStream<
-        Input: Wire.ProtoEncodable & Swift.Encodable, Output: Wire.ProtoDecodable & Swift.Decodable
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
         path: String,
         headers: Headers,
@@ -222,7 +222,7 @@ extension ProtocolClient: ProtocolClientInterface {
 }
 
 private extension StreamResult<Data> {
-    func toTypedResult<Output: Wire.ProtoDecodable & Swift.Decodable>(using codec: Codec)
+    func toTypedResult<Output: SwiftProtobuf.Message>(using codec: Codec)
         throws -> StreamResult<Output>
     {
         switch self {

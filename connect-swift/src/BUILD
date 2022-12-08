@@ -10,7 +10,7 @@ swift_library(
     ],
     module_name = "Connect",
     visibility = ["//visibility:public"],
-    deps = ["//:Wire"],
+    deps = ["//:SwiftProtobuf"],
 )
 
 # TODO: Build and distribute iOS Connect framework

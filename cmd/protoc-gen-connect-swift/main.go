@@ -106,7 +106,7 @@ func interfaceName(service *protogen.Service) string {
 }
 
 func implementationName(service *protogen.Service) string {
-	return upperCamelCase(service.Desc.Name()) + "Client"
+	return upperCamelCase(service.Desc.Name(), "") + "Client"
 }
 
 func methodSignature(method *protogen.Method, file *protogen.File, includeDefaults bool) string {
@@ -156,21 +156,23 @@ func methodSignature(method *protogen.Method, file *protogen.File, includeDefaul
 }
 
 func swiftFullyQualifiedName(name protoreflect.Name, file *protogen.File) string {
-	upperCamelName := upperCamelCase(name)
-	return upperCamelName
-	// TODO: Uncomment after adding support for upper-camel-casing and swift_prefix to Wire, which supports neither
-	//if file.Proto.Options.SwiftPrefix != nil {
-	//	return fmt.Sprintf("%s%s", *file.Proto.Options.SwiftPrefix, upperCamelName)
-	//} else {
-	//	upperCamelPackage := upperCamelCase(protoreflect.Name(file.Desc.FullName()))
-	//	return fmt.Sprintf("%s_%s", strings.ReplaceAll(upperCamelPackage, ".", "_"), upperCamelName)
-	//}
+	upperCamelName := upperCamelCase(name, "")
+	if file.Proto.Options.SwiftPrefix != nil {
+		return fmt.Sprintf("%s%s", *file.Proto.Options.SwiftPrefix, upperCamelName)
+	} else {
+		upperCamelPackage := upperCamelCase(protoreflect.Name(file.Desc.FullName()), "_")
+		return fmt.Sprintf("%s_%s", upperCamelPackage, upperCamelName)
+	}
 }
 
-func upperCamelCase(name protoreflect.Name) string {
+func upperCamelCase(name protoreflect.Name, newSeparator string) string {
 	finalText := ""
-	for _, component := range strings.Split(string(name), ".") {
-		finalText += fmt.Sprintf("%s%s", strings.ToUpper(string(component[0])), component[1:])
+	for index, component := range strings.Split(string(name), ".") {
+		if index == 0 {
+			finalText += fmt.Sprintf("%s%s", strings.ToUpper(string(component[0])), component[1:])
+		} else {
+			finalText += fmt.Sprintf("%s%s%s", newSeparator, strings.ToUpper(string(component[0])), component[1:])
+		}
 	}
 	return finalText
 }
