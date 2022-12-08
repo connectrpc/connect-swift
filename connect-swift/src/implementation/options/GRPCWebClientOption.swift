@@ -41,6 +41,10 @@ extension GRPCWebInterceptor: Interceptor {
                 )
             },
             responseFunction: { response in
+                guard let responseData = response.message, !responseData.isEmpty else {
+                    return response
+                }
+
                 let compressionPool = response.headers[HeaderConstants.grpcContentEncoding]?
                     .first
                     .flatMap { self.config.compressionPools[$0] }
@@ -50,7 +54,6 @@ extension GRPCWebInterceptor: Interceptor {
                     //    message data.
                     // 2. The (headers and length prefixed) trailers data.
                     // https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
-                    let responseData = response.message ?? Data()
                     let firstChunkLength = Envelope.messageLength(forPackedData: responseData)
                     let prefixedFirstChunkLength = Envelope.prefixLength + firstChunkLength
                     let firstChunk = try Envelope.unpackMessage(
