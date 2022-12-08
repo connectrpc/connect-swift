@@ -3,6 +3,8 @@ public enum HeaderConstants {
     public static let contentEncoding = "content-encoding"
     public static let contentType = "content-type"
 
+    public static let connectProtocolVersion = "connect-protocol-version"
+
     public static let connectStreamingAcceptEncoding = "connect-accept-encoding"
     public static let connectStreamingContentEncoding = "connect-content-encoding"
 

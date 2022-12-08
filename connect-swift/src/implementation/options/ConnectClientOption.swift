@@ -16,6 +16,8 @@ extension ConnectClientOption: ProtocolClientOption {
 private struct ConnectInterceptor {
     private let config: ProtocolClientConfig
 
+    private static let protocolVersion = "1"
+
     init(config: ProtocolClientConfig) {
         self.config = config
     }
@@ -26,6 +28,7 @@ extension ConnectInterceptor: Interceptor {
         return UnaryFunction(
             requestFunction: { request in
                 var headers = request.headers
+                headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
                 headers[HeaderConstants.acceptEncoding] = self.config.acceptCompressionPoolNames()
 
                 let requestBody = request.message ?? Data()
@@ -84,6 +87,7 @@ extension ConnectInterceptor: Interceptor {
         return StreamingFunction(
             requestFunction: { request in
                 var headers = request.headers
+                headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
                 headers[HeaderConstants.connectStreamingContentEncoding] = self.config
                     .compressionName.map { [$0] }
                 headers[HeaderConstants.connectStreamingAcceptEncoding] = self.config
