@@ -63,9 +63,9 @@ xcodeproj(
             build_action = xcode_schemes.build_action(["//:SwiftProtobuf"]),
         ),
         xcode_schemes.scheme(
-            name = "Crosstest",
+            name = "Crosstests",
             test_action = xcode_schemes.test_action([
-                "//crosstest:crosstest",
+                "//crosstests:crosstests",
             ]),
         ),
     ],
@@ -80,6 +80,6 @@ xcodeproj(
             target_environments = ["simulator"],
         ),
         # Tests
-        "//crosstest:crosstest",
+        "//crosstests:crosstests",
     ],
 )

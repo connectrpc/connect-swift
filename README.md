@@ -79,7 +79,7 @@ To run it locally **without requiring a TLS certificate**:
 
 ```sh
 cd connect-crosstest
-git apply ../ct-local.patch
+git apply ../crosstests/local.patch
 go build -o testserver cmd/serverconnect/main.go
 ./testserver --h1port=8080 --h2port=8081
 ```
@@ -87,7 +87,7 @@ go build -o testserver cmd/serverconnect/main.go
 Run the cross tests:
 
 ```sh
-bazelisk test //crosstest:crosstest
+bazelisk test //crosstests:crosstests
 ```
 
 ## Bazel
