@@ -71,13 +71,13 @@ extension GRPCWebInterceptor: Interceptor {
                     )
                     let isTrailersOnly = 0b10000000 & firstChunk.headerByte != 0
                     if isTrailersOnly {
-                        let unpackedTrailers = try Trailers.fromGRPCHeadersDataBlock(
+                        let unpackedTrailers = try Trailers.fromGRPCHeadersBlock(
                             firstChunk.unpacked
                         )
                         return response.withHandledGRPCWebTrailers(unpackedTrailers, message: nil)
                     } else {
                         let trailersData = Data(responseData.suffix(from: prefixedFirstChunkLength))
-                        let unpackedTrailers = try Trailers.fromGRPCHeadersDataBlock(
+                        let unpackedTrailers = try Trailers.fromGRPCHeadersBlock(
                             try Envelope.unpackMessage(
                                 trailersData, compressionPool: compressionPool
                             ).unpacked
@@ -137,7 +137,7 @@ extension GRPCWebInterceptor: Interceptor {
                         )
                         let isTrailers = 0b10000000 & headerByte != 0
                         if isTrailers {
-                            let trailers = try Trailers.fromGRPCHeadersDataBlock(unpackedData)
+                            let trailers = try Trailers.fromGRPCHeadersBlock(unpackedData)
                             let grpcCode = trailers.grpcStatus()
                             if grpcCode == .ok {
                                 return .complete(code: .ok, error: nil, trailers: trailers)
@@ -180,7 +180,7 @@ private extension Headers {
 }
 
 private extension Trailers {
-    static func fromGRPCHeadersDataBlock(_ source: Data) throws -> Self {
+    static func fromGRPCHeadersBlock(_ source: Data) throws -> Self {
         guard let string = String(data: source, encoding: .utf8) else {
             throw TrailersDecodingError()
         }

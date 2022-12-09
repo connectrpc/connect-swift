@@ -12,20 +12,6 @@ open class URLSessionHTTPClient: NSObject {
     }
 }
 
-extension URLSessionHTTPClient: URLSessionDelegate, URLSessionTaskDelegate {
-    public func urlSession(
-        _ session: URLSession, didReceive challenge: URLAuthenticationChallenge,
-        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
-    ) {
-        print("**Challenged")
-        if (challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust) {
-            if let serverTrust = challenge.protectionSpace.serverTrust {
-                completionHandler(.useCredential, URLCredential(trust: serverTrust))
-            }
-        }
-    }
-}
-
 extension URLSessionHTTPClient: HTTPClientInterface {
     public func unary(request: HTTPRequest, completion: @escaping (HTTPResponse) -> Void) {
         let urlRequest = URLRequest(httpRequest: request)
@@ -48,7 +34,6 @@ extension URLSessionHTTPClient: HTTPClientInterface {
                 error: error
             ))
         }
-        task.delegate = self
         task.resume()
     }
 
