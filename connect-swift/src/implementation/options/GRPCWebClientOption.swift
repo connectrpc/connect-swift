@@ -42,7 +42,16 @@ extension GRPCWebInterceptor: Interceptor {
             },
             responseFunction: { response in
                 guard let responseData = response.message, !responseData.isEmpty else {
-                    return response
+                    let code = response.headers.grpcStatus()
+                    return HTTPResponse(
+                        code: code,
+                        headers: response.headers,
+                        message: response.message,
+                        trailers: response.trailers,
+                        error: response.error ?? ConnectError.fromGRPCWebTrailers(
+                            response.headers, code: code
+                        )
+                    )
                 }
 
                 let compressionPool = response.headers[HeaderConstants.grpcContentEncoding]?
@@ -62,13 +71,13 @@ extension GRPCWebInterceptor: Interceptor {
                     )
                     let isTrailersOnly = 0b10000000 & firstChunk.headerByte != 0
                     if isTrailersOnly {
-                        let unpackedTrailers = try Trailers.fromGRPCHeadersBlock(
+                        let unpackedTrailers = try Trailers.fromGRPCHeadersDataBlock(
                             firstChunk.unpacked
                         )
                         return response.withHandledGRPCWebTrailers(unpackedTrailers, message: nil)
                     } else {
                         let trailersData = Data(responseData.suffix(from: prefixedFirstChunkLength))
-                        let unpackedTrailers = try Trailers.fromGRPCHeadersBlock(
+                        let unpackedTrailers = try Trailers.fromGRPCHeadersDataBlock(
                             try Envelope.unpackMessage(
                                 trailersData, compressionPool: compressionPool
                             ).unpacked
@@ -83,7 +92,7 @@ extension GRPCWebInterceptor: Interceptor {
                         code: .unknown,
                         headers: response.headers,
                         message: response.message,
-                        trailers: nil,
+                        trailers: response.trailers,
                         error: error
                     )
                 }
@@ -128,12 +137,13 @@ extension GRPCWebInterceptor: Interceptor {
                         )
                         let isTrailers = 0b10000000 & headerByte != 0
                         if isTrailers {
-                            let trailers = try Trailers.fromGRPCHeadersBlock(unpackedData)
+                            let trailers = try Trailers.fromGRPCHeadersDataBlock(unpackedData)
                             let grpcCode = trailers.grpcStatus()
                             if grpcCode == .ok {
-                                return .complete(error: nil, trailers: trailers)
+                                return .complete(code: .ok, error: nil, trailers: trailers)
                             } else {
                                 return .complete(
+                                    code: grpcCode,
                                     error: ConnectError.fromGRPCWebTrailers(
                                         trailers, code: grpcCode
                                     ),
@@ -145,7 +155,7 @@ extension GRPCWebInterceptor: Interceptor {
                         }
                     } catch let error {
                         // TODO: Close the stream here?
-                        return .complete(error: error, trailers: nil)
+                        return .complete(code: .unknown, error: error, trailers: nil)
                     }
                 }
             }
@@ -170,7 +180,7 @@ private extension Headers {
 }
 
 private extension Trailers {
-    static func fromGRPCHeadersBlock(_ source: Data) throws -> Self {
+    static func fromGRPCHeadersDataBlock(_ source: Data) throws -> Self {
         guard let string = String(data: source, encoding: .utf8) else {
             throw TrailersDecodingError()
         }
@@ -203,7 +213,11 @@ private extension Trailers {
             ?? .unknown
     }
 
-    func connectErrorDetails() -> [ConnectError.Detail] {
+    func grpcMessage() -> String? {
+        return self[HeaderConstants.grpcMessage]?.first?.grpcPercentDecoded()
+    }
+
+    func connectErrorDetailsFromGRPCWeb() -> [ConnectError.Detail] {
         return self[HeaderConstants.grpcStatusDetails]?
             .first
             .flatMap { Data(base64Encoded: $0) }
@@ -214,7 +228,7 @@ private extension Trailers {
             .compactMap { protoDetail in
                 return ConnectError.Detail(
                     type: protoDetail.typeURL,
-                    payload: String(data: protoDetail.value, encoding: .utf8)
+                    payload: protoDetail.value
                 )
             }
             ?? []
@@ -245,13 +259,65 @@ private extension HTTPResponse {
 }
 
 private extension ConnectError {
-    static func fromGRPCWebTrailers(_ trailers: Trailers, code: Code) -> Self {
+    static func fromGRPCWebTrailers(_ trailers: Trailers, code: Code) -> Self? {
+        if code == .ok {
+            return nil
+        }
+
         return ConnectError(
             code: code,
-            message: trailers[HeaderConstants.grpcMessage]?.first,
+            message: trailers.grpcMessage(),
             exception: nil,
-            details: trailers.connectErrorDetails(),
+            details: trailers.connectErrorDetailsFromGRPCWeb(),
             metadata: [:]
         )
+    }
+}
+
+private extension String {
+    /// grpcPercentEncode/grpcPercentDecode follows RFC 3986 Section 2.1 and the gRPC HTTP/2 spec.
+    /// It's a variant of URL-encoding with fewer reserved characters. It's intended
+    /// to take UTF-8 encoded text and escape non-ASCII bytes so that they're valid
+    /// HTTP/1 headers, while still maximizing readability of the data on the wire.
+    ///
+    /// The grpc-message trailer (used for human-readable error messages) should be
+    /// percent-encoded.
+    ///
+    /// References:
+    ///
+    ///    https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md#responses
+    ///    https://datatracker.ietf.org/doc/html/rfc3986#section-2.1
+    ///
+    /// - returns: A decoded string using the above format.
+    func grpcPercentDecoded() -> Self {
+        let utf8 = self.utf8
+        let endIndex = utf8.endIndex
+        var characters = [UInt8]()
+        let utf8Percent = UInt8(ascii: "%")
+        var index = utf8.startIndex
+
+        while index < endIndex {
+            let character = utf8[index]
+            if character == utf8Percent {
+                let secondIndex = utf8.index(index, offsetBy: 2)
+                if secondIndex >= endIndex {
+                    return self // Decoding failed
+                }
+
+                if let decoded = String(
+                    utf8[utf8.index(index, offsetBy: 1) ... secondIndex]
+                ).flatMap({ UInt8($0, radix: 16) }) {
+                    characters.append(decoded)
+                    index = utf8.index(after: secondIndex)
+                } else {
+                    return self // Decoding failed
+                }
+            } else {
+                characters.append(character)
+                index = utf8.index(after: index)
+            }
+        }
+
+        return String(decoding: characters, as: Unicode.UTF8.self)
     }
 }

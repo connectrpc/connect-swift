@@ -88,6 +88,12 @@ extension URLSessionStream: URLSessionTaskDelegate {
     func urlSession(
         _ session: URLSession, task: URLSessionTask, didCompleteWithError error: Swift.Error?
     ) {
-        self.responseCallbacks.receiveClose(error)
+        if let error = error {
+            self.responseCallbacks.receiveClose(
+                Code.fromURLSessionCode((error as NSError).code), error
+            )
+        } else {
+            self.responseCallbacks.receiveClose(.ok, nil)
+        }
     }
 }

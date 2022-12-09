@@ -56,27 +56,40 @@ extension ConnectInterceptor: Interceptor {
                 )
             },
             responseFunction: { response in
-                guard let encoding = response.headers[HeaderConstants.contentEncoding]?.first,
-                      let compressionPool = self.config.compressionPools[encoding] else
-                {
-                    return response
+                let trailerPrefix = "trailer-"
+                let headers = response.headers.filter { header in
+                    return header.key != HeaderConstants.contentEncoding
+                        && !header.key.hasPrefix(trailerPrefix)
                 }
+                let trailers = response.headers
+                    .filter { $0.key.hasPrefix(trailerPrefix) }
+                    .reduce(into: Trailers(), { trailers, current in
+                        trailers[
+                            String(current.key.dropFirst(trailerPrefix.count))
+                        ] = current.value
+                    })
 
-                do {
+                if let encoding = response.headers[HeaderConstants.contentEncoding]?.first,
+                   let compressionPool = self.config.compressionPools[encoding],
+                   let message = response.message.flatMap({ data in
+                       return try? compressionPool.decompress(data: data)
+                   })
+                {
                     return HTTPResponse(
                         code: response.code,
-                        headers: response.headers
-                            .filter { $0.key != HeaderConstants.contentEncoding },
-                        message: try response.message.map { body in
-                            return try compressionPool.decompress(data: body)
-                        },
-                        // TODO: Handle trailers prefixed with "trailer-":
-                        // https://connect.build/docs/protocol
-                        trailers: nil,
+                        headers: headers,
+                        message: message,
+                        trailers: trailers,
                         error: response.error
                     )
-                } catch {
-                    return response
+                } else {
+                    return HTTPResponse(
+                        code: response.code,
+                        headers: headers,
+                        message: response.message,
+                        trailers: trailers,
+                        error: response.error
+                    )
                 }
             }
         )
@@ -129,13 +142,17 @@ extension ConnectInterceptor: Interceptor {
                             let response = try JSONDecoder().decode(
                                 ConnectEndStreamResponse.self, from: message
                             )
-                            return .complete(error: response.error, trailers: response.metadata)
+                            return .complete(
+                                code: response.error?.code ?? .ok,
+                                error: response.error,
+                                trailers: response.metadata
+                            )
                         } else {
                             return .message(message)
                         }
                     } catch let error {
                         // TODO: Close the stream here?
-                        return .complete(error: error, trailers: nil)
+                        return .complete(code: .unknown, error: error, trailers: nil)
                     }
                 }
             }

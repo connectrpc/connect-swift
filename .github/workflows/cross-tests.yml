@@ -1,0 +1,24 @@
+name: cross-tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  ios:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - uses: docker-practice/actions-setup-docker@master
+      - uses: actions/setup-go@v3
+      - uses: bazelbuild/setup-bazelisk@v2
+      - name: Start test server
+        run: make cross-test-server-run
+      - name: Run crosstests
+        run: bazelisk test //crosstest:crosstest
+      - name: Stop test server
+        run: make cross-test-server-stop

@@ -62,12 +62,12 @@ xcodeproj(
             name = "SwiftProtobuf Runtime",
             build_action = xcode_schemes.build_action(["//:SwiftProtobuf"]),
         ),
-        # xcode_schemes.scheme(
-        #     name = "Basic Tests",
-        #     test_action = xcode_schemes.test_action([
-        #         "//connect-swift/tests/basic:test",
-        #     ]),
-        # ),
+        xcode_schemes.scheme(
+            name = "Crosstest",
+            test_action = xcode_schemes.test_action([
+                "//crosstest:crosstest",
+            ]),
+        ),
     ],
     tags = ["manual"],
     top_level_targets = [
@@ -80,6 +80,6 @@ xcodeproj(
             target_environments = ["simulator"],
         ),
         # Tests
-        # "//connect-swift/tests/basic:test",
+        "//crosstest:crosstest",
     ],
 )
