@@ -72,9 +72,9 @@ select the app target and an iOS simulator, then click Run.
 make swift-example
 ```
 
-## Run Connect cross tests & test service
+## Run Connect crosstests & test service
 
-The test service is used by the client cross tests.
+The test service is used by the client crosstests.
 To run it locally **without requiring a TLS certificate**:
 
 ```sh
@@ -84,7 +84,7 @@ go build -o testserver cmd/serverconnect/main.go
 ./testserver --h1port=8080 --h2port=8081
 ```
 
-Run the cross tests:
+Run the crosstests:
 
 ```sh
 bazelisk test //crosstests:crosstests
