@@ -383,10 +383,7 @@ final class Crosstests: XCTestCase {
             let expectation = self.expectation(description: "Request completes")
             client.unimplementedCall(request: Grpc_Testing_Empty()) { response in
                 XCTAssertEqual(response.code, .unimplemented)
-                XCTAssertEqual(
-                    response.error?.message,
-                    "grpc.testing.TestService.UnimplementedCall is not implemented"
-                )
+                XCTAssertNotNil(response.error?.message)
                 expectation.fulfill()
             }
 
@@ -407,12 +404,7 @@ final class Crosstests: XCTestCase {
 
                 case .complete(let code, let error, _):
                     XCTAssertEqual(code, .unimplemented)
-                    XCTAssertEqual(
-                        (error as? ConnectError)?.message,
-                        """
-                        grpc.testing.TestService.UnimplementedStreamingOutputCall is not implemented
-                        """
-                    )
+                    XCTAssertNotNil((error as? ConnectError)?.message)
                     expectation.fulfill()
                 }
             }
