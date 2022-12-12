@@ -19,38 +19,38 @@ private final class CrosstestClients {
         self.connectJSONClient = ProtocolClient(
             target: target,
             httpClient: httpClient,
+            ConnectClientOption(),
+            JSONClientOption(),
             GzipRequestOption(),
             CompressionMinBytesRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption(),
-            ConnectClientOption(),
-            JSONClientOption()
+            GzipCompressionOption()
         )
         self.connectProtoClient = ProtocolClient(
             target: target,
             httpClient: httpClient,
             ConnectClientOption(),
+            ProtoClientOption(),
             GzipRequestOption(),
             CompressionMinBytesRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption(),
-            ProtoClientOption()
+            GzipCompressionOption()
         )
         self.grpcWebJSONClient = ProtocolClient(
             target: target,
             httpClient: httpClient,
             GRPCWebClientOption(),
+            JSONClientOption(),
             GzipRequestOption(),
             CompressionMinBytesRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption(),
-            JSONClientOption()
+            GzipCompressionOption()
         )
         self.grpcWebProtoClient = ProtocolClient(
             target: target,
             httpClient: httpClient,
             GRPCWebClientOption(),
+            ProtoClientOption(),
             GzipRequestOption(),
             CompressionMinBytesRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption(),
-            ProtoClientOption()
+            GzipCompressionOption()
         )
     }
 }
@@ -70,11 +70,10 @@ final class Crosstests: XCTestCase {
         os_log("Running \(function) with Connect + proto...")
         try runTestsWithClient(TestServiceClient(client: clients.connectProtoClient))
 
-// TODO: Enable gRPC Web tests
-//        os_log("Running \(function) with gRPC Web + JSON...")
-//        try runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
-//        os_log("Running \(function) with gRPC Web + proto...")
-//        try runTestsWithClient(TestServiceClient(client: clients.grpcWebProtoClient))
+        os_log("Running \(function) with gRPC Web + JSON...")
+        try runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
+        os_log("Running \(function) with gRPC Web + proto...")
+        try runTestsWithClient(TestServiceClient(client: clients.grpcWebProtoClient))
     }
 
     private func executeTestWithUnimplementedClients(
@@ -82,6 +81,7 @@ final class Crosstests: XCTestCase {
         runTestsWithClient: (UnimplementedServiceClient) throws -> Void
     ) rethrows {
         let clients = CrosstestClients(timeout: 60)
+
         os_log("Running \(function) with Connect + JSON...")
         try runTestsWithClient(UnimplementedServiceClient(client: clients.connectJSONClient))
         os_log("Running \(function) with Connect + proto...")

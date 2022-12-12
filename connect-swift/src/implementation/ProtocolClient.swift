@@ -202,9 +202,10 @@ extension ProtocolClient: ProtocolClientInterface {
                 }
             },
             receiveClose: { code, error in
-                if code != .ok {
+                if code != .ok || error != nil {
                     // Only pass the result through as completion if there is an error.
-                    // An example of this codepath would be the client disconnecting mid-stream.
+                    // Examples of this codepath would be the client disconnecting mid-stream
+                    // or receiving a non-2xx response.
                     // The happy path is usually determined by "end stream" flags in the
                     // response body.
                     interceptAndHandleResult(.complete(
