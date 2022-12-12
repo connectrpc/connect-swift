@@ -1,5 +1,6 @@
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application")
 load("@build_bazel_rules_swift//swift:swift.bzl", "swift_library")
+load("//bazel:config.bzl", "MINIMUM_IOS_VERSION")
 
 swift_library(
     name = "app_lib",
@@ -17,7 +18,7 @@ ios_application(
     bundle_id = "build.buf.eliza-example",
     families = ["iphone"],
     infoplists = ["Info.plist"],
-    minimum_os_version = "15.0",
+    minimum_os_version = MINIMUM_IOS_VERSION,
     sdk_frameworks = ["UIKit"],
     visibility = ["//visibility:public"],
     deps = ["app_lib"],
