@@ -1,6 +1,5 @@
 import Connect
 import Foundation
-import os.log
 import SwiftGenerated
 import XCTest
 
@@ -65,15 +64,15 @@ final class Crosstests: XCTestCase {
     ) rethrows {
         let clients = CrosstestClients(timeout: timeout)
 
-        os_log("Running \(function) with Connect + JSON...")
+        print("Running \(function) with Connect + JSON...")
         try runTestsWithClient(TestServiceClient(client: clients.connectJSONClient))
-        os_log("Running \(function) with Connect + proto...")
+        print("Running \(function) with Connect + proto...")
         try runTestsWithClient(TestServiceClient(client: clients.connectProtoClient))
 
 // TODO: Enable gRPC Web tests
-//        os_log("Running \(function) with gRPC Web + JSON...")
+//        print("Running \(function) with gRPC Web + JSON...")
 //        try runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
-//        os_log("Running \(function) with gRPC Web + proto...")
+//        print("Running \(function) with gRPC Web + proto...")
 //        try runTestsWithClient(TestServiceClient(client: clients.grpcWebProtoClient))
     }
 
@@ -83,15 +82,15 @@ final class Crosstests: XCTestCase {
     ) rethrows {
         let clients = CrosstestClients(timeout: 60)
 
-        os_log("Running \(function) with Connect + JSON...")
+        print("Running \(function) with Connect + JSON...")
         try runTestsWithClient(UnimplementedServiceClient(client: clients.connectJSONClient))
-        os_log("Running \(function) with Connect + proto...")
+        print("Running \(function) with Connect + proto...")
         try runTestsWithClient(UnimplementedServiceClient(client: clients.connectProtoClient))
 
 // TODO: Enable gRPC Web tests
-//        os_log("Running \(function) with gRPC Web + JSON...")
+//        print("Running \(function) with gRPC Web + JSON...")
 //        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebJSONClient))
-//        os_log("Running \(function) with gRPC Web + proto...")
+//        print("Running \(function) with gRPC Web + proto...")
 //        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebProtoClient))
     }
 
