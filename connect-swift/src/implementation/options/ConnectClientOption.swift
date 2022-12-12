@@ -121,8 +121,20 @@ extension ConnectInterceptor: Interceptor {
             },
             streamResultFunc: { result in
                 switch result {
-                case .complete:
-                    return result
+                case .complete(let code, let error, let trailers):
+                    if code != .ok && error == nil {
+                        return .complete(
+                            code: code,
+                            error: ConnectError.from(
+                                code: code,
+                                headers: trailers ?? [:],
+                                source: nil
+                            ),
+                            trailers: trailers
+                        )
+                    } else {
+                        return result
+                    }
 
                 case .headers(let headers):
                     responseCompressionPool = headers[

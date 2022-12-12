@@ -68,7 +68,8 @@ final class Crosstests: XCTestCase {
         try runTestsWithClient(TestServiceClient(client: clients.connectJSONClient))
         os_log("Running \(function) with Connect + proto...")
         try runTestsWithClient(TestServiceClient(client: clients.connectProtoClient))
-        #warning("TODO - enable gRPC web tests")
+
+// TODO: Enable gRPC Web tests
 //        os_log("Running \(function) with gRPC Web + JSON...")
 //        try runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
 //        os_log("Running \(function) with gRPC Web + proto...")
@@ -84,6 +85,8 @@ final class Crosstests: XCTestCase {
         try runTestsWithClient(UnimplementedServiceClient(client: clients.connectJSONClient))
         os_log("Running \(function) with Connect + proto...")
         try runTestsWithClient(UnimplementedServiceClient(client: clients.connectProtoClient))
+
+// TODO: Enable gRPC Web tests
 //        os_log("Running \(function) with gRPC Web + JSON...")
 //        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebJSONClient))
 //        os_log("Running \(function) with gRPC Web + proto...")
@@ -383,7 +386,7 @@ final class Crosstests: XCTestCase {
             let expectation = self.expectation(description: "Request completes")
             client.unimplementedCall(request: Grpc_Testing_Empty()) { response in
                 XCTAssertEqual(response.code, .unimplemented)
-                XCTAssertNotNil(response.error?.message)
+                XCTAssertNotNil(response.error)
                 expectation.fulfill()
             }
 
@@ -404,7 +407,7 @@ final class Crosstests: XCTestCase {
 
                 case .complete(let code, let error, _):
                     XCTAssertEqual(code, .unimplemented)
-                    XCTAssertNotNil((error as? ConnectError)?.message)
+                    XCTAssertNotNil(error)
                     expectation.fulfill()
                 }
             }
