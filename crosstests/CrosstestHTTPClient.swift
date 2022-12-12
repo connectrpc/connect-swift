@@ -32,11 +32,15 @@ extension CrosstestHTTPClient: URLSessionDelegate {
         _ session: URLSession, didReceive challenge: URLAuthenticationChallenge,
         completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
     ) {
+        // This codepath is executed when using HTTPS with the crosstest server.
         print("**Challenged")
-        if (challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust) {
-            if let serverTrust = challenge.protectionSpace.serverTrust {
-                completionHandler(.useCredential, URLCredential(trust: serverTrust))
-            }
+        if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
+            let serverTrust = challenge.protectionSpace.serverTrust
+        {
+            completionHandler(.useCredential, URLCredential(trust: serverTrust))
+        } else {
+            print("**failed")
+            completionHandler(.performDefaultHandling, nil)
         }
 //        completionHandler(.performDefaultHandling, nil)
 //                var secresult = SecTrustResultType.invalid
