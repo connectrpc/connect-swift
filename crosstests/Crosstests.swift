@@ -70,10 +70,11 @@ final class Crosstests: XCTestCase {
         os_log("Running \(function) with Connect + proto...")
         try runTestsWithClient(TestServiceClient(client: clients.connectProtoClient))
 
-        os_log("Running \(function) with gRPC Web + JSON...")
-        try runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
-        os_log("Running \(function) with gRPC Web + proto...")
-        try runTestsWithClient(TestServiceClient(client: clients.grpcWebProtoClient))
+// TODO: Enable gRPC Web tests
+//        os_log("Running \(function) with gRPC Web + JSON...")
+//        try runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
+//        os_log("Running \(function) with gRPC Web + proto...")
+//        try runTestsWithClient(TestServiceClient(client: clients.grpcWebProtoClient))
     }
 
     private func executeTestWithUnimplementedClients(
