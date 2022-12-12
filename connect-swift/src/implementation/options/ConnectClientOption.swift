@@ -96,7 +96,7 @@ extension ConnectInterceptor: Interceptor {
     }
 
     func wrapStream(nextStream: StreamingFunction) -> StreamingFunction {
-        var responseCompressionPool: CompressionPool?
+        var responseHeaders: Headers?
         return StreamingFunction(
             requestFunction: { request in
                 var headers = request.headers
@@ -121,29 +121,15 @@ extension ConnectInterceptor: Interceptor {
             },
             streamResultFunc: { result in
                 switch result {
-                case .complete(let code, let error, let trailers):
-                    if code != .ok && error == nil {
-                        return .complete(
-                            code: code,
-                            error: ConnectError.from(
-                                code: code,
-                                headers: trailers ?? [:],
-                                source: nil
-                            ),
-                            trailers: trailers
-                        )
-                    } else {
-                        return result
-                    }
-
                 case .headers(let headers):
-                    responseCompressionPool = headers[
-                        HeaderConstants.connectStreamingContentEncoding
-                    ]?.first.flatMap { self.config.compressionPools[$0] }
+                    responseHeaders = headers
                     return result
 
                 case .message(let data):
                     do {
+                        let responseCompressionPool = responseHeaders?[
+                            HeaderConstants.connectStreamingContentEncoding
+                        ]?.first.flatMap { self.config.compressionPools[$0] }
                         let (headerByte, message) = try Envelope.unpackMessage(
                             data, compressionPool: responseCompressionPool
                         )
@@ -165,6 +151,21 @@ extension ConnectInterceptor: Interceptor {
                     } catch let error {
                         // TODO: Close the stream here?
                         return .complete(code: .unknown, error: error, trailers: nil)
+                    }
+
+                case .complete(let code, let error, let trailers):
+                    if code != .ok && error == nil {
+                        return .complete(
+                            code: code,
+                            error: ConnectError.from(
+                                code: code,
+                                headers: responseHeaders ?? [:],
+                                source: nil
+                            ),
+                            trailers: trailers
+                        )
+                    } else {
+                        return result
                     }
                 }
             }

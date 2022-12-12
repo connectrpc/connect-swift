@@ -64,6 +64,7 @@ final class Crosstests: XCTestCase {
         runTestsWithClient: (TestServiceClient) throws -> Void
     ) rethrows {
         let clients = CrosstestClients(timeout: timeout)
+
         os_log("Running \(function) with Connect + JSON...")
         try runTestsWithClient(TestServiceClient(client: clients.connectJSONClient))
         os_log("Running \(function) with Connect + proto...")

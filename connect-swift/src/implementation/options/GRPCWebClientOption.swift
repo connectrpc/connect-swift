@@ -101,7 +101,7 @@ extension GRPCWebInterceptor: Interceptor {
     }
 
     func wrapStream(nextStream: StreamingFunction) -> StreamingFunction {
-        var responseCompressionPool: CompressionPool?
+        var responseHeaders: Headers?
         return StreamingFunction(
             requestFunction: { request in
                 return HTTPRequest(
@@ -121,17 +121,15 @@ extension GRPCWebInterceptor: Interceptor {
             },
             streamResultFunc: { result in
                 switch result {
-                case .complete:
-                    return result
-
                 case .headers(let headers):
-                    responseCompressionPool = headers[HeaderConstants.grpcContentEncoding]?
-                        .first
-                        .flatMap { self.config.compressionPools[$0] }
+                    responseHeaders = headers
                     return result
 
                 case .message(let data):
                     do {
+                        let responseCompressionPool = responseHeaders?[
+                            HeaderConstants.grpcContentEncoding
+                        ]?.first.flatMap { self.config.compressionPools[$0] }
                         let (headerByte, unpackedData) = try Envelope.unpackMessage(
                             data, compressionPool: responseCompressionPool
                         )
@@ -156,6 +154,20 @@ extension GRPCWebInterceptor: Interceptor {
                     } catch let error {
                         // TODO: Close the stream here?
                         return .complete(code: .unknown, error: error, trailers: nil)
+                    }
+
+                case .complete(let code, let error, let trailers):
+                    if code != .ok && error == nil {
+                        return .complete(
+                            code: code,
+                            error: ConnectError.fromGRPCWebTrailers(
+                                trailers ?? responseHeaders ?? [:],
+                                code: code
+                            ),
+                            trailers: trailers
+                        )
+                    } else {
+                        return result
                     }
                 }
             }
