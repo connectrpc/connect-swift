@@ -12,9 +12,9 @@
   * [Generate code from protos](#generate-code-from-protos)
   * [Go development](#go-development)
 - [Tests](#tests)
-  * [Run Connect crosstests & test service](#run-connect-crosstests---test-service)
+  * [Run Connect crosstests & test service](#run-connect-crosstests--test-service)
     + [Using Docker](#using-docker)
-    + [Without Docker (and no SSL)](#without-docker--and-no-ssl-)
+    + [Without Docker (and no SSL)](#without-docker-and-no-ssl)
 
 # Get started
 
@@ -24,7 +24,7 @@ The easiest way to get started using connect-swift is to use
 [Buf's remote generation](https://docs.buf.build/bsr/remote-plugins/overview):
 
 1. Install Buf's CLI (`brew install buf`).
-2. Add a `buf.gen.yaml` file to your project which contains a configuration for running both the [SwiftProtobuf](https://github.com/apple/swift-protobuf) generator and connect-swift:
+2. Add a `buf.gen.yaml` file to your project which contains a configuration for running both the [SwiftProtobuf](https://github.com/apple/swift-protobuf) and connect-swift generators:
 
 ```yaml
 version: v1
@@ -105,7 +105,7 @@ distribution. To open the project and start using it:
 ## Generate code from protos
 
 To build the plugin and run it against the [`./protos`](./protos) directory
-using Buf:
+using the [local plugin](./protoc-gen-connect-swift) and Buf:
 
 ```sh
 make build-connect-plugin # Compile the plugin
