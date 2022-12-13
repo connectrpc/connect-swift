@@ -7,16 +7,6 @@ on:
   pull_request:
 
 jobs:
-  buildifier:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-      - uses: bazelbuild/setup-bazelisk@v2
-      - name: Run Buildifier
-        run: make buildifier-check
-
   swiftlint:
     name: swiftlint
     runs-on: ubuntu-latest

@@ -7,37 +7,43 @@ on:
   pull_request:
 
 jobs:
-  plugins:
+  connect-plugin:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
       - uses: actions/setup-go@v3
-      - uses: bazelbuild/setup-bazelisk@v2
 # buf set up requires a github token to prevent a rate limit.
 # TODO: We're currently checking in generated code to side-step this problem.
 #      - uses: bufbuild/buf-setup-action@v1.8.0
 #        with:
 #          buf_token: ${{ secrets.BSR_TEST_TOKEN }}
-      - name: Build plugins
-        run: make build
-#      - name: Buf generate
-#        run: buf generate
+      - name: Build Connect plugin
+        run: make build-connect-plugin
+#      - name: Generate
+#        run: make generate
 
-  swift:
+  connect-library:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
-      - uses: bazelbuild/setup-bazelisk@v2
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
-      - name: Build connect-swift
-        run: bazelisk build //connect-swift/src/...
-      - name: Build Swift example app
-        # Individual app is built instead of doing a catch-all per:
-        # https://github.com/bazelbuild/rules_swift/issues/240#issuecomment-708885118
-        run: bazelisk build //connect-swift/examples/eliza:app
+      - name: Build Connect Swift library
+        run: swift build
+
+  eliza-example:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Select Xcode version
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
+        run: sudo xcode-select --switch /Applications/Xcode_14.1.app
+      - name: Build Eliza example app
+        run: cd connect-swift/examples/eliza && xcodebuild -scheme Eliza build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
