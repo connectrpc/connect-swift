@@ -1,38 +1,99 @@
 # connect-swift
 
-## Prerequisites
+- [Get started](#get-started)
+  * [Set up code generation](#set-up-code-generation)
+  * [Integrate with Swift Package Manager](#integrate-with-swift-package-manager)
+  * [Integrate with CocoaPods](#integrate-with-cocoapods)
+- [Examples](#examples)
+  * [Build and run example apps](#build-and-run-example-apps)
+- [Contributing](#contributing)
+  * [Development setup](#development-setup)
+  * [Swift development](#swift-development)
+  * [Generate code from protos](#generate-code-from-protos)
+  * [Go development](#go-development)
+- [Tests](#tests)
+  * [Run Connect crosstests & test service](#run-connect-crosstests---test-service)
+    + [Using Docker](#using-docker)
+    + [Without Docker (and no SSL)](#without-docker--and-no-ssl-)
 
-In order to develop with this repository, install Xcode and
+# Get started
+
+## Set up code generation
+
+The easiest way to get started using connect-swift is to use
+[Buf's remote generation](https://docs.buf.build/bsr/remote-plugins/overview):
+
+1. Install Buf's CLI (`brew install buf`).
+2. Add a `buf.gen.yaml` file to your project which contains a configuration for running both the [SwiftProtobuf](https://github.com/apple/swift-protobuf) generator and connect-swift:
+
+```yaml
+version: v1
+managed:
+  enabled: true
+  optimize_for: LITE_RUNTIME
+  go_package_prefix:
+    default: plugins/protoc-gen-connect-swift # Replace with your package (can be anything)
+plugins:
+  - plugin: buf.build/apple/swift
+    opt: Visibility=Public
+    out: gen/proto/swift-protobuf # Or your target output directory
+  - remote: buf.build/mrebello/plugins/connect-swift
+    out: gen/proto/connectswift # Or your target output directory
+
+```
+
+3. Add a `buf.work.yaml` file to your project which specifies the input directories for your `.proto` files:
+```yaml
+version: v1
+directories:
+  - protos # Or wherever your .proto files live
+```
+
+4. Run `make generate` (or `buf generate`), and you should see the outputted files!
+5. Now that you have generated models + APIs from your `.proto` files, you'll need to integrate the runtime using one of the methods below.
+
+## Integrate with Swift Package Manager
+
+The easiest way to integrate with connect-swift is to depend on the `Connect`
+package specified in [`Package.swift`](./Package.swift), as you would any
+other Swift package.
+
+Apple has documentation for how to do this
+[here](https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app).
+
+Once you've added the `Connect` dependency (and its transitive dependency
+on `SwiftProtobuf`), add the generated `.swift` files from the code generation
+step, and your project should build!
+
+We have an [example app](#examples) that uses this exact setup that you can
+also take a look at below.
+
+## Integrate with CocoaPods
+
+TODO
+
+# Examples
+
+## Build and run example apps
+
+Tests and example apps depend on outputs in `./gen`.
+
+Example apps are available in
+[`./examples`](./examples), and can be opened and built using Xcode.
+
+# Contributing
+
+## Development setup
+
+In order to develop with this repository, **install Xcode** and
 complete the following setup:
 
 ```sh
-# Grab the connect-crosstest submodule:
-git submodule update --init
-
-# Ensure you have required dependencies installed:
+git submodule update --init # Set up the connect-crosstest submodule
 brew install buf
 ```
 
-## Go development
-
-To make changes to the Go [plugin](./protoc-gen-connect-swift)
-that is used to generate code,
-ensure the required dependencies are installed:
-
-```sh
-go mod vendor
-```
-
-If you have issues with GoLand indexing dependencies correctly, you can try
-removing the `.idea` directory in the project directory and re-opening GoLand.
-
-To build the connect-swift generator plugin, you can use:
-
-```sh
-make build-connect-plugin
-```
-
-## <a name="swift-setup"></a>Swift (iOS) setup
+## Swift development
 
 This project uses Swift Package Manager for development, building, and
 distribution. To open the project and start using it:
@@ -53,13 +114,26 @@ make generate # Run buf generate - uses buf.gen.yaml
 
 Outputted code will be available in `./gen`.
 
-## Build and run example apps
+## Go development
 
-Tests and example apps depend on outputs in `./gen`.
+To make changes to the Go [plugin](./protoc-gen-connect-swift)
+that is used to generate code,
+ensure the required dependencies are installed:
 
-Example apps are available in
-[`./examples`](./examples), and can be opened and
-built using Xcode.
+```sh
+go mod vendor
+```
+
+If you have issues with GoLand indexing dependencies correctly, you can try
+removing the `.idea` directory in the project directory and re-opening GoLand.
+
+To build the connect-swift generator plugin, you can use:
+
+```sh
+make build-connect-plugin
+```
+
+# Tests
 
 ## Run Connect crosstests & test service
 
