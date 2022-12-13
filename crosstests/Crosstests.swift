@@ -184,7 +184,7 @@ final class Crosstests: XCTestCase {
             })
 
             XCTAssertEqual(XCTWaiter().wait(for: [
-                headersExpectation, closeExpectation
+                headersExpectation, closeExpectation,
             ], timeout: kTimeout, enforceOrder: true), .completed)
         }
     }
@@ -258,7 +258,7 @@ final class Crosstests: XCTestCase {
             })
 
             XCTAssertEqual(XCTWaiter().wait(for: [
-                headersExpectation, messageExpectation, trailersExpectation
+                headersExpectation, messageExpectation, trailersExpectation,
             ], timeout: kTimeout, enforceOrder: true), .completed)
         }
     }
