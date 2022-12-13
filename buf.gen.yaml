@@ -8,6 +8,8 @@ plugins:
   - plugin: buf.build/apple/swift
     opt: Visibility=Public
     out: gen/proto/swift-protobuf
-  - name: connect-swift
+  # - name: connect-swift
+  #   out: gen/proto/connectswift
+  #   path: ./protoc-gen-connect-swift/protoc-gen-connect-swift
+  - remote: buf.build/mrebello/plugins/connect-swift
     out: gen/proto/connectswift
-    path: ./protoc-gen-connect-swift/protoc-gen-connect-swift
