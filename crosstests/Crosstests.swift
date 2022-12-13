@@ -1,6 +1,6 @@
 import Connect
 import Foundation
-import SwiftGenerated
+import GeneratedExamples
 import XCTest
 
 private let kTimeout = TimeInterval(5)
