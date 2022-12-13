@@ -9,10 +9,12 @@ let package = Package(
         .macOS(.v10_14),
     ],
     products: [
+        // Primary library for consumers to use
         .library(
             name: "Connect",
             targets: ["Connect"]
         ),
+        // Library used by examples within this repository
         .library(
             name: "SwiftGenerated",
             targets: ["SwiftGenerated"]
