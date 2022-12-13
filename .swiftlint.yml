@@ -1,8 +1,8 @@
 excluded:
-  - connect-swift/src/implementation/generated
   - gen
+  - library/implementation/generated
 included:
-  - connect-swift
+  - library
 disabled_rules:
   - cyclomatic_complexity
   - function_body_length
