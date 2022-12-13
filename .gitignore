@@ -6,7 +6,7 @@
 *.xcuserstate
 
 /.swiftpm
-/protoc-gen-connect-swift/plugin
+/protoc-gen-connect-swift/protoc-gen-connect-swift
 /vendor
 
 # buf set up requires a github token to prevent a rate limit.

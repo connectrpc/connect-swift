@@ -3,7 +3,7 @@ CROSSTEST_VERSION := 4f4e96d8fea3ed9473b90a964a5ba429e7ea5649
 .PHONY: build-connect-plugin
 build-connect-plugin:
 	@echo "Building connect-swift plugin..."
-	@go build -o ./protoc-gen-connect-swift/plugin ./protoc-gen-connect-swift/main.go
+	@go build -o ./protoc-gen-connect-swift/protoc-gen-connect-swift ./protoc-gen-connect-swift/main.go
 
 .PHONY: build-connect
 build-connect:
