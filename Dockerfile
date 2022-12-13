@@ -7,5 +7,5 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o plugin ./
 
 FROM scratch
 WORKDIR /app
-COPY --from=build /app/plugin .
-ENTRYPOINT [ "/app/plugin" ]
+COPY --from=build /app/plugin protoc-gen-connect-swift
+ENTRYPOINT [ "/app/protoc-gen-connect-swift" ]
