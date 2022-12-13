@@ -27,7 +27,7 @@
 		B204C6592947EAC700239D66 /* MenuView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 		B204C65A2947EAC700239D66 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		B204C65B2947EAC700239D66 /* MessagingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingView.swift; sourceTree = "<group>"; };
-		B204C6602947EB4C00239D66 /* connect-swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "connect-swift"; path = ../../..; sourceTree = "<group>"; };
+		B2D532F22948FF4D00DA95C7 /* connect-swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "connect-swift"; path = ../..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,7 +46,7 @@
 		B204C62F2947E98A00239D66 = {
 			isa = PBXGroup;
 			children = (
-				B204C6532947EA2F00239D66 /* Packages */,
+				B2D532F12948FF4D00DA95C7 /* Packages */,
 				B204C63A2947E98A00239D66 /* Eliza */,
 				B204C6392947E98A00239D66 /* Products */,
 				B204C6552947EA5200239D66 /* Frameworks */,
@@ -83,19 +83,19 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		B204C6532947EA2F00239D66 /* Packages */ = {
-			isa = PBXGroup;
-			children = (
-				B204C6602947EB4C00239D66 /* connect-swift */,
-			);
-			name = Packages;
-			sourceTree = "<group>";
-		};
 		B204C6552947EA5200239D66 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B2D532F12948FF4D00DA95C7 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				B2D532F22948FF4D00DA95C7 /* connect-swift */,
+			);
+			name = Packages;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
