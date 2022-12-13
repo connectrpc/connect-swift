@@ -14,10 +14,10 @@ let package = Package(
             name: "Connect",
             targets: ["Connect"]
         ),
-        // Library used by examples within this repository
+        // Library used by example apps within this repository
         .library(
-            name: "SwiftGenerated",
-            targets: ["SwiftGenerated"]
+            name: "GeneratedExamples",
+            targets: ["GeneratedExamples"]
         ),
     ],
     dependencies: [
@@ -38,13 +38,13 @@ let package = Package(
             name: "ConnectCrosstests",
             dependencies: [
                 "Connect",
-                "SwiftGenerated",
+                "GeneratedExamples",
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
             path: "crosstests"
         ),
         .target(
-            name: "SwiftGenerated",
+            name: "GeneratedExamples",
             dependencies: [
                 "Connect",
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),

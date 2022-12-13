@@ -15,7 +15,7 @@
 		B204C65E2947EAC700239D66 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = B204C65A2947EAC700239D66 /* Message.swift */; };
 		B204C65F2947EAC700239D66 /* MessagingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B204C65B2947EAC700239D66 /* MessagingView.swift */; };
 		B204C6622947EB7300239D66 /* Connect in Frameworks */ = {isa = PBXBuildFile; productRef = B204C6612947EB7300239D66 /* Connect */; };
-		B204C6642947EB7300239D66 /* SwiftGenerated in Frameworks */ = {isa = PBXBuildFile; productRef = B204C6632947EB7300239D66 /* SwiftGenerated */; };
+		B204C6642947EB7300239D66 /* GeneratedExamples in Frameworks */ = {isa = PBXBuildFile; productRef = B204C6632947EB7300239D66 /* GeneratedExamples */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,7 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B204C6642947EB7300239D66 /* SwiftGenerated in Frameworks */,
+				B204C6642947EB7300239D66 /* GeneratedExamples in Frameworks */,
 				B204C6622947EB7300239D66 /* Connect in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -116,7 +116,7 @@
 			name = Eliza;
 			packageProductDependencies = (
 				B204C6612947EB7300239D66 /* Connect */,
-				B204C6632947EB7300239D66 /* SwiftGenerated */,
+				B204C6632947EB7300239D66 /* GeneratedExamples */,
 			);
 			productName = Eliza;
 			productReference = B204C6382947E98A00239D66 /* Eliza.app */;
@@ -397,9 +397,9 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = Connect;
 		};
-		B204C6632947EB7300239D66 /* SwiftGenerated */ = {
+		B204C6632947EB7300239D66 /* GeneratedExamples */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = SwiftGenerated;
+			productName = GeneratedExamples;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
