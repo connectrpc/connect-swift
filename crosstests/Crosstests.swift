@@ -1,3 +1,5 @@
+// swiftlint:disable file_length
+
 import Connect
 import Foundation
 import GeneratedExamples
@@ -110,7 +112,7 @@ final class Crosstests: XCTestCase {
 
     func testLargeUnary() {
         self.executeTestWithClients { client in
-            let size = 314159
+            let size = 314_159
             let message = Grpc_Testing_SimpleRequest.with { proto in
                 proto.responseSize = Int32(size)
                 proto.payload = .with { $0.body = Data(repeating: 0, count: size) }
@@ -127,7 +129,7 @@ final class Crosstests: XCTestCase {
 
     func testServerStreaming() throws {
         try self.executeTestWithClients { client in
-            let sizes = [31415, 9, 2653, 58979]
+            let sizes = [31_415, 9, 2_653, 58_979]
             let expectation = self.expectation(description: "Stream completes")
             var responseCount = 0
             let stream = client.streamingOutputCall { result in
@@ -189,14 +191,14 @@ final class Crosstests: XCTestCase {
 
     func testCustomMetadata() {
         self.executeTestWithClients { client in
-            let size = 314159
+            let size = 314_159
             let leadingKey = "x-grpc-test-echo-initial"
             let leadingValue = "test_initial_metadata_value"
             let trailingKey = "x-grpc-test-echo-trailing-bin"
             let trailingValue = Data([0xab, 0xab, 0xab])
             let headers: Headers = [
                 leadingKey: [leadingValue],
-                trailingKey: [trailingValue.base64EncodedString()]
+                trailingKey: [trailingValue.base64EncodedString()],
             ]
             let message = Grpc_Testing_SimpleRequest.with { proto in
                 proto.responseSize = Int32(size)
@@ -220,14 +222,14 @@ final class Crosstests: XCTestCase {
     }
 
     func testCustomMetadataServerStreaming() throws {
-        let size = 314159
+        let size = 314_159
         let leadingKey = "x-grpc-test-echo-initial"
         let leadingValue = "test_initial_metadata_value"
         let trailingKey = "x-grpc-test-echo-trailing-bin"
         let trailingValue = Data([0xab, 0xab, 0xab])
         let headers: Headers = [
             leadingKey: [leadingValue],
-            trailingKey: [trailingValue.base64EncodedString()]
+            trailingKey: [trailingValue.base64EncodedString()],
         ]
 
         try self.executeTestWithClients { client in
@@ -254,7 +256,7 @@ final class Crosstests: XCTestCase {
             try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
                 proto.responseParameters = [.with { $0.size = Int32(size) }]
             })
-            
+
             XCTAssertEqual(XCTWaiter().wait(for: [
                 headersExpectation, messageExpectation, trailersExpectation
             ], timeout: kTimeout, enforceOrder: true), .completed)
@@ -315,11 +317,13 @@ final class Crosstests: XCTestCase {
         try self.executeTestWithClients(timeout: 0.01) { client in
             let expectation = self.expectation(description: "Stream times out")
             let message = Grpc_Testing_StreamingOutputCallRequest.with { proto in
-                proto.payload = .with { $0.body = Data(count: 271828) }
-                proto.responseParameters = [.with { parameters in
-                    parameters.size = 31415
-                    parameters.intervalUs = 50_000
-                }]
+                proto.payload = .with { $0.body = Data(count: 271_828) }
+                proto.responseParameters = [
+                    .with { parameters in
+                        parameters.size = 31_415
+                        parameters.intervalUs = 50_000
+                    },
+                ]
             }
             let stream = client.streamingOutputCall { result in
                 switch result {
@@ -464,7 +468,7 @@ final class Crosstests: XCTestCase {
                 }
             }
             try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
-                proto.responseParameters = [31415, 9, 2653, 58979]
+                proto.responseParameters = [31_415, 9, 2_653, 58_979]
                     .enumerated()
                     .map { index, value in
                         return Grpc_Testing_ResponseParameters.with { parameters in
