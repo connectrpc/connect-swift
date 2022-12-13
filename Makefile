@@ -1,17 +1,14 @@
 CROSSTEST_VERSION := 4f4e96d8fea3ed9473b90a964a5ba429e7ea5649
 
-.PHONY: build
-build:
+.PHONY: build-connect-plugin
+build-connect-plugin:
 	@echo "Building connect-swift plugin..."
 	@go build -o protoc-gen-connect-swift ./cmd/protoc-gen-connect-swift/main.go
 
-.PHONY: buildifier-check
-buildifier-check:
-	@bazelisk run //:buildifier.check
-
-.PHONY: buildifier-fix
-buildifier-fix:
-	@bazelisk run //:buildifier.fix
+.PHONY: build-connect
+build-connect:
+	@echo "Building Connect library..."
+	@swift build
 
 .PHONY: generate
 generate: clean
@@ -20,14 +17,6 @@ generate: clean
 .PHONY: clean
 clean:
 	@rm -rf ./gen/proto
-
-.PHONY: xcodeproj
-xcodeproj:
-	@bazelisk run //:xcodeproj
-
-.PHONY: swift-example
-swift-example:
-	bazelisk run //connect-swift/examples/eliza:app
 
 .PHONY: cross-test-server-stop
 cross-test-server-stop:

@@ -14,13 +14,12 @@ jobs:
         with:
           submodules: true
       - uses: docker-practice/actions-setup-docker@master
-      - uses: bazelbuild/setup-bazelisk@v2
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
       - name: Start test server
         run: make cross-test-server-run
       - name: Run crosstests
-        run: bazelisk test //crosstests:crosstests
+        run: swift test
       - name: Stop test server
         run: make cross-test-server-stop

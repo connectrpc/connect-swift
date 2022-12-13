@@ -2,14 +2,15 @@
 
 ## Prerequisites
 
-In order to develop with this repository, complete the following setup:
+In order to develop with this repository, install Xcode and
+complete the following setup:
 
 ```sh
-# To grab connect-crosstest submodule:
+# Grab the connect-crosstest submodule:
 git submodule update --init
 
 # Ensure you have required dependencies installed:
-brew install bazelisk buf
+brew install buf
 ```
 
 ## Go development
@@ -24,34 +25,28 @@ go mod vendor
 If you have issues with GoLand indexing dependencies correctly, you can try
 removing the `.idea` directory in the project directory and re-opening GoLand.
 
-To build the plugins, you can use:
+To build the connect-swift generator plugin, you can use:
 
 ```sh
-make build
+make build-connect-plugin
 ```
 
 ## <a name="swift-setup"></a>Swift (iOS) setup
 
-Ensure that you have **Xcode 14.1 (or above)** installed and that `xcode-select` is set up:
+This project uses Swift Package Manager for development, building, and
+distribution. To open the project and start using it:
 
-```sh
-sudo xcode-select -s /Applications/Xcode.app/Contents/Developer # Or your Xcode location
-```
-
-To generate an Xcode project with schemes for all relevant sources:
-
-```sh
-make xcodeproj # Generate a .xcodeproj
-xed . # Open the generated .xcodeproj
-```
+- Open Xcode
+- Click `Open...` and select the root `connect-swift` directory
+- Xcode will automatically read the [`Package.swift`](./Package.swift) file and open the project
 
 ## Generate code from protos
 
-Build both plugins and invoke them against the [protos](./protos) directory
+To build the plugin and run it against the [protos](./protos) directory
 using Buf:
 
 ```sh
-make build # Compile the plugins
+make build-connect-plugin # Compile the plugin
 make generate # Run buf generate - uses buf.gen.yaml
 ```
 
@@ -59,18 +54,11 @@ Outputted code will be available in `./gen`.
 
 ## Build and run example apps
 
-Tests and example apps depend on targets in `./gen`.
+Tests and example apps depend on outputs in `./gen`.
 
-**Using Xcode:**
-
-Generate the `.xcodeproj` using the [steps above](#swift-setup),
-select the app target and an iOS simulator, then click Run.
-
-**Using command line:**
-
-```sh
-make swift-example
-```
+Example apps are available in
+[`connect-swift/examples`](./connect-swift/examples), and can be opened and
+built using Xcode.
 
 ## Run Connect crosstests & test service
 
@@ -87,7 +75,7 @@ Running the crosstest service using Docker allows the tests to run using SSL:
 
 ```sh
 make cross-test-server-run
-bazelisk test //crosstests:crosstests
+swift test
 make cross-test-server-stop
 ```
 
@@ -110,18 +98,5 @@ go build -o testserver cmd/serverconnect/main.go
 Finally, run the crosstests:
 
 ```sh
-bazelisk test //crosstests:crosstests
-```
-
-## Bazel
-
-The Bazel build system is used to compile all the code in this repository.
-
-The version in use is pinned in the [`.bazelversion`](./.bazelversion) file,
-and it's automatically consumed by `bazelisk`.
-
-If you run into lint failures with Bazel files, you can run this to fix them:
-
-```sh
-make buildifier-fix
+swift test
 ```
