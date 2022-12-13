@@ -32,7 +32,7 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "connect-swift/src"
+            path: "library"
         ),
         .testTarget(
             name: "ConnectCrosstests",

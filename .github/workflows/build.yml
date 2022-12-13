@@ -46,4 +46,4 @@ jobs:
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
       - name: Build Eliza example app
-        run: cd connect-swift/examples/eliza && xcodebuild -scheme Eliza build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+        run: cd examples/eliza && xcodebuild -scheme Eliza build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
