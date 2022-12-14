@@ -17,8 +17,8 @@ public struct ProtocolClientConfig {
         codec: Codec? = nil,
         interceptors: [(ProtocolClientConfig) -> Interceptor]? = nil,
         compressionPools: [String: CompressionPool]? = nil
-    ) -> ProtocolClientConfig {
-        return ProtocolClientConfig(
+    ) -> Self {
+        return .init(
             target: self.target,
             httpClient: self.httpClient,
             compressionMinBytes: compressionMinBytes ?? self.compressionMinBytes,
