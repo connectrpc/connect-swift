@@ -83,15 +83,15 @@ final class Crosstests: XCTestCase {
     ) rethrows {
         let clients = CrosstestClients(timeout: 60)
 
-//        print("Running \(function) with Connect + JSON...")
-//        try runTestsWithClient(UnimplementedServiceClient(client: clients.connectJSONClient))
-//        print("Running \(function) with Connect + proto...")
-//        try runTestsWithClient(UnimplementedServiceClient(client: clients.connectProtoClient))
+        print("Running \(function) with Connect + JSON...")
+        try runTestsWithClient(UnimplementedServiceClient(client: clients.connectJSONClient))
+        print("Running \(function) with Connect + proto...")
+        try runTestsWithClient(UnimplementedServiceClient(client: clients.connectProtoClient))
 
         print("Running \(function) with gRPC Web + JSON...")
         try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebJSONClient))
-//        print("Running \(function) with gRPC Web + proto...")
-//        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebProtoClient))
+        print("Running \(function) with gRPC Web + proto...")
+        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebProtoClient))
     }
 
     // MARK: - Test cases
