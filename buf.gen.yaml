@@ -10,4 +10,4 @@ plugins:
     out: gen/proto/swift-protobuf
   - name: connect-swift
     out: gen/proto/connectswift
-    path: ./protoc-gen-connect-swift
+    path: ./protoc-gen-connect-swift/protoc-gen-connect-swift

@@ -15,7 +15,8 @@ brew install buf
 
 ## Go development
 
-To make changes to the Go [plugins](./cmd) that are used to generate code,
+To make changes to the Go [plugin](./protoc-gen-connect-swift)
+that is used to generate code,
 ensure the required dependencies are installed:
 
 ```sh
@@ -37,12 +38,12 @@ This project uses Swift Package Manager for development, building, and
 distribution. To open the project and start using it:
 
 - Open Xcode
-- Click `Open...` and select the root `connect-swift` directory
+- Click `Open...` and select the root `connect-swift` repo directory
 - Xcode will automatically read the [`Package.swift`](./Package.swift) file and open the project
 
 ## Generate code from protos
 
-To build the plugin and run it against the [protos](./protos) directory
+To build the plugin and run it against the [`./protos`](./protos) directory
 using Buf:
 
 ```sh
@@ -57,7 +58,7 @@ Outputted code will be available in `./gen`.
 Tests and example apps depend on outputs in `./gen`.
 
 Example apps are available in
-[`connect-swift/examples`](./connect-swift/examples), and can be opened and
+[`./examples`](./examples), and can be opened and
 built using Xcode.
 
 ## Run Connect crosstests & test service
