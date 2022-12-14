@@ -12,6 +12,10 @@ final class URLSessionStream: NSObject {
         case unableToWriteData
     }
 
+    var taskID: Int {
+        return self.task.taskIdentifier
+    }
+
     init(
         request: URLRequest,
         session: URLSession,
@@ -34,11 +38,12 @@ final class URLSessionStream: NSObject {
         self.task = session.uploadTask(withStreamedRequest: request)
         super.init()
 
-        self.task.delegate = self
         writeStream.schedule(in: .current, forMode: .default)
         writeStream.open()
         self.task.resume()
     }
+
+    // MARK: - Outbound
 
     func sendData(_ data: Data) throws {
         var remaining = Data(data)
@@ -65,40 +70,25 @@ final class URLSessionStream: NSObject {
     func close() {
         self.writeStream.close()
     }
-}
 
-extension URLSessionStream: URLSessionDataDelegate {
-    func urlSession(
-        _ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
-        completionHandler: @escaping (URLSession.ResponseDisposition) -> Void)
-    {
-        defer { completionHandler(.allow) }
+    // MARK: - Inbound
 
-        guard let httpURLResponse = response as? HTTPURLResponse else {
-            return
-        }
-
-        let code = Code.fromURLSessionCode(httpURLResponse.statusCode)
-        self.responseCallbacks.receiveResponseHeaders(
-            httpURLResponse.formattedLowercasedHeaders()
-        )
+    func handleResponse(_ response: HTTPURLResponse) {
+        let code = Code.fromURLSessionCode(response.statusCode)
+        self.responseCallbacks.receiveResponseHeaders(response.formattedLowercasedHeaders())
         if code != .ok {
             self.closedByServer = true
             self.responseCallbacks.receiveClose(code, nil)
         }
     }
 
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+    func handleResponseData(_ data: Data) {
         if !self.closedByServer {
             self.responseCallbacks.receiveResponseData(data)
         }
     }
-}
 
-extension URLSessionStream: URLSessionTaskDelegate {
-    func urlSession(
-        _ session: URLSession, task: URLSessionTask, didCompleteWithError error: Swift.Error?
-    ) {
+    func handleCompletion(error: Swift.Error?) {
         if self.closedByServer {
             return
         }

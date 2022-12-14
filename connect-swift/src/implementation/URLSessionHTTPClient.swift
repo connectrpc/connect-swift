@@ -4,11 +4,23 @@ import os.log
 
 /// Concrete implementation of `HTTPClientInterface` backed by `URLSession`.
 open class URLSessionHTTPClient: NSObject {
-    private let session: URLSession
+    /// Lock used for safely accessing stream storage.
+    private let lock = Lock()
+    /// Force unwrapped to allow using `self` as the delegate.
+    private var session: URLSession!
+    /// List of active streams.
+    /// TODO: Remove in favor of simply setting
+    /// `URLSessionTask.delegate = <URLSessionStream instance>` once we are able to set iOS 15
+    /// as the base deployment target.
+    private var streams = [Int: URLSessionStream]()
 
-    public required init(session: URLSession = .shared) {
-        self.session = session
+    public init(configuration: URLSessionConfiguration = .default) {
         super.init()
+        self.session = URLSession(
+            configuration: configuration,
+            delegate: self,
+            delegateQueue: .main
+        )
     }
 }
 
@@ -45,6 +57,7 @@ extension URLSessionHTTPClient: HTTPClientInterface {
             session: self.session,
             responseCallbacks: responseCallbacks
         )
+        self.lock.perform { self.streams[urlSessionStream.taskID] = urlSessionStream }
         return RequestCallbacks(
             sendData: { data in
                 do {
@@ -60,6 +73,38 @@ extension URLSessionHTTPClient: HTTPClientInterface {
             },
             sendClose: urlSessionStream.close
         )
+    }
+}
+
+extension URLSessionHTTPClient: URLSessionDataDelegate {
+    open func urlSession(
+        _ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
+        completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
+    ) {
+        defer { completionHandler(.allow) }
+
+        guard let httpURLResponse = response as? HTTPURLResponse else {
+            return
+        }
+
+        let stream = self.lock.perform { self.streams[dataTask.taskIdentifier] }
+        stream?.handleResponse(httpURLResponse)
+    }
+
+    open func urlSession(
+        _ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data
+    ) {
+        let stream = self.lock.perform { self.streams[dataTask.taskIdentifier] }
+        stream?.handleResponseData(data)
+    }
+}
+
+extension URLSessionHTTPClient: URLSessionTaskDelegate {
+    open func urlSession(
+        _ session: URLSession, task: URLSessionTask, didCompleteWithError error: Swift.Error?
+    ) {
+        let stream = self.lock.perform { self.streams.removeValue(forKey: task.taskIdentifier) }
+        stream?.handleCompletion(error: error)
     }
 }
 

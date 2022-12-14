@@ -17,6 +17,7 @@ ios_application(
     bundle_id = "build.buf.eliza-example",
     families = ["iphone"],
     infoplists = ["Info.plist"],
+    # iOS 15 is used to take advantage of new SwiftUI APIs.
     minimum_os_version = "15.0",
     sdk_frameworks = ["UIKit"],
     visibility = ["//visibility:public"],
