@@ -1,6 +1,6 @@
 /// Indicates a status of an RPC.
 /// The zero code in gRPC is OK, which indicates that the operation was a success.
-public enum Code: Int, CaseIterable {
+public enum Code: Int, CaseIterable, Equatable {
     case ok = 0
     case canceled = 1
     case unknown = 2
@@ -59,6 +59,7 @@ public enum Code: Int, CaseIterable {
     }
 
     public static func fromHTTPStatus(_ status: Int) -> Self {
+        // From https://github.com/bufbuild/connect-web/blob/main/packages/connect-web/src/code.ts
         switch status {
         case 200:
             return .ok
@@ -69,7 +70,7 @@ public enum Code: Int, CaseIterable {
         case 403:
             return .permissionDenied
         case 404:
-            return .notFound
+            return .unimplemented
         case 408:
             return .deadlineExceeded
         case 409:
@@ -80,7 +81,9 @@ public enum Code: Int, CaseIterable {
             return .resourceExhausted
         case 415:
             return .internalError
-        case 429, 431:
+        case 429:
+            return .unavailable
+        case 431:
             return .resourceExhausted
         case 502, 503, 504:
             return .unavailable

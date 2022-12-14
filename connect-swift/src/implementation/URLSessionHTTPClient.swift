@@ -1,12 +1,14 @@
+import CFNetwork
 import Foundation
 import os.log
 
 /// Concrete implementation of `HTTPClientInterface` backed by `URLSession`.
-public final class URLSessionHTTPClient {
+open class URLSessionHTTPClient: NSObject {
     private let session: URLSession
 
-    public init(session: URLSession = .shared) {
+    public required init(session: URLSession = .shared) {
         self.session = session
+        super.init()
     }
 }
 
@@ -16,7 +18,7 @@ extension URLSessionHTTPClient: HTTPClientInterface {
         let task = self.session.dataTask(with: urlRequest) { data, urlResponse, error in
             guard let httpURLResponse = urlResponse as? HTTPURLResponse else {
                 return completion(HTTPResponse(
-                    code: .unknown, headers: [:], message: data, trailers: nil, error: ConnectError(
+                    code: .unknown, headers: [:], message: data, trailers: [:], error: ConnectError(
                         code: .unknown,
                         message: "unexpected response type \(type(of: urlResponse))",
                         exception: error, details: [], metadata: [:]
@@ -25,10 +27,10 @@ extension URLSessionHTTPClient: HTTPClientInterface {
             }
 
             completion(HTTPResponse(
-                code: Code.fromHTTPStatus(httpURLResponse.statusCode),
+                code: Code.fromURLSessionCode(httpURLResponse.statusCode),
                 headers: httpURLResponse.formattedLowercasedHeaders(),
                 message: data,
-                trailers: nil, // URLSession does not support trailers
+                trailers: [:], // URLSession does not support trailers
                 error: error
             ))
         }
@@ -70,6 +72,29 @@ extension HTTPURLResponse {
 
             let headerValue = current.value as? String ?? String(describing: current.value)
             headers[headerName] = headerValue.components(separatedBy: ",")
+        }
+    }
+}
+
+extension Code {
+    static func fromURLSessionCode(_ code: Int) -> Self {
+        // https://developer.apple.com/documentation/cfnetwork/cfnetworkerrors?language=swift
+        switch Int32(code) {
+        case CFNetworkErrors.cfurlErrorUnknown.rawValue:
+            return .unknown
+        case CFNetworkErrors.cfurlErrorCancelled.rawValue:
+            return .canceled
+        case CFNetworkErrors.cfurlErrorBadURL.rawValue:
+            return .invalidArgument
+        case CFNetworkErrors.cfurlErrorTimedOut.rawValue:
+            return .deadlineExceeded
+        case CFNetworkErrors.cfurlErrorUnsupportedURL.rawValue:
+            return .unimplemented
+        case ...100:
+            // URLSession can return errors in this range
+            return .unknown
+        default:
+            return Code.fromHTTPStatus(code)
         }
     }
 }

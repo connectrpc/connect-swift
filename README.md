@@ -72,20 +72,46 @@ select the app target and an iOS simulator, then click Run.
 make swift-example
 ```
 
-## Run crosstests & test service
+## Run Connect crosstests & test service
 
-The test service is used by the client crosstests. To run it locally:
+A test service is used to run crosstests
+(integration tests which validate the behavior of the `Connect` library with
+various protocols).
+
+Crosstests can be run using the command line or using Xcode. Before running
+them, you'll need to start the test service using one of the methods below:
+
+### Using Docker
+
+Running the crosstest service using Docker allows the tests to run using SSL:
+
+```sh
+make cross-test-server-run
+bazelisk test //crosstests:crosstests
+make cross-test-server-stop
+```
+
+### Without Docker (and no SSL)
+
+Alternatively, you can run the local service without
+requiring a TLS certificate. This requires a patch to be applied before
+starting the service:
 
 ```sh
 cd connect-crosstest
-git apply ../ct-local.patch
-go build -o testserver cmd/serverconnect/main.go; ./testserver --h1port=1231 --h2port=1232
-./testserver --h1port=1231 --h2port=1232
+git apply ../crosstests/local.patch
+go build -o testserver cmd/serverconnect/main.go
+./testserver --h1port=8080 --h2port=8081
 ```
 
-Run the crosstests:
+**You'll then need to change `http` to `https` in
+[`Crosstests.swift`](./crosstests/Crosstests.swift).**
 
-TODO
+Finally, run the crosstests:
+
+```sh
+bazelisk test //crosstests:crosstests
+```
 
 ## Bazel
 

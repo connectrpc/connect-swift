@@ -45,6 +45,7 @@ extension ProtocolClient: ProtocolClientInterface {
                 code: .unknown,
                 headers: [:],
                 message: nil,
+                trailers: [:],
                 error: ConnectError(
                     code: .unknown, message: "request serialization failed", exception: error,
                     details: [], metadata: [:]
@@ -73,6 +74,7 @@ extension ProtocolClient: ProtocolClientInterface {
                     code: response.code,
                     headers: response.headers,
                     message: nil,
+                    trailers: response.trailers,
                     error: error
                 )
             } else if response.message == nil {
@@ -80,6 +82,7 @@ extension ProtocolClient: ProtocolClientInterface {
                     code: response.code,
                     headers: response.headers,
                     message: nil,
+                    trailers: response.trailers,
                     error: nil
                 )
             } else {
@@ -88,6 +91,7 @@ extension ProtocolClient: ProtocolClientInterface {
                         code: response.code,
                         headers: response.headers,
                         message: try response.message.map(codec.deserialize),
+                        trailers: response.trailers,
                         error: nil
                     )
                 } catch let error {
@@ -95,6 +99,7 @@ extension ProtocolClient: ProtocolClientInterface {
                         code: response.code,
                         headers: response.headers,
                         message: nil,
+                        trailers: response.trailers,
                         error: ConnectError(
                             code: response.code, message: nil, exception: error,
                             details: [], metadata: response.headers
@@ -196,13 +201,18 @@ extension ProtocolClient: ProtocolClientInterface {
                     responseBuffer = Data(responseBuffer.suffix(from: prefixedMessageLength))
                 }
             },
-            receiveClose: { error in
-                if let error = error {
+            receiveClose: { code, error in
+                if code != .ok || error != nil {
                     // Only pass the result through as completion if there is an error.
-                    // An example of this codepath would be the client disconnecting mid-stream.
+                    // Examples of this codepath would be the client disconnecting mid-stream
+                    // or receiving a non-2xx response.
                     // The happy path is usually determined by "end stream" flags in the
                     // response body.
-                    interceptAndHandleResult(.complete(error: error, trailers: nil))
+                    interceptAndHandleResult(.complete(
+                        code: code,
+                        error: error,
+                        trailers: nil
+                    ))
                 }
             }
         )
@@ -226,8 +236,8 @@ private extension StreamResult<Data> {
         throws -> StreamResult<Output>
     {
         switch self {
-        case .complete(let error, let trailers):
-            return .complete(error: error, trailers: trailers)
+        case .complete(let code, let error, let trailers):
+            return .complete(code: code, error: error, trailers: trailers)
         case .headers(let headers):
             return .headers(headers)
         case .message(let data):

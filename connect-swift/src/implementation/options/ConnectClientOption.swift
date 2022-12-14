@@ -56,34 +56,47 @@ extension ConnectInterceptor: Interceptor {
                 )
             },
             responseFunction: { response in
-                guard let encoding = response.headers[HeaderConstants.contentEncoding]?.first,
-                      let compressionPool = self.config.compressionPools[encoding] else
-                {
-                    return response
+                let trailerPrefix = "trailer-"
+                let headers = response.headers.filter { header in
+                    return header.key != HeaderConstants.contentEncoding
+                        && !header.key.hasPrefix(trailerPrefix)
                 }
+                let trailers = response.headers
+                    .filter { $0.key.hasPrefix(trailerPrefix) }
+                    .reduce(into: Trailers(), { trailers, current in
+                        trailers[
+                            String(current.key.dropFirst(trailerPrefix.count))
+                        ] = current.value
+                    })
 
-                do {
+                if let encoding = response.headers[HeaderConstants.contentEncoding]?.first,
+                   let compressionPool = self.config.compressionPools[encoding],
+                   let message = response.message.flatMap({ data in
+                       return try? compressionPool.decompress(data: data)
+                   })
+                {
                     return HTTPResponse(
                         code: response.code,
-                        headers: response.headers
-                            .filter { $0.key != HeaderConstants.contentEncoding },
-                        message: try response.message.map { body in
-                            return try compressionPool.decompress(data: body)
-                        },
-                        // TODO: Handle trailers prefixed with "trailer-":
-                        // https://connect.build/docs/protocol
-                        trailers: nil,
+                        headers: headers,
+                        message: message,
+                        trailers: trailers,
                         error: response.error
                     )
-                } catch {
-                    return response
+                } else {
+                    return HTTPResponse(
+                        code: response.code,
+                        headers: headers,
+                        message: response.message,
+                        trailers: trailers,
+                        error: response.error
+                    )
                 }
             }
         )
     }
 
     func wrapStream(nextStream: StreamingFunction) -> StreamingFunction {
-        var responseCompressionPool: CompressionPool?
+        var responseHeaders: Headers?
         return StreamingFunction(
             requestFunction: { request in
                 var headers = request.headers
@@ -108,17 +121,15 @@ extension ConnectInterceptor: Interceptor {
             },
             streamResultFunc: { result in
                 switch result {
-                case .complete:
-                    return result
-
                 case .headers(let headers):
-                    responseCompressionPool = headers[
-                        HeaderConstants.connectStreamingContentEncoding
-                    ]?.first.flatMap { self.config.compressionPools[$0] }
+                    responseHeaders = headers
                     return result
 
                 case .message(let data):
                     do {
+                        let responseCompressionPool = responseHeaders?[
+                            HeaderConstants.connectStreamingContentEncoding
+                        ]?.first.flatMap { self.config.compressionPools[$0] }
                         let (headerByte, message) = try Envelope.unpackMessage(
                             data, compressionPool: responseCompressionPool
                         )
@@ -129,13 +140,32 @@ extension ConnectInterceptor: Interceptor {
                             let response = try JSONDecoder().decode(
                                 ConnectEndStreamResponse.self, from: message
                             )
-                            return .complete(error: response.error, trailers: response.metadata)
+                            return .complete(
+                                code: response.error?.code ?? .ok,
+                                error: response.error,
+                                trailers: response.metadata
+                            )
                         } else {
                             return .message(message)
                         }
                     } catch let error {
                         // TODO: Close the stream here?
-                        return .complete(error: error, trailers: nil)
+                        return .complete(code: .unknown, error: error, trailers: nil)
+                    }
+
+                case .complete(let code, let error, let trailers):
+                    if code != .ok && error == nil {
+                        return .complete(
+                            code: code,
+                            error: ConnectError.from(
+                                code: code,
+                                headers: responseHeaders ?? [:],
+                                source: nil
+                            ),
+                            trailers: trailers
+                        )
+                    } else {
+                        return result
                     }
                 }
             }

@@ -2,6 +2,7 @@ import Foundation
 
 /// Stream implementation that wraps a `URLSession` stream.
 final class URLSessionStream: NSObject {
+    private var closedByServer = false
     private let responseCallbacks: ResponseCallbacks
     private let task: URLSessionUploadTask
     private let writeStream: Foundation.OutputStream
@@ -71,16 +72,26 @@ extension URLSessionStream: URLSessionDataDelegate {
         _ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
         completionHandler: @escaping (URLSession.ResponseDisposition) -> Void)
     {
-        if let httpURLResponse = response as? HTTPURLResponse {
-            self.responseCallbacks.receiveResponseHeaders(
-                httpURLResponse.formattedLowercasedHeaders()
-            )
+        defer { completionHandler(.allow) }
+
+        guard let httpURLResponse = response as? HTTPURLResponse else {
+            return
         }
-        completionHandler(.allow)
+
+        let code = Code.fromURLSessionCode(httpURLResponse.statusCode)
+        self.responseCallbacks.receiveResponseHeaders(
+            httpURLResponse.formattedLowercasedHeaders()
+        )
+        if code != .ok {
+            self.closedByServer = true
+            self.responseCallbacks.receiveClose(code, nil)
+        }
     }
 
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        self.responseCallbacks.receiveResponseData(data)
+        if !self.closedByServer {
+            self.responseCallbacks.receiveResponseData(data)
+        }
     }
 }
 
@@ -88,6 +99,17 @@ extension URLSessionStream: URLSessionTaskDelegate {
     func urlSession(
         _ session: URLSession, task: URLSessionTask, didCompleteWithError error: Swift.Error?
     ) {
-        self.responseCallbacks.receiveClose(error)
+        if self.closedByServer {
+            return
+        }
+
+        self.closedByServer = true
+        if let error = error {
+            self.responseCallbacks.receiveClose(
+                Code.fromURLSessionCode((error as NSError).code), error
+            )
+        } else {
+            self.responseCallbacks.receiveClose(.ok, nil)
+        }
     }
 }

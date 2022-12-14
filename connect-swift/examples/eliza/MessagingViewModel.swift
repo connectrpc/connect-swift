@@ -111,7 +111,7 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
                     self?.messages.append(Message(message: message.sentence, author: .eliza))
                 }
 
-            case .complete(let error, let trailers):
+            case .complete(_, let error, let trailers):
                 os_log(.debug, "Eliza completed with trailers: %@", trailers ?? [:])
 
                 // UI updates must be performed on the main thread.
