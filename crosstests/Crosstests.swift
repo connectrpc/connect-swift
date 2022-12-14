@@ -96,7 +96,7 @@ final class Crosstests: XCTestCase {
 //        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebProtoClient))
     }
 
-    // MARK: - Test cases
+    // MARK: - Crosstest cases
 
     func testEmptyUnary() {
         self.executeTestWithClients { client in
@@ -478,6 +478,21 @@ final class Crosstests: XCTestCase {
                     }
             })
 
+            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+        }
+    }
+
+    // MARK: - Additional cases
+
+    func testCancelingUnary() {
+        self.executeTestWithClients { client in
+            let expectation = self.expectation(description: "Receives canceled response")
+            let cancelable = client.emptyCall(request: Grpc_Testing_Empty()) { response in
+                XCTAssertEqual(response.code, .canceled)
+                XCTAssertEqual(response.error?.code, .canceled)
+                expectation.fulfill()
+            }
+            cancelable.cancel()
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
     }

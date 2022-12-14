@@ -25,11 +25,31 @@ open class URLSessionHTTPClient: NSObject {
 }
 
 extension URLSessionHTTPClient: HTTPClientInterface {
-    public func unary(request: HTTPRequest, completion: @escaping (HTTPResponse) -> Void) {
+    @discardableResult
+    public func unary(
+        request: HTTPRequest, completion: @escaping (HTTPResponse) -> Void
+    ) -> Cancelable {
         let urlRequest = URLRequest(httpRequest: request)
         let task = self.session.dataTask(with: urlRequest) { data, urlResponse, error in
-            guard let httpURLResponse = urlResponse as? HTTPURLResponse else {
-                return completion(HTTPResponse(
+            if let httpURLResponse = urlResponse as? HTTPURLResponse {
+                completion(HTTPResponse(
+                    code: Code.fromURLSessionCode(httpURLResponse.statusCode),
+                    headers: httpURLResponse.formattedLowercasedHeaders(),
+                    message: data,
+                    trailers: [:], // URLSession does not support trailers
+                    error: error
+                ))
+            } else if let error = error {
+                let code = Code.fromURLSessionCode((error as NSError).code)
+                completion(HTTPResponse(
+                    code: code, headers: [:], message: data, trailers: [:], error: ConnectError(
+                        code: code,
+                        message: error.localizedDescription,
+                        exception: error, details: [], metadata: [:]
+                    )
+                ))
+            } else {
+                completion(HTTPResponse(
                     code: .unknown, headers: [:], message: data, trailers: [:], error: ConnectError(
                         code: .unknown,
                         message: "unexpected response type \(type(of: urlResponse))",
@@ -37,16 +57,9 @@ extension URLSessionHTTPClient: HTTPClientInterface {
                     )
                 ))
             }
-
-            completion(HTTPResponse(
-                code: Code.fromURLSessionCode(httpURLResponse.statusCode),
-                headers: httpURLResponse.formattedLowercasedHeaders(),
-                message: data,
-                trailers: [:], // URLSession does not support trailers
-                error: error
-            ))
         }
         task.resume()
+        return Cancelable(cancel: task.cancel)
     }
 
     public func stream(
