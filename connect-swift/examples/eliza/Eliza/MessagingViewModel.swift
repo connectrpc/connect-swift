@@ -1,8 +1,8 @@
 import Combine
 import Connect
 import Dispatch
+import GeneratedExamples
 import os.log
-import SwiftGenerated
 
 private typealias ConverseRequest = Buf_Connect_Demo_Eliza_V1_ConverseRequest
 private typealias ConverseResponse = Buf_Connect_Demo_Eliza_V1_ConverseResponse

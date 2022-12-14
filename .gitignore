@@ -1,10 +1,13 @@
+.build
 .DS_Store
 .idea
 *.iml
-*.xcodeproj
-bazel-*
+*.xcuserdatad
+*.xcuserstate
+
+/.swiftpm
 /protoc-gen-connect-swift
-vendor
+/vendor
 
 # buf set up requires a github token to prevent a rate limit.
 # TODO: We're currently checking in generated code to side-step this problem.
