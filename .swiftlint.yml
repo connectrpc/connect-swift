@@ -2,6 +2,7 @@ excluded:
   - gen
   - library/implementation/generated
 included:
+  - crosstests
   - library
 disabled_rules:
   - cyclomatic_complexity
