@@ -9,7 +9,7 @@ the Connect library:
 
 - [Connect](https://connect.build) + unary
 - [Connect](https://connect.build) + streaming
-- [gRPC](https://grpc.io) + unary
-- [gRPC](https://grpc.io) + streaming
+- [gRPC-Web](https://grpc.io) + unary
+- [gRPC-Web](https://grpc.io) + streaming
 
 To try out the app, simply open the `.xcodeproj` in this directory.
