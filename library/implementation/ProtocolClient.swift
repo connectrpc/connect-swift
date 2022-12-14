@@ -197,7 +197,6 @@ extension ProtocolClient: ProtocolClientInterface {
                         return
                     }
 
-                    // TODO: Document buffering behavior requirements in interface declaration
                     interceptAndHandleResult(.message(responseBuffer.prefix(prefixedMessageLength)))
                     responseBuffer = Data(responseBuffer.suffix(from: prefixedMessageLength))
                 }
