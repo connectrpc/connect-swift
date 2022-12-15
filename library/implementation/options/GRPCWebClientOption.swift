@@ -41,8 +41,13 @@ extension GRPCWebInterceptor: Interceptor {
                 )
             },
             responseFunction: { response in
+                guard response.code == .ok else {
+                    // Invalid gRPC response - expects HTTP 200. Potentially a network error.
+                    return response
+                }
+
                 guard let responseData = response.message, !responseData.isEmpty else {
-                    let code = response.headers.grpcStatus()
+                    let code = response.headers.grpcStatus() ?? response.code
                     return HTTPResponse(
                         code: code,
                         headers: response.headers,
@@ -122,8 +127,17 @@ extension GRPCWebInterceptor: Interceptor {
             streamResultFunc: { result in
                 switch result {
                 case .headers(let headers):
-                    responseHeaders = headers
-                    return result
+                    if let grpcCode = headers.grpcStatus() {
+                        // Headers-only response.
+                        return .complete(
+                            code: grpcCode,
+                            error: ConnectError.fromGRPCWebTrailers(headers, code: grpcCode),
+                            trailers: headers
+                        )
+                    } else {
+                        responseHeaders = headers
+                        return result
+                    }
 
                 case .message(let data):
                     do {
@@ -136,7 +150,7 @@ extension GRPCWebInterceptor: Interceptor {
                         let isTrailers = 0b10000000 & headerByte != 0
                         if isTrailers {
                             let trailers = try Trailers.fromGRPCHeadersBlock(unpackedData)
-                            let grpcCode = trailers.grpcStatus()
+                            let grpcCode = trailers.grpcStatus() ?? .unknown
                             if grpcCode == .ok {
                                 return .complete(code: .ok, error: nil, trailers: trailers)
                             } else {
@@ -156,19 +170,8 @@ extension GRPCWebInterceptor: Interceptor {
                         return .complete(code: .unknown, error: error, trailers: nil)
                     }
 
-                case .complete(let code, let error, let trailers):
-                    if code != .ok && error == nil {
-                        return .complete(
-                            code: code,
-                            error: ConnectError.fromGRPCWebTrailers(
-                                trailers ?? responseHeaders ?? [:],
-                                code: code
-                            ),
-                            trailers: trailers
-                        )
-                    } else {
-                        return result
-                    }
+                case .complete:
+                    return result
                 }
             }
         )
@@ -217,12 +220,11 @@ private extension Trailers {
             }
     }
 
-    func grpcStatus() -> Code {
+    func grpcStatus() -> Code? {
         return self[HeaderConstants.grpcStatus]?
             .first
             .flatMap(Int.init)
             .flatMap { Code(rawValue: $0) }
-            ?? .unknown
     }
 
     func grpcMessage() -> String? {
@@ -239,7 +241,9 @@ private extension Trailers {
             .details
             .compactMap { protoDetail in
                 return ConnectError.Detail(
-                    type: protoDetail.typeURL,
+                    // Include only the type name (last component of the type URL)
+                    // to be compatible with SwiftProtobuf's `Google_Protobuf_Any`.
+                    type: String(protoDetail.typeURL.split(separator: "/").last!),
                     payload: protoDetail.value
                 )
             }
@@ -249,7 +253,7 @@ private extension Trailers {
 
 private extension HTTPResponse {
     func withHandledGRPCWebTrailers(_ trailers: Trailers, message: Data?) -> Self {
-        let grpcStatus = trailers.grpcStatus()
+        let grpcStatus = trailers.grpcStatus() ?? .unknown
         if grpcStatus == .ok {
             return HTTPResponse(
                 code: grpcStatus,

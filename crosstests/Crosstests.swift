@@ -71,11 +71,10 @@ final class Crosstests: XCTestCase {
         print("Running \(function) with Connect + proto...")
         try runTestsWithClient(TestServiceClient(client: clients.connectProtoClient))
 
-// TODO: Enable gRPC Web tests
-//        print("Running \(function) with gRPC Web + JSON...")
-//        try runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
-//        print("Running \(function) with gRPC Web + proto...")
-//        try runTestsWithClient(TestServiceClient(client: clients.grpcWebProtoClient))
+        print("Running \(function) with gRPC Web + JSON...")
+        try runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
+        print("Running \(function) with gRPC Web + proto...")
+        try runTestsWithClient(TestServiceClient(client: clients.grpcWebProtoClient))
     }
 
     private func executeTestWithUnimplementedClients(
@@ -89,11 +88,10 @@ final class Crosstests: XCTestCase {
         print("Running \(function) with Connect + proto...")
         try runTestsWithClient(UnimplementedServiceClient(client: clients.connectProtoClient))
 
-// TODO: Enable gRPC Web tests
-//        print("Running \(function) with gRPC Web + JSON...")
-//        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebJSONClient))
-//        print("Running \(function) with gRPC Web + proto...")
-//        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebProtoClient))
+        print("Running \(function) with gRPC Web + JSON...")
+        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebJSONClient))
+        print("Running \(function) with gRPC Web + proto...")
+        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebProtoClient))
     }
 
     // MARK: - Test cases
@@ -163,12 +161,11 @@ final class Crosstests: XCTestCase {
 
     func testEmptyStream() throws {
         try self.executeTestWithClients { client in
-            let headersExpectation = self.expectation(description: "Receives headers")
             let closeExpectation = self.expectation(description: "Stream completes")
             let stream = client.streamingOutputCall { result in
                 switch result {
                 case .headers:
-                    headersExpectation.fulfill()
+                    break
 
                 case .message:
                     XCTFail("Unexpectedly received message")
@@ -183,9 +180,7 @@ final class Crosstests: XCTestCase {
                 proto.responseParameters = []
             })
 
-            XCTAssertEqual(XCTWaiter().wait(for: [
-                headersExpectation, closeExpectation,
-            ], timeout: kTimeout, enforceOrder: true), .completed)
+            XCTAssertEqual(XCTWaiter().wait(for: [closeExpectation], timeout: kTimeout), .completed)
         }
     }
 
@@ -410,9 +405,8 @@ final class Crosstests: XCTestCase {
                 case .message:
                     XCTFail("Unexpectedly received message")
 
-                case .complete(let code, let error, _):
+                case .complete(let code, _, _):
                     XCTAssertEqual(code, .unimplemented)
-                    XCTAssertNotNil(error)
                     expectation.fulfill()
                 }
             }
