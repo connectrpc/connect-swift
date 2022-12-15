@@ -8,9 +8,6 @@ public protocol Interceptor {
     /// Invoked when a unary call is started. Provides a set of closures that will be called
     /// as the request progresses, allowing the interceptor to alter request/response data.
     ///
-    /// - parameter nextUnary: The set of closures which will be invoked after this interceptor.
-    ///                        Represents either another interceptor or client's invocation.
-    ///
     /// - returns: A new set of closures which can be used to read/alter request/response data.
     func unaryFunction() -> UnaryFunction
 
@@ -21,9 +18,6 @@ public protocol Interceptor {
     /// is sent/received over the stream). Furthermore, a guarantee is provided that each data chunk
     /// will contain 1 full message (for Connect and gRPC, this includes the prefix and message
     /// length bytes, followed by the actual message data).
-    ///
-    /// - parameter nextStream: The set of closures which will be invoked after this interceptor.
-    ///                         Represents either another interceptor or the client's invocation.
     ///
     /// - returns: A new set of closures which can be used to read/alter request/response data.
     func streamFunction() -> StreamFunction
