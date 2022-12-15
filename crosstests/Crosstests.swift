@@ -405,9 +405,8 @@ final class Crosstests: XCTestCase {
                 case .message:
                     XCTFail("Unexpectedly received message")
 
-                case .complete(let code, let error, _):
+                case .complete(let code, _, _):
                     XCTAssertEqual(code, .unimplemented)
-                    XCTAssertNotNil(error)
                     expectation.fulfill()
                 }
             }
