@@ -15,7 +15,8 @@ public protocol ElizaServiceClientInterface {
 
 	// Say is a unary request demo. This method should allow for a one sentence
 	// response given a one sentence request.
-	func say(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>) -> Void)
+	@discardableResult
+	func say(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>) -> Void) -> Connect.Cancelable
 
 	// Converse is a bi-directional streaming request demo. This method should allow for
 	// many requests and many responses.
@@ -34,8 +35,9 @@ public final class ElizaServiceClient: ElizaServiceClientInterface {
 		self.client = client
 	}
 
-	public func say(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>) -> Void) {
-		self.client.unary(path: "buf.connect.demo.eliza.v1.ElizaService/Say", request: request, headers: headers, completion: completion)
+	@discardableResult
+	public func say(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>) -> Void) -> Connect.Cancelable {
+		return self.client.unary(path: "buf.connect.demo.eliza.v1.ElizaService/Say", request: request, headers: headers, completion: completion)
 	}
 
 	public func converse(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_ConverseResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Buf_Connect_Demo_Eliza_V1_ConverseRequest> {

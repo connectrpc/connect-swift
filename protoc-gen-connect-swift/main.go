@@ -67,6 +67,9 @@ func generateServiceInterface(g *protogen.GeneratedFile, file *protogen.File, se
 		for _, line := range strings.Split(strings.TrimSpace(method.Comments.Leading.String()), "\n") {
 			g.P("\t", line)
 		}
+		if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
+			g.P("\t", "@discardableResult")
+		}
 		g.P("\t", methodSignature(method, file, false))
 	}
 
@@ -86,15 +89,19 @@ func generateServiceImplementation(g *protogen.GeneratedFile, file *protogen.Fil
 		methodPath := fmt.Sprintf("\"%s/%s\"", service.Desc.FullName(), method.Desc.Name())
 
 		g.P()
-		g.P("\t", "public ", methodSignature(method, file, true), " {")
 		if method.Desc.IsStreamingClient() && method.Desc.IsStreamingServer() {
+			g.P("\t", "public ", methodSignature(method, file, true), " {")
 			g.P("\t\t", "return self.client.bidirectionalStream(path: ", methodPath, ", headers: headers, onResult: onResult)")
 		} else if method.Desc.IsStreamingServer() {
+			g.P("\t", "public ", methodSignature(method, file, true), " {")
 			g.P("\t\t", "return self.client.serverOnlyStream(path: ", methodPath, ", headers: headers, onResult: onResult)")
 		} else if method.Desc.IsStreamingClient() {
+			g.P("\t", "public ", methodSignature(method, file, true), " {")
 			g.P("\t\t", "return self.client.clientOnlyStream(path: ", methodPath, ", headers: headers, onResult: onResult)")
 		} else {
-			g.P("\t\t", "self.client.unary(path: ", methodPath, ", request: request, headers: headers, completion: completion)")
+			g.P("\t", "@discardableResult")
+			g.P("\t", "public ", methodSignature(method, file, true), " {")
+			g.P("\t\t", "return self.client.unary(path: ", methodPath, ", request: request, headers: headers, completion: completion)")
 		}
 		g.P("\t", "}")
 	}
@@ -151,7 +158,8 @@ func methodSignature(method *protogen.Method, file *protogen.File, includeDefaul
 			defaultHeaders +
 			", completion: @escaping (ResponseMessage<" +
 			swiftFullyQualifiedName(method.Output.Desc.Name(), file) +
-			">) -> Void)"
+			">) -> Void) " +
+			"-> Connect.Cancelable"
 	}
 }
 

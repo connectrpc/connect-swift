@@ -2,6 +2,7 @@ import Foundation
 import SwiftProtobuf
 
 public protocol ProtocolClientInterface {
+    @discardableResult
     func unary<
         Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
@@ -9,7 +10,7 @@ public protocol ProtocolClientInterface {
         request: Input,
         headers: Headers,
         completion: @escaping (ResponseMessage<Output>) -> Void
-    )
+    ) -> Cancelable
 
     func bidirectionalStream<
         Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message

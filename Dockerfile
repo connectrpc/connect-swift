@@ -2,8 +2,8 @@
 # Usage:
 # buf registry login
 # docker login -u $USERNAME -p $PASSWORD plugins.buf.build
-# docker build -t plugins.buf.build/mrebello/connect-swift:v0.0.1-3 -f Dockerfile .
-# docker push plugins.buf.build/mrebello/connect-swift:v0.0.1-3
+# docker build -t plugins.buf.build/mrebello/connect-swift:v0.0.1-4 -f Dockerfile .
+# docker push plugins.buf.build/mrebello/connect-swift:v0.0.1-4
 
 FROM golang:alpine as build
 WORKDIR /app

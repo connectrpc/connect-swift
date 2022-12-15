@@ -28,6 +28,7 @@ public final class ProtocolClient {
 }
 
 extension ProtocolClient: ProtocolClientInterface {
+    @discardableResult
     public func unary<
         Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
@@ -35,7 +36,7 @@ extension ProtocolClient: ProtocolClientInterface {
         request: Input,
         headers: Headers,
         completion: @escaping (ResponseMessage<Output>) -> Void
-    ) {
+    ) -> Cancelable {
         let codec = self.config.codec
         let data: Data
         do {
@@ -51,7 +52,7 @@ extension ProtocolClient: ProtocolClientInterface {
                     details: [], metadata: [:]
                 )
             ))
-            return
+            return Cancelable(cancel: {})
         }
 
         let chain = self.config.createUnaryInterceptorChain()
@@ -62,7 +63,7 @@ extension ProtocolClient: ProtocolClientInterface {
             headers: headers,
             message: data
         ))
-        self.config.httpClient.unary(request: request) { response in
+        return self.config.httpClient.unary(request: request) { response in
             let response = chain.responseFunction(response)
             let responseMessage: ResponseMessage<Output>
             if response.code != .ok {
