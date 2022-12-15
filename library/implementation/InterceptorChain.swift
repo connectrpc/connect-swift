@@ -24,7 +24,7 @@ struct InterceptorChain {
     ///
     /// - returns: A set of closures that each invoke the chain of interceptors in the above order.
     func unaryFunction() -> UnaryFunction {
-        let interceptors = self.interceptors.lazy.map { $0.unaryFunction() }
+        let interceptors = self.interceptors.map { $0.unaryFunction() }
         return UnaryFunction(
             requestFunction: { request in
                 return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
@@ -47,7 +47,7 @@ struct InterceptorChain {
     ///
     /// - returns: A set of closures that each invoke the chain of interceptors in the above order.
     func streamFunction() -> StreamFunction {
-        let interceptors = self.interceptors.lazy.map { $0.streamFunction() }
+        let interceptors = self.interceptors.map { $0.streamFunction() }
         return StreamFunction(
             requestFunction: { request in
                 return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
