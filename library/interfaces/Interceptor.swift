@@ -12,7 +12,7 @@ public protocol Interceptor {
     ///                        Represents either another interceptor or client's invocation.
     ///
     /// - returns: A new set of closures which can be used to read/alter request/response data.
-    func wrapUnary() -> UnaryFunction
+    func unaryFunction() -> UnaryFunction
 
     /// Invoked when a streaming call is started. Provides a set of closures that will be called
     /// as the stream progresses, allowing the interceptor to alter request/response data.
@@ -26,7 +26,7 @@ public protocol Interceptor {
     ///                         Represents either another interceptor or the client's invocation.
     ///
     /// - returns: A new set of closures which can be used to read/alter request/response data.
-    func wrapStream() -> StreamingFunction
+    func streamFunction() -> StreamFunction
 }
 
 public struct UnaryFunction {
@@ -34,7 +34,7 @@ public struct UnaryFunction {
     public let responseFunction: (HTTPResponse) -> HTTPResponse
 }
 
-public struct StreamingFunction {
+public struct StreamFunction {
     public let requestFunction: (HTTPRequest) -> HTTPRequest
     public let requestDataFunction: (Data) -> Data
     public let streamResultFunc: (StreamResult<Data>) -> StreamResult<Data>

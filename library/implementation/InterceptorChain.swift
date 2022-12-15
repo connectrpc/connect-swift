@@ -14,8 +14,8 @@ struct InterceptorChain {
             .map { initialize in initialize(config) }
     }
 
-    func wrapUnary() -> UnaryFunction {
-        let interceptors = self.interceptors.map { $0.wrapUnary() }
+    func unaryFunction() -> UnaryFunction {
+        let interceptors = self.interceptors.map { $0.unaryFunction() }
         return UnaryFunction(
             requestFunction: { request in
                 return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
@@ -26,9 +26,9 @@ struct InterceptorChain {
         )
     }
 
-    func wrapStream() -> StreamingFunction {
-        let interceptors = self.interceptors.map { $0.wrapStream() }
-        return StreamingFunction(
+    func streamFunction() -> StreamFunction {
+        let interceptors = self.interceptors.map { $0.streamFunction() }
+        return StreamFunction(
             requestFunction: { request in
                 return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
             },
