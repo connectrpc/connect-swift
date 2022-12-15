@@ -9,6 +9,14 @@ struct InterceptorChain {
         self.interceptors = interceptors.map { initialize in initialize(config) }
     }
 
+    /// Create a set of closures configured with all interceptors for a unary API.
+    ///
+    /// NOTE: Interceptors are invoked in FIFO order for the request path, and in LIFO order for
+    /// the response path. For example, with interceptors `[a, b, c]`:
+    /// `caller -> a -> b -> c -> server`
+    /// `caller <- c <- b <- a <- server`
+    ///
+    /// - returns: A set of closures that each invoke the chain of interceptors in the above order.
     func unaryFunction() -> UnaryFunction {
         let interceptors = self.interceptors.lazy.map { $0.unaryFunction() }
         return UnaryFunction(
@@ -24,6 +32,14 @@ struct InterceptorChain {
         )
     }
 
+    /// Create a set of closures configured with all interceptors for a stream.
+    ///
+    /// NOTE: Interceptors are invoked in FIFO order for the request path, and in LIFO order for
+    /// the response path. For example, with interceptors `[a, b, c]`:
+    /// `caller -> a -> b -> c -> server`
+    /// `caller <- c <- b <- a <- server`
+    ///
+    /// - returns: A set of closures that each invoke the chain of interceptors in the above order.
     func streamFunction() -> StreamFunction {
         let interceptors = self.interceptors.lazy.map { $0.streamFunction() }
         return StreamFunction(
