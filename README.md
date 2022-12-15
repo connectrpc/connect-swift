@@ -137,7 +137,7 @@ make build-connect-plugin
 
 ## Run Connect crosstests & test service
 
-A test service is used to run crosstests
+A test service is used to run [crosstests](./tests)
 (integration tests which validate the behavior of the `Connect` library with
 various protocols).
 
@@ -162,13 +162,13 @@ starting the service:
 
 ```sh
 cd connect-crosstest
-git apply ../crosstests/local.patch
+git apply ../tests/crosstests-local.patch
 go build -o testserver cmd/serverconnect/main.go
 ./testserver --h1port=8080 --h2port=8081
 ```
 
 **You'll then need to change `http` to `https` in
-[`Crosstests.swift`](./crosstests/Crosstests.swift).**
+[`Crosstests.swift`](./tests/Crosstests.swift).**
 
 Finally, run the crosstests:
 

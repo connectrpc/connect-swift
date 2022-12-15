@@ -3,6 +3,12 @@
 struct InterceptorChain {
     private let interceptors: [Interceptor]
 
+    /// Initialize the interceptor chain.
+    ///
+    /// NOTE: Exactly 1 chain is expected to be instantiated for a single request/stream.
+    ///
+    /// - parameter interceptors: Closures that should be called to create interceptors.
+    /// - parameter config: Config to use for setting up interceptors.
     init(
         interceptors: [(ProtocolClientConfig) -> Interceptor], config: ProtocolClientConfig
     ) {
