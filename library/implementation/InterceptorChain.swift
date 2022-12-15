@@ -1,7 +1,5 @@
-/// Represents a chain of interceptors that is used for a single request.
-/// Matches the Go implementation in that the chain itself is represented as an interceptor
-/// that invokes other interceptors:
-/// https://github.com/bufbuild/connect-go/blob/main/interceptor.go
+/// Represents a chain of interceptors that is used for a single request/stream,
+/// and orchestrates invoking each of them as needed.
 struct InterceptorChain {
     private let interceptors: [Interceptor]
 
