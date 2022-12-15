@@ -41,7 +41,10 @@ let package = Package(
                 "GeneratedExamples",
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "crosstests"
+            path: "crosstests",
+            exclude: [
+                "local.patch",
+            ]
         ),
         .target(
             name: "GeneratedExamples",
