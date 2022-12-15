@@ -24,7 +24,7 @@ private struct ConnectInterceptor {
 }
 
 extension ConnectInterceptor: Interceptor {
-    func wrapUnary(nextUnary: UnaryFunction) -> UnaryFunction {
+    func wrapUnary() -> UnaryFunction {
         return UnaryFunction(
             requestFunction: { request in
                 var headers = request.headers
@@ -95,7 +95,7 @@ extension ConnectInterceptor: Interceptor {
         )
     }
 
-    func wrapStream(nextStream: StreamingFunction) -> StreamingFunction {
+    func wrapStream() -> StreamingFunction {
         var responseHeaders: Headers?
         return StreamingFunction(
             requestFunction: { request in

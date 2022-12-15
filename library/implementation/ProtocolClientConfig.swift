@@ -49,13 +49,7 @@ extension ProtocolClientConfig {
         return self.compressionPools.keys.filter { $0 != IdentityCompressionPool.name() }
     }
 
-    func createUnaryInterceptorChain() -> UnaryFunction {
+    func createInterceptorChain() -> InterceptorChain {
         return InterceptorChain(interceptors: self.interceptors, config: self)
-            .wrapUnary(nextUnary: .identity())
-    }
-
-    func createStreamingInterceptorChain() -> StreamingFunction {
-        return InterceptorChain(interceptors: self.interceptors, config: self)
-            .wrapStream(nextStream: .identity())
     }
 }

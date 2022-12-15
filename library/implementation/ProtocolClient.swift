@@ -55,7 +55,7 @@ extension ProtocolClient: ProtocolClientInterface {
             return Cancelable(cancel: {})
         }
 
-        let chain = self.config.createUnaryInterceptorChain()
+        let chain = self.config.createInterceptorChain().wrapUnary()
         let url = URL(string: path, relativeTo: URL(string: self.config.target))!
         let request = chain.requestFunction(HTTPRequest(
             target: url,
@@ -158,7 +158,7 @@ extension ProtocolClient: ProtocolClientInterface {
         onResult: @escaping (StreamResult<Output>) -> Void
     ) -> BidirectionalStream<Input> {
         let codec = self.config.codec
-        let chain = self.config.createStreamingInterceptorChain()
+        let chain = self.config.createInterceptorChain().wrapStream()
         let url = URL(string: path, relativeTo: URL(string: self.config.target))!
         let request = chain.requestFunction(HTTPRequest(
             target: url,

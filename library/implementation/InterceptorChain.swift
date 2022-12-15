@@ -13,32 +13,39 @@ struct InterceptorChain {
             .reversed()
             .map { initialize in initialize(config) }
     }
+
+    func wrapUnary() -> UnaryFunction {
+        let interceptors = self.interceptors.map { $0.wrapUnary() }
+        return UnaryFunction(
+            requestFunction: { request in
+                return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
+            },
+            responseFunction: { response in
+                return executeInterceptors(interceptors.map(\.responseFunction), initial: response)
+            }
+        )
+    }
+
+    func wrapStream() -> StreamingFunction {
+        let interceptors = self.interceptors.map { $0.wrapStream() }
+        return StreamingFunction(
+            requestFunction: { request in
+                return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
+            },
+            requestDataFunction: { data in
+                return executeInterceptors(interceptors.map(\.requestDataFunction), initial: data)
+            },
+            streamResultFunc: { result in
+                return executeInterceptors(interceptors.map(\.streamResultFunc), initial: result)
+            }
+        )
+    }
 }
 
-extension InterceptorChain: Interceptor {
-    func wrapUnary(nextUnary: UnaryFunction) -> UnaryFunction {
-        if self.interceptors.isEmpty {
-            return nextUnary
-        }
-
-        var nextCall = nextUnary
-        for interceptor in self.interceptors {
-            nextCall = interceptor.wrapUnary(nextUnary: nextCall)
-        }
-
-        return nextCall
+private func executeInterceptors<T>(_ interceptors: [(T) -> T], initial: T) -> T {
+    var next = initial
+    for interceptor in interceptors {
+        next = interceptor(next)
     }
-
-    func wrapStream(nextStream: StreamingFunction) -> StreamingFunction {
-        if self.interceptors.isEmpty {
-            return nextStream
-        }
-
-        var nextCall = nextStream
-        for interceptor in self.interceptors {
-            nextCall = interceptor.wrapStream(nextStream: nextCall)
-        }
-
-        return nextCall
-    }
+    return next
 }
