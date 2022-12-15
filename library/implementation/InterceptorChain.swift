@@ -6,26 +6,26 @@ struct InterceptorChain {
     init(
         interceptors: [(ProtocolClientConfig) -> Interceptor], config: ProtocolClientConfig
     ) {
-        // Reverse the interceptor order up front to avoid reversing multiple times later.
-        self.interceptors = interceptors
-            .reversed()
-            .map { initialize in initialize(config) }
+        self.interceptors = interceptors.map { initialize in initialize(config) }
     }
 
     func unaryFunction() -> UnaryFunction {
-        let interceptors = self.interceptors.map { $0.unaryFunction() }
+        let interceptors = self.interceptors.lazy.map { $0.unaryFunction() }
         return UnaryFunction(
             requestFunction: { request in
                 return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
             },
             responseFunction: { response in
-                return executeInterceptors(interceptors.map(\.responseFunction), initial: response)
+                return executeInterceptors(
+                    interceptors.reversed().map(\.responseFunction),
+                    initial: response
+                )
             }
         )
     }
 
     func streamFunction() -> StreamFunction {
-        let interceptors = self.interceptors.map { $0.streamFunction() }
+        let interceptors = self.interceptors.lazy.map { $0.streamFunction() }
         return StreamFunction(
             requestFunction: { request in
                 return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
@@ -34,7 +34,10 @@ struct InterceptorChain {
                 return executeInterceptors(interceptors.map(\.requestDataFunction), initial: data)
             },
             streamResultFunc: { result in
-                return executeInterceptors(interceptors.map(\.streamResultFunc), initial: result)
+                return executeInterceptors(
+                    interceptors.reversed().map(\.streamResultFunc),
+                    initial: result
+                )
             }
         )
     }
