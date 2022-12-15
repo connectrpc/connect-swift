@@ -22,7 +22,7 @@ private struct GRPCWebInterceptor {
 }
 
 extension GRPCWebInterceptor: Interceptor {
-    func wrapUnary(nextUnary: UnaryFunction) -> UnaryFunction {
+    func unaryFunction() -> UnaryFunction {
         return UnaryFunction(
             requestFunction: { request in
                 // GRPC unary payloads are enveloped.
@@ -105,9 +105,9 @@ extension GRPCWebInterceptor: Interceptor {
         )
     }
 
-    func wrapStream(nextStream: StreamingFunction) -> StreamingFunction {
+    func streamFunction() -> StreamFunction {
         var responseHeaders: Headers?
-        return StreamingFunction(
+        return StreamFunction(
             requestFunction: { request in
                 return HTTPRequest(
                     target: request.target,

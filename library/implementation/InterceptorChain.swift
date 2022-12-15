@@ -1,7 +1,5 @@
-/// Represents a chain of interceptors that is used for a single request.
-/// Matches the Go implementation in that the chain itself is represented as an interceptor
-/// that invokes other interceptors:
-/// https://github.com/bufbuild/connect-go/blob/main/interceptor.go
+/// Represents a chain of interceptors that is used for a single request/stream,
+/// and orchestrates invoking each of them as needed.
 struct InterceptorChain {
     private let interceptors: [Interceptor]
 
@@ -13,32 +11,39 @@ struct InterceptorChain {
             .reversed()
             .map { initialize in initialize(config) }
     }
+
+    func unaryFunction() -> UnaryFunction {
+        let interceptors = self.interceptors.map { $0.unaryFunction() }
+        return UnaryFunction(
+            requestFunction: { request in
+                return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
+            },
+            responseFunction: { response in
+                return executeInterceptors(interceptors.map(\.responseFunction), initial: response)
+            }
+        )
+    }
+
+    func streamFunction() -> StreamFunction {
+        let interceptors = self.interceptors.map { $0.streamFunction() }
+        return StreamFunction(
+            requestFunction: { request in
+                return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
+            },
+            requestDataFunction: { data in
+                return executeInterceptors(interceptors.map(\.requestDataFunction), initial: data)
+            },
+            streamResultFunc: { result in
+                return executeInterceptors(interceptors.map(\.streamResultFunc), initial: result)
+            }
+        )
+    }
 }
 
-extension InterceptorChain: Interceptor {
-    func wrapUnary(nextUnary: UnaryFunction) -> UnaryFunction {
-        if self.interceptors.isEmpty {
-            return nextUnary
-        }
-
-        var nextCall = nextUnary
-        for interceptor in self.interceptors {
-            nextCall = interceptor.wrapUnary(nextUnary: nextCall)
-        }
-
-        return nextCall
+private func executeInterceptors<T>(_ interceptors: [(T) -> T], initial: T) -> T {
+    var next = initial
+    for interceptor in interceptors {
+        next = interceptor(next)
     }
-
-    func wrapStream(nextStream: StreamingFunction) -> StreamingFunction {
-        if self.interceptors.isEmpty {
-            return nextStream
-        }
-
-        var nextCall = nextStream
-        for interceptor in self.interceptors {
-            nextCall = interceptor.wrapStream(nextStream: nextCall)
-        }
-
-        return nextCall
-    }
+    return next
 }

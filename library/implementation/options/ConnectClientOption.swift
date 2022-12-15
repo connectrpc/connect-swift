@@ -24,7 +24,7 @@ private struct ConnectInterceptor {
 }
 
 extension ConnectInterceptor: Interceptor {
-    func wrapUnary(nextUnary: UnaryFunction) -> UnaryFunction {
+    func unaryFunction() -> UnaryFunction {
         return UnaryFunction(
             requestFunction: { request in
                 var headers = request.headers
@@ -95,9 +95,9 @@ extension ConnectInterceptor: Interceptor {
         )
     }
 
-    func wrapStream(nextStream: StreamingFunction) -> StreamingFunction {
+    func streamFunction() -> StreamFunction {
         var responseHeaders: Headers?
-        return StreamingFunction(
+        return StreamFunction(
             requestFunction: { request in
                 var headers = request.headers
                 headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
