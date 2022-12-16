@@ -190,6 +190,13 @@ private extension Headers {
         headers[HeaderConstants.grpcContentEncoding] = config.requestCompressionPool()
             .map { [type(of: $0).name()] }
         headers[HeaderConstants.grpcTE] = ["trailers"]
+
+        // Note that we do not comply with the recommended structure for user-agent:
+        // https://github.com/grpc/grpc/blob/v1.51.1/doc/PROTOCOL-HTTP2.md#user-agents
+        // But this behavior matches connect-web:
+        // https://github.com/bufbuild/connect-web/blob/v0.4.0/packages/connect-core/src/grpc-web-create-request-header.ts#L33-L36
+        // swiftlint:disable:previous line_length
+        headers[HeaderConstants.xUserAgent] = ["@bufbuild/connect-swift"]
         return headers
     }
 }

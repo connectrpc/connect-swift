@@ -8,6 +8,8 @@ public enum HeaderConstants {
     public static let connectStreamingAcceptEncoding = "connect-accept-encoding"
     public static let connectStreamingContentEncoding = "connect-content-encoding"
 
+    public static let xUserAgent = "x-user-agent"
+
     public static let grpcAcceptEncoding = "grpc-accept-encoding"
     public static let grpcContentEncoding = "grpc-encoding"
     public static let grpcMessage = "grpc-message"
