@@ -1,4 +1,4 @@
-name: crosstests
+name: tests
 
 on:
   push:
@@ -17,9 +17,9 @@ jobs:
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
-      - name: Start test server
+      - name: Start crosstest server
         run: make cross-test-server-run
-      - name: Run crosstests
+      - name: Run tests
         run: swift test
-      - name: Stop test server
+      - name: Stop crosstest server
         run: make cross-test-server-stop

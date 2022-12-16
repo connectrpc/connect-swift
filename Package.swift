@@ -35,15 +35,15 @@ let package = Package(
             path: "library"
         ),
         .testTarget(
-            name: "ConnectCrosstests",
+            name: "ConnectTests",
             dependencies: [
                 "Connect",
                 "GeneratedExamples",
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "crosstests",
+            path: "tests",
             exclude: [
-                "local.patch",
+                "crosstests-local.patch",
             ]
         ),
         .target(

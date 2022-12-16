@@ -3,15 +3,26 @@
 struct InterceptorChain {
     private let interceptors: [Interceptor]
 
+    /// Initialize the interceptor chain.
+    ///
+    /// NOTE: Exactly 1 chain is expected to be instantiated for a single request/stream.
+    ///
+    /// - parameter interceptors: Closures that should be called to create interceptors.
+    /// - parameter config: Config to use for setting up interceptors.
     init(
         interceptors: [(ProtocolClientConfig) -> Interceptor], config: ProtocolClientConfig
     ) {
-        // Reverse the interceptor order up front to avoid reversing multiple times later.
-        self.interceptors = interceptors
-            .reversed()
-            .map { initialize in initialize(config) }
+        self.interceptors = interceptors.map { initialize in initialize(config) }
     }
 
+    /// Create a set of closures configured with all interceptors for a unary API.
+    ///
+    /// NOTE: Interceptors are invoked in FIFO order for the request path, and in LIFO order for
+    /// the response path. For example, with interceptors `[a, b, c]`:
+    /// `caller -> a -> b -> c -> server`
+    /// `caller <- c <- b <- a <- server`
+    ///
+    /// - returns: A set of closures that each invoke the chain of interceptors in the above order.
     func unaryFunction() -> UnaryFunction {
         let interceptors = self.interceptors.map { $0.unaryFunction() }
         return UnaryFunction(
@@ -19,11 +30,22 @@ struct InterceptorChain {
                 return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
             },
             responseFunction: { response in
-                return executeInterceptors(interceptors.map(\.responseFunction), initial: response)
+                return executeInterceptors(
+                    interceptors.reversed().map(\.responseFunction),
+                    initial: response
+                )
             }
         )
     }
 
+    /// Create a set of closures configured with all interceptors for a stream.
+    ///
+    /// NOTE: Interceptors are invoked in FIFO order for the request path, and in LIFO order for
+    /// the response path. For example, with interceptors `[a, b, c]`:
+    /// `caller -> a -> b -> c -> server`
+    /// `caller <- c <- b <- a <- server`
+    ///
+    /// - returns: A set of closures that each invoke the chain of interceptors in the above order.
     func streamFunction() -> StreamFunction {
         let interceptors = self.interceptors.map { $0.streamFunction() }
         return StreamFunction(
@@ -34,7 +56,10 @@ struct InterceptorChain {
                 return executeInterceptors(interceptors.map(\.requestDataFunction), initial: data)
             },
             streamResultFunc: { result in
-                return executeInterceptors(interceptors.map(\.streamResultFunc), initial: result)
+                return executeInterceptors(
+                    interceptors.reversed().map(\.streamResultFunc),
+                    initial: result
+                )
             }
         )
     }
