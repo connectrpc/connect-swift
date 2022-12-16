@@ -26,10 +26,28 @@ public protocol Interceptor {
 public struct UnaryFunction {
     public let requestFunction: (HTTPRequest) -> HTTPRequest
     public let responseFunction: (HTTPResponse) -> HTTPResponse
+
+    public init(
+        requestFunction: @escaping (HTTPRequest) -> HTTPRequest,
+        responseFunction: @escaping (HTTPResponse) -> HTTPResponse
+    ) {
+        self.requestFunction = requestFunction
+        self.responseFunction = responseFunction
+    }
 }
 
 public struct StreamFunction {
     public let requestFunction: (HTTPRequest) -> HTTPRequest
     public let requestDataFunction: (Data) -> Data
     public let streamResultFunc: (StreamResult<Data>) -> StreamResult<Data>
+
+    public init(
+        requestFunction: @escaping (HTTPRequest) -> HTTPRequest,
+        requestDataFunction: @escaping (Data) -> Data,
+        streamResultFunc: @escaping (StreamResult<Data>) -> StreamResult<Data>
+    ) {
+        self.requestFunction = requestFunction
+        self.requestDataFunction = requestDataFunction
+        self.streamResultFunc = streamResultFunc
+    }
 }

@@ -6,6 +6,7 @@
   * [Integrate with CocoaPods](#integrate-with-cocoapods)
 - [Examples](#examples)
   * [Build and run example apps](#build-and-run-example-apps)
+  * [Writing an interceptor](#writing-an-interceptor)
 - [Contributing](#contributing)
   * [Development setup](#development-setup)
   * [Swift development](#swift-development)
@@ -80,6 +81,65 @@ Tests and example apps depend on outputs in `./gen`.
 
 Example apps are available in
 [`./examples`](./examples), and can be opened and built using Xcode.
+
+## Writing an interceptor
+
+Interceptors are a powerful way to observe and mutate outbound and inbound
+headers, data, trailers, and errors both for unary APIs and streams.
+
+An interceptor is instantiated once per request, and provides a set of
+closures that are invoked by the client during the lifecycle of that request.
+Each closure provides the ability for the interceptor to observe and store
+state, as well as the option to mutate the outbound or inbound content.
+
+For example, here is an interceptor that adds an `Authorization` header to
+all outbound requests to `demo.connect.build`:
+
+```swift
+import Connect
+
+/// Interceptor that adds an `Authorization` header to outbound
+/// requests to `demo.connect.build`.
+struct ExampleAuthInterceptor: Interceptor {
+    init(config: ProtocolClientConfig) {...}
+
+    func unaryFunction() -> UnaryFunction {
+        return UnaryFunction(
+            requestFunction: { request in
+                if request.target.host != "demo.connect.build" {
+                    return request
+                }
+
+                var headers = request.headers
+                headers["Authorization"] = ["SOME_USER_TOKEN"]
+                return HTTPRequest(
+                    target: request.target,
+                    contentType: request.contentType,
+                    headers: headers,
+                    message: request.message
+                )
+            },
+            responseFunction: { $0 } // Return the response as-is
+        )
+    }
+
+    func streamFunction() -> StreamFunction {
+        return StreamFunction(...)
+    }
+}
+```
+
+Interceptor(s) are then registered with the `ProtocolClient` on initialization:
+
+```swift
+let client = ProtocolClient(
+    target: "https://demo.connect.build",
+    httpClient: URLSessionHTTPClient(),
+    ProtoClientOption(),
+    ConnectClientOption(),
+    InterceptorsOption(interceptors: [ExampleAuthInterceptor.init])
+)
+```
 
 # Contributing
 

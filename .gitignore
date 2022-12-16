@@ -5,6 +5,8 @@
 *.xcuserdatad
 *.xcuserstate
 
+DerivedData
+
 /.swiftpm
 /protoc-gen-connect-swift/protoc-gen-connect-swift
 /vendor

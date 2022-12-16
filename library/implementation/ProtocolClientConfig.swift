@@ -3,13 +3,13 @@ import Foundation
 /// Set of configuration (usually modified through `ClientOption` types) used to set up clients.
 public struct ProtocolClientConfig {
     /// The target host (e.g., https://buf.build).
-    let target: String
-    let httpClient: HTTPClientInterface
-    let compressionMinBytes: Int?
-    let compressionName: String?
-    let codec: Codec
-    let interceptors: [(ProtocolClientConfig) -> Interceptor]
-    let compressionPools: [String: CompressionPool]
+    public let target: String
+    public let httpClient: HTTPClientInterface
+    public let compressionMinBytes: Int?
+    public let compressionName: String?
+    public let codec: Codec
+    public let interceptors: [(ProtocolClientConfig) -> Interceptor]
+    public let compressionPools: [String: CompressionPool]
 
     public func clone(
         compressionMinBytes: Int? = nil,
