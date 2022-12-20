@@ -9,15 +9,20 @@ let package = Package(
         .macOS(.v10_14),
     ],
     products: [
-        // Primary library for consumers to use
+        // Primary library for consumers to use.
         .library(
             name: "Connect",
             targets: ["Connect"]
         ),
-        // Library used by example apps within this repository
+        // Library used by example apps within this repository.
         .library(
             name: "GeneratedExamples",
             targets: ["GeneratedExamples"]
+        ),
+        // Generator executable for Connect RPCs.
+        .executable(
+            name: "protoc-gen-connect-swift",
+            targets: ["protoc-gen-connect-swift"]
         ),
     ],
     dependencies: [
@@ -53,6 +58,13 @@ let package = Package(
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
             path: "gen"
+        ),
+        .executableTarget(
+            name: "protoc-gen-connect-swift",
+            dependencies: [
+                .product(name: "SwiftProtobufPluginLibrary", package: "swift-protobuf"),
+            ],
+            path: "protoc-gen-connect-swift"
         ),
     ],
     swiftLanguageVersions: [.v5]
