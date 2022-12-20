@@ -50,6 +50,7 @@ private enum CommandLineParameter: String {
     }
 }
 
+/// A set of options that are used to customize generator outputs.
 struct GeneratorOptions {
     private(set) var extraModuleImports = [String]()
     private(set) var keepMethodCasing = false
