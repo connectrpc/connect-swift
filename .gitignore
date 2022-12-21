@@ -8,8 +8,7 @@
 DerivedData
 
 /.swiftpm
-/protoc-gen-connect-swift/protoc-gen-connect-swift
-/vendor
+/plugins
 
 # buf set up requires a github token to prevent a rate limit.
 # TODO: We're currently checking in generated code to side-step this problem.

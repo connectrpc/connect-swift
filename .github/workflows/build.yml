@@ -8,18 +8,17 @@ on:
 
 jobs:
   connect-plugin:
-    runs-on: ubuntu-latest
+    runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
-      - uses: actions/setup-go@v3
 # buf set up requires a github token to prevent a rate limit.
 # TODO: We're currently checking in generated code to side-step this problem.
 #      - uses: bufbuild/buf-setup-action@v1.8.0
 #        with:
 #          buf_token: ${{ secrets.BSR_TEST_TOKEN }}
-      - name: Build Connect plugin
+      - name: Build connect-swift plugin
         run: make build-connect-plugin
 #      - name: Generate
 #        run: make generate
@@ -33,7 +32,7 @@ jobs:
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
-      - name: Build Connect Swift library
+      - name: Build Connect library
         run: swift build
 
   eliza-example:

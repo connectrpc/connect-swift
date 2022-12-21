@@ -7,6 +7,9 @@ import XCTest
 
 private let kTimeout = TimeInterval(5)
 
+private typealias TestServiceClient = Grpc_Testing_TestServiceClient
+private typealias UnimplementedServiceClient = Grpc_Testing_UnimplementedServiceClient
+
 private final class CrosstestClients {
     let connectJSONClient: ProtocolClient
     let connectProtoClient: ProtocolClient
