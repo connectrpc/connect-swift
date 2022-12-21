@@ -16,5 +16,5 @@ plugins:
   # TODO: Replace this with an official BSR plugin once open-sourced.
   # To use the remote plugin instead of the local one:
   # - remote: buf.build/mrebello/plugins/connect-swift
-  #   opt: Visibility=Public # See "custom configuration" section in docs below
+  #   opt: Visibility=Public # See "custom configuration" section in docs
   #   out: gen/proto/connect-swift
