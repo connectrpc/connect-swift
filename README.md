@@ -39,10 +39,10 @@ managed:
 plugins:
   - plugin: buf.build/apple/swift
     opt: Visibility=Public
-    out: gen/proto/swift-protobuf
+    out: gen/proto/swift-protobuf # Or your target output directory
   - remote: buf.build/mrebello/plugins/connect-swift
     opt: Visibility=Public # See "custom configuration" section in docs below
-    out: gen/proto/connect-swift
+    out: gen/proto/connect-swift # Or your target output directory
 ```
 
 3. Add a `buf.work.yaml` file to your project which specifies the input directories for your `.proto` files:
@@ -60,8 +60,8 @@ directories:
 We generally try to support the
 [same generator options that SwiftProtobuf supports](https://github.com/apple/swift-protobuf/blob/master/Documentation/PLUGIN.md)
 such as `Visibility`, `ProtoPathModuleMappings`, etc.
-when it makes sense to do so. Additionally, there are other options that may be specified
-which are specific to the `protoc-gen-connect-swift` plugin.
+when it makes sense to do so. Additionally, there are other options which may be specified
+that are specific to the `protoc-gen-connect-swift` plugin.
 
 **Supported SwiftProtobuf options:**
 

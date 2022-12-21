@@ -46,7 +46,9 @@ final class ConnectGenerator {
     }
 
     private func printLine(_ line: String = "") {
-        self.printer.print(line)
+        if !line.isEmpty {
+            self.printer.print(line)
+        }
         self.printer.print("\n")
     }
 
