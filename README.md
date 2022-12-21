@@ -11,7 +11,6 @@
   * [Development setup](#development-setup)
   * [Swift development](#swift-development)
   * [Generate code from protos](#generate-code-from-protos)
-  * [Go development](#go-development)
 - [Tests](#tests)
   * [Run Connect crosstests & test service](#run-connect-crosstests--test-service)
     + [Using Docker](#using-docker)
@@ -37,10 +36,11 @@ managed:
 plugins:
   - plugin: buf.build/apple/swift
     opt: Visibility=Public
-    out: gen/proto/swift-protobuf # Or your target output directory
-  - remote: buf.build/mrebello/plugins/connect-swift
-    out: gen/proto/connectswift # Or your target output directory
-
+    out: gen/proto/swift-protobuf
+  - name: connect-swift
+    opt: Visibility=Public # See "custom configuration" section in docs below
+    out: gen/proto/connect-swift
+    path: ./plugins/protoc-gen-connect-swift
 ```
 
 3. Add a `buf.work.yaml` file to your project which specifies the input directories for your `.proto` files:
@@ -52,6 +52,26 @@ directories:
 
 4. Run `make generate` (or `buf generate`), and you should see the outputted files!
 5. Now that you have generated models + APIs from your `.proto` files, you'll need to integrate the runtime using one of the methods below.
+
+### Custom configuration
+
+We generally try to support the
+[same generator options that SwiftProtobuf supports](https://github.com/apple/swift-protobuf/blob/master/Documentation/PLUGIN.md)
+such as `Visibility`, `ProtoPathModuleMappings`, etc.
+when it makes sense to do so. Additionally, there are other options that may be specified
+which are specific to the `protoc-gen-connect-swift` plugin.
+
+**Currently supported SwiftProtobuf options:**
+
+- `FileNaming` - See [docs](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-filenaming---naming-of-generated-sources)
+- `ProtoPathModuleMappings` - See [docs](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-protopathmodulemappings---swift-module-names-for-proto-paths)
+- `Visibility` - See [docs](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-visibility---visibility-of-generated-types)
+
+**Additional options:**
+
+- `KeepMethodCasing` - If `true`, generated RPC function names will match the `rpc` specified in the `.proto` file (instead of being lower-camel-cased)
+- `ExtraModuleImports` - Allows for specifying additional modules that generated sources should import. May be specified multiple times
+- `SwiftProtobufModuleName` - Allows for overriding the `SwiftProtobuf` module name in `import` statements. Useful if the `SwiftProtobuf` dependency is being renamed in custom build configurations
 
 ## Integrate with Swift Package Manager
 
@@ -162,6 +182,33 @@ distribution. To open the project and start using it:
 - Click `Open...` and select the root `connect-swift` repo directory
 - Xcode will automatically read the [`Package.swift`](./Package.swift) file and open the project
 
+### Developing the library
+
+The Connect library's source code is available in the [`./library`](./library)
+directory.
+
+The easiest way to contribute to the library is to
+[open the Xcode project](#swift-development) and
+[run the tests](#tests) after making changes.
+
+### Developing the generator plugin
+
+The source code for the plugin that is used to generate Connect-compatible
+services and RPCs is in the
+[`./protoc-gen-connect-swift`](./protoc-gen-connect-swift) directory.
+
+The plugin utilizes the
+[`SwiftProtobufPluginLibrary`](https://github.com/apple/swift-protobuf/tree/main/Sources/SwiftProtobufPluginLibrary)
+module from SwiftProtobuf which provides types for interacting with the input
+`.proto` files and writing to `stdout`/`stderr` as expected by `protoc`.
+
+To build the connect-swift generator plugin, you can use Xcode or
+the following command:
+
+```sh
+make build-connect-plugin
+```
+
 ## Generate code from protos
 
 To build the plugin and run it against the [`./protos`](./protos) directory
@@ -173,25 +220,6 @@ make generate # Run buf generate - uses buf.gen.yaml
 ```
 
 Outputted code will be available in `./gen`.
-
-## Go development
-
-To make changes to the Go [plugin](./protoc-gen-connect-swift)
-that is used to generate code,
-ensure the required dependencies are installed:
-
-```sh
-go mod vendor
-```
-
-If you have issues with GoLand indexing dependencies correctly, you can try
-removing the `.idea` directory in the project directory and re-opening GoLand.
-
-To build the connect-swift generator plugin, you can use:
-
-```sh
-make build-connect-plugin
-```
 
 # Tests
 
@@ -214,7 +242,7 @@ swift test
 make cross-test-server-stop
 ```
 
-### Without Docker (and no SSL)
+### Without Docker (no SSL)
 
 Alternatively, you can run the local service without
 requiring a TLS certificate. This requires a patch to be applied before
