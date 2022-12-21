@@ -2,6 +2,7 @@
 
 - [Get started](#get-started)
   * [Set up code generation](#set-up-code-generation)
+    + [Custom configuration](#custom-configuration)
   * [Integrate with Swift Package Manager](#integrate-with-swift-package-manager)
   * [Integrate with CocoaPods](#integrate-with-cocoapods)
 - [Examples](#examples)
@@ -10,11 +11,13 @@
 - [Contributing](#contributing)
   * [Development setup](#development-setup)
   * [Swift development](#swift-development)
+    + [Developing the library](#developing-the-library)
+    + [Developing the generator plugin](#developing-the-generator-plugin)
   * [Generate code from protos](#generate-code-from-protos)
 - [Tests](#tests)
-  * [Run Connect crosstests & test service](#run-connect-crosstests--test-service)
+  * [Run Connect crosstests & test service](#run-connect-crosstests---test-service)
     + [Using Docker](#using-docker)
-    + [Without Docker (and no SSL)](#without-docker-and-no-ssl)
+    + [Without Docker (no SSL)](#without-docker--no-ssl-)
 
 # Get started
 
@@ -37,10 +40,9 @@ plugins:
   - plugin: buf.build/apple/swift
     opt: Visibility=Public
     out: gen/proto/swift-protobuf
-  - name: connect-swift
+  - remote: buf.build/mrebello/plugins/connect-swift
     opt: Visibility=Public # See "custom configuration" section in docs below
     out: gen/proto/connect-swift
-    path: ./plugins/protoc-gen-connect-swift
 ```
 
 3. Add a `buf.work.yaml` file to your project which specifies the input directories for your `.proto` files:
@@ -61,11 +63,11 @@ such as `Visibility`, `ProtoPathModuleMappings`, etc.
 when it makes sense to do so. Additionally, there are other options that may be specified
 which are specific to the `protoc-gen-connect-swift` plugin.
 
-**Currently supported SwiftProtobuf options:**
+**Supported SwiftProtobuf options:**
 
-- `FileNaming` - See [docs](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-filenaming---naming-of-generated-sources)
-- `ProtoPathModuleMappings` - See [docs](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-protopathmodulemappings---swift-module-names-for-proto-paths)
-- `Visibility` - See [docs](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-visibility---visibility-of-generated-types)
+- `FileNaming` - [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-filenaming---naming-of-generated-sources)
+- `ProtoPathModuleMappings` - [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-protopathmodulemappings---swift-module-names-for-proto-paths)
+- `Visibility` - [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-visibility---visibility-of-generated-types)
 
 **Additional options:**
 
@@ -202,7 +204,7 @@ The plugin utilizes the
 module from SwiftProtobuf which provides types for interacting with the input
 `.proto` files and writing to `stdout`/`stderr` as expected by `protoc`.
 
-To build the connect-swift generator plugin, you can use Xcode or
+To build the connect-swift generator plugin, use Xcode or
 the following command:
 
 ```sh
