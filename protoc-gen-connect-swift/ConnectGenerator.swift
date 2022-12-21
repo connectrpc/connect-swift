@@ -1,5 +1,6 @@
 import SwiftProtobufPluginLibrary
 
+/// Responsible for generating services and RPCs that are compatible with the Connect library.
 final class ConnectGenerator {
     private let descriptor: FileDescriptor
     private let namer: SwiftProtobufNamer
@@ -49,6 +50,13 @@ final class ConnectGenerator {
         self.printer.print("\n")
     }
 
+    private func printCommentsIfNeeded(for entity: ProvidesSourceCodeLocation) {
+        let comments = entity.protoSourceComments().trimmingCharacters(in: .whitespacesAndNewlines)
+        if !comments.isEmpty {
+            self.printLine(comments)
+        }
+    }
+
     // MARK: - Output content
 
     private func printContent() {
@@ -77,10 +85,7 @@ final class ConnectGenerator {
     }
 
     private func printService(_ service: ServiceDescriptor) {
-        let serviceComments = service.protoSourceComments()
-        if !serviceComments.isEmpty {
-            self.printLine(serviceComments)
-        }
+        self.printCommentsIfNeeded(for: service)
 
         let protocolName = service.protocolName(using: self.namer)
         self.printLine("\(self.visibility) protocol \(protocolName) {")
@@ -88,10 +93,7 @@ final class ConnectGenerator {
             for method in service.methods {
                 self.printLine()
 
-                let methodComments = method.protoSourceComments()
-                if !methodComments.isEmpty {
-                    self.printLine(methodComments)
-                }
+                self.printCommentsIfNeeded(for: method)
                 if !method.serverStreaming && !method.clientStreaming {
                     self.printLine("@discardableResult")
                 }
@@ -117,7 +119,22 @@ final class ConnectGenerator {
             }
             self.printLine("}")
 
-            
+            for method in service.methods {
+                self.printLine()
+                if !method.serverStreaming && !method.clientStreaming {
+                    self.printLine("@discardableResult")
+                }
+
+                self.printLine(
+                    "\(self.visibility) "
+                    + method.signature(using: namer, includeDefaults: true, options: self.options)
+                    + " {"
+                )
+                self.indent {
+                    self.printLine("return \(method.returnValue())")
+                }
+                self.printLine("}")
+            }
         }
         self.printLine("}")
     }
@@ -129,7 +146,7 @@ private extension ServiceDescriptor {
     }
 
     func implementationName(using namer: SwiftProtobufNamer) -> String {
-        let upperCamelName = NamingUtils.toUpperCamelCase(self.name)
+        let upperCamelName = NamingUtils.toUpperCamelCase(self.name) + "Client"
         if self.file.package.isEmpty {
             return upperCamelName
         } else {
@@ -148,9 +165,10 @@ private extension MethodDescriptor {
         let inputName = namer.fullName(message: self.inputType)
         let outputName = namer.fullName(message: self.outputType)
 
+        // Note that the method name is escaped to avoid using Swift keywords.
         if self.clientStreaming && self.serverStreaming {
             return """
-            func \(methodName)\
+            func `\(methodName)`\
             (headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
             onResult: @escaping (Connect.StreamResult<\(outputName)>) -> Void) \
             -> any Connect.BidirectionalStreamInterface<\(inputName)>
@@ -158,7 +176,7 @@ private extension MethodDescriptor {
 
         } else if self.serverStreaming {
             return """
-            func \(methodName)\
+            func `\(methodName)`\
             (headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
             onResult: @escaping (Connect.StreamResult<\(outputName)>) -> Void) \
             -> any Connect.ServerOnlyStreamInterface<\(inputName)>
@@ -166,7 +184,7 @@ private extension MethodDescriptor {
 
         } else if self.clientStreaming {
             return """
-            func \(methodName)\
+            func `\(methodName)`\
             (headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
             onResult: @escaping (Connect.StreamResult<\(outputName)>) -> Void) \
             -> any Connect.ClientOnlyStreamInterface<\(inputName)>
@@ -174,10 +192,41 @@ private extension MethodDescriptor {
 
         } else {
             return """
-            func \(methodName)\
+            func `\(methodName)`\
             (request: \(inputName), headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
             completion: @escaping (ResponseMessage<\(outputName)>) -> Void) \
             -> Connect.Cancelable
+            """
+        }
+    }
+
+    func returnValue() -> String {
+        let methodPath: String
+        if self.file.package.isEmpty {
+            methodPath = "\(self.service.name)/\(self.name)"
+        } else {
+            methodPath = "\(self.file.package).\(self.service.name)/\(self.name)"
+        }
+
+        if self.clientStreaming && self.serverStreaming {
+            return """
+            self.client.bidirectionalStream(\
+            path: "\(methodPath)", headers: headers, onResult: onResult)
+            """
+        } else if self.serverStreaming {
+            return """
+            self.client.serverOnlyStream(\
+            path: "\(methodPath)", headers: headers, onResult: onResult)
+            """
+        } else if self.clientStreaming {
+            return """
+            self.client.clientOnlyStream(\
+            path: "\(methodPath)", headers: headers, onResult: onResult)
+            """
+        } else {
+            return """
+            self.client.unary(\
+            path: "\(methodPath)", request: request, headers: headers, completion: completion)
             """
         }
     }

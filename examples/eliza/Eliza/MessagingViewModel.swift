@@ -28,7 +28,9 @@ protocol MessagingViewModel: ObservableObject {
 /// View model that uses unary requests for messaging.
 final class UnaryMessagingViewModel: MessagingViewModel {
     private let protocolClient: ProtocolClient
-    private lazy var elizaClient = ElizaServiceClient(client: self.protocolClient)
+    private lazy var elizaClient = Buf_Connect_Demo_Eliza_V1_ElizaServiceClient(
+        client: self.protocolClient
+    )
 
     @Published private(set) var messages = [Message]()
 
@@ -62,7 +64,9 @@ final class UnaryMessagingViewModel: MessagingViewModel {
 /// View model that uses bidirectional streaming for messaging.
 final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
     private let protocolClient: ProtocolClient
-    private lazy var elizaClient = ElizaServiceClient(client: self.protocolClient)
+    private lazy var elizaClient = Buf_Connect_Demo_Eliza_V1_ElizaServiceClient(
+        client: self.protocolClient
+    )
     private var elizaStream: (any BidirectionalStreamInterface<ConverseRequest>)?
 
     @Published private(set) var messages = [Message]()

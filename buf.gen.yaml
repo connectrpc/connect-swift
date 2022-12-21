@@ -9,10 +9,11 @@ plugins:
     opt: Visibility=Public
     out: gen/proto/swift-protobuf
   - name: connect-swift
-    out: gen/proto/connectswift
-    path: ./protoc-gen-connect-swift/protoc-gen-connect-swift
+    opt: Visibility=Public
+    out: gen/proto/connect-swift
+    path: ./plugins/protoc-gen-connect-swift
 
   # TODO: Replace this with an official BSR plugin once open-sourced.
   # To use the remote plugin instead of the local one:
   # - remote: buf.build/mrebello/plugins/connect-swift
-  #   out: gen/proto/connectswift
+  #   out: gen/proto/connect-swift
