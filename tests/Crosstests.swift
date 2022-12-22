@@ -16,8 +16,10 @@ private final class CrosstestClients {
     let grpcWebJSONClient: ProtocolClient
     let grpcWebProtoClient: ProtocolClient
 
-    init(timeout: TimeInterval) {
-        let httpClient = CrosstestHTTPClient(timeout: timeout)
+    init(timeout: TimeInterval, responseDelay: TimeInterval?) {
+        let httpClient = CrosstestHTTPClient(
+            timeout: timeout, delayAfterChallenge: responseDelay
+        )
         let target = "https://localhost:8081"
 
         self.connectJSONClient = ProtocolClient(
@@ -65,9 +67,10 @@ final class Crosstests: XCTestCase {
     private func executeTestWithClients(
         function: Selector = #function,
         timeout: TimeInterval = 60,
+        responseDelay: TimeInterval? = nil,
         runTestsWithClient: (TestServiceClient) throws -> Void
     ) rethrows {
-        let clients = CrosstestClients(timeout: timeout)
+        let clients = CrosstestClients(timeout: timeout, responseDelay: responseDelay)
 
         print("Running \(function) with Connect + JSON...")
         try runTestsWithClient(TestServiceClient(client: clients.connectJSONClient))
@@ -84,7 +87,7 @@ final class Crosstests: XCTestCase {
         function: Selector = #function,
         runTestsWithClient: (UnimplementedServiceClient) throws -> Void
     ) rethrows {
-        let clients = CrosstestClients(timeout: 60)
+        let clients = CrosstestClients(timeout: 60, responseDelay: nil)
 
         print("Running \(function) with Connect + JSON...")
         try runTestsWithClient(UnimplementedServiceClient(client: clients.connectJSONClient))
@@ -493,4 +496,142 @@ final class Crosstests: XCTestCase {
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
     }
+
+    func testCancelingUnaryAsyncBeforeTaskStarts() {
+        self.executeTestWithClients { client in
+            let expectation = self.expectation(description: "Receives canceled response")
+            let task = Task {
+                let response = await client.emptyCall(request: Grpc_Testing_Empty())
+                XCTAssertEqual(response.code, .canceled)
+                XCTAssertEqual(response.error?.code, .canceled)
+                expectation.fulfill()
+            }
+
+            task.cancel()
+
+            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+            XCTAssertTrue(task.isCancelled)
+        }
+    }
+
+    func testCancelingUnaryAsyncAfterTaskIsInFlight() {
+        self.executeTestWithClients(responseDelay: 5.0) { client in
+            let expectation = self.expectation(description: "Receives canceled response")
+            let task = Task {
+                let response = await client.emptyCall(request: Grpc_Testing_Empty())
+                XCTAssertEqual(response.code, .canceled)
+                XCTAssertEqual(response.error?.code, .canceled)
+                expectation.fulfill()
+            }
+
+            // Wait briefly before canceling the task to ensure that the task receives an explicit
+            // cancelation (see `withTaskCancellationHandler`).
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2), execute: task.cancel)
+
+            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+            XCTAssertTrue(task.isCancelled)
+        }
+    }
 }
+
+import SwiftProtobuf
+
+actor AsyncUnaryWrapper<Output: SwiftProtobuf.Message> {
+    private var cancelable: Cancelable?
+    private let sendUnary: (@escaping (_ completion: ResponseMessage<Output>) -> Void) -> Cancelable
+
+    init(sendUnary: @escaping (@escaping (_ completion: ResponseMessage<Output>) -> Void) -> Cancelable) {
+        self.sendUnary = sendUnary
+    }
+
+    func send() async -> ResponseMessage<Output> {
+        return await withTaskCancellationHandler(operation: {
+            return await withCheckedContinuation { continuation in
+                if Task.isCancelled {
+                    return continuation.resume(returning: .canceled())
+                }
+
+                self.cancelable = self.sendUnary { response in
+                    continuation.resume(returning: response)
+                }
+            }
+        }, onCancel: {
+            Task { await self.cancelable?.cancel() }
+        })
+    }
+}
+
+extension Grpc_Testing_TestServiceClient {
+    func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+        return await AsyncUnaryWrapper { self.emptyCall(request: request, headers: headers, completion: $0) }.send()
+    }
+}
+
+//actor Grpc_Testing_TestServiceAsyncClient {
+//    private var cancelable: Cancelable?
+//    private let client: Grpc_Testing_TestServiceClient
+//
+//    init(client: Grpc_Testing_TestServiceClient) {
+//        self.client = client
+//    }
+//
+//    func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+//        return await withTaskCancellationHandler(operation: {
+//            return await withCheckedContinuation { continuation in
+//                if Task.isCancelled {
+//                    return continuation.resume(returning: .canceled())
+//                }
+//
+//                self.cancelable = self.client.emptyCall(request: request, headers: headers, completion: { response in
+//                    continuation.resume(returning: response)
+//                })
+//            }
+//        }, onCancel: {
+//            Task { await self.cancelable?.cancel() }
+//        })
+//    }
+//}
+
+//extension Grpc_Testing_TestServiceClient {
+//    func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+//        let cancelable = AsyncCancelable()
+//        return await withTaskCancellationHandler(operation: {
+//            return await withCheckedContinuation { continuation in
+//                if Task.isCancelled {
+//                    return
+//                }
+//
+//                print("**sending")
+//                cancelable.cancel = self.emptyCall(request: request, headers: headers, completion: { response in
+//                    continuation.resume(returning: response)
+//                }).cancel
+//            }
+//        }, onCancel: {
+//            Task { await cancelable.cancel?() }
+//            print("**Canceling \(cancelable)")
+//        })
+//    }
+//}
+
+//extension Grpc_Testing_TestServiceClient {
+//    func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+//        let cancelable = AsyncCancelable()
+//        return await withTaskCancellationHandler(operation: {
+//            return await withCheckedContinuation { continuation in
+//                if Task.isCancelled {
+//                    return
+//                }
+//
+//                print("**sending")
+//                self.emptyCall(request: request, headers: headers, completion: { response in
+//                    continuation.resume(returning: response)
+//                })
+//            }
+//        }, onCancel: {
+//            Task {
+//                await cancelable.cancelable?.cancel()
+//                print("**Canceling \(cancelable)")
+//            }
+//        })
+//    }
+//}
