@@ -64,7 +64,7 @@ when it makes sense to do so. Additionally, there are other options which may be
 that are specific to the `protoc-gen-connect-swift` plugin.
 
 | **Option** | **Type** | **Default** | **Repeatable** | **Supported by SwiftProtobuf** | **Details** |
-|---|---|---|---|---|---|
+|:---:|:---:|:---:|:---:|:---:|:---|
 | `ExtraModuleImports` | String | None | Yes | No | Allows for specifying additional modules that generated Connect sources should import |
 | `FileNaming` | String | `FullPath` | No | Yes | [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-filenaming---naming-of-generated-sources) |
 | `IncludeAsyncAwait` | Bool | `false` | No | No | If `true`, generates RPC function calls that provide Swift `async`/`await` interfaces instead of closure-based callbacks |
