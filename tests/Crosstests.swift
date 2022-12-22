@@ -533,9 +533,3 @@ final class Crosstests: XCTestCase {
         }
     }
 }
-
-extension Grpc_Testing_TestServiceClient {
-    func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
-        return await AsyncUnaryWrapper { self.emptyCall(request: request, headers: headers, completion: $0) }.send()
-    }
-}

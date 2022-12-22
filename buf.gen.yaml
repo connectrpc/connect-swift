@@ -9,7 +9,7 @@ plugins:
     opt: Visibility=Public
     out: gen/proto/swift-protobuf
   - name: connect-swift
-    opt: Visibility=Public
+    opt: IncludeAsyncAwait=true,Visibility=Public
     out: gen/proto/connect-swift
     path: ./plugins/protoc-gen-connect-swift
 

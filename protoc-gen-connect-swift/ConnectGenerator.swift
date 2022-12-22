@@ -123,19 +123,63 @@ final class ConnectGenerator {
 
             for method in service.methods {
                 self.printLine()
-                if !method.serverStreaming && !method.clientStreaming {
-                    self.printLine("@discardableResult")
-                }
+                self.printMethodImplementation(for: method)
+            }
+        }
+        self.printLine("}")
 
-                self.printLine(
-                    "\(self.visibility) "
-                    + method.signature(using: namer, includeDefaults: true, options: self.options)
-                    + " {"
-                )
-                self.indent {
-                    self.printLine("return \(method.returnValue())")
-                }
-                self.printLine("}")
+        if self.options.includeAsyncAwait {
+            self.printLine()
+            self.printAsyncAwaitExtension(for: service)
+        }
+    }
+
+    private func printMethodImplementation(for method: MethodDescriptor) {
+        if !method.serverStreaming && !method.clientStreaming {
+            self.printLine("@discardableResult")
+        }
+
+        self.printLine(
+            "\(self.visibility) "
+            + method.signature(using: namer, includeDefaults: true, options: self.options)
+            + " {"
+        )
+        self.indent {
+            self.printLine("return \(method.returnValue())")
+        }
+        self.printLine("}")
+    }
+
+    private func printAsyncAwaitMethodImplementation(for method: MethodDescriptor) {
+        let methodName = method.name(using: self.options)
+        self.printLine(
+            """
+            \(self.visibility) func `\(methodName)`\
+            (request: \(self.namer.fullName(message: method.inputType)), \
+            headers: Connect.Headers = [:]) async \
+            -> ResponseMessage<\(self.namer.fullName(message: method.outputType))> {
+            """
+        )
+        self.indent {
+            self.printLine(
+                """
+                return await Connect.AsyncUnaryWrapper { \
+                self.\(methodName)(request: request, headers: headers, completion: $0) \
+                }.send()
+                """
+            )
+        }
+        self.printLine("}")
+    }
+
+    private func printAsyncAwaitExtension(for service: ServiceDescriptor) {
+        self.printLine()
+        self.printLine("extension \(service.protocolName(using: self.namer)) {")
+        self.indent {
+            // TODO: Add streaming extensions
+            for method in service.methods where !method.clientStreaming && !method.serverStreaming {
+                self.printLine()
+                self.printAsyncAwaitMethodImplementation(for: method)
             }
         }
         self.printLine("}")
@@ -158,12 +202,16 @@ private extension ServiceDescriptor {
 }
 
 private extension MethodDescriptor {
+    func name(using options: GeneratorOptions) -> String {
+        return options.keepMethodCasing
+            ? self.name
+            : NamingUtils.toLowerCamelCase(self.name)
+    }
+
     func signature(
         using namer: SwiftProtobufNamer, includeDefaults: Bool, options: GeneratorOptions
     ) -> String {
-        let methodName = options.keepMethodCasing
-            ? self.name
-            : NamingUtils.toLowerCamelCase(self.name)
+        let methodName = self.name(using: options)
         let inputName = namer.fullName(message: self.inputType)
         let outputName = namer.fullName(message: self.outputType)
 
