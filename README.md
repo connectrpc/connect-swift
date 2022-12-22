@@ -41,7 +41,7 @@ plugins:
     opt: Visibility=Public
     out: gen/proto/swift-protobuf # Or your target output directory
   - remote: buf.build/mrebello/plugins/connect-swift
-    opt: Visibility=Public # See "custom configuration" section in docs below
+    opt: IncludeAsyncAwait=true,Visibility=Public # See "custom configuration" section in docs below
     out: gen/proto/connect-swift # Or your target output directory
 ```
 

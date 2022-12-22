@@ -107,6 +107,11 @@ final class ConnectGenerator {
         }
         self.printLine("}")
 
+        if self.options.includeAsyncAwait {
+            self.printLine()
+            self.printAsyncAwaitProtocolExtension(for: service)
+        }
+
         self.printLine()
 
         let className = service.implementationName(using: self.namer)
@@ -127,11 +132,6 @@ final class ConnectGenerator {
             }
         }
         self.printLine("}")
-
-        if self.options.includeAsyncAwait {
-            self.printLine()
-            self.printAsyncAwaitExtension(for: service)
-        }
     }
 
     private func printMethodImplementation(for method: MethodDescriptor) {
@@ -172,7 +172,7 @@ final class ConnectGenerator {
         self.printLine("}")
     }
 
-    private func printAsyncAwaitExtension(for service: ServiceDescriptor) {
+    private func printAsyncAwaitProtocolExtension(for service: ServiceDescriptor) {
         self.printLine()
         self.printLine("extension \(service.protocolName(using: self.namer)) {")
         self.indent {

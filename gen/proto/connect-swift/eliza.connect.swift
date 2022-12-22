@@ -29,6 +29,14 @@ public protocol Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
     func `introduce`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest>
 }
 
+
+extension Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
+
+    public func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse> {
+        return await Connect.AsyncUnaryWrapper { self.say(request: request, headers: headers, completion: $0) }.send()
+    }
+}
+
 /// Concrete implementation of `Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface`.
 public final class Buf_Connect_Demo_Eliza_V1_ElizaServiceClient: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
     private let client: Connect.ProtocolClientInterface
@@ -48,13 +56,5 @@ public final class Buf_Connect_Demo_Eliza_V1_ElizaServiceClient: Buf_Connect_Dem
 
     public func `introduce`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest> {
         return self.client.serverOnlyStream(path: "buf.connect.demo.eliza.v1.ElizaService/Introduce", headers: headers, onResult: onResult)
-    }
-}
-
-
-extension Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
-
-    public func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse> {
-        return await Connect.AsyncUnaryWrapper { self.say(request: request, headers: headers, completion: $0) }.send()
     }
 }
