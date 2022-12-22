@@ -58,3 +58,27 @@ public final class Buf_Connect_Demo_Eliza_V1_ElizaServiceClient: Buf_Connect_Dem
         return self.client.serverOnlyStream(path: "buf.connect.demo.eliza.v1.ElizaService/Introduce", headers: headers, onResult: onResult)
     }
 }
+
+extension Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
+    public func `introduce`(headers: Connect.Headers = [:]) -> AsyncStream<Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>> {
+        let onResult = { (result: Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>) -> Void in
+            
+        }
+        let asyncStream = AsyncStream { continuation in
+
+            self.introduce(headers: headers) { result in
+                if Task.isCancelled {
+                    return
+                }
+                continuation.yield(result)
+                if case .complete = result {
+                    continuation.finish()
+                }
+            }
+        }
+    }
+}
+
+public struct AsyncStreamWrapper<Output: SwiftProtobuf.Message> {
+
+}
