@@ -1,9 +1,10 @@
-excluded:
-  - gen
-  - library/implementation/generated
 included:
-  - crosstests
-  - library
+  - Connect
+  - ConnectTests
+  - Examples/Eliza/Eliza
+  - protoc-gen-connect-swift
+excluded:
+  - Connect/Implementation/Generated
 disabled_rules:
   - cyclomatic_complexity
   - function_body_length
