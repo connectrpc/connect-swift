@@ -10,64 +10,17 @@ private let kTimeout = TimeInterval(5)
 private typealias TestServiceClient = Grpc_Testing_TestServiceClient
 private typealias UnimplementedServiceClient = Grpc_Testing_UnimplementedServiceClient
 
-private final class CrosstestClients {
-    let connectJSONClient: ProtocolClient
-    let connectProtoClient: ProtocolClient
-    let grpcWebJSONClient: ProtocolClient
-    let grpcWebProtoClient: ProtocolClient
-
-    init(timeout: TimeInterval) {
-        let httpClient = CrosstestHTTPClient(timeout: timeout)
-        let target = "https://localhost:8081"
-
-        self.connectJSONClient = ProtocolClient(
-            target: target,
-            httpClient: httpClient,
-            ConnectClientOption(),
-            JSONClientOption(),
-            GzipRequestOption(),
-            CompressionMinBytesRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption()
-        )
-        self.connectProtoClient = ProtocolClient(
-            target: target,
-            httpClient: httpClient,
-            ConnectClientOption(),
-            ProtoClientOption(),
-            GzipRequestOption(),
-            CompressionMinBytesRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption()
-        )
-        self.grpcWebJSONClient = ProtocolClient(
-            target: target,
-            httpClient: httpClient,
-            GRPCWebClientOption(),
-            JSONClientOption(),
-            GzipRequestOption(),
-            CompressionMinBytesRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption()
-        )
-        self.grpcWebProtoClient = ProtocolClient(
-            target: target,
-            httpClient: httpClient,
-            GRPCWebClientOption(),
-            ProtoClientOption(),
-            GzipRequestOption(),
-            CompressionMinBytesRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption()
-        )
-    }
-}
-
 /// This test suite runs against multiple protocols and serialization formats.
 /// Tests are based on https://github.com/bufbuild/connect-crosstest
-final class Crosstests: XCTestCase {
+///
+/// Tests are written using callback APIs.
+final class CallbackCrosstests: XCTestCase {
     private func executeTestWithClients(
         function: Selector = #function,
         timeout: TimeInterval = 60,
         runTestsWithClient: (TestServiceClient) throws -> Void
     ) rethrows {
-        let clients = CrosstestClients(timeout: timeout)
+        let clients = CrosstestClients(timeout: timeout, responseDelay: nil)
 
         print("Running \(function) with Connect + JSON...")
         try runTestsWithClient(TestServiceClient(client: clients.connectJSONClient))
@@ -84,7 +37,7 @@ final class Crosstests: XCTestCase {
         function: Selector = #function,
         runTestsWithClient: (UnimplementedServiceClient) throws -> Void
     ) rethrows {
-        let clients = CrosstestClients(timeout: 60)
+        let clients = CrosstestClients(timeout: 60, responseDelay: nil)
 
         print("Running \(function) with Connect + JSON...")
         try runTestsWithClient(UnimplementedServiceClient(client: clients.connectJSONClient))

@@ -13,13 +13,13 @@ private typealias SayResponse = Buf_Connect_Demo_Eliza_V1_SayResponse
 /// View model that can be injected into a `MessagingView`.
 protocol MessagingViewModel: ObservableObject {
     /// The current set of messages. Observable by storing the view model as an `@ObservedObject`.
-    var messages: [Message] { get }
+    @MainActor var messages: [Message] { get }
 
     /// Send a message to the upstream service.
     /// This message and any responses will be appended to `messages`.
     ///
     /// - parameter message: The message to send.
-    func send(_ message: String)
+    func send(_ message: String) async
 
     /// End the chat session (and close connections if needed).
     func endChat()
@@ -32,7 +32,7 @@ final class UnaryMessagingViewModel: MessagingViewModel {
         client: self.protocolClient
     )
 
-    @Published private(set) var messages = [Message]()
+    @MainActor @Published private(set) var messages = [Message]()
 
     init(protocolOption: ProtocolClientOption) {
         self.protocolClient = ProtocolClient(
@@ -43,22 +43,23 @@ final class UnaryMessagingViewModel: MessagingViewModel {
         )
     }
 
-    func send(_ sentence: String) {
+    func send(_ sentence: String) async {
         let request = SayRequest.with { $0.sentence = sentence }
-        self.messages.append(Message(message: sentence, author: .user))
-        self.elizaClient.say(request: request) { [weak self] response in
-            os_log(.debug, "Eliza unary response: %@", String(describing: response))
+        await self.addMessage(Message(message: sentence, author: .user))
 
-            // UI updates must be performed on the main thread.
-            DispatchQueue.main.async {
-                self?.messages.append(Message(
-                    message: response.message?.sentence ?? "No response", author: .eliza
-                ))
-            }
-        }
-    }
+        let response = await self.elizaClient.say(request: request)
+        os_log(.debug, "Eliza unary response: %@", String(describing: response))
+        await self.addMessage(Message(
+            message: response.message?.sentence ?? "No response", author: .eliza
+        ))
+     }
 
     func endChat() {}
+
+    @MainActor
+    private func addMessage(_ message: Message) {
+        self.messages.append(message)
+    }
 }
 
 /// View model that uses bidirectional streaming for messaging.
@@ -67,9 +68,9 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
     private lazy var elizaClient = Buf_Connect_Demo_Eliza_V1_ElizaServiceClient(
         client: self.protocolClient
     )
-    private var elizaStream: (any BidirectionalStreamInterface<ConverseRequest>)?
+    private lazy var elizaStream = self.elizaClient.converse()
 
-    @Published private(set) var messages = [Message]()
+    @MainActor @Published private(set) var messages = [Message]()
 
     init(protocolOption: ProtocolClientOption) {
         self.protocolClient = ProtocolClient(
@@ -78,13 +79,14 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
             ProtoClientOption(), // Send protobuf binary on the wire
             protocolOption // Specify the protocol to use for the client
         )
+        self.observeResponses()
     }
 
-    func send(_ sentence: String) {
+    func send(_ sentence: String) async {
         do {
             let request = ConverseRequest.with { $0.sentence = sentence }
-            self.messages.append(Message(message: sentence, author: .user))
-            try self.getOrCreateStream().send(request)
+            await self.addMessage(Message(message: sentence, author: .user))
+            try self.elizaStream.send(request)
         } catch let error {
             os_log(
                 .error, "Failed to write message to stream: %@", error.localizedDescription
@@ -93,33 +95,22 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
     }
 
     func endChat() {
-        self.elizaStream?.close()
-        self.elizaStream = nil
+        self.elizaStream.close()
     }
 
-    private func getOrCreateStream() -> any BidirectionalStreamInterface<ConverseRequest> {
-        if let activeStream = self.elizaStream {
-            return activeStream
-        }
+    private func observeResponses() {
+        Task {
+            for await result in self.elizaStream.results() {
+                switch result {
+                case .headers(let headers):
+                    os_log(.debug, "Eliza headers: %@", headers)
 
-        let newStream = self.elizaClient.converse { [weak self] result in
-            switch result {
-            case .headers(let headers):
-                os_log(.debug, "Eliza headers: %@", headers)
+                case .message(let message):
+                    os_log(.debug, "Eliza message: %@", String(describing: message))
+                    await self.addMessage(Message(message: message.sentence, author: .eliza))
 
-            case .message(let message):
-                os_log(.debug, "Eliza message: %@", String(describing: message))
-
-                // UI updates must be performed on the main thread.
-                DispatchQueue.main.async {
-                    self?.messages.append(Message(message: message.sentence, author: .eliza))
-                }
-
-            case .complete(_, let error, let trailers):
-                os_log(.debug, "Eliza completed with trailers: %@", trailers ?? [:])
-
-                // UI updates must be performed on the main thread.
-                DispatchQueue.main.async {
+                case .complete(_, let error, let trailers):
+                    os_log(.debug, "Eliza completed with trailers: %@", trailers ?? [:])
                     let sentence: String
                     if let error = error {
                         os_log(.error, "Eliza error: %@", error.localizedDescription)
@@ -127,12 +118,15 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
                     } else {
                         sentence = "[Conversation ended]"
                     }
-                    self?.messages.append(Message(message: sentence, author: .eliza))
-                    self?.elizaStream = nil
+                    await self.addMessage(Message(message: sentence, author: .eliza))
                 }
             }
         }
-        self.elizaStream = newStream
-        return newStream
+    }
+
+    @MainActor
+    private func addMessage(_ message: Message) {
+        self.messages.append(message)
+        print(self.messages)
     }
 }
