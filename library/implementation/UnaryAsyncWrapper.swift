@@ -1,9 +1,9 @@
 import SwiftProtobuf
 
-/// Actor that may be used to wrap closure-based unary API calls in a way that allows them
-/// to be used with async/await while (importantly) supporting cancelation.
+/// Internal actor used to wrap closure-based unary API calls in a way that allows them
+/// to be used with async/await while properly supporting cancelation.
 ///
-/// For more information on why this is necessary, see:
+/// For discussions on why this is necessary, see:
 /// https://forums.swift.org/t/how-to-use-withtaskcancellationhandler-properly/54341/37
 /// https://stackoverflow.com/q/71898080
 actor UnaryAsyncWrapper<Output: SwiftProtobuf.Message> {
@@ -13,7 +13,7 @@ actor UnaryAsyncWrapper<Output: SwiftProtobuf.Message> {
     /// Accepts a closure to be called upon completion of a request and returns a cancelable which,
     /// when invoked, will cancel the underlying request.
     typealias PerformClosure = (
-        @escaping (_ completion: ResponseMessage<Output>) -> Void
+        @escaping (ResponseMessage<Output>) -> Void
     ) -> Cancelable
 
     init(sendUnary: @escaping PerformClosure) {

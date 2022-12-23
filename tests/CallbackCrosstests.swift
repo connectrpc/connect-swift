@@ -18,10 +18,9 @@ final class CallbackCrosstests: XCTestCase {
     private func executeTestWithClients(
         function: Selector = #function,
         timeout: TimeInterval = 60,
-        responseDelay: TimeInterval? = nil,
         runTestsWithClient: (TestServiceClient) throws -> Void
     ) rethrows {
-        let clients = CrosstestClients(timeout: timeout, responseDelay: responseDelay)
+        let clients = CrosstestClients(timeout: timeout, responseDelay: nil)
 
         print("Running \(function) with Connect + JSON...")
         try runTestsWithClient(TestServiceClient(client: clients.connectJSONClient))

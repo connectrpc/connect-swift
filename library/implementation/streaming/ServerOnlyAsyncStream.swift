@@ -1,5 +1,6 @@
 import SwiftProtobuf
 
+/// Concrete implementation of `ServerOnlyAsyncStreamInterface`.
 final class ServerOnlyAsyncStream<Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message> {
     private let bidirectionalStream: BidirectionalAsyncStream<Input, Output>
 

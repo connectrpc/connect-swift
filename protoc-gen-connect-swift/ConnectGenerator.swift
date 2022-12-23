@@ -129,7 +129,7 @@ final class ConnectGenerator {
         self.printLine("}")
     }
 
-    func printCallbackMethodInterface(for method: MethodDescriptor) {
+    private func printCallbackMethodInterface(for method: MethodDescriptor) {
         self.printLine()
         self.printCommentsIfNeeded(for: method)
         if !method.serverStreaming && !method.clientStreaming {
@@ -141,7 +141,7 @@ final class ConnectGenerator {
         )
     }
 
-    func printAsyncAwaitMethodInterface(for method: MethodDescriptor) {
+    private func printAsyncAwaitMethodInterface(for method: MethodDescriptor) {
         self.printLine()
         self.printCommentsIfNeeded(for: method)
         self.printLine(

@@ -137,8 +137,6 @@ public protocol ProtocolClientInterface {
     ///
     /// - parameter path: The RPC path, e.g., "buf.connect.demo.eliza.v1.ElizaService/Converse".
     /// - parameter headers: The outbound request headers to include.
-    /// - parameter onResult: Closure called whenever new results are received on the stream
-    ///                       (response headers, messages, trailers, etc.).
     ///
     /// - returns: An interface for sending and receiving data over the stream using async/await.
     func clientOnlyStream<

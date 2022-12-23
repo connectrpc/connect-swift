@@ -179,12 +179,11 @@ extension ProtocolClient: ProtocolClientInterface {
         path: String,
         headers: Headers
     ) -> any BidirectionalAsyncStreamInterface<Input, Output> {
-        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
         let callbacks = self.createRequestCallbacks(
             path: path, headers: headers, onResult: bidirectionalAsync.receive
         )
-        bidirectionalAsync.configureForSending(with: self.config.codec, requestCallbacks: callbacks)
-        return bidirectionalAsync
+        return bidirectionalAsync.configureForSending(with: callbacks)
     }
 
     public func clientOnlyStream<
@@ -193,12 +192,11 @@ extension ProtocolClient: ProtocolClientInterface {
         path: String,
         headers: Headers
     ) -> any ClientOnlyAsyncStreamInterface<Input, Output> {
-        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
         let callbacks = self.createRequestCallbacks(
             path: path, headers: headers, onResult: bidirectionalAsync.receive
         )
-        bidirectionalAsync.configureForSending(with: self.config.codec, requestCallbacks: callbacks)
-        return bidirectionalAsync
+        return bidirectionalAsync.configureForSending(with: callbacks)
     }
 
     public func serverOnlyStream<
@@ -207,12 +205,13 @@ extension ProtocolClient: ProtocolClientInterface {
         path: String,
         headers: Headers
     ) -> any ServerOnlyAsyncStreamInterface<Input, Output> {
-        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
         let callbacks = self.createRequestCallbacks(
             path: path, headers: headers, onResult: bidirectionalAsync.receive
         )
-        bidirectionalAsync.configureForSending(with: self.config.codec, requestCallbacks: callbacks)
-        return ServerOnlyAsyncStream(bidirectionalStream: bidirectionalAsync)
+        return ServerOnlyAsyncStream(
+            bidirectionalStream: bidirectionalAsync.configureForSending(with: callbacks)
+        )
     }
 
     // MARK: - Private

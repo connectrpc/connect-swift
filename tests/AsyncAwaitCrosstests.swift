@@ -76,7 +76,6 @@ final class AsyncAwaitCrosstests: XCTestCase {
     func testServerStreaming() async throws {
         try await self.executeTestWithClients { client in
             let sizes = [31_415, 9, 2_653, 58_979]
-            var responseCount = 0
             let stream = client.streamingOutputCall()
             try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
                 proto.responseParameters = sizes.enumerated().map { index, size in
@@ -87,6 +86,8 @@ final class AsyncAwaitCrosstests: XCTestCase {
                 }
             })
 
+            let expectation = self.expectation(description: "Stream completes")
+            var responseCount = 0
             for await result in stream.results() {
                 switch result {
                 case .headers:
@@ -99,20 +100,22 @@ final class AsyncAwaitCrosstests: XCTestCase {
                 case .complete(let code, let error, _):
                     XCTAssertEqual(code, .ok)
                     XCTAssertNil(error)
+                    expectation.fulfill()
                 }
             }
+
+            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
             XCTAssertEqual(responseCount, 4)
         }
     }
 
     func testEmptyStream() async throws {
         try await self.executeTestWithClients { client in
-            var resultCode: Code?
+            let closeExpectation = self.expectation(description: "Stream completes")
             let stream = client.streamingOutputCall()
             try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
                 proto.responseParameters = []
             })
-            
             for await result in stream.results() {
                 switch result {
                 case .headers:
@@ -122,11 +125,13 @@ final class AsyncAwaitCrosstests: XCTestCase {
                     XCTFail("Unexpectedly received message")
 
                 case .complete(let code, let error, _):
-                    resultCode = code
+                    XCTAssertEqual(code, .ok)
                     XCTAssertNil(error)
+                    closeExpectation.fulfill()
                 }
             }
-            XCTAssertEqual(resultCode, .ok)
+
+            XCTAssertEqual(XCTWaiter().wait(for: [closeExpectation], timeout: kTimeout), .completed)
         }
     }
 
@@ -260,7 +265,6 @@ final class AsyncAwaitCrosstests: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(message)
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
@@ -319,7 +323,7 @@ final class AsyncAwaitCrosstests: XCTestCase {
             for await result in stream.results() {
                 switch result {
                 case .headers:
-                    break
+                    continue
 
                 case .message:
                     XCTFail("Unexpectedly received message")
