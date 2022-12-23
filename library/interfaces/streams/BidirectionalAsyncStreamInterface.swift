@@ -7,7 +7,7 @@ public protocol BidirectionalAsyncStreamInterface<Input, Output> {
     @discardableResult
     func send(_ input: Input) throws -> Self
 
-    func results() -> AsyncStream<Output>
+    func results() -> AsyncStream<StreamResult<Output>>
 
     func close()
 }

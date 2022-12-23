@@ -6,5 +6,5 @@ public protocol ServerOnlyAsyncStreamInterface<Input, Output> {
 
     func send(_ input: Input) throws
 
-    func results() -> AsyncStream<Output>
+    func results() -> AsyncStream<StreamResult<Output>>
 }
