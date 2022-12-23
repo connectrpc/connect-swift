@@ -76,11 +76,12 @@ struct MessagingView<ViewModel: MessagingViewModel>: View {
     }
 
     private func sendMessage() {
-        if self.currentMessage.isEmpty {
+        let messageToSend = self.currentMessage
+        if messageToSend.isEmpty {
             return
         }
 
-        self.viewModel.send(self.currentMessage)
+        Task { await self.viewModel.send(messageToSend) }
         self.currentMessage = ""
     }
 }
