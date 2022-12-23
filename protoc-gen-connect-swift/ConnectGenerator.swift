@@ -93,10 +93,10 @@ final class ConnectGenerator {
         self.printLine("\(self.visibility) protocol \(protocolName) {")
         self.indent {
             for method in service.methods {
-                if self.options.includeCallbackMethods {
+                if self.options.generateCallbackMethods {
                     self.printCallbackMethodInterface(for: method)
                 }
-                if self.options.includeAsyncMethods {
+                if self.options.generateAsyncMethods {
                     self.printAsyncAwaitMethodInterface(for: method)
                 }
             }
@@ -118,10 +118,10 @@ final class ConnectGenerator {
             self.printLine("}")
 
             for method in service.methods {
-                if self.options.includeCallbackMethods {
+                if self.options.generateCallbackMethods {
                     self.printCallbackMethodImplementation(for: method)
                 }
-                if self.options.includeAsyncMethods {
+                if self.options.generateAsyncMethods {
                     self.printAsyncAwaitMethodImplementation(for: method)
                 }
             }

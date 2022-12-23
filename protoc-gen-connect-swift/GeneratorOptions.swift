@@ -4,8 +4,8 @@ import SwiftProtobufPluginLibrary
 private enum CommandLineParameter: String {
     case extraModuleImports = "ExtraModuleImports"
     case fileNaming = "FileNaming"
-    case includeAsyncMethods = "IncludeAsyncMethods"
-    case includeCallbackMethods = "IncludeCallbackMethods"
+    case generateAsyncMethods = "GenerateAsyncMethods"
+    case generateCallbackMethods = "GenerateCallbackMethods"
     case keepMethodCasing = "KeepMethodCasing"
     case protoPathModuleMappings = "ProtoPathModuleMappings"
     case swiftProtobufModuleName = "SwiftProtobufModuleName"
@@ -56,8 +56,8 @@ private enum CommandLineParameter: String {
 struct GeneratorOptions {
     private(set) var extraModuleImports = [String]()
     private(set) var fileNaming = FileNaming.fullPath
-    private(set) var includeAsyncMethods = true
-    private(set) var includeCallbackMethods = true
+    private(set) var generateAsyncMethods = true
+    private(set) var generateCallbackMethods = true
     private(set) var keepMethodCasing = false
     private(set) var protoToModuleMappings = ProtoFileToModuleMappings()
     private(set) var swiftProtobufModuleName = "SwiftProtobuf"
@@ -96,15 +96,15 @@ struct GeneratorOptions {
                     continue
                 }
 
-            case .includeAsyncMethods:
+            case .generateAsyncMethods:
                 if let value = Bool(rawValue) {
-                    self.includeAsyncMethods = value
+                    self.generateAsyncMethods = value
                     continue
                 }
 
-            case .includeCallbackMethods:
+            case .generateCallbackMethods:
                 if let value = Bool(rawValue) {
-                    self.includeCallbackMethods = value
+                    self.generateCallbackMethods = value
                     continue
                 }
 
