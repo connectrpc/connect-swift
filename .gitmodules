@@ -1,3 +1,0 @@
-[submodule "connect-crosstest"]
-	path = connect-crosstest
-	url = git@github.com:bufbuild/connect-crosstest.git
