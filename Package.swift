@@ -6,7 +6,7 @@ let package = Package(
     name: "Connect",
     platforms: [
         .iOS(.v14),
-        .macOS(.v10_14),
+        .macOS(.v10_15),
     ],
     products: [
         // Primary library for consumers to use.

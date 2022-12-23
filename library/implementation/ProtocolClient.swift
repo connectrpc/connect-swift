@@ -28,6 +28,8 @@ public final class ProtocolClient {
 }
 
 extension ProtocolClient: ProtocolClientInterface {
+    // MARK: - Callbacks
+
     @discardableResult
     public func unary<
         Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
@@ -119,8 +121,11 @@ extension ProtocolClient: ProtocolClientInterface {
         headers: Headers,
         onResult: @escaping (StreamResult<Output>) -> Void
     ) -> any BidirectionalStreamInterface<Input> {
-        return self.createBidirectionalStream(
-            path: path, headers: headers, onResult: onResult
+        return BidirectionalStream(
+            requestCallbacks: self.createRequestCallbacks(
+                path: path, headers: headers, onResult: onResult
+            ),
+            codec: self.config.codec
         )
     }
 
@@ -131,9 +136,12 @@ extension ProtocolClient: ProtocolClientInterface {
         headers: Headers,
         onResult: @escaping (StreamResult<Output>) -> Void
     ) -> any ClientOnlyStreamInterface<Input> {
-        return ClientOnlyStream(bidirectionalStream: self.createBidirectionalStream(
-            path: path, headers: headers, onResult: onResult
-        ))
+        return BidirectionalStream(
+            requestCallbacks: self.createRequestCallbacks(
+                path: path, headers: headers, onResult: onResult
+            ),
+            codec: self.config.codec
+        )
     }
 
     public func serverOnlyStream<
@@ -143,20 +151,76 @@ extension ProtocolClient: ProtocolClientInterface {
         headers: Headers,
         onResult: @escaping (StreamResult<Output>) -> Void
     ) -> any ServerOnlyStreamInterface<Input> {
-        return ServerOnlyStream(bidirectionalStream: self.createBidirectionalStream(
-            path: path, headers: headers, onResult: onResult
+        return ServerOnlyStream(bidirectionalStream: BidirectionalStream(
+            requestCallbacks: self.createRequestCallbacks(
+                path: path, headers: headers, onResult: onResult
+            ),
+            codec: self.config.codec
         ))
+    }
+
+    // MARK: - Async/await
+
+    public func unary<
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+    >(
+        path: String,
+        request: Input,
+        headers: Headers
+    ) async -> ResponseMessage<Output> {
+        return await UnaryAsyncWrapper { completion in
+            self.unary(path: path, request: request, headers: headers, completion: completion)
+        }.send()
+    }
+
+    public func bidirectionalStream<
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+    >(
+        path: String,
+        headers: Headers
+    ) -> any BidirectionalAsyncStreamInterface<Input, Output> {
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
+        let callbacks = self.createRequestCallbacks(
+            path: path, headers: headers, onResult: bidirectionalAsync.receive
+        )
+        return bidirectionalAsync.configureForSending(with: callbacks)
+    }
+
+    public func clientOnlyStream<
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+    >(
+        path: String,
+        headers: Headers
+    ) -> any ClientOnlyAsyncStreamInterface<Input, Output> {
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
+        let callbacks = self.createRequestCallbacks(
+            path: path, headers: headers, onResult: bidirectionalAsync.receive
+        )
+        return bidirectionalAsync.configureForSending(with: callbacks)
+    }
+
+    public func serverOnlyStream<
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+    >(
+        path: String,
+        headers: Headers
+    ) -> any ServerOnlyAsyncStreamInterface<Input, Output> {
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
+        let callbacks = self.createRequestCallbacks(
+            path: path, headers: headers, onResult: bidirectionalAsync.receive
+        )
+        return ServerOnlyAsyncStream(
+            bidirectionalStream: bidirectionalAsync.configureForSending(with: callbacks)
+        )
     }
 
     // MARK: - Private
 
-    private func createBidirectionalStream<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
-    >(
+    private func createRequestCallbacks<Output: SwiftProtobuf.Message>(
         path: String,
         headers: Headers,
         onResult: @escaping (StreamResult<Output>) -> Void
-    ) -> BidirectionalStream<Input> {
+    ) -> RequestCallbacks {
         let codec = self.config.codec
         let chain = self.config.createInterceptorChain().streamFunction()
         let url = URL(string: path, relativeTo: URL(string: self.config.target))!
@@ -220,13 +284,11 @@ extension ProtocolClient: ProtocolClientInterface {
             request: request,
             responseCallbacks: responseCallbacks
         )
-        return BidirectionalStream(
-            // Wrap the request data callback to invoke the interceptor chain.
-            requestCallbacks: RequestCallbacks(
-                sendData: { httpRequestCallbacks.sendData(chain.requestDataFunction($0)) },
-                sendClose: httpRequestCallbacks.sendClose
-            ),
-            codec: codec
+
+        // Wrap the request data callback to invoke the interceptor chain.
+        return RequestCallbacks(
+            sendData: { httpRequestCallbacks.sendData(chain.requestDataFunction($0)) },
+            sendClose: httpRequestCallbacks.sendClose
         )
     }
 }
