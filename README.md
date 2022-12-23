@@ -65,15 +65,14 @@ that are specific to the `protoc-gen-connect-swift` plugin.
 
 **Supported SwiftProtobuf options:**
 
-- `FileNaming` - [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-filenaming---naming-of-generated-sources)
-- `ProtoPathModuleMappings` - [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-protopathmodulemappings---swift-module-names-for-proto-paths)
-- `Visibility` - [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-visibility---visibility-of-generated-types)
-
-**Additional options:**
-
-- `KeepMethodCasing` - If `true`, generated RPC function names will match the `rpc` specified in the `.proto` file (instead of being lower-camel-cased)
-- `ExtraModuleImports` - Allows for specifying additional modules that generated sources should import. May be specified multiple times
-- `SwiftProtobufModuleName` - Allows for overriding the `SwiftProtobuf` module name in `import` statements. Useful if the `SwiftProtobuf` dependency is being renamed in custom build configurations
+| **Option** | **Type** | **Default** | **Repeatable** | **Supported by SwiftProtobuf** | **Details** |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| `ExtraModuleImports` | String | None | Yes | No | Allows for specifying additional modules that generated Connect sources should import |
+| `FileNaming` | String | `FullPath` | No | Yes | [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-filenaming---naming-of-generated-sources) |
+| `KeepMethodCasing` | Bool | `false` | No | No | If `true`, generated RPC function names will match the `rpc` specified in the `.proto` file (instead of being lower-camel-cased) |
+| `ProtoPathModuleMappings` | Custom | None | No | Yes | [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-protopathmodulemappings---swift-module-names-for-proto-paths) |
+| `SwiftProtobufModuleName` | String | `SwiftProtobuf` | No | No | Allows for overriding the `SwiftProtobuf` module name in `import` statements. Useful if the `SwiftProtobuf` dependency is being renamed in custom build configurations |
+| `Visibility` | String | `Internal` | No | Yes | [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-visibility---visibility-of-generated-types) |
 
 ## Integrate with Swift Package Manager
 
