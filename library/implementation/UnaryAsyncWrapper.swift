@@ -6,17 +6,17 @@ import SwiftProtobuf
 /// For more information on why this is necessary, see:
 /// https://forums.swift.org/t/how-to-use-withtaskcancellationhandler-properly/54341/37
 /// https://stackoverflow.com/q/71898080
-public actor AsyncUnaryWrapper<Output: SwiftProtobuf.Message> {
+actor UnaryAsyncWrapper<Output: SwiftProtobuf.Message> {
     private var cancelable: Cancelable?
     private let sendUnary: PerformClosure
 
     /// Accepts a closure to be called upon completion of a request and returns a cancelable which,
     /// when invoked, will cancel the underlying request.
-    public typealias PerformClosure = (
+    typealias PerformClosure = (
         @escaping (_ completion: ResponseMessage<Output>) -> Void
     ) -> Cancelable
 
-    public init(sendUnary: @escaping PerformClosure) {
+    init(sendUnary: @escaping PerformClosure) {
         self.sendUnary = sendUnary
     }
 
@@ -25,7 +25,7 @@ public actor AsyncUnaryWrapper<Output: SwiftProtobuf.Message> {
     /// outbound request and return a response with a `.canceled` status code.
     ///
     /// - returns: The response/result of the request.
-    public func send() async -> ResponseMessage<Output> {
+    func send() async -> ResponseMessage<Output> {
         return await withTaskCancellationHandler(operation: {
             return await withCheckedContinuation { continuation in
                 if Task.isCancelled {

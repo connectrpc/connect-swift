@@ -93,24 +93,15 @@ final class ConnectGenerator {
         self.printLine("\(self.visibility) protocol \(protocolName) {")
         self.indent {
             for method in service.methods {
-                self.printLine()
-
-                self.printCommentsIfNeeded(for: method)
-                if !method.serverStreaming && !method.clientStreaming {
-                    self.printLine("@discardableResult")
+                if self.options.includeCallbackMethods {
+                    self.printCallbackMethodInterface(for: method)
                 }
-
-                self.printLine(
-                    method.signature(using: namer, includeDefaults: false, options: self.options)
-                )
+                if self.options.includeAsyncMethods {
+                    self.printAsyncAwaitMethodInterface(for: method)
+                }
             }
         }
         self.printLine("}")
-
-        if self.options.includeAsyncAwait {
-            self.printLine()
-            self.printAsyncAwaitProtocolExtension(for: service)
-        }
 
         self.printLine()
 
@@ -127,60 +118,63 @@ final class ConnectGenerator {
             self.printLine("}")
 
             for method in service.methods {
-                self.printLine()
-                self.printMethodImplementation(for: method)
+                if self.options.includeCallbackMethods {
+                    self.printCallbackMethodImplementation(for: method)
+                }
+                if self.options.includeAsyncMethods {
+                    self.printAsyncAwaitMethodImplementation(for: method)
+                }
             }
         }
         self.printLine("}")
     }
 
-    private func printMethodImplementation(for method: MethodDescriptor) {
+    func printCallbackMethodInterface(for method: MethodDescriptor) {
+        self.printLine()
+        self.printCommentsIfNeeded(for: method)
+        if !method.serverStreaming && !method.clientStreaming {
+            self.printLine("@discardableResult")
+        }
+
+        self.printLine(
+            method.callbackSignature(using: namer, includeDefaults: false, options: self.options)
+        )
+    }
+
+    func printAsyncAwaitMethodInterface(for method: MethodDescriptor) {
+        self.printLine()
+        self.printCommentsIfNeeded(for: method)
+        self.printLine(
+            method.asyncAwaitSignature(using: namer, includeDefaults: false, options: self.options)
+        )
+    }
+
+    private func printCallbackMethodImplementation(for method: MethodDescriptor) {
+        self.printLine()
         if !method.serverStreaming && !method.clientStreaming {
             self.printLine("@discardableResult")
         }
 
         self.printLine(
             "\(self.visibility) "
-            + method.signature(using: namer, includeDefaults: true, options: self.options)
+            + method.callbackSignature(using: namer, includeDefaults: true, options: self.options)
             + " {"
         )
         self.indent {
-            self.printLine("return \(method.returnValue())")
+            self.printLine("return \(method.callbackReturnValue())")
         }
         self.printLine("}")
     }
 
     private func printAsyncAwaitMethodImplementation(for method: MethodDescriptor) {
-        let methodName = method.name(using: self.options)
+        self.printLine()
         self.printLine(
-            """
-            \(self.visibility) func `\(methodName)`\
-            (request: \(self.namer.fullName(message: method.inputType)), \
-            headers: Connect.Headers = [:]) async \
-            -> ResponseMessage<\(self.namer.fullName(message: method.outputType))> {
-            """
+            "\(self.visibility) "
+            + method.asyncAwaitSignature(using: namer, includeDefaults: true, options: self.options)
+            + " {"
         )
         self.indent {
-            self.printLine(
-                """
-                return await Connect.AsyncUnaryWrapper { \
-                self.\(methodName)(request: request, headers: headers, completion: $0) \
-                }.send()
-                """
-            )
-        }
-        self.printLine("}")
-    }
-
-    private func printAsyncAwaitProtocolExtension(for service: ServiceDescriptor) {
-        self.printLine()
-        self.printLine("extension \(service.protocolName(using: self.namer)) {")
-        self.indent {
-            // TODO: Add streaming extensions
-            for method in service.methods where !method.clientStreaming && !method.serverStreaming {
-                self.printLine()
-                self.printAsyncAwaitMethodImplementation(for: method)
-            }
+            self.printLine("return \(method.asyncAwaitReturnValue())")
         }
         self.printLine("}")
     }
@@ -202,13 +196,21 @@ private extension ServiceDescriptor {
 }
 
 private extension MethodDescriptor {
+    var methodPath: String {
+        if self.file.package.isEmpty {
+            return "\(self.service.name)/\(self.name)"
+        } else {
+            return "\(self.file.package).\(self.service.name)/\(self.name)"
+        }
+    }
+
     func name(using options: GeneratorOptions) -> String {
         return options.keepMethodCasing
             ? self.name
             : NamingUtils.toLowerCamelCase(self.name)
     }
 
-    func signature(
+    func callbackSignature(
         using namer: SwiftProtobufNamer, includeDefaults: Bool, options: GeneratorOptions
     ) -> String {
         let methodName = self.name(using: options)
@@ -250,33 +252,84 @@ private extension MethodDescriptor {
         }
     }
 
-    func returnValue() -> String {
-        let methodPath: String
-        if self.file.package.isEmpty {
-            methodPath = "\(self.service.name)/\(self.name)"
-        } else {
-            methodPath = "\(self.file.package).\(self.service.name)/\(self.name)"
-        }
+    func asyncAwaitSignature(
+        using namer: SwiftProtobufNamer, includeDefaults: Bool, options: GeneratorOptions
+    ) -> String {
+        let methodName = self.name(using: options)
+        let inputName = namer.fullName(message: self.inputType)
+        let outputName = namer.fullName(message: self.outputType)
 
+        // Note that the method name is escaped to avoid using Swift keywords.
+        if self.clientStreaming && self.serverStreaming {
+            return """
+            func `\(methodName)`\
+            (headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
+            -> any Connect.BidirectionalAsyncStreamInterface<\(inputName), \(outputName)>
+            """
+
+        } else if self.serverStreaming {
+            return """
+            func `\(methodName)`\
+            (headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
+            -> any Connect.ServerOnlyAsyncStreamInterface<\(inputName), \(outputName)>
+            """
+
+        } else if self.clientStreaming {
+            return """
+            func `\(methodName)`\
+            (headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
+            -> any Connect.ClientOnlyAsyncStreamInterface<\(inputName), \(outputName)>
+            """
+
+        } else {
+            return """
+            func `\(methodName)`\
+            (request: \(inputName), headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
+            async -> ResponseMessage<\(outputName)>
+            """
+        }
+    }
+
+    func callbackReturnValue() -> String {
         if self.clientStreaming && self.serverStreaming {
             return """
             self.client.bidirectionalStream(\
-            path: "\(methodPath)", headers: headers, onResult: onResult)
+            path: "\(self.methodPath)", headers: headers, onResult: onResult)
             """
         } else if self.serverStreaming {
             return """
             self.client.serverOnlyStream(\
-            path: "\(methodPath)", headers: headers, onResult: onResult)
+            path: "\(self.methodPath)", headers: headers, onResult: onResult)
             """
         } else if self.clientStreaming {
             return """
             self.client.clientOnlyStream(\
-            path: "\(methodPath)", headers: headers, onResult: onResult)
+            path: "\(self.methodPath)", headers: headers, onResult: onResult)
             """
         } else {
             return """
             self.client.unary(\
-            path: "\(methodPath)", request: request, headers: headers, completion: completion)
+            path: "\(self.methodPath)", request: request, headers: headers, completion: completion)
+            """
+        }
+    }
+
+    func asyncAwaitReturnValue() -> String {
+        if self.clientStreaming && self.serverStreaming {
+            return """
+            self.client.bidirectionalStream(path: "\(self.methodPath)", headers: headers)
+            """
+        } else if self.serverStreaming {
+            return """
+            self.client.serverOnlyStream(path: "\(self.methodPath)", headers: headers)
+            """
+        } else if self.clientStreaming {
+            return """
+            self.client.clientOnlyStream(path: "\(self.methodPath)", headers: headers)
+            """
+        } else {
+            return """
+            await self.client.unary(path: "\(self.methodPath)", request: request, headers: headers)
             """
         }
     }

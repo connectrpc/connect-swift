@@ -41,7 +41,7 @@ plugins:
     opt: Visibility=Public
     out: gen/proto/swift-protobuf # Or your target output directory
   - remote: buf.build/mrebello/plugins/connect-swift
-    opt: IncludeAsyncAwait=true,Visibility=Public # See "custom configuration" section in docs below
+    opt: IncludeAsyncMethods=true,Visibility=Public # See "custom configuration" section in docs below
     out: gen/proto/connect-swift # Or your target output directory
 ```
 
@@ -67,7 +67,8 @@ that are specific to the `protoc-gen-connect-swift` plugin.
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | `ExtraModuleImports` | String | None | Yes | No | Allows for specifying additional modules that generated Connect sources should import |
 | `FileNaming` | String | `FullPath` | No | Yes | [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-filenaming---naming-of-generated-sources) |
-| `IncludeAsyncAwait` | Bool | `false` | No | No | If `true`, generates RPC function calls that provide Swift `async`/`await` interfaces instead of closure-based callbacks |
+| `IncludeAsyncMethods` | Bool | `true` | No | No | If `true`, generates RPC function calls that provide Swift `async`/`await` interfaces |
+| `IncludeCallbackMethods` | Bool | `true` | No | No | If `true`, generates RPC function calls that provide closure-based callback interfaces |
 | `KeepMethodCasing` | Bool | `false` | No | No | If `true`, generated RPC function names will match the `rpc` specified in the `.proto` file (instead of being lower-camel-cased) |
 | `ProtoPathModuleMappings` | Custom | None | No | Yes | [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-protopathmodulemappings---swift-module-names-for-proto-paths) |
 | `SwiftProtobufModuleName` | String | `SwiftProtobuf` | No | No | Allows for overriding the `SwiftProtobuf` module name in `import` statements. Useful if the `SwiftProtobuf` dependency is being renamed in custom build configurations |
@@ -256,7 +257,7 @@ go build -o testserver cmd/serverconnect/main.go
 ```
 
 **You'll then need to change `http` to `https` in
-[`Crosstests.swift`](./tests/Crosstests.swift).**
+[`CrosstestClients.swift`](./tests/CrosstestClients.swift).**
 
 Finally, run the crosstests:
 

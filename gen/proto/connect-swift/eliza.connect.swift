@@ -20,21 +20,25 @@ public protocol Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
     @discardableResult
     func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>) -> Void) -> Connect.Cancelable
 
+    /// Say is a unary request demo. This method should allow for a one sentence
+    /// response given a one sentence request.
+    func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers) async -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>
+
     /// Converse is a bi-directional streaming request demo. This method should allow for
     /// many requests and many responses.
     func `converse`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_ConverseResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Buf_Connect_Demo_Eliza_V1_ConverseRequest>
 
+    /// Converse is a bi-directional streaming request demo. This method should allow for
+    /// many requests and many responses.
+    func `converse`(headers: Connect.Headers) -> any Connect.BidirectionalAsyncStreamInterface<Buf_Connect_Demo_Eliza_V1_ConverseRequest, Buf_Connect_Demo_Eliza_V1_ConverseResponse>
+
     /// Introduce is a server-streaming request demo.  This method allows for a single request that will return a series
     /// of responses
     func `introduce`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest>
-}
 
-
-extension Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
-
-    public func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse> {
-        return await Connect.AsyncUnaryWrapper { self.say(request: request, headers: headers, completion: $0) }.send()
-    }
+    /// Introduce is a server-streaming request demo.  This method allows for a single request that will return a series
+    /// of responses
+    func `introduce`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest, Buf_Connect_Demo_Eliza_V1_IntroduceResponse>
 }
 
 /// Concrete implementation of `Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface`.
@@ -50,35 +54,23 @@ public final class Buf_Connect_Demo_Eliza_V1_ElizaServiceClient: Buf_Connect_Dem
         return self.client.unary(path: "buf.connect.demo.eliza.v1.ElizaService/Say", request: request, headers: headers, completion: completion)
     }
 
+    public func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse> {
+        return await self.client.unary(path: "buf.connect.demo.eliza.v1.ElizaService/Say", request: request, headers: headers)
+    }
+
     public func `converse`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_ConverseResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Buf_Connect_Demo_Eliza_V1_ConverseRequest> {
         return self.client.bidirectionalStream(path: "buf.connect.demo.eliza.v1.ElizaService/Converse", headers: headers, onResult: onResult)
+    }
+
+    public func `converse`(headers: Connect.Headers = [:]) -> any Connect.BidirectionalAsyncStreamInterface<Buf_Connect_Demo_Eliza_V1_ConverseRequest, Buf_Connect_Demo_Eliza_V1_ConverseResponse> {
+        return self.client.bidirectionalStream(path: "buf.connect.demo.eliza.v1.ElizaService/Converse", headers: headers)
     }
 
     public func `introduce`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest> {
         return self.client.serverOnlyStream(path: "buf.connect.demo.eliza.v1.ElizaService/Introduce", headers: headers, onResult: onResult)
     }
-}
 
-extension Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
-    public func `introduce`(headers: Connect.Headers = [:]) -> AsyncStream<Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>> {
-        let onResult = { (result: Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>) -> Void in
-            
-        }
-        let asyncStream = AsyncStream { continuation in
-
-            self.introduce(headers: headers) { result in
-                if Task.isCancelled {
-                    return
-                }
-                continuation.yield(result)
-                if case .complete = result {
-                    continuation.finish()
-                }
-            }
-        }
+    public func `introduce`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest, Buf_Connect_Demo_Eliza_V1_IntroduceResponse> {
+        return self.client.serverOnlyStream(path: "buf.connect.demo.eliza.v1.ElizaService/Introduce", headers: headers)
     }
-}
-
-public struct AsyncStreamWrapper<Output: SwiftProtobuf.Message> {
-
 }

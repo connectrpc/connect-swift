@@ -93,6 +93,21 @@ public protocol ProtocolClientInterface {
 
     // MARK: - Async/await
 
+    /// Perform a unary (non-streaming) request.
+    ///
+    /// - parameter path: The RPC path, e.g., "buf.connect.demo.eliza.v1.ElizaService/Say".
+    /// - parameter request: The outbound request message.
+    /// - parameter headers: The outbound request headers to include.
+    ///
+    /// - returns: The response which is returned asynchronously.
+    func unary<
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+    >(
+        path: String,
+        request: Input,
+        headers: Headers
+    ) async -> ResponseMessage<Output>
+
     /// Start a new bidirectional stream.
     ///
     /// NOTE: The implementation is required to buffer inbound response data and pass complete
@@ -111,6 +126,27 @@ public protocol ProtocolClientInterface {
         path: String,
         headers: Headers
     ) -> any BidirectionalAsyncStreamInterface<Input, Output>
+
+    /// Start a new client-only stream.
+    ///
+    /// NOTE: The implementation is required to buffer inbound response data and pass complete
+    /// chunks to its `Interceptor` list, in order to allow interceptors to consume full messages
+    /// with each data chunk they are passed. For example, if 10 bytes are received but the prefix
+    /// data indicates that the message is longer, the implementation must wait until the remaining
+    /// bytes are received to pass the data down to its interceptors (and finally the caller).
+    ///
+    /// - parameter path: The RPC path, e.g., "buf.connect.demo.eliza.v1.ElizaService/Converse".
+    /// - parameter headers: The outbound request headers to include.
+    /// - parameter onResult: Closure called whenever new results are received on the stream
+    ///                       (response headers, messages, trailers, etc.).
+    ///
+    /// - returns: An interface for sending and receiving data over the stream using async/await.
+    func clientOnlyStream<
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+    >(
+        path: String,
+        headers: Headers
+    ) -> any ClientOnlyAsyncStreamInterface<Input, Output>
 
     /// Start a new server-only stream.
     ///

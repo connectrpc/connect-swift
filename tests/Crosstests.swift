@@ -10,59 +10,10 @@ private let kTimeout = TimeInterval(5)
 private typealias TestServiceClient = Grpc_Testing_TestServiceClient
 private typealias UnimplementedServiceClient = Grpc_Testing_UnimplementedServiceClient
 
-private final class CrosstestClients {
-    let connectJSONClient: ProtocolClient
-    let connectProtoClient: ProtocolClient
-    let grpcWebJSONClient: ProtocolClient
-    let grpcWebProtoClient: ProtocolClient
-
-    init(timeout: TimeInterval, responseDelay: TimeInterval?) {
-        let httpClient = CrosstestHTTPClient(
-            timeout: timeout, delayAfterChallenge: responseDelay
-        )
-        let target = "https://localhost:8081"
-
-        self.connectJSONClient = ProtocolClient(
-            target: target,
-            httpClient: httpClient,
-            ConnectClientOption(),
-            JSONClientOption(),
-            GzipRequestOption(),
-            CompressionMinBytesRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption()
-        )
-        self.connectProtoClient = ProtocolClient(
-            target: target,
-            httpClient: httpClient,
-            ConnectClientOption(),
-            ProtoClientOption(),
-            GzipRequestOption(),
-            CompressionMinBytesRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption()
-        )
-        self.grpcWebJSONClient = ProtocolClient(
-            target: target,
-            httpClient: httpClient,
-            GRPCWebClientOption(),
-            JSONClientOption(),
-            GzipRequestOption(),
-            CompressionMinBytesRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption()
-        )
-        self.grpcWebProtoClient = ProtocolClient(
-            target: target,
-            httpClient: httpClient,
-            GRPCWebClientOption(),
-            ProtoClientOption(),
-            GzipRequestOption(),
-            CompressionMinBytesRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption()
-        )
-    }
-}
-
 /// This test suite runs against multiple protocols and serialization formats.
 /// Tests are based on https://github.com/bufbuild/connect-crosstest
+///
+/// Tests are written using callback APIs.
 final class Crosstests: XCTestCase {
     private func executeTestWithClients(
         function: Selector = #function,
@@ -494,42 +445,6 @@ final class Crosstests: XCTestCase {
             }
             cancelable.cancel()
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
-        }
-    }
-
-    func testCancelingUnaryAsyncBeforeTaskStarts() {
-        self.executeTestWithClients { client in
-            let expectation = self.expectation(description: "Receives canceled response")
-            let task = Task {
-                let response = await client.emptyCall(request: Grpc_Testing_Empty())
-                XCTAssertEqual(response.code, .canceled)
-                XCTAssertEqual(response.error?.code, .canceled)
-                expectation.fulfill()
-            }
-
-            task.cancel()
-
-            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
-            XCTAssertTrue(task.isCancelled)
-        }
-    }
-
-    func testCancelingUnaryAsyncAfterTaskIsInFlight() {
-        self.executeTestWithClients(responseDelay: 5.0) { client in
-            let expectation = self.expectation(description: "Receives canceled response")
-            let task = Task {
-                let response = await client.emptyCall(request: Grpc_Testing_Empty())
-                XCTAssertEqual(response.code, .canceled)
-                XCTAssertEqual(response.error?.code, .canceled)
-                expectation.fulfill()
-            }
-
-            // Wait briefly before canceling the task to ensure that the task receives an explicit
-            // cancelation (see `withTaskCancellationHandler`).
-            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2), execute: task.cancel)
-
-            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
-            XCTAssertTrue(task.isCancelled)
         }
     }
 }

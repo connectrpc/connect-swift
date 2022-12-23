@@ -4,7 +4,8 @@ import SwiftProtobufPluginLibrary
 private enum CommandLineParameter: String {
     case extraModuleImports = "ExtraModuleImports"
     case fileNaming = "FileNaming"
-    case includeAsyncAwait = "IncludeAsyncAwait"
+    case includeAsyncMethods = "IncludeAsyncMethods"
+    case includeCallbackMethods = "IncludeCallbackMethods"
     case keepMethodCasing = "KeepMethodCasing"
     case protoPathModuleMappings = "ProtoPathModuleMappings"
     case swiftProtobufModuleName = "SwiftProtobufModuleName"
@@ -55,7 +56,8 @@ private enum CommandLineParameter: String {
 struct GeneratorOptions {
     private(set) var extraModuleImports = [String]()
     private(set) var fileNaming = FileNaming.fullPath
-    private(set) var includeAsyncAwait = false
+    private(set) var includeAsyncMethods = true
+    private(set) var includeCallbackMethods = true
     private(set) var keepMethodCasing = false
     private(set) var protoToModuleMappings = ProtoFileToModuleMappings()
     private(set) var swiftProtobufModuleName = "SwiftProtobuf"
@@ -94,9 +96,15 @@ struct GeneratorOptions {
                     continue
                 }
 
-            case .includeAsyncAwait:
+            case .includeAsyncMethods:
                 if let value = Bool(rawValue) {
-                    self.includeAsyncAwait = value
+                    self.includeAsyncMethods = value
+                    continue
+                }
+
+            case .includeCallbackMethods:
+                if let value = Bool(rawValue) {
+                    self.includeCallbackMethods = value
                     continue
                 }
 

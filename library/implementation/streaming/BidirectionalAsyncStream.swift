@@ -58,3 +58,6 @@ extension BidirectionalAsyncStream: BidirectionalAsyncStreamInterface {
         self.requestCallbacks?.sendClose()
     }
 }
+
+// Conforms to the client-only interface since it matches exactly and the implementation is internal
+extension BidirectionalAsyncStream: ClientOnlyAsyncStreamInterface {}

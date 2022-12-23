@@ -136,12 +136,12 @@ extension ProtocolClient: ProtocolClientInterface {
         headers: Headers,
         onResult: @escaping (StreamResult<Output>) -> Void
     ) -> any ClientOnlyStreamInterface<Input> {
-        return ClientOnlyStream(bidirectionalStream: BidirectionalStream(
+        return BidirectionalStream(
             requestCallbacks: self.createRequestCallbacks(
                 path: path, headers: headers, onResult: onResult
             ),
             codec: self.config.codec
-        ))
+        )
     }
 
     public func serverOnlyStream<
@@ -161,12 +161,38 @@ extension ProtocolClient: ProtocolClientInterface {
 
     // MARK: - Async/await
 
+    public func unary<
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+    >(
+        path: String,
+        request: Input,
+        headers: Headers
+    ) async -> ResponseMessage<Output> {
+        return await UnaryAsyncWrapper { completion in
+            self.unary(path: path, request: request, headers: headers, completion: completion)
+        }.send()
+    }
+
     public func bidirectionalStream<
         Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
         path: String,
         headers: Headers
     ) -> any BidirectionalAsyncStreamInterface<Input, Output> {
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let callbacks = self.createRequestCallbacks(
+            path: path, headers: headers, onResult: bidirectionalAsync.receive
+        )
+        bidirectionalAsync.configureForSending(with: self.config.codec, requestCallbacks: callbacks)
+        return bidirectionalAsync
+    }
+
+    public func clientOnlyStream<
+        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+    >(
+        path: String,
+        headers: Headers
+    ) -> any ClientOnlyAsyncStreamInterface<Input, Output> {
         let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
         let callbacks = self.createRequestCallbacks(
             path: path, headers: headers, onResult: bidirectionalAsync.receive
