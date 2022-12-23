@@ -14,7 +14,7 @@ private typealias UnimplementedServiceClient = Grpc_Testing_UnimplementedService
 /// Tests are based on https://github.com/bufbuild/connect-crosstest
 ///
 /// Tests are written using callback APIs.
-final class Crosstests: XCTestCase {
+final class CallbackCrosstests: XCTestCase {
     private func executeTestWithClients(
         function: Selector = #function,
         timeout: TimeInterval = 60,
