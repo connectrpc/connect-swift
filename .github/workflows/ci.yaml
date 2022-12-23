@@ -1,48 +1,59 @@
-name: build
-
+name: ci
 on:
   push:
     branches:
       - main
   pull_request:
-
+permissions:
+  contents: read
 jobs:
-  connect-plugin:
+  build-connect-plugin:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: true
 # buf set up requires a github token to prevent a rate limit.
 # TODO: We're currently checking in generated code to side-step this problem.
 #      - uses: bufbuild/buf-setup-action@v1.8.0
 #        with:
 #          buf_token: ${{ secrets.BSR_TEST_TOKEN }}
       - name: Build connect-swift plugin
-        run: make build-connect-plugin
+        run: make buildplugin
 #      - name: Generate
 #        run: make generate
-
-  connect-library:
+  build-connect-library:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: true
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
       - name: Build Connect library
         run: swift build
-
-  eliza-example:
+  build-eliza-example:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: true
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
       - name: Build Eliza example app
         run: cd examples/eliza && xcodebuild -scheme Eliza build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+  run-connect-tests:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker-practice/actions-setup-docker@master
+      - name: Select Xcode version
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
+        run: sudo xcode-select --switch /Applications/Xcode_14.1.app
+      - name: Run tests
+        run: make test
+  run-swiftlint:
+    name: swiftlint
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/realm/swiftlint:0.50.3
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run SwiftLint
+        run: swiftlint lint --strict

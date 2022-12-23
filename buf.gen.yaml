@@ -1,9 +1,6 @@
 version: v1
 managed:
   enabled: true
-  optimize_for: LITE_RUNTIME
-  go_package_prefix:
-    default: plugins/protoc-gen-connect-swift
 plugins:
   - plugin: buf.build/apple/swift
     opt: Visibility=Public

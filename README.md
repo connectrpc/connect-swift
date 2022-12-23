@@ -1,5 +1,7 @@
 # connect-swift
 
+[![Build](https://github.com/bufbuild/connect-swift/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/bufbuild/connect-swift/actions/workflows/ci.yaml)
+
 - [Get started](#get-started)
   * [Set up code generation](#set-up-code-generation)
     + [Custom configuration](#custom-configuration)
@@ -15,7 +17,7 @@
     + [Developing the generator plugin](#developing-the-generator-plugin)
   * [Generate code from protos](#generate-code-from-protos)
 - [Tests](#tests)
-  * [Run Connect crosstests & test service](#run-connect-crosstests---test-service)
+  * [Run Connect crosstests & test server](#run-connect-crosstests---test-server)
 
 # Get started
 
@@ -31,9 +33,6 @@ The easiest way to get started using connect-swift is to use
 version: v1
 managed:
   enabled: true
-  optimize_for: LITE_RUNTIME
-  go_package_prefix:
-    default: plugins/protoc-gen-connect-swift # Replace with your package (can be anything)
 plugins:
   - plugin: buf.build/apple/swift
     opt: Visibility=Public
@@ -204,7 +203,7 @@ To build the connect-swift generator plugin, use Xcode or
 the following command:
 
 ```sh
-make build-connect-plugin
+make buildplugin
 ```
 
 ## Generate code from protos
@@ -213,7 +212,7 @@ To build the plugin and run it against the [`./protos`](./protos) directory
 using the [local plugin](./protoc-gen-connect-swift) and Buf:
 
 ```sh
-make build-connect-plugin # Compile the plugin
+make buildplugin # Compile the plugin
 make generate # Run buf generate - uses buf.gen.yaml
 ```
 
@@ -221,23 +220,21 @@ Outputted code will be available in `./gen`.
 
 # Tests
 
-## Run Connect crosstests & test service
+## Run Connect crosstests & test server
 
-A test service is used to run [crosstests](./tests)
+A test server is used to run [crosstests](./tests)
 (integration tests which validate the behavior of the `Connect` library with
-various protocols).
+various protocols). **Starting the server requires Docker,
+so ensure that you have Docker installed before proceeding.**
 
-Crosstests can be run using the command line or using Xcode. Before running
-them, you'll need to start the test service using Docker:
+To start the server and run tests using the command line:
 
 ```sh
-make cross-test-server-run
-swift test
-make cross-test-server-stop
+make test
 ```
 
-Finally, run the crosstests:
+If you prefer to run the tests using Xcode, you can manually start the server:
 
 ```sh
-swift test
+make crosstestserverrun
 ```
