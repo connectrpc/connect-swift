@@ -1,147 +1,133 @@
-//// swiftlint:disable file_length
-//
-//import Connect
-//import Foundation
-//import GeneratedExamples
-//import XCTest
-//
-//private let kTimeout = TimeInterval(5)
-//
-//private typealias TestServiceClient = Grpc_Testing_TestServiceClient
-//private typealias UnimplementedServiceClient = Grpc_Testing_UnimplementedServiceClient
-//
-///// This test suite runs against multiple protocols and serialization formats.
-///// Tests are based on https://github.com/bufbuild/connect-crosstest
-/////
-///// Tests are written using async/await APIs.
-//final class CrosstestsAsyncAwait: XCTestCase {
-//    private func executeTestWithClients(
-//        function: Selector = #function,
-//        timeout: TimeInterval = 60,
-//        responseDelay: TimeInterval? = nil,
-//        runTestsWithClient: (TestServiceClient) throws -> Void
-//    ) rethrows {
-//        let clients = CrosstestClients(timeout: timeout, responseDelay: responseDelay)
-//
-//        print("Running \(function) with Connect + JSON...")
-//        try runTestsWithClient(TestServiceClient(client: clients.connectJSONClient))
-//        print("Running \(function) with Connect + proto...")
-//        try runTestsWithClient(TestServiceClient(client: clients.connectProtoClient))
-//
-//        print("Running \(function) with gRPC Web + JSON...")
-//        try runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
-//        print("Running \(function) with gRPC Web + proto...")
-//        try runTestsWithClient(TestServiceClient(client: clients.grpcWebProtoClient))
-//    }
-//
-//    private func executeTestWithUnimplementedClients(
-//        function: Selector = #function,
-//        runTestsWithClient: (UnimplementedServiceClient) throws -> Void
-//    ) rethrows {
-//        let clients = CrosstestClients(timeout: 60, responseDelay: nil)
-//
-//        print("Running \(function) with Connect + JSON...")
-//        try runTestsWithClient(UnimplementedServiceClient(client: clients.connectJSONClient))
-//        print("Running \(function) with Connect + proto...")
-//        try runTestsWithClient(UnimplementedServiceClient(client: clients.connectProtoClient))
-//
-//        print("Running \(function) with gRPC Web + JSON...")
-//        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebJSONClient))
-//        print("Running \(function) with gRPC Web + proto...")
-//        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebProtoClient))
-//    }
-//
-//    // MARK: - Crosstest cases
-//
-//    #error("todo")
-//    func testEmptyUnary() {
-//        self.executeTestWithClients { client in
-//            let expectation = self.expectation(description: "Receives successful response")
-//            client.emptyCall(request: Grpc_Testing_Empty()) { response in
-//                XCTAssertNil(response.error)
-//                XCTAssertEqual(response.message, Grpc_Testing_Empty())
-//                expectation.fulfill()
-//            }
-//            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
-//        }
-//    }
-//
-//    func testLargeUnary() {
-//        self.executeTestWithClients { client in
-//            let size = 314_159
-//            let message = Grpc_Testing_SimpleRequest.with { proto in
-//                proto.responseSize = Int32(size)
-//                proto.payload = .with { $0.body = Data(repeating: 0, count: size) }
-//            }
-//            let expectation = self.expectation(description: "Receives successful response")
-//            client.unaryCall(request: message) { response in
-//                XCTAssertNil(response.error)
-//                XCTAssertEqual(response.message?.payload.body.count, size)
-//                expectation.fulfill()
-//            }
-//            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
-//        }
-//    }
-//
-//    func testServerStreaming() throws {
-//        try self.executeTestWithClients { client in
-//            let sizes = [31_415, 9, 2_653, 58_979]
-//            let expectation = self.expectation(description: "Stream completes")
-//            var responseCount = 0
-//            let stream = client.streamingOutputCall { result in
-//                switch result {
-//                case .headers:
-//                    break
-//
-//                case .message(let output):
-//                    XCTAssertEqual(output.payload.body.count, sizes[responseCount])
-//                    responseCount += 1
-//
-//                case .complete(let code, let error, _):
-//                    XCTAssertEqual(code, .ok)
-//                    XCTAssertNil(error)
-//                    expectation.fulfill()
-//                }
-//            }
-//            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
-//                proto.responseParameters = sizes.enumerated().map { index, size in
-//                    return .with { parameters in
-//                        parameters.size = Int32(size)
-//                        parameters.intervalUs = Int32(index * 10)
-//                    }
-//                }
-//            })
-//
-//            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
-//            XCTAssertEqual(responseCount, 4)
-//        }
-//    }
-//
-//    func testEmptyStream() throws {
-//        try self.executeTestWithClients { client in
-//            let closeExpectation = self.expectation(description: "Stream completes")
-//            let stream = client.streamingOutputCall { result in
-//                switch result {
-//                case .headers:
-//                    break
-//
-//                case .message:
-//                    XCTFail("Unexpectedly received message")
-//
-//                case .complete(let code, let error, _):
-//                    XCTAssertEqual(code, .ok)
-//                    XCTAssertNil(error)
-//                    closeExpectation.fulfill()
-//                }
-//            }
-//            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
-//                proto.responseParameters = []
-//            })
-//
-//            XCTAssertEqual(XCTWaiter().wait(for: [closeExpectation], timeout: kTimeout), .completed)
-//        }
-//    }
-//
+// swiftlint:disable file_length
+
+import Connect
+import Foundation
+import GeneratedExamples
+import XCTest
+
+private typealias TestServiceClient = Grpc_Testing_TestServiceClient
+private typealias UnimplementedServiceClient = Grpc_Testing_UnimplementedServiceClient
+
+/// This test suite runs against multiple protocols and serialization formats.
+/// Tests are based on https://github.com/bufbuild/connect-crosstest
+///
+/// Tests are written using async/await APIs.
+final class CrosstestsAsyncAwait: XCTestCase {
+    private func executeTestWithClients(
+        function: Selector = #function,
+        timeout: TimeInterval = 60,
+        responseDelay: TimeInterval? = nil,
+        runTestsWithClient: (TestServiceClient) async throws -> Void
+    ) async rethrows {
+        let clients = CrosstestClients(timeout: timeout, responseDelay: responseDelay)
+
+        print("Running \(function) with Connect + JSON...")
+        try await runTestsWithClient(TestServiceClient(client: clients.connectJSONClient))
+        print("Running \(function) with Connect + proto...")
+        try await runTestsWithClient(TestServiceClient(client: clients.connectProtoClient))
+
+        print("Running \(function) with gRPC Web + JSON...")
+        try await runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
+        print("Running \(function) with gRPC Web + proto...")
+        try await runTestsWithClient(TestServiceClient(client: clients.grpcWebProtoClient))
+    }
+
+    private func executeTestWithUnimplementedClients(
+        function: Selector = #function,
+        runTestsWithClient: (UnimplementedServiceClient) async throws -> Void
+    ) async rethrows {
+        let clients = CrosstestClients(timeout: 60, responseDelay: nil)
+
+        print("Running \(function) with Connect + JSON...")
+        try await runTestsWithClient(UnimplementedServiceClient(client: clients.connectJSONClient))
+        print("Running \(function) with Connect + proto...")
+        try await runTestsWithClient(UnimplementedServiceClient(client: clients.connectProtoClient))
+
+        print("Running \(function) with gRPC Web + JSON...")
+        try await runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebJSONClient))
+        print("Running \(function) with gRPC Web + proto...")
+        try await runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebProtoClient))
+    }
+
+    // MARK: - Crosstest cases
+
+    func testEmptyUnary() async {
+        await self.executeTestWithClients { client in
+            let response = await client.emptyCall(request: Grpc_Testing_Empty())
+            XCTAssertEqual(response.message, Grpc_Testing_Empty())
+        }
+    }
+
+    func testLargeUnary() async {
+        await self.executeTestWithClients { client in
+            let size = 314_159
+            let message = Grpc_Testing_SimpleRequest.with { proto in
+                proto.responseSize = Int32(size)
+                proto.payload = .with { $0.body = Data(repeating: 0, count: size) }
+            }
+            let response = await client.unaryCall(request: message)
+            XCTAssertNil(response.error)
+            XCTAssertEqual(response.message?.payload.body.count, size)
+        }
+    }
+
+    func testServerStreaming() async throws {
+        try await self.executeTestWithClients { client in
+            let sizes = [31_415, 9, 2_653, 58_979]
+            var responseCount = 0
+            let stream = client.streamingOutputCall()
+            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
+                proto.responseParameters = sizes.enumerated().map { index, size in
+                    return .with { parameters in
+                        parameters.size = Int32(size)
+                        parameters.intervalUs = Int32(index * 10)
+                    }
+                }
+            })
+
+            for await result in stream.results() {
+                switch result {
+                case .headers:
+                    continue
+
+                case .message(let output):
+                    XCTAssertEqual(output.payload.body.count, sizes[responseCount])
+                    responseCount += 1
+
+                case .complete(let code, let error, _):
+                    XCTAssertEqual(code, .ok)
+                    XCTAssertNil(error)
+                }
+            }
+            XCTAssertEqual(responseCount, 4)
+        }
+    }
+
+    func testEmptyStream() async throws {
+        try await self.executeTestWithClients { client in
+            var resultCode: Code?
+            let stream = client.streamingOutputCall()
+            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
+                proto.responseParameters = []
+            })
+            
+            for await result in stream.results() {
+                switch result {
+                case .headers:
+                    continue
+
+                case .message:
+                    XCTFail("Unexpectedly received message")
+
+                case .complete(let code, let error, _):
+                    resultCode = code
+                    XCTAssertNil(error)
+                }
+            }
+            XCTAssertEqual(resultCode, .ok)
+        }
+    }
+
 //    func testCustomMetadata() {
 //        self.executeTestWithClients { client in
 //            let size = 314_159
@@ -471,4 +457,4 @@
 //            XCTAssertTrue(task.isCancelled)
 //        }
 //    }
-//}
+}
