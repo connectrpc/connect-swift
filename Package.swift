@@ -46,7 +46,7 @@ let package = Package(
                 "GeneratedExamples",
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "tests"
+            path: "tests/swift"
         ),
         .target(
             name: "GeneratedExamples",
