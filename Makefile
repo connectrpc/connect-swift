@@ -7,8 +7,7 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-print-directory
 BIN := .tmp/bin
-COPYRIGHT_YEARS := 2021-2022
-LICENSE_IGNORE := -e /tests/proto
+COPYRIGHT_YEARS := 2022
 CROSSTEST_VERSION := 4f4e96d8fea3ed9473b90a964a5ba429e7ea5649
 
 .PHONY: buildlibrary
@@ -24,7 +23,7 @@ buildplugin: ## Build the protoc-gen-connect-swift plugin binary
 
 .PHONY: clean
 clean: ## Clean/delete all generated outputs
-	rm -rf ./gen/proto
+	rm -rf ./Generated
 
 .PHONY: crosstestserstop
 crosstestserstop: ## Stop the crosstest server

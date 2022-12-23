@@ -26,7 +26,7 @@
 The easiest way to get started using connect-swift is to use
 [Buf's remote generation](https://docs.buf.build/bsr/remote-plugins/overview):
 
-1. Install Buf's CLI (`brew install buf`).
+1. Install Buf's CLI (`brew install bufbuild/buf/buf`).
 2. Add a `buf.gen.yaml` file to your project which contains a configuration for running both the [SwiftProtobuf](https://github.com/apple/swift-protobuf) and connect-swift generators:
 
 ```yaml
@@ -36,21 +36,21 @@ managed:
 plugins:
   - plugin: buf.build/apple/swift
     opt: Visibility=Public
-    out: gen/proto/swift-protobuf # Or your target output directory
+    out: Generated/swift-protobuf # Or your target output directory
   - remote: buf.build/mrebello/plugins/connect-swift
     opt: GenerateAsyncMethods=true,GenerateCallbackMethods=true,Visibility=Public # See "custom configuration" section in docs below
-    out: gen/proto/connect-swift # Or your target output directory
+    out: Generated/connect-swift # Or your target output directory
 ```
 
 3. Add a `buf.work.yaml` file to your project which specifies the input directories for your `.proto` files:
 ```yaml
 version: v1
 directories:
-  - protos # Or wherever your .proto files live
+  - proto # Or wherever your .proto files live
 ```
 
 4. Run `make generate` (or `buf generate`), and you should see the outputted files!
-5. Now that you have generated models + APIs from your `.proto` files, you'll need to integrate the runtime using one of the methods below.
+5. Now that you have generated models & APIs from your `.proto` files, you'll need to integrate the runtime using one of the methods below.
 
 ### Custom configuration
 
@@ -95,10 +95,10 @@ TODO
 
 ## Build and run example apps
 
-Tests and example apps depend on outputs in `./gen`.
+Tests and example apps depend on outputs in `./Generated`.
 
 Example apps are available in
-[`./examples`](./examples), and can be opened and built using Xcode.
+[`./Examples`](./Examples), and can be opened and built using Xcode.
 
 ## Writing an interceptor
 
@@ -167,7 +167,7 @@ In order to develop with this repository, **install Xcode** and
 complete the following setup:
 
 ```sh
-brew install buf
+brew install bufbuild/buf/buf
 ```
 
 ## Swift development
@@ -181,7 +181,7 @@ distribution. To open the project and start using it:
 
 ### Developing the library
 
-The Connect library's source code is available in the [`./library`](./library)
+The Connect library's source code is available in the [`./Connect`](./Connect)
 directory.
 
 The easiest way to contribute to the library is to
@@ -208,7 +208,8 @@ make buildplugin
 
 ## Generate code from protos
 
-To build the plugin and run it against the [`./protos`](./protos) directory
+To build the plugin and run it against the directories specified in
+[`buf.work.yaml`](./buf.work.yaml)
 using the [local plugin](./protoc-gen-connect-swift) and Buf:
 
 ```sh
@@ -216,13 +217,13 @@ make buildplugin # Compile the plugin
 make generate # Run buf generate - uses buf.gen.yaml
 ```
 
-Outputted code will be available in `./gen`.
+Outputted code will be available in `./Generated`.
 
 # Tests
 
 ## Run Connect crosstests & test server
 
-A test server is used to run [crosstests](./tests)
+A test server is used to run [crosstests](./ConnectTests)
 (integration tests which validate the behavior of the `Connect` library with
 various protocols). **Starting the server requires Docker,
 so ensure that you have Docker installed before proceeding.**
