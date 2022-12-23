@@ -16,8 +16,6 @@
   * [Generate code from protos](#generate-code-from-protos)
 - [Tests](#tests)
   * [Run Connect crosstests & test service](#run-connect-crosstests---test-service)
-    + [Using Docker](#using-docker)
-    + [Without Docker (no SSL)](#without-docker--no-ssl-)
 
 # Get started
 
@@ -170,7 +168,6 @@ In order to develop with this repository, **install Xcode** and
 complete the following setup:
 
 ```sh
-git submodule update --init # Set up the connect-crosstest submodule
 brew install buf
 ```
 
@@ -231,33 +228,13 @@ A test service is used to run [crosstests](./tests)
 various protocols).
 
 Crosstests can be run using the command line or using Xcode. Before running
-them, you'll need to start the test service using one of the methods below:
-
-### Using Docker
-
-Running the crosstest service using Docker allows the tests to run using SSL:
+them, you'll need to start the test service using Docker:
 
 ```sh
 make cross-test-server-run
 swift test
 make cross-test-server-stop
 ```
-
-### Without Docker (no SSL)
-
-Alternatively, you can run the local service without
-requiring a TLS certificate. This requires a patch to be applied before
-starting the service:
-
-```sh
-cd connect-crosstest
-git apply ../tests/crosstests-local.patch
-go build -o testserver cmd/serverconnect/main.go
-./testserver --h1port=8080 --h2port=8081
-```
-
-**You'll then need to change `http` to `https` in
-[`CrosstestClients.swift`](./tests/CrosstestClients.swift).**
 
 Finally, run the crosstests:
 

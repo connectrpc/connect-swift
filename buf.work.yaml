@@ -1,4 +1,4 @@
 version: v1
 directories:
   - protos
-  - connect-crosstest/internal/proto
+  - tests/proto
