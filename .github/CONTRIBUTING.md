@@ -24,12 +24,6 @@ git remote add upstream https://github.com/bufbuild/connect-swift.git
 git fetch upstream
 ```
 
-Make sure that the tests and the linters pass:
-
-```
-make
-```
-
 ## Making Changes
 
 Start by creating a new branch for your changes:
