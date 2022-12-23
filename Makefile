@@ -25,12 +25,12 @@ buildplugin: ## Build the protoc-gen-connect-swift plugin binary
 clean: ## Clean/delete all generated outputs
 	rm -rf ./Generated
 
-.PHONY: crosstestserstop
-crosstestserstop: ## Stop the crosstest server
+.PHONY: crosstestserverstop
+crosstestserverstop: ## Stop the crosstest server
 	-docker container stop serverconnect servergrpc
 
-.PHONY: crosstestserrun
-crosstestserrun: crosstestserstop ## Start the crosstest server
+.PHONY: crosstestserverrun
+crosstestserverrun: crosstestserverstop ## Start the crosstest server
 	docker run --rm --name serverconnect -p 8080:8080 -p 8081:8081 -d \
 		bufbuild/connect-crosstest:$(CROSSTEST_VERSION) \
 		/usr/local/bin/serverconnect --h1port "8080" --h2port "8081" --cert "cert/localhost.crt" --key "cert/localhost.key"
@@ -47,6 +47,6 @@ help: ## Describe useful make targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "%-30s %s\n", $$1, $$2}'
 
 .PHONY: test
-test: crosstestserrun ## Run all tests
+test: crosstestserverrun ## Run all tests
 	swift test
-	$(MAKE) crosstestserstop
+	$(MAKE) crosstestserverstop
