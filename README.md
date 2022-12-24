@@ -98,7 +98,7 @@ TODO
 Tests and example apps depend on outputs in `./Generated`.
 
 Example apps are available in
-[`./Examples`](./Examples), and can be opened and built using Xcode.
+[`./ConnectExamples`](./ConnectExamples), and can be opened and built using Xcode.
 
 ## Writing an interceptor
 

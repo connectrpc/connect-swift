@@ -27,7 +27,7 @@
 		B204C6592947EAC700239D66 /* MenuView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 		B204C65A2947EAC700239D66 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		B204C65B2947EAC700239D66 /* MessagingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingView.swift; sourceTree = "<group>"; };
-		B28DA31129566DCC00D2F796 /* connect-swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "connect-swift"; path = ../..; sourceTree = "<group>"; };
+		B2D43E2829567DDB006F8FF1 /* connect-swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "connect-swift"; path = ../..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,7 +93,7 @@
 		B2D532F12948FF4D00DA95C7 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				B28DA31129566DCC00D2F796 /* connect-swift */,
+				B2D43E2829567DDB006F8FF1 /* connect-swift */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
