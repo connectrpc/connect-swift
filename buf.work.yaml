@@ -2,4 +2,4 @@ version: v1
 directories:
   - Connect/proto
   - ConnectTests/proto
-  - Examples/proto
+  - ConnectExamples/proto
