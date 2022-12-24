@@ -14,8 +14,8 @@
 		B204C65D2947EAC700239D66 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B204C6592947EAC700239D66 /* MenuView.swift */; };
 		B204C65E2947EAC700239D66 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = B204C65A2947EAC700239D66 /* Message.swift */; };
 		B204C65F2947EAC700239D66 /* MessagingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B204C65B2947EAC700239D66 /* MessagingView.swift */; };
-		B204C6622947EB7300239D66 /* Connect in Frameworks */ = {isa = PBXBuildFile; productRef = B204C6612947EB7300239D66 /* Connect */; };
-		B204C6642947EB7300239D66 /* GeneratedExamples in Frameworks */ = {isa = PBXBuildFile; productRef = B204C6632947EB7300239D66 /* GeneratedExamples */; };
+		B28DA31329566DDB00D2F796 /* Connect in Frameworks */ = {isa = PBXBuildFile; productRef = B28DA31229566DDB00D2F796 /* Connect */; };
+		B28DA31529566DDB00D2F796 /* Generated in Frameworks */ = {isa = PBXBuildFile; productRef = B28DA31429566DDB00D2F796 /* Generated */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +27,7 @@
 		B204C6592947EAC700239D66 /* MenuView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 		B204C65A2947EAC700239D66 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		B204C65B2947EAC700239D66 /* MessagingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingView.swift; sourceTree = "<group>"; };
-		B2D532F22948FF4D00DA95C7 /* connect-swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "connect-swift"; path = ../..; sourceTree = "<group>"; };
+		B28DA31129566DCC00D2F796 /* connect-swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "connect-swift"; path = ../..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,8 +35,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B204C6642947EB7300239D66 /* GeneratedExamples in Frameworks */,
-				B204C6622947EB7300239D66 /* Connect in Frameworks */,
+				B28DA31529566DDB00D2F796 /* Generated in Frameworks */,
+				B28DA31329566DDB00D2F796 /* Connect in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,7 +93,7 @@
 		B2D532F12948FF4D00DA95C7 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				B2D532F22948FF4D00DA95C7 /* connect-swift */,
+				B28DA31129566DCC00D2F796 /* connect-swift */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -115,8 +115,8 @@
 			);
 			name = Eliza;
 			packageProductDependencies = (
-				B204C6612947EB7300239D66 /* Connect */,
-				B204C6632947EB7300239D66 /* GeneratedExamples */,
+				B28DA31229566DDB00D2F796 /* Connect */,
+				B28DA31429566DDB00D2F796 /* Generated */,
 			);
 			productName = Eliza;
 			productReference = B204C6382947E98A00239D66 /* Eliza.app */;
@@ -393,13 +393,13 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		B204C6612947EB7300239D66 /* Connect */ = {
+		B28DA31229566DDB00D2F796 /* Connect */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Connect;
 		};
-		B204C6632947EB7300239D66 /* GeneratedExamples */ = {
+		B28DA31429566DDB00D2F796 /* Generated */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = GeneratedExamples;
+			productName = Generated;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

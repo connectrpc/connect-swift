@@ -35,7 +35,7 @@ private struct MockUnaryInterceptor: Interceptor {
     }
 
     func streamFunction() -> Connect.StreamFunction {
-        fatalError()
+        fatalError("Unexpectedly called with stream")
     }
 }
 
@@ -48,7 +48,7 @@ private struct MockStreamInterceptor: Interceptor {
     let resultExpectation: XCTestExpectation
 
     func unaryFunction() -> UnaryFunction {
-        fatalError()
+        fatalError("Unexpectedly called with unary request")
     }
 
     func streamFunction() -> StreamFunction {
@@ -64,7 +64,7 @@ private struct MockStreamInterceptor: Interceptor {
                     message: request.message
                 )
             },
-            requestDataFunction: { data in
+            requestDataFunction: { _ in
                 self.requestDataExpectation.fulfill()
                 return self.outboundMessageData
             },
@@ -116,7 +116,7 @@ final class InterceptorChainTests: XCTestCase {
                         requestExpectation: bRequestExpectation,
                         responseExpectation: bResponseExpectation
                     )
-                }
+                },
             ],
             config: self.config
         ).unaryFunction()

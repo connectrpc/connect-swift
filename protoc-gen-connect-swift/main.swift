@@ -32,4 +32,3 @@ do {
 } catch let error {
     FileHandle.standardError.write(("\(error)" + "\n").data(using: .utf8)!)
 }
-

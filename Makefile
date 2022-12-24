@@ -1,35 +1,52 @@
+# See https://tech.davis-hansson.com/p/make/
+SHELL := bash
+.DELETE_ON_ERROR:
+.SHELLFLAGS := -eu -o pipefail -c
+.DEFAULT_GOAL := all
+MAKEFLAGS += --warn-undefined-variables
+MAKEFLAGS += --no-builtin-rules
+MAKEFLAGS += --no-print-directory
+BIN := .tmp/bin
+COPYRIGHT_YEARS := 2022
 CROSSTEST_VERSION := 4f4e96d8fea3ed9473b90a964a5ba429e7ea5649
 
-.PHONY: build-connect-plugin
-build-connect-plugin:
-	@echo "Building connect-swift plugin..."
-	@swift build -c release --product protoc-gen-connect-swift
-	@mkdir -p ./plugins
-	@mv ./.build/release/protoc-gen-connect-swift ./plugins
+.PHONY: buildlibrary
+buildlibrary: ## Build the Swift library targets
+	swift build
+
+.PHONY: buildplugin
+buildplugin: ## Build the protoc-gen-connect-swift plugin binary
+	swift build -c release --product protoc-gen-connect-swift
+	mkdir -p ./plugins
+	mv ./.build/release/protoc-gen-connect-swift ./plugins
 	@echo "Success! The plugin is available in ./plugins"
 
-.PHONY: build-connect
-build-connect:
-	@echo "Building Connect library..."
-	@swift build
-
-.PHONY: generate
-generate: clean
-	buf generate
-
 .PHONY: clean
-clean:
-	@rm -rf ./gen/proto
+clean: ## Clean/delete all generated outputs
+	rm -rf ./Generated
 
-.PHONY: cross-test-server-stop
-cross-test-server-stop:
+.PHONY: crosstestserverstop
+crosstestserverstop: ## Stop the crosstest server
 	-docker container stop serverconnect servergrpc
 
-.PHONY: cross-test-server-run
-cross-test-server-run: cross-test-server-stop
+.PHONY: crosstestserverrun
+crosstestserverrun: crosstestserverstop ## Start the crosstest server
 	docker run --rm --name serverconnect -p 8080:8080 -p 8081:8081 -d \
 		bufbuild/connect-crosstest:$(CROSSTEST_VERSION) \
 		/usr/local/bin/serverconnect --h1port "8080" --h2port "8081" --cert "cert/localhost.crt" --key "cert/localhost.key"
 	docker run --rm --name servergrpc -p 8083:8083 -d \
 		bufbuild/connect-crosstest:$(CROSSTEST_VERSION) \
 		/usr/local/bin/servergrpc --port "8083" --cert "cert/localhost.crt" --key "cert/localhost.key"
+
+.PHONY: generate
+generate: clean ## Regenerate outputs for all .proto files
+	buf generate
+
+.PHONY: help
+help: ## Describe useful make targets
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "%-30s %s\n", $$1, $$2}'
+
+.PHONY: test
+test: crosstestserverrun ## Run all tests
+	swift test
+	$(MAKE) crosstestserverstop

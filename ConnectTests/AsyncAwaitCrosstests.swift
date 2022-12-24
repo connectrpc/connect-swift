@@ -2,7 +2,7 @@
 
 import Connect
 import Foundation
-import GeneratedExamples
+import Generated
 import XCTest
 
 private let kTimeout = TimeInterval(5)

@@ -16,8 +16,8 @@ let package = Package(
         ),
         // Library used by example apps within this repository.
         .library(
-            name: "GeneratedExamples",
-            targets: ["GeneratedExamples"]
+            name: "Generated",
+            targets: ["Generated"]
         ),
         // Generator executable for Connect RPCs.
         .executable(
@@ -37,24 +37,30 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "library"
+            path: "Connect",
+            exclude: [
+                "proto",
+            ]
         ),
         .testTarget(
             name: "ConnectTests",
             dependencies: [
                 "Connect",
-                "GeneratedExamples",
+                "Generated",
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "tests/swift"
+            path: "ConnectTests",
+            exclude: [
+                "proto",
+            ]
         ),
         .target(
-            name: "GeneratedExamples",
+            name: "Generated",
             dependencies: [
                 "Connect",
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "gen"
+            path: "Generated"
         ),
         .executableTarget(
             name: "protoc-gen-connect-swift",

@@ -1,7 +1,7 @@
 import Combine
 import Connect
 import Dispatch
-import GeneratedExamples
+import Generated
 import os.log
 
 private typealias ConverseRequest = Buf_Connect_Demo_Eliza_V1_ConverseRequest

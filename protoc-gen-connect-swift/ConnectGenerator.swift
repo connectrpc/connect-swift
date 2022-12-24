@@ -225,7 +225,6 @@ private extension MethodDescriptor {
             onResult: @escaping (Connect.StreamResult<\(outputName)>) -> Void) \
             -> any Connect.BidirectionalStreamInterface<\(inputName)>
             """
-
         } else if self.serverStreaming {
             return """
             func `\(methodName)`\
@@ -233,7 +232,6 @@ private extension MethodDescriptor {
             onResult: @escaping (Connect.StreamResult<\(outputName)>) -> Void) \
             -> any Connect.ServerOnlyStreamInterface<\(inputName)>
             """
-
         } else if self.clientStreaming {
             return """
             func `\(methodName)`\
@@ -241,7 +239,6 @@ private extension MethodDescriptor {
             onResult: @escaping (Connect.StreamResult<\(outputName)>) -> Void) \
             -> any Connect.ClientOnlyStreamInterface<\(inputName)>
             """
-
         } else {
             return """
             func `\(methodName)`\
@@ -266,21 +263,18 @@ private extension MethodDescriptor {
             (headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
             -> any Connect.BidirectionalAsyncStreamInterface<\(inputName), \(outputName)>
             """
-
         } else if self.serverStreaming {
             return """
             func `\(methodName)`\
             (headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
             -> any Connect.ServerOnlyAsyncStreamInterface<\(inputName), \(outputName)>
             """
-
         } else if self.clientStreaming {
             return """
             func `\(methodName)`\
             (headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
             -> any Connect.ClientOnlyAsyncStreamInterface<\(inputName), \(outputName)>
             """
-
         } else {
             return """
             func `\(methodName)`\
