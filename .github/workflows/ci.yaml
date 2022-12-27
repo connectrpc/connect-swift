@@ -18,6 +18,7 @@ jobs:
 #          buf_token: ${{ secrets.BSR_TEST_TOKEN }}
       - name: Build connect-swift plugin
         run: make buildplugin
+# TODO: After running `make generate`, ensure `git diff` is empty
 #      - name: Generate
 #        run: make generate
   build-connect-library:

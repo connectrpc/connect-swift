@@ -41,6 +41,7 @@ crosstestserverrun: crosstestserverstop ## Start the crosstest server
 .PHONY: generate
 generate: clean ## Regenerate outputs for all .proto files
 	buf generate
+	cp ./Generated/swift-protobuf/grpc/status/v1/status.pb.swift ./Connect/Implementation/Generated
 
 .PHONY: help
 help: ## Describe useful make targets
