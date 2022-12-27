@@ -1,4 +1,7 @@
-/// Provides an implementation of gzip for encoding/decoding.
+/// Provides an implementation of gzip for encoding/decoding, allowing the client to compress
+/// and decompress requests/responses using gzip.
+///
+/// To compress outbound requests, specify the `GzipRequestOption`.
 public struct GzipCompressionOption {
     public init() {}
 }

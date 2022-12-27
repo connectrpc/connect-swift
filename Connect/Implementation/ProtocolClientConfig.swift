@@ -4,28 +4,36 @@ import Foundation
 public struct ProtocolClientConfig {
     /// The target host (e.g., https://buf.build).
     public let target: String
+    /// The client to use for performing requests.
     public let httpClient: HTTPClientInterface
+    /// The minimum number of bytes that a request message should be for compression to be used.
     public let compressionMinBytes: Int?
+    /// The compression type that should be used (e.g., "gzip").
+    /// Requires a matching `compressionPools` entry.
     public let compressionName: String?
-    public let codec: Codec
-    public let interceptors: [(ProtocolClientConfig) -> Interceptor]
+    /// Compression pools that provide support for the provided `compressionName`, as well as any
+    /// other compression methods that need to be supported for inbound responses.
     public let compressionPools: [String: CompressionPool]
+    /// Codec to use for serializing/deserializing requests/responses.
+    public let codec: Codec
+    /// Set of interceptors that should be invoked with requests/responses.
+    public let interceptors: [(ProtocolClientConfig) -> Interceptor]
 
     public func clone(
         compressionMinBytes: Int? = nil,
         compressionName: String? = nil,
+        compressionPools: [String: CompressionPool]? = nil,
         codec: Codec? = nil,
-        interceptors: [(ProtocolClientConfig) -> Interceptor]? = nil,
-        compressionPools: [String: CompressionPool]? = nil
+        interceptors: [(ProtocolClientConfig) -> Interceptor]? = nil
     ) -> Self {
         return .init(
             target: self.target,
             httpClient: self.httpClient,
             compressionMinBytes: compressionMinBytes ?? self.compressionMinBytes,
             compressionName: compressionName ?? self.compressionName,
+            compressionPools: compressionPools ?? self.compressionPools,
             codec: codec ?? self.codec,
-            interceptors: interceptors ?? self.interceptors,
-            compressionPools: compressionPools ?? self.compressionPools
+            interceptors: interceptors ?? self.interceptors
         )
     }
 }

@@ -1,6 +1,7 @@
 import Foundation
 import SwiftProtobuf
 
+/// Codec providing functionality for serializing to/from Protobuf binary.
 public struct ProtoCodec {
     public init() {}
 }

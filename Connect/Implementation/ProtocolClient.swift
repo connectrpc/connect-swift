@@ -10,8 +10,12 @@ public final class ProtocolClient {
     ///
     /// - parameter target: The target host (e.g., https://buf.build).
     /// - parameter httpClient: HTTP client to use for performing requests.
-    /// - parameter options: Series of options with which to configure the client. Identity and gzip
-    ///                      compression options are provided by default.
+    /// - parameter options: Series of options with which to configure the client.
+    ///                      Identity and gzip compression implementations are provided by default
+    ///                      via `IdentityCompressionOption` and `GzipCompressionOption`, and
+    ///                      encoding requests with gzip can be enabled using `GzipRequestOption`.
+    ///                      Additional compression implementations may be specified using custom
+    ///                      options.
     public init(
         target: String, httpClient: HTTPClientInterface, _ options: ProtocolClientOption...
     ) {

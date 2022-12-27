@@ -2,6 +2,9 @@ import Foundation
 
 /// Enables the client to speak using the Connect protocol:
 /// https://connect.build/docs
+///
+/// Should not be specified alongside other options like `GRPCWebClientOption`, as only one protocol
+/// should be used per `ProtocolClient`.
 public struct ConnectClientOption {
     public init() {}
 }

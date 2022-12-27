@@ -1,6 +1,7 @@
 /// Adds interceptors to requests/responses.
+///
 /// If multiple `InterceptorsOption` instances are specified, the interceptors from each will
-/// be added in order.
+/// be added in the order specified.
 public struct InterceptorsOption {
     private let interceptors: [(ProtocolClientConfig) -> Interceptor]
 

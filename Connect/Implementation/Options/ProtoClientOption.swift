@@ -1,4 +1,4 @@
-/// Enables protobuf as the encoding/decoding for requests/responses.
+/// Enables Protobuf binary as the serialization method for requests/responses.
 public struct ProtoClientOption {
     public init() {}
 }

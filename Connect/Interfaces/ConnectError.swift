@@ -1,11 +1,18 @@
 import Foundation
 import SwiftProtobuf
 
+/// Typed error provided by Connect RPCs that may optionally wrap additional typed custom errors
+/// using `details`.
 public struct ConnectError: Swift.Error {
+    /// The resulting status code.
     public let code: Code
+    /// User-readable error message.
     public let message: String?
+    /// Client-side exception that occurred, resulting in the error.
     public let exception: Swift.Error?
+    /// List of typed errors that were provided by the server. See `unpackedDetails()`.
     public let details: [Detail]
+    /// Additional key-values that were provided by the server.
     public private(set) var metadata: Headers
 
     /// Unpacks values from `self.details` and returns the first matching error, if any.
