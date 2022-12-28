@@ -1,7 +1,8 @@
+*.xcscheme
 *.xcuserdatad
 *.xcuserstate
+*.xcworkspacedata
 .build
 .DS_Store
-/.swiftpm
 /plugins
 DerivedData
