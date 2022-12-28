@@ -18,8 +18,7 @@ final class CrosstestClients {
             httpClient: httpClient,
             ConnectClientOption(),
             JSONClientOption(),
-            GzipRequestOption(),
-            CompressionMinBytesRequestOption(compressionMinBytes: 10),
+            GzipRequestOption(compressionMinBytes: 10),
             GzipCompressionOption()
         )
         self.connectProtoClient = ProtocolClient(
@@ -27,8 +26,7 @@ final class CrosstestClients {
             httpClient: httpClient,
             ConnectClientOption(),
             ProtoClientOption(),
-            GzipRequestOption(),
-            CompressionMinBytesRequestOption(compressionMinBytes: 10),
+            GzipRequestOption(compressionMinBytes: 10),
             GzipCompressionOption()
         )
         self.grpcWebJSONClient = ProtocolClient(
@@ -36,8 +34,7 @@ final class CrosstestClients {
             httpClient: httpClient,
             GRPCWebClientOption(),
             JSONClientOption(),
-            GzipRequestOption(),
-            CompressionMinBytesRequestOption(compressionMinBytes: 10),
+            GzipRequestOption(compressionMinBytes: 10),
             GzipCompressionOption()
         )
         self.grpcWebProtoClient = ProtocolClient(
@@ -45,8 +42,7 @@ final class CrosstestClients {
             httpClient: httpClient,
             GRPCWebClientOption(),
             ProtoClientOption(),
-            GzipRequestOption(),
-            CompressionMinBytesRequestOption(compressionMinBytes: 10),
+            GzipRequestOption(compressionMinBytes: 10),
             GzipCompressionOption()
         )
     }
