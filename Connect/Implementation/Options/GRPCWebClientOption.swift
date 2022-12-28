@@ -2,6 +2,9 @@ import Foundation
 
 /// Enables the client to speak using the gRPC Web protocol:
 /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
+///
+/// Should not be specified alongside other options like `ConnectClientOption`, as only one protocol
+/// should be used per `ProtocolClient`.
 public struct GRPCWebClientOption {
     public init() {}
 }

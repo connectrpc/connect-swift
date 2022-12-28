@@ -1,10 +1,10 @@
 /// Structure modeling the final JSON message that is returned by Connect streams:
 /// https://connect.build/docs/protocol#error-end-stream
-public struct ConnectEndStreamResponse {
+struct ConnectEndStreamResponse {
     /// Connect error that was returned with the response.
-    public let error: ConnectError?
+    let error: ConnectError?
     /// Additional metadata that was passed with the response. Keys are guaranteed to be lowercased.
-    public let metadata: Trailers?
+    let metadata: Trailers?
 }
 
 extension ConnectEndStreamResponse: Decodable {
@@ -13,7 +13,7 @@ extension ConnectEndStreamResponse: Decodable {
         case metadata = "metadata"
     }
 
-    public init(from decoder: Decoder) throws {
+    init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let rawMetadata = try container.decodeIfPresent(Trailers.self, forKey: .metadata)
         self.init(

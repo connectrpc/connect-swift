@@ -1,5 +1,6 @@
 import Foundation
 
+/// Internal implementation of a lock. Wraps usage of `os_unfair_lock`.
 final class Lock {
     private let underlyingLock: UnsafeMutablePointer<os_unfair_lock>
 

@@ -1,5 +1,5 @@
 /// Represents a chain of interceptors that is used for a single request/stream,
-/// and orchestrates invoking each of them as needed.
+/// and orchestrates invoking each of them in the proper order.
 struct InterceptorChain {
     private let interceptors: [Interceptor]
 

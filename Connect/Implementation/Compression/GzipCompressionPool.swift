@@ -1,7 +1,7 @@
 import Foundation
 import zlib
 
-/// Compression pool that handles gzip compression.
+/// Compression pool that handles gzip compression/decompression.
 public struct GzipCompressionPool {
     public init() {}
 

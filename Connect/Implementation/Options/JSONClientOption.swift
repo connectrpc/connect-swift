@@ -1,4 +1,4 @@
-/// Enables JSON as the encoding/decoding for requests/responses.
+/// Enables JSON as the serialization method for requests/responses.
 public struct JSONClientOption {
     public init() {}
 }

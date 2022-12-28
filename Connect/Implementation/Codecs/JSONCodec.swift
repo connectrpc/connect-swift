@@ -1,6 +1,7 @@
 import Foundation
 import SwiftProtobuf
 
+/// Codec providing functionality for serializing to/from JSON.
 public struct JSONCodec {
     private let encodingOptions: JSONEncodingOptions
     private let decodingOptions: JSONDecodingOptions = {
