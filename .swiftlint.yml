@@ -36,7 +36,6 @@ opt_in_rules:
   - explicit_init
   - fallthrough
   - fatal_error_message
-  - file_header
   - file_name
   - first_where
   - flatmap_over_map_reduce
