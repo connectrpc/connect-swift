@@ -22,7 +22,6 @@ import XCTest
 
 final class ConnectErrorTests: XCTestCase {
     func testDeserializingFullErrorAndUnpackingDetails() throws {
-        // Example error from https://connect.build/docs/protocol/#error-end-stream
         let expectedDetails = Grpc_Testing_SimpleResponse.with { $0.hostname = "foobar" }
         let errorData = try self.errorData(expectedDetails: expectedDetails)
         let error = try JSONDecoder().decode(ConnectError.self, from: errorData)
@@ -32,6 +31,25 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertEqual(error.details.count, 1)
         XCTAssertEqual(error.unpackedDetails(), expectedDetails)
         XCTAssertTrue(error.metadata.isEmpty)
+    }
+
+    func testDeserializingErrorUsingHelperFunctionLowercasesHeaderKeys() throws {
+        let expectedDetails = Grpc_Testing_SimpleResponse.with { $0.hostname = "foobar" }
+        let errorData = try self.errorData(expectedDetails: expectedDetails)
+        let error = ConnectError.from(
+            code: .aborted,
+            headers: [
+                "sOmEkEy": ["foo"],
+                "otherKey1": ["BAR", "bAz"],
+            ],
+            source: errorData
+        )
+        XCTAssertEqual(error.code, .unavailable) // Respects the code from the error body
+        XCTAssertEqual(error.message, "overloaded: back off and retry")
+        XCTAssertNil(error.exception)
+        XCTAssertEqual(error.details.count, 1)
+        XCTAssertEqual(error.unpackedDetails(), expectedDetails)
+        XCTAssertEqual(error.metadata, ["somekey": ["foo"], "otherkey1": ["BAR", "bAz"]])
     }
 
     func testDeserializingSimpleError() throws {
@@ -56,6 +74,7 @@ final class ConnectErrorTests: XCTestCase {
     // MARK: - Private
 
     private func errorData(expectedDetails: SwiftProtobuf.Message) throws -> Data {
+        // Example error from https://connect.build/docs/protocol/#error-end-stream
         let dictionary: [String: Any] = [
             "code": "unavailable",
             "message": "overloaded: back off and retry",
