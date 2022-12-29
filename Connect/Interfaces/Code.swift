@@ -46,7 +46,7 @@ public enum Code: Int, CaseIterable, Equatable {
         case .invalidArgument:
             return "invalid_argument"
         case .deadlineExceeded:
-            return "timeout_exceeded"
+            return "deadline_exceeded"
         case .notFound:
             return "not_found"
         case .alreadyExists:
@@ -64,7 +64,7 @@ public enum Code: Int, CaseIterable, Equatable {
         case .unimplemented:
             return "unimplemented"
         case .internalError:
-            return "internal_error"
+            return "internal"
         case .unavailable:
             return "unavailable"
         case .dataLoss:
@@ -75,7 +75,7 @@ public enum Code: Int, CaseIterable, Equatable {
     }
 
     public static func fromHTTPStatus(_ status: Int) -> Self {
-        // From https://github.com/bufbuild/connect-web/blob/main/packages/connect-web/src/code.ts
+        // https://connect.build/docs/protocol#http-to-error-code
         switch status {
         case 200:
             return .ok
