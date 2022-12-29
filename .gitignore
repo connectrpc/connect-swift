@@ -4,5 +4,6 @@
 *.xcworkspacedata
 .build
 .DS_Store
+/.tmp
 /plugins
 DerivedData
