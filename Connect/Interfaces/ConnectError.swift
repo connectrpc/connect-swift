@@ -80,6 +80,10 @@ extension ConnectError: Swift.Decodable {
 
 extension ConnectError {
     public static func from(code: Code, headers: Headers, source: Data?) -> Self {
+        let headers = headers.reduce(into: Headers(), { headers, current in
+            headers[current.key.lowercased()] = current.value
+        })
+
         guard let source = source else {
             return ConnectError(
                 code: code, message: "empty error message from source", exception: nil,

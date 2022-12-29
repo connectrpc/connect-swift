@@ -66,6 +66,9 @@ let package = Package(
             path: "ConnectTests",
             exclude: [
                 "proto",
+            ],
+            resources: [
+                .copy("Resources"),
             ]
         ),
         .target(
