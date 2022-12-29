@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		B204C6402947E98B00239D66 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B204C63F2947E98B00239D66 /* Assets.xcassets */; };
-		B204C6432947E98B00239D66 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B204C6422947E98B00239D66 /* Preview Assets.xcassets */; };
 		B204C64A2947E9D100239D66 /* ElizaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B204C6492947E9D100239D66 /* ElizaApp.swift */; };
 		B204C65C2947EAC700239D66 /* MessagingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B204C6582947EAC700239D66 /* MessagingViewModel.swift */; };
 		B204C65D2947EAC700239D66 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B204C6592947EAC700239D66 /* MenuView.swift */; };
@@ -21,7 +20,6 @@
 /* Begin PBXFileReference section */
 		B204C6382947E98A00239D66 /* Eliza.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Eliza.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B204C63F2947E98B00239D66 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		B204C6422947E98B00239D66 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B204C6492947E9D100239D66 /* ElizaApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElizaApp.swift; sourceTree = "<group>"; };
 		B204C6582947EAC700239D66 /* MessagingViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingViewModel.swift; sourceTree = "<group>"; };
 		B204C6592947EAC700239D66 /* MenuView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
@@ -70,17 +68,8 @@
 				B204C65B2947EAC700239D66 /* MessagingView.swift */,
 				B204C6582947EAC700239D66 /* MessagingViewModel.swift */,
 				B204C63F2947E98B00239D66 /* Assets.xcassets */,
-				B204C6412947E98B00239D66 /* Preview Content */,
 			);
 			path = Eliza;
-			sourceTree = "<group>";
-		};
-		B204C6412947E98B00239D66 /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				B204C6422947E98B00239D66 /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		B204C6552947EA5200239D66 /* Frameworks */ = {
@@ -161,7 +150,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B204C6432947E98B00239D66 /* Preview Assets.xcassets in Resources */,
 				B204C6402947E98B00239D66 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -306,7 +294,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Eliza/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -342,7 +330,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Eliza/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
