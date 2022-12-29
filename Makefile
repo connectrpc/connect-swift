@@ -12,6 +12,7 @@ LICENSE_HEADER_YEAR_RANGE := 2022
 GO ?= go
 CROSSTEST_VERSION := 4f4e96d8fea3ed9473b90a964a5ba429e7ea5649
 LICENSE_HEADER_VERSION := f5dd847fb18b577a62aaf46dd168b6e5b25206a3
+LICENSE_IGNORE := -e Package.swift -e .tmp\/ -e Generated\/ -e Connect\/Implementation\/Generated\/ -e ConnectTests/proto/grpc\/
 
 .PHONY: buildlibrary
 buildlibrary: ## Build the Swift library targets
@@ -52,8 +53,8 @@ help: ## Describe useful make targets
 .PHONY: licenseheaders
 licenseheaders: $(BIN)/license-headers ## Add/reformat license headers in source files
 	comm -23 \
-		<(git ls-files --cached --modified --others --no-empty-directory --exclude-standard --exclude="Generated" --exclude="Connect/Implementation/Generated" | sort -u) \
-		<(git ls-files --deleted --exclude="Generated" --exclude="Connect/Implementation/Generated" | sort -u) | \
+		<(git ls-files --cached --modified --others --no-empty-directory --exclude-standard | sort -u | grep -v $(LICENSE_IGNORE) ) \
+		<(git ls-files --deleted | sort -u) | \
 		xargs $(BIN)/license-header \
 			--license-type "apache" \
 			--copyright-holder "Buf Technologies, Inc." \
