@@ -119,3 +119,6 @@ custom_rules:
   spaces_over_tabs:
     name: "Use (4) spaces instead of tabs"
     regex: '\t'
+  xctestcase:
+    name: "Use XCTestCase over XCTest to ensure tests run properly"
+    regex: ': XCTest[\s,]+'
