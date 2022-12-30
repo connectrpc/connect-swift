@@ -96,14 +96,14 @@ CocoaPods support.
 To integrate using CocoaPods, add this line to your `Podfile`:
 
 ```rb
-pod 'Connect'
+# Use the current version (automatically pinned in Podfile.lock after):
+pod 'Connect-Swift'
+
+# Or pin a specific version:
+pod 'Connect-Swift', '~> x.y.z'
 ```
 
-You can pin to a specific version using:
-
-```rb
-pod 'Connect', '~> x.y.z'
-```
+You can then use the library by adding `import Connect` to your sources.
 
 For an example of integrating `Connect` via CocoaPods,
 see the [`ElizaCocoaPodsApp`](./ConnectExamples/ElizaCocoaPodsApp).

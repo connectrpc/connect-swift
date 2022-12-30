@@ -1,5 +1,6 @@
 Pod::Spec.new do |spec|
-  spec.name = 'Connect'
+  spec.name = 'Connect-Swift'
+  spec.module_name = 'Connect'
   spec.version = '0.0.1'
   spec.license = { :type => 'Apache 2.0', :file => 'LICENSE' }
   spec.summary = 'Connect is a slim library for building Protobuf- and gRPC-compatible HTTP APIs.'

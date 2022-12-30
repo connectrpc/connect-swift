@@ -4,6 +4,6 @@ target 'ElizaCocoaPodsApp' do
   use_frameworks!
 
   # For real projects, use a version instead of a path:
-  # pod 'Connect', '~> x.y.z'
-  pod 'Connect', :path => '../..'
+  # pod 'Connect-Swift', '~> x.y.z'
+  pod 'Connect-Swift', :path => '../..'
 end
