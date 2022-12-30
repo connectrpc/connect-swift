@@ -1,0 +1,23 @@
+PODS:
+  - Connect (0.0.1):
+    - SwiftProtobuf (~> 1.20.3)
+  - SwiftProtobuf (1.20.3)
+
+DEPENDENCIES:
+  - Connect (from `../..`)
+
+SPEC REPOS:
+  trunk:
+    - SwiftProtobuf
+
+EXTERNAL SOURCES:
+  Connect:
+    :path: "../.."
+
+SPEC CHECKSUMS:
+  Connect: 0dc61db3f1fb891ced603026785301590dfc422a
+  SwiftProtobuf: b02b5075dcf60c9f5f403000b3b0c202a11b6ae1
+
+PODFILE CHECKSUM: 9b085eadf81f07f74247c9cfc524d0a0eac3ae3b
+
+COCOAPODS: 1.11.3

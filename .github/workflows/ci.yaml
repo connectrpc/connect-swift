@@ -29,15 +29,31 @@ jobs:
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
       - name: Build Connect library
         run: swift build
-  build-eliza-example:
+  build-eliza-cocoapods-example:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
-      - name: Build Eliza example app
-        run: cd ConnectExamples/Eliza && xcodebuild -scheme Eliza build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+      - name: Install CocoaPods
+        run: brew install cocoapods
+      - name: Build Eliza CocoaPods example
+        run: |
+          cd ConnectExamples/ElizaCocoaPodsApp
+          pod install
+          xcodebuild -workspace ElizaCocoaPodsApp.xcworkspace -scheme ElizaCocoaPodsApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+  build-eliza-package-example:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+      - name: Select Xcode version
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
+        run: sudo xcode-select --switch /Applications/Xcode_14.1.app
+      - name: Build Eliza Swift PM example
+        run: |
+          cd ConnectExamples/ElizaSwiftPackageApp
+          xcodebuild -scheme ElizaSwiftPackageApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
   run-connect-tests:
     runs-on: macos-12
     steps:

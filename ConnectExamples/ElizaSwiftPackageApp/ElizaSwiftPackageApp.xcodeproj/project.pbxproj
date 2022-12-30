@@ -7,127 +7,135 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B204C6402947E98B00239D66 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B204C63F2947E98B00239D66 /* Assets.xcassets */; };
-		B204C64A2947E9D100239D66 /* ElizaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B204C6492947E9D100239D66 /* ElizaApp.swift */; };
-		B204C65C2947EAC700239D66 /* MessagingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B204C6582947EAC700239D66 /* MessagingViewModel.swift */; };
-		B204C65D2947EAC700239D66 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B204C6592947EAC700239D66 /* MenuView.swift */; };
-		B204C65E2947EAC700239D66 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = B204C65A2947EAC700239D66 /* Message.swift */; };
-		B204C65F2947EAC700239D66 /* MessagingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B204C65B2947EAC700239D66 /* MessagingView.swift */; };
-		B28DA31329566DDB00D2F796 /* Connect in Frameworks */ = {isa = PBXBuildFile; productRef = B28DA31229566DDB00D2F796 /* Connect */; };
-		B28DA31529566DDB00D2F796 /* Generated in Frameworks */ = {isa = PBXBuildFile; productRef = B28DA31429566DDB00D2F796 /* Generated */; };
+		B236EE8C295F564900DDCDA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B236EE8B295F564900DDCDA9 /* Assets.xcassets */; };
+		B236EE9B295F565500DDCDA9 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EE96295F565500DDCDA9 /* Message.swift */; };
+		B236EE9C295F565500DDCDA9 /* MessagingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EE97295F565500DDCDA9 /* MessagingView.swift */; };
+		B236EE9D295F565500DDCDA9 /* MessagingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EE98295F565500DDCDA9 /* MessagingViewModel.swift */; };
+		B236EE9E295F565500DDCDA9 /* ElizaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EE99295F565500DDCDA9 /* ElizaApp.swift */; };
+		B236EE9F295F565500DDCDA9 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EE9A295F565500DDCDA9 /* MenuView.swift */; };
+		B236EEA4295F569700DDCDA9 /* Connect in Frameworks */ = {isa = PBXBuildFile; productRef = B236EEA3295F569700DDCDA9 /* Connect */; };
+		B236EEA6295F569700DDCDA9 /* Generated in Frameworks */ = {isa = PBXBuildFile; productRef = B236EEA5295F569700DDCDA9 /* Generated */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		B204C6382947E98A00239D66 /* Eliza.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Eliza.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		B204C63F2947E98B00239D66 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		B204C6492947E9D100239D66 /* ElizaApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElizaApp.swift; sourceTree = "<group>"; };
-		B204C6582947EAC700239D66 /* MessagingViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingViewModel.swift; sourceTree = "<group>"; };
-		B204C6592947EAC700239D66 /* MenuView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
-		B204C65A2947EAC700239D66 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
-		B204C65B2947EAC700239D66 /* MessagingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingView.swift; sourceTree = "<group>"; };
-		B2D43E2829567DDB006F8FF1 /* connect-swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "connect-swift"; path = ../..; sourceTree = "<group>"; };
+		B236EE84295F564800DDCDA9 /* ElizaSwiftPackageApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ElizaSwiftPackageApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B236EE8B295F564900DDCDA9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B236EE96295F565500DDCDA9 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		B236EE97295F565500DDCDA9 /* MessagingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingView.swift; sourceTree = "<group>"; };
+		B236EE98295F565500DDCDA9 /* MessagingViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingViewModel.swift; sourceTree = "<group>"; };
+		B236EE99295F565500DDCDA9 /* ElizaApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElizaApp.swift; sourceTree = "<group>"; };
+		B236EE9A295F565500DDCDA9 /* MenuView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
+		B236EEA1295F568C00DDCDA9 /* connect-swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "connect-swift"; path = ../..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		B204C6352947E98A00239D66 /* Frameworks */ = {
+		B236EE81295F564800DDCDA9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B28DA31529566DDB00D2F796 /* Generated in Frameworks */,
-				B28DA31329566DDB00D2F796 /* Connect in Frameworks */,
+				B236EEA6295F569700DDCDA9 /* Generated in Frameworks */,
+				B236EEA4295F569700DDCDA9 /* Connect in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B204C62F2947E98A00239D66 = {
+		B236EE7B295F564800DDCDA9 = {
 			isa = PBXGroup;
 			children = (
-				B2D532F12948FF4D00DA95C7 /* Packages */,
-				B204C63A2947E98A00239D66 /* Eliza */,
-				B204C6392947E98A00239D66 /* Products */,
-				B204C6552947EA5200239D66 /* Frameworks */,
+				B236EEA0295F568C00DDCDA9 /* Packages */,
+				B236EE86295F564800DDCDA9 /* ElizaSwiftPackageApp */,
+				B236EE85295F564800DDCDA9 /* Products */,
+				B236EEA2295F569700DDCDA9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
-		B204C6392947E98A00239D66 /* Products */ = {
+		B236EE85295F564800DDCDA9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B204C6382947E98A00239D66 /* Eliza.app */,
+				B236EE84295F564800DDCDA9 /* ElizaSwiftPackageApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B204C63A2947E98A00239D66 /* Eliza */ = {
+		B236EE86295F564800DDCDA9 /* ElizaSwiftPackageApp */ = {
 			isa = PBXGroup;
 			children = (
-				B204C6492947E9D100239D66 /* ElizaApp.swift */,
-				B204C6592947EAC700239D66 /* MenuView.swift */,
-				B204C65A2947EAC700239D66 /* Message.swift */,
-				B204C65B2947EAC700239D66 /* MessagingView.swift */,
-				B204C6582947EAC700239D66 /* MessagingViewModel.swift */,
-				B204C63F2947E98B00239D66 /* Assets.xcassets */,
+				B236EE95295F565500DDCDA9 /* ElizaSharedSources */,
+				B236EE8B295F564900DDCDA9 /* Assets.xcassets */,
 			);
-			path = Eliza;
+			path = ElizaSwiftPackageApp;
 			sourceTree = "<group>";
 		};
-		B204C6552947EA5200239D66 /* Frameworks */ = {
+		B236EE95295F565500DDCDA9 /* ElizaSharedSources */ = {
+			isa = PBXGroup;
+			children = (
+				B236EE96295F565500DDCDA9 /* Message.swift */,
+				B236EE97295F565500DDCDA9 /* MessagingView.swift */,
+				B236EE98295F565500DDCDA9 /* MessagingViewModel.swift */,
+				B236EE99295F565500DDCDA9 /* ElizaApp.swift */,
+				B236EE9A295F565500DDCDA9 /* MenuView.swift */,
+			);
+			name = ElizaSharedSources;
+			path = ../../ElizaSharedSources;
+			sourceTree = "<group>";
+		};
+		B236EEA0295F568C00DDCDA9 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				B236EEA1295F568C00DDCDA9 /* connect-swift */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		B236EEA2295F569700DDCDA9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		B2D532F12948FF4D00DA95C7 /* Packages */ = {
-			isa = PBXGroup;
-			children = (
-				B2D43E2829567DDB006F8FF1 /* connect-swift */,
-			);
-			name = Packages;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B204C6372947E98A00239D66 /* Eliza */ = {
+		B236EE83295F564800DDCDA9 /* ElizaSwiftPackageApp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B204C6462947E98B00239D66 /* Build configuration list for PBXNativeTarget "Eliza" */;
+			buildConfigurationList = B236EE92295F564900DDCDA9 /* Build configuration list for PBXNativeTarget "ElizaSwiftPackageApp" */;
 			buildPhases = (
-				B204C6342947E98A00239D66 /* Sources */,
-				B204C6352947E98A00239D66 /* Frameworks */,
-				B204C6362947E98A00239D66 /* Resources */,
+				B236EE80295F564800DDCDA9 /* Sources */,
+				B236EE81295F564800DDCDA9 /* Frameworks */,
+				B236EE82295F564800DDCDA9 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = Eliza;
+			name = ElizaSwiftPackageApp;
 			packageProductDependencies = (
-				B28DA31229566DDB00D2F796 /* Connect */,
-				B28DA31429566DDB00D2F796 /* Generated */,
+				B236EEA3295F569700DDCDA9 /* Connect */,
+				B236EEA5295F569700DDCDA9 /* Generated */,
 			);
-			productName = Eliza;
-			productReference = B204C6382947E98A00239D66 /* Eliza.app */;
+			productName = ElizaSwiftPackageApp;
+			productReference = B236EE84295F564800DDCDA9 /* ElizaSwiftPackageApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		B204C6302947E98A00239D66 /* Project object */ = {
+		B236EE7C295F564800DDCDA9 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1410;
-				LastUpgradeCheck = 1410;
+				LastSwiftUpdateCheck = 1420;
+				LastUpgradeCheck = 1420;
 				TargetAttributes = {
-					B204C6372947E98A00239D66 = {
-						CreatedOnToolsVersion = 14.1;
-						LastSwiftMigration = 1410;
+					B236EE83295F564800DDCDA9 = {
+						CreatedOnToolsVersion = 14.2;
 					};
 				};
 			};
-			buildConfigurationList = B204C6332947E98A00239D66 /* Build configuration list for PBXProject "Eliza" */;
+			buildConfigurationList = B236EE7F295F564800DDCDA9 /* Build configuration list for PBXProject "ElizaSwiftPackageApp" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -135,44 +143,44 @@
 				en,
 				Base,
 			);
-			mainGroup = B204C62F2947E98A00239D66;
-			productRefGroup = B204C6392947E98A00239D66 /* Products */;
+			mainGroup = B236EE7B295F564800DDCDA9;
+			productRefGroup = B236EE85295F564800DDCDA9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B204C6372947E98A00239D66 /* Eliza */,
+				B236EE83295F564800DDCDA9 /* ElizaSwiftPackageApp */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		B204C6362947E98A00239D66 /* Resources */ = {
+		B236EE82295F564800DDCDA9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B204C6402947E98B00239D66 /* Assets.xcassets in Resources */,
+				B236EE8C295F564900DDCDA9 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		B204C6342947E98A00239D66 /* Sources */ = {
+		B236EE80295F564800DDCDA9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B204C64A2947E9D100239D66 /* ElizaApp.swift in Sources */,
-				B204C65F2947EAC700239D66 /* MessagingView.swift in Sources */,
-				B204C65E2947EAC700239D66 /* Message.swift in Sources */,
-				B204C65D2947EAC700239D66 /* MenuView.swift in Sources */,
-				B204C65C2947EAC700239D66 /* MessagingViewModel.swift in Sources */,
+				B236EE9F295F565500DDCDA9 /* MenuView.swift in Sources */,
+				B236EE9B295F565500DDCDA9 /* Message.swift in Sources */,
+				B236EE9C295F565500DDCDA9 /* MessagingView.swift in Sources */,
+				B236EE9D295F565500DDCDA9 /* MessagingViewModel.swift in Sources */,
+				B236EE9E295F565500DDCDA9 /* ElizaApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		B204C6442947E98B00239D66 /* Debug */ = {
+		B236EE90295F564900DDCDA9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -232,7 +240,7 @@
 			};
 			name = Debug;
 		};
-		B204C6452947E98B00239D66 /* Release */ = {
+		B236EE91295F564900DDCDA9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -286,16 +294,14 @@
 			};
 			name = Release;
 		};
-		B204C6472947E98B00239D66 /* Debug */ = {
+		B236EE93295F564900DDCDA9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Eliza;
@@ -303,35 +309,32 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "build.buf.eliza-example.Eliza";
+				PRODUCT_BUNDLE_IDENTIFIER = build.buf.ElizaSwiftPackageApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
-		B204C6482947E98B00239D66 /* Release */ = {
+		B236EE94295F564900DDCDA9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Eliza;
@@ -339,15 +342,15 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "build.buf.eliza-example.Eliza";
+				PRODUCT_BUNDLE_IDENTIFIER = build.buf.ElizaSwiftPackageApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -360,20 +363,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B204C6332947E98A00239D66 /* Build configuration list for PBXProject "Eliza" */ = {
+		B236EE7F295F564800DDCDA9 /* Build configuration list for PBXProject "ElizaSwiftPackageApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B204C6442947E98B00239D66 /* Debug */,
-				B204C6452947E98B00239D66 /* Release */,
+				B236EE90295F564900DDCDA9 /* Debug */,
+				B236EE91295F564900DDCDA9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B204C6462947E98B00239D66 /* Build configuration list for PBXNativeTarget "Eliza" */ = {
+		B236EE92295F564900DDCDA9 /* Build configuration list for PBXNativeTarget "ElizaSwiftPackageApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B204C6472947E98B00239D66 /* Debug */,
-				B204C6482947E98B00239D66 /* Release */,
+				B236EE93295F564900DDCDA9 /* Debug */,
+				B236EE94295F564900DDCDA9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -381,15 +384,15 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		B28DA31229566DDB00D2F796 /* Connect */ = {
+		B236EEA3295F569700DDCDA9 /* Connect */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Connect;
 		};
-		B28DA31429566DDB00D2F796 /* Generated */ = {
+		B236EEA5295F569700DDCDA9 /* Generated */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Generated;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = B204C6302947E98A00239D66 /* Project object */;
+	rootObject = B236EE7C295F564800DDCDA9 /* Project object */;
 }

@@ -1,0 +1,544 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		00CF4618AA904D5D3AEEDAA4 /* Pods_ElizaCocoaPodsApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97B2C5809ECFFD24F0C87AB2 /* Pods_ElizaCocoaPodsApp.framework */; };
+		B236EEB8295F574F00DDCDA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B236EEB7295F574F00DDCDA9 /* Assets.xcassets */; };
+		B236EEC7295F577C00DDCDA9 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EEC2295F577C00DDCDA9 /* Message.swift */; };
+		B236EEC8295F577C00DDCDA9 /* MessagingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EEC3295F577C00DDCDA9 /* MessagingView.swift */; };
+		B236EEC9295F577C00DDCDA9 /* MessagingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EEC4295F577C00DDCDA9 /* MessagingViewModel.swift */; };
+		B236EECA295F577C00DDCDA9 /* ElizaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EEC5295F577C00DDCDA9 /* ElizaApp.swift */; };
+		B236EECB295F577C00DDCDA9 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EEC6295F577C00DDCDA9 /* MenuView.swift */; };
+		B236EEDE295F5A3E00DDCDA9 /* testingtest.connect.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EECF295F5A3E00DDCDA9 /* testingtest.connect.swift */; };
+		B236EEDF295F5A3E00DDCDA9 /* eliza.connect.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EED0295F5A3E00DDCDA9 /* eliza.connect.swift */; };
+		B236EEE0295F5A3E00DDCDA9 /* eliza.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EED2295F5A3E00DDCDA9 /* eliza.pb.swift */; };
+		B236EEE1295F5A3E00DDCDA9 /* status.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EED6295F5A3E00DDCDA9 /* status.pb.swift */; };
+		B236EEE2295F5A3E00DDCDA9 /* messages.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EED8295F5A3E00DDCDA9 /* messages.pb.swift */; };
+		B236EEE3295F5A3E00DDCDA9 /* empty.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EED9295F5A3E00DDCDA9 /* empty.pb.swift */; };
+		B236EEE4295F5A3E00DDCDA9 /* test.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EEDA295F5A3E00DDCDA9 /* test.pb.swift */; };
+		B236EEE5295F5A3E00DDCDA9 /* server.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EEDD295F5A3E00DDCDA9 /* server.pb.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		24421109838104D5D0DBD5C7 /* Pods-ElizaCocoaPodsApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ElizaCocoaPodsApp.debug.xcconfig"; path = "Target Support Files/Pods-ElizaCocoaPodsApp/Pods-ElizaCocoaPodsApp.debug.xcconfig"; sourceTree = "<group>"; };
+		2596F885A0CF999DCDAA7364 /* Pods-ElizaCocoaPodsApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ElizaCocoaPodsApp.release.xcconfig"; path = "Target Support Files/Pods-ElizaCocoaPodsApp/Pods-ElizaCocoaPodsApp.release.xcconfig"; sourceTree = "<group>"; };
+		97B2C5809ECFFD24F0C87AB2 /* Pods_ElizaCocoaPodsApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ElizaCocoaPodsApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B236EEB0295F574E00DDCDA9 /* ElizaCocoaPodsApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ElizaCocoaPodsApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B236EEB7295F574F00DDCDA9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B236EEC2295F577C00DDCDA9 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		B236EEC3295F577C00DDCDA9 /* MessagingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingView.swift; sourceTree = "<group>"; };
+		B236EEC4295F577C00DDCDA9 /* MessagingViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingViewModel.swift; sourceTree = "<group>"; };
+		B236EEC5295F577C00DDCDA9 /* ElizaApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElizaApp.swift; sourceTree = "<group>"; };
+		B236EEC6295F577C00DDCDA9 /* MenuView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
+		B236EECF295F5A3E00DDCDA9 /* testingtest.connect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = testingtest.connect.swift; sourceTree = "<group>"; };
+		B236EED0295F5A3E00DDCDA9 /* eliza.connect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = eliza.connect.swift; sourceTree = "<group>"; };
+		B236EED2295F5A3E00DDCDA9 /* eliza.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = eliza.pb.swift; sourceTree = "<group>"; };
+		B236EED6295F5A3E00DDCDA9 /* status.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = status.pb.swift; sourceTree = "<group>"; };
+		B236EED8295F5A3E00DDCDA9 /* messages.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = messages.pb.swift; sourceTree = "<group>"; };
+		B236EED9295F5A3E00DDCDA9 /* empty.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = empty.pb.swift; sourceTree = "<group>"; };
+		B236EEDA295F5A3E00DDCDA9 /* test.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test.pb.swift; sourceTree = "<group>"; };
+		B236EEDD295F5A3E00DDCDA9 /* server.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = server.pb.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B236EEAD295F574E00DDCDA9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00CF4618AA904D5D3AEEDAA4 /* Pods_ElizaCocoaPodsApp.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AD87F7F77BF93E62095653FE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				97B2C5809ECFFD24F0C87AB2 /* Pods_ElizaCocoaPodsApp.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B236EEA7295F574E00DDCDA9 = {
+			isa = PBXGroup;
+			children = (
+				B236EEB2295F574E00DDCDA9 /* ElizaCocoaPodsApp */,
+				B236EEB1295F574E00DDCDA9 /* Products */,
+				E9960EDDFFBFBB99D7DBA860 /* Pods */,
+				AD87F7F77BF93E62095653FE /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		B236EEB1295F574E00DDCDA9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B236EEB0295F574E00DDCDA9 /* ElizaCocoaPodsApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B236EEB2295F574E00DDCDA9 /* ElizaCocoaPodsApp */ = {
+			isa = PBXGroup;
+			children = (
+				B236EECC295F5A3E00DDCDA9 /* Generated */,
+				B236EEC1295F577C00DDCDA9 /* ElizaSharedSources */,
+				B236EEB7295F574F00DDCDA9 /* Assets.xcassets */,
+			);
+			path = ElizaCocoaPodsApp;
+			sourceTree = "<group>";
+		};
+		B236EEC1295F577C00DDCDA9 /* ElizaSharedSources */ = {
+			isa = PBXGroup;
+			children = (
+				B236EEC2295F577C00DDCDA9 /* Message.swift */,
+				B236EEC3295F577C00DDCDA9 /* MessagingView.swift */,
+				B236EEC4295F577C00DDCDA9 /* MessagingViewModel.swift */,
+				B236EEC5295F577C00DDCDA9 /* ElizaApp.swift */,
+				B236EEC6295F577C00DDCDA9 /* MenuView.swift */,
+			);
+			name = ElizaSharedSources;
+			path = ../../ElizaSharedSources;
+			sourceTree = "<group>";
+		};
+		B236EECC295F5A3E00DDCDA9 /* Generated */ = {
+			isa = PBXGroup;
+			children = (
+				B236EECD295F5A3E00DDCDA9 /* connect-swift */,
+				B236EED1295F5A3E00DDCDA9 /* swift-protobuf */,
+			);
+			name = Generated;
+			path = ../../../Generated;
+			sourceTree = "<group>";
+		};
+		B236EECD295F5A3E00DDCDA9 /* connect-swift */ = {
+			isa = PBXGroup;
+			children = (
+				B236EECE295F5A3E00DDCDA9 /* grpc */,
+				B236EED0295F5A3E00DDCDA9 /* eliza.connect.swift */,
+			);
+			path = "connect-swift";
+			sourceTree = "<group>";
+		};
+		B236EECE295F5A3E00DDCDA9 /* grpc */ = {
+			isa = PBXGroup;
+			children = (
+				B236EECF295F5A3E00DDCDA9 /* testingtest.connect.swift */,
+			);
+			path = grpc;
+			sourceTree = "<group>";
+		};
+		B236EED1295F5A3E00DDCDA9 /* swift-protobuf */ = {
+			isa = PBXGroup;
+			children = (
+				B236EED2295F5A3E00DDCDA9 /* eliza.pb.swift */,
+				B236EED3295F5A3E00DDCDA9 /* grpc */,
+				B236EEDB295F5A3E00DDCDA9 /* server */,
+			);
+			path = "swift-protobuf";
+			sourceTree = "<group>";
+		};
+		B236EED3295F5A3E00DDCDA9 /* grpc */ = {
+			isa = PBXGroup;
+			children = (
+				B236EED4295F5A3E00DDCDA9 /* status */,
+				B236EED7295F5A3E00DDCDA9 /* testing */,
+			);
+			path = grpc;
+			sourceTree = "<group>";
+		};
+		B236EED4295F5A3E00DDCDA9 /* status */ = {
+			isa = PBXGroup;
+			children = (
+				B236EED5295F5A3E00DDCDA9 /* v1 */,
+			);
+			path = status;
+			sourceTree = "<group>";
+		};
+		B236EED5295F5A3E00DDCDA9 /* v1 */ = {
+			isa = PBXGroup;
+			children = (
+				B236EED6295F5A3E00DDCDA9 /* status.pb.swift */,
+			);
+			path = v1;
+			sourceTree = "<group>";
+		};
+		B236EED7295F5A3E00DDCDA9 /* testing */ = {
+			isa = PBXGroup;
+			children = (
+				B236EED8295F5A3E00DDCDA9 /* messages.pb.swift */,
+				B236EED9295F5A3E00DDCDA9 /* empty.pb.swift */,
+				B236EEDA295F5A3E00DDCDA9 /* test.pb.swift */,
+			);
+			path = testing;
+			sourceTree = "<group>";
+		};
+		B236EEDB295F5A3E00DDCDA9 /* server */ = {
+			isa = PBXGroup;
+			children = (
+				B236EEDC295F5A3E00DDCDA9 /* v1 */,
+			);
+			path = server;
+			sourceTree = "<group>";
+		};
+		B236EEDC295F5A3E00DDCDA9 /* v1 */ = {
+			isa = PBXGroup;
+			children = (
+				B236EEDD295F5A3E00DDCDA9 /* server.pb.swift */,
+			);
+			path = v1;
+			sourceTree = "<group>";
+		};
+		E9960EDDFFBFBB99D7DBA860 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				24421109838104D5D0DBD5C7 /* Pods-ElizaCocoaPodsApp.debug.xcconfig */,
+				2596F885A0CF999DCDAA7364 /* Pods-ElizaCocoaPodsApp.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B236EEAF295F574E00DDCDA9 /* ElizaCocoaPodsApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B236EEBE295F574F00DDCDA9 /* Build configuration list for PBXNativeTarget "ElizaCocoaPodsApp" */;
+			buildPhases = (
+				6FEF7C4EF2BF3EDB9B3E5679 /* [CP] Check Pods Manifest.lock */,
+				B236EEAC295F574E00DDCDA9 /* Sources */,
+				B236EEAD295F574E00DDCDA9 /* Frameworks */,
+				B236EEAE295F574E00DDCDA9 /* Resources */,
+				BB4B591EBE727C1831233AE4 /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ElizaCocoaPodsApp;
+			productName = ElizaCocoaPodsApp;
+			productReference = B236EEB0295F574E00DDCDA9 /* ElizaCocoaPodsApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B236EEA8295F574E00DDCDA9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1420;
+				LastUpgradeCheck = 1420;
+				TargetAttributes = {
+					B236EEAF295F574E00DDCDA9 = {
+						CreatedOnToolsVersion = 14.2;
+					};
+				};
+			};
+			buildConfigurationList = B236EEAB295F574E00DDCDA9 /* Build configuration list for PBXProject "ElizaCocoaPodsApp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B236EEA7295F574E00DDCDA9;
+			productRefGroup = B236EEB1295F574E00DDCDA9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B236EEAF295F574E00DDCDA9 /* ElizaCocoaPodsApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B236EEAE295F574E00DDCDA9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B236EEB8295F574F00DDCDA9 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		6FEF7C4EF2BF3EDB9B3E5679 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ElizaCocoaPodsApp-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		BB4B591EBE727C1831233AE4 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ElizaCocoaPodsApp/Pods-ElizaCocoaPodsApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ElizaCocoaPodsApp/Pods-ElizaCocoaPodsApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ElizaCocoaPodsApp/Pods-ElizaCocoaPodsApp-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B236EEAC295F574E00DDCDA9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B236EEE2295F5A3E00DDCDA9 /* messages.pb.swift in Sources */,
+				B236EEE3295F5A3E00DDCDA9 /* empty.pb.swift in Sources */,
+				B236EECB295F577C00DDCDA9 /* MenuView.swift in Sources */,
+				B236EEC7295F577C00DDCDA9 /* Message.swift in Sources */,
+				B236EEE4295F5A3E00DDCDA9 /* test.pb.swift in Sources */,
+				B236EEDE295F5A3E00DDCDA9 /* testingtest.connect.swift in Sources */,
+				B236EEE5295F5A3E00DDCDA9 /* server.pb.swift in Sources */,
+				B236EEC8295F577C00DDCDA9 /* MessagingView.swift in Sources */,
+				B236EEE1295F5A3E00DDCDA9 /* status.pb.swift in Sources */,
+				B236EEC9295F577C00DDCDA9 /* MessagingViewModel.swift in Sources */,
+				B236EEDF295F5A3E00DDCDA9 /* eliza.connect.swift in Sources */,
+				B236EEE0295F5A3E00DDCDA9 /* eliza.pb.swift in Sources */,
+				B236EECA295F577C00DDCDA9 /* ElizaApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		B236EEBC295F574F00DDCDA9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		B236EEBD295F574F00DDCDA9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B236EEBF295F574F00DDCDA9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 24421109838104D5D0DBD5C7 /* Pods-ElizaCocoaPodsApp.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Eliza;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = build.buf.ElizaCocoaPodsApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		B236EEC0295F574F00DDCDA9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2596F885A0CF999DCDAA7364 /* Pods-ElizaCocoaPodsApp.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Eliza;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = build.buf.ElizaCocoaPodsApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B236EEAB295F574E00DDCDA9 /* Build configuration list for PBXProject "ElizaCocoaPodsApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B236EEBC295F574F00DDCDA9 /* Debug */,
+				B236EEBD295F574F00DDCDA9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B236EEBE295F574F00DDCDA9 /* Build configuration list for PBXNativeTarget "ElizaCocoaPodsApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B236EEBF295F574F00DDCDA9 /* Debug */,
+				B236EEC0295F574F00DDCDA9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B236EEA8295F574E00DDCDA9 /* Project object */;
+}
