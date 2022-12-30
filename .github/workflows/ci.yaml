@@ -16,21 +16,6 @@ jobs:
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
       - name: Build Connect library
         run: swift build
-  build-connect-plugin:
-    runs-on: macos-12
-    steps:
-      - uses: actions/checkout@v3
-      - uses: bufbuild/buf-setup-action@v1.11.0
-        with:
-          github_token: ${{ github.token }}
-      - name: Build connect-swift plugin
-        run: make buildplugin
-      - name: Generate
-        run: make generate
-      - name: Ensure no generation diff
-        run: |
-          git update-index --refresh --add --remove
-          git diff-index --quiet HEAD --
   build-eliza-cocoapods-example:
     runs-on: macos-12
     steps:
@@ -54,6 +39,21 @@ jobs:
         run: |
           cd ConnectExamples/ElizaSwiftPackageApp
           xcodebuild -scheme ElizaSwiftPackageApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+  build-plugin-and-generate:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+      - uses: bufbuild/buf-setup-action@v1.11.0
+        with:
+          github_token: ${{ github.token }}
+      - name: Build connect-swift plugin
+        run: make buildplugin
+      - name: Generate outputs
+        run: make generate
+      - name: Ensure no generated diff
+        run: |
+          git update-index --refresh --add --remove
+          git diff-index --quiet HEAD --
   run-connect-tests:
     runs-on: macos-12
     steps:
