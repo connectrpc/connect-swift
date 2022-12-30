@@ -36,8 +36,6 @@ jobs:
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
-      - name: Install CocoaPods
-        run: brew install cocoapods
       - name: Build Eliza CocoaPods example
         run: |
           cd ConnectExamples/ElizaCocoaPodsApp
