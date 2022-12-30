@@ -14,7 +14,8 @@ the Connect library:
 
 ## Try it out
 
-Simply open the `.xcodeproj` in this directory and build the app using Xcode.
+Simply open the `.xcodeproj` in this directory and build the app target
+using Xcode.
 
 Note that the project uses a local reference to the Connect package,
 rather than the GitHub URL.

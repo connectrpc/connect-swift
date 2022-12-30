@@ -7,6 +7,15 @@ on:
 permissions:
   contents: read
 jobs:
+  build-connect-library:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+      - name: Select Xcode version
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
+        run: sudo xcode-select --switch /Applications/Xcode_14.1.app
+      - name: Build Connect library
+        run: swift build
   build-connect-plugin:
     runs-on: macos-12
     steps:
@@ -20,15 +29,6 @@ jobs:
         run: make buildplugin
 #      - name: Generate
 #        run: make generate
-  build-connect-library:
-    runs-on: macos-12
-    steps:
-      - uses: actions/checkout@v3
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_14.1.app
-      - name: Build Connect library
-        run: swift build
   build-eliza-cocoapods-example:
     runs-on: macos-12
     steps:
@@ -41,7 +41,7 @@ jobs:
           cd ConnectExamples/ElizaCocoaPodsApp
           pod install
           xcodebuild -workspace ElizaCocoaPodsApp.xcworkspace -scheme ElizaCocoaPodsApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
-  build-eliza-package-example:
+  build-eliza-swiftpm-example:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
