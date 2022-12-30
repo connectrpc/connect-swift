@@ -84,9 +84,8 @@ Once you've added the `Connect` dependency (and its transitive dependency
 on `SwiftProtobuf`), add the generated `.swift` files from the code generation
 step, and your project should build!
 
-There is also an
-[`ElizaSwiftPackageApp` app](./ConnectExamples/ElizaSwiftPackageApp)
-with an example of this Swift Package Manager integration.
+For an example of integrating `Connect` via Swift Package Manager,
+see the [`ElizaSwiftPackageApp`](./ConnectExamples/ElizaSwiftPackageApp).
 
 ## Integrate with CocoaPods
 
@@ -106,9 +105,8 @@ You can pin to a specific version using:
 pod 'Connect', '~> x.y.z'
 ```
 
-There is also an
-[`ElizaCocoaPodsApp` app](./ConnectExamples/ElizaCocoaPodsApp)
-with an example of this CocoaPods integration.
+For an example of integrating `Connect` via CocoaPods,
+see the [`ElizaCocoaPodsApp`](./ConnectExamples/ElizaCocoaPodsApp).
 
 # Examples
 
