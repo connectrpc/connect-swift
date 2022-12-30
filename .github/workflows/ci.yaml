@@ -29,7 +29,7 @@ jobs:
         run: make generate
       - name: Ensure no generation diff
         run: |
-          git update-index --refresh
+          git update-index --refresh --add --remove
           git diff-index --quiet HEAD --
   build-eliza-cocoapods-example:
     runs-on: macos-12
