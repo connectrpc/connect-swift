@@ -84,12 +84,29 @@ Once you've added the `Connect` dependency (and its transitive dependency
 on `SwiftProtobuf`), add the generated `.swift` files from the code generation
 step, and your project should build!
 
-We have an [example app](#examples) that uses this exact setup that you can
-also take a look at below.
+For an example of integrating `Connect` via Swift Package Manager,
+see the [`ElizaSwiftPackageApp`](./ConnectExamples/ElizaSwiftPackageApp).
 
 ## Integrate with CocoaPods
 
-TODO
+Although Swift Package Manager is the preferred distribution method for
+the Connect library, we also provide a [podspec](./Connect.podspec) for
+CocoaPods support.
+
+To integrate using CocoaPods, add this line to your `Podfile`:
+
+```rb
+pod 'Connect'
+```
+
+You can pin to a specific version using:
+
+```rb
+pod 'Connect', '~> x.y.z'
+```
+
+For an example of integrating `Connect` via CocoaPods,
+see the [`ElizaCocoaPodsApp`](./ConnectExamples/ElizaCocoaPodsApp).
 
 # Examples
 
@@ -98,7 +115,8 @@ TODO
 Tests and example apps depend on outputs in `./Generated`.
 
 Example apps are available in
-[`./ConnectExamples`](./ConnectExamples), and can be opened and built using Xcode.
+[`./ConnectExamples`](./ConnectExamples), and can be opened and built using
+Xcode.
 
 ## Writing an interceptor
 
