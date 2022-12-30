@@ -20,15 +20,17 @@ jobs:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
-# buf set up requires a github token to prevent a rate limit.
-# TODO: We're currently checking in generated code to side-step this problem.
-#      - uses: bufbuild/buf-setup-action@v1.8.0
-#        with:
-#          buf_token: ${{ secrets.BSR_TEST_TOKEN }}
+      - uses: bufbuild/buf-setup-action@v1.8.0
+        with:
+          github_token: ${{ github.token }}
       - name: Build connect-swift plugin
         run: make buildplugin
-#      - name: Generate
-#        run: make generate
+      - name: Generate
+        run: make generate
+      - name: Ensure no generation diff
+        run: |
+          git update-index --refresh
+          git diff-index --quiet HEAD --
   build-eliza-cocoapods-example:
     runs-on: macos-12
     steps:
