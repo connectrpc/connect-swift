@@ -1,4 +1,4 @@
-# Eliza example
+# ElizaSwiftPackageApp example
 
 This example app imports the `Connect` library using Swift Package Manager,
 and provides an interface for
@@ -12,4 +12,10 @@ the Connect library:
 - [gRPC-Web](https://grpc.io) + unary
 - [gRPC-Web](https://grpc.io) + streaming
 
-To try out the app, simply open the `.xcodeproj` in this directory.
+## Try it out
+
+Simply open the `.xcodeproj` in this directory and build the app target
+using Xcode.
+
+Note that the project uses a local reference to the Connect package,
+rather than the GitHub URL.

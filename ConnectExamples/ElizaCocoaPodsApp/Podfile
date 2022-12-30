@@ -1,0 +1,9 @@
+platform :ios, '15.0'
+
+target 'ElizaCocoaPodsApp' do
+  use_frameworks!
+
+  # For real projects, use a version instead of a path:
+  # pod 'Connect', '~> x.y.z'
+  pod 'Connect', :path => '../..'
+end
