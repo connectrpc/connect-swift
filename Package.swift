@@ -28,6 +28,11 @@ let package = Package(
             name: "Connect",
             targets: ["Connect"]
         ),
+        // Mock types that are imported by generated mock classes and can be used for testing.
+        .library(
+            name: "ConnectMocks",
+            targets: ["ConnectMocks"]
+        ),
         // Library used by example apps within this repository.
         .library(
             name: "Generated",
@@ -55,6 +60,14 @@ let package = Package(
             exclude: [
                 "proto",
             ]
+        ),
+        .target(
+            name: "ConnectMocks",
+            dependencies: [
+                .target(name: "Connect"),
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+            ],
+            path: "ConnectMocks"
         ),
         .testTarget(
             name: "ConnectTests",

@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// Type that wraps an action that can be canceled.
-public struct Cancelable {
-    /// Cancel the current action.
-    public let cancel: () -> Void
+import Connect
+import SwiftProtobuf
 
-    public init(cancel: @escaping () -> Void) {
-        self.cancel = cancel
-    }
-}
+/// Mock implementation of `ClientOnlyStreamInterface` which can be used for testing.
+///
+/// This type can be used by setting `on*` closures and observing their calls,
+/// by validating its instance variables like `inputs` at the end of invocation,
+/// or by subclassing the type and overriding functions such as `send()`.
+open class MockClientOnlyStream<
+    Input: SwiftProtobuf.Message
+>: MockBidirectionalStream<Input>, ClientOnlyStreamInterface {}

@@ -36,11 +36,21 @@ do {
             continue
         }
 
-        response.file.append(.with { outputFile in
-            outputFile.name = FilePathComponents(path: descriptor.name)
-                .outputFilePath(withExtension: ".connect.swift", using: options.fileNaming)
-            outputFile.content = ConnectGenerator(descriptor, options: options).output
-        })
+        if options.generateCallbackMethods || options.generateAsyncMethods {
+            response.file.append(.with { outputFile in
+                outputFile.name = FilePathComponents(path: descriptor.name)
+                    .outputFilePath(withExtension: ".connect.swift", using: options.fileNaming)
+                outputFile.content = ConnectClientGenerator(descriptor, options: options).output
+            })
+        }
+
+        if options.generateCallbackMocks || options.generateAsyncMocks {
+            response.file.append(.with { outputFile in
+                outputFile.name = FilePathComponents(path: descriptor.name)
+                    .outputFilePath(withExtension: ".mock.swift", using: options.fileNaming)
+                outputFile.content = ConnectMockGenerator(descriptor, options: options).output
+            })
+        }
     }
     FileHandle.standardOutput.write(try response.serializedData())
 } catch let error {

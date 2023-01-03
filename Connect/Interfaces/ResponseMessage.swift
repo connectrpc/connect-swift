@@ -28,8 +28,8 @@ public struct ResponseMessage<Output: SwiftProtobuf.Message> {
     public let error: ConnectError?
 
     public init(
-        code: Code, headers: Headers, message: Output?,
-        trailers: Trailers, error: ConnectError?
+        code: Code = .ok, headers: Headers = [:], message: Output?,
+        trailers: Trailers = [:], error: ConnectError? = nil
     ) {
         self.code = code
         self.headers = headers

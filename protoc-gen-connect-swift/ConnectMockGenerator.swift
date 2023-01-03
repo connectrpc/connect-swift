@@ -1,0 +1,183 @@
+// Copyright 2022 Buf Technologies, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import Foundation
+import SwiftProtobufPluginLibrary
+
+/// Responsible for generating services and RPCs that are compatible with the Connect library.
+final class ConnectMockGenerator: Generator {
+    override init(_ descriptor: FileDescriptor, options: GeneratorOptions) {
+        super.init(descriptor, options: options)
+        self.printContent()
+    }
+
+    private func printContent() {
+        self.printFilePreamble()
+
+        self.printModuleImports(adding: ["ConnectMocks"])
+
+        for service in self.descriptor.services {
+            self.printLine()
+            self.printMockService(service)
+        }
+    }
+
+    private func printMockService(_ service: ServiceDescriptor) {
+        self.printLine(
+            """
+            open class \(service.mockName(using: self.namer)): \
+            \(service.protocolName(using: self.namer)) {
+            """
+        )
+        self.indent {
+            for method in service.methods {
+                if self.options.generateCallbackMocks {
+                    self.printLine(
+                        "/// Mocked for calls to `\(method.name(using: self.options))()`."
+                    )
+                    self.printLine(
+                        """
+                        public var \(method.callbackMockPropertyName()) = \
+                        \(method.callbackMockPropertyValue(using: self.namer))
+                        """
+                    )
+                }
+                if self.options.generateAsyncMocks {
+                    self.printLine(
+                        "/// Mocked for async calls to `\(method.name(using: self.options))()`."
+                    )
+                    self.printLine(
+                        """
+                        public var \(method.asyncAwaitMockPropertyName()) = \
+                        \(method.asyncAwaitMockPropertyValue(using: self.namer))
+                        """
+                    )
+                }
+            }
+
+            self.printLine()
+            self.printLine("public init() {}")
+
+            for method in service.methods {
+                if self.options.generateCallbackMocks {
+                    self.printCallbackMethodMockImplementation(for: method)
+                }
+                if self.options.generateAsyncMocks {
+                    self.printAsyncAwaitMethodMockImplementation(for: method)
+                }
+            }
+        }
+
+        self.printLine("}")
+    }
+
+    private func printCallbackMethodMockImplementation(for method: MethodDescriptor) {
+        self.printLine()
+
+        self.printLine(
+            "open "
+            + method.callbackSignature(
+                using: self.namer, includeDefaults: true, options: self.options
+            )
+            + " {"
+        )
+        self.indent {
+            self.printLine("\(method.callbackMockReturnStatement())")
+        }
+        self.printLine("}")
+    }
+
+    private func printAsyncAwaitMethodMockImplementation(for method: MethodDescriptor) {
+        self.printLine()
+
+        self.printLine(
+            "open "
+            + method.asyncAwaitSignature(
+                using: self.namer, includeDefaults: true, options: self.options
+            )
+            + " {"
+        )
+        self.indent {
+            self.printLine("\(method.asyncAwaitMockReturnStatement())")
+        }
+        self.printLine("}")
+    }
+}
+
+private extension ServiceDescriptor {
+    func mockName(using namer: SwiftProtobufNamer) -> String {
+        return "Mock" + self.implementationName(using: namer)
+    }
+}
+
+private extension MethodDescriptor {
+    func callbackMockPropertyName() -> String {
+        return "mock" + NamingUtils.toUpperCamelCase(self.name)
+    }
+
+    func asyncAwaitMockPropertyName() -> String {
+        return "mockAsync" + NamingUtils.toUpperCamelCase(self.name)
+    }
+
+    func callbackMockPropertyValue(using namer: SwiftProtobufNamer) -> String {
+        let inputName = namer.fullName(message: self.inputType)
+        let outputName = namer.fullName(message: self.outputType)
+        if self.clientStreaming && self.serverStreaming {
+            return "MockBidirectionalStream<\(inputName)>()"
+        } else if self.serverStreaming {
+            return "MockServerOnlyStream<\(inputName)>()"
+        } else if self.clientStreaming {
+            return "MockClientOnlyStream<\(inputName)>()"
+        } else {
+            return """
+            { (_: \(inputName)) -> ResponseMessage<\(outputName)> in .init(message: .init()) }
+            """
+        }
+    }
+
+    func asyncAwaitMockPropertyValue(using namer: SwiftProtobufNamer) -> String {
+        let inputName = namer.fullName(message: self.inputType)
+        let outputName = namer.fullName(message: self.outputType)
+        if self.clientStreaming && self.serverStreaming {
+            return "MockBidirectionalAsyncStream<\(inputName), \(outputName)>()"
+        } else if self.serverStreaming {
+            return "MockServerOnlyAsyncStream<\(inputName), \(outputName)>()"
+        } else if self.clientStreaming {
+            return "MockClientOnlyAsyncStream<\(inputName), \(outputName)>()"
+        } else {
+            return """
+            { (_: \(inputName)) -> ResponseMessage<\(outputName)> in .init(message: .init()) }
+            """
+        }
+    }
+
+    func callbackMockReturnStatement() -> String {
+        if self.clientStreaming || self.serverStreaming {
+            return "return self.\(self.callbackMockPropertyName())"
+        } else {
+            return """
+            completion(self.\(self.callbackMockPropertyName())(request))
+            return Connect.Cancelable {}
+            """
+        }
+    }
+
+    func asyncAwaitMockReturnStatement() -> String {
+        if self.clientStreaming || self.serverStreaming {
+            return "return self.\(self.asyncAwaitMockPropertyName())"
+        } else {
+            return "return self.\(self.callbackMockPropertyName())(request)"
+        }
+    }
+}
