@@ -90,7 +90,7 @@ see the [`ElizaSwiftPackageApp`](./ConnectExamples/ElizaSwiftPackageApp).
 ## Integrate with CocoaPods
 
 Although Swift Package Manager is the preferred distribution method for
-the Connect library, we also provide a [podspec](./Connect.podspec) for
+the Connect library, we also provide a [podspec](./Connect-Swift.podspec) for
 CocoaPods support.
 
 To integrate using CocoaPods, add this line to your `Podfile`:
