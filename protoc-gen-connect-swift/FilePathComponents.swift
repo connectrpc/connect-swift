@@ -36,16 +36,24 @@ struct FilePathComponents {
         withExtension pathExtension: String,
         using option: GeneratorOptions.FileNaming
     ) -> String {
+        if self.directory.isEmpty {
+            return "\(self.base)\(pathExtension)"
+        }
+
         switch option {
         case .dropPath:
             return "\(self.base)\(pathExtension)"
 
         case .fullPath:
-            return "\(self.directory)\(self.base)\(pathExtension)"
+            return "\(self.directory)/\(self.base)\(pathExtension)"
 
         case .pathToUnderscores:
             let underscoredDirectory = self.directory.replacingOccurrences(of: "/", with: "_")
-            return "\(underscoredDirectory)\(self.base)\(pathExtension)"
+            if underscoredDirectory.hasPrefix("_") {
+                return "\(underscoredDirectory.dropFirst())_\(self.base)\(pathExtension)"
+            } else {
+                return "\(underscoredDirectory)_\(self.base)\(pathExtension)"
+            }
         }
     }
 }

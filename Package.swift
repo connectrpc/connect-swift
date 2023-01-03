@@ -86,6 +86,13 @@ let package = Package(
             ],
             path: "protoc-gen-connect-swift"
         ),
+        .testTarget(
+            name: "protoc-gen-connect-swift-tests",
+            dependencies: [
+                "protoc-gen-connect-swift",
+            ],
+            path: "protoc-gen-connect-swift-tests"
+        ),
     ],
     swiftLanguageVersions: [.v5]
 )
