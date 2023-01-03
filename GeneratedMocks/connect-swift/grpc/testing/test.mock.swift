@@ -9,6 +9,12 @@ import Foundation
 import Generated
 import SwiftProtobuf
 
+/// Mock implementation of `Grpc_Testing_TestServiceClientInterface`.
+///
+/// Production implementations can be substituted with instances of this
+/// class, allowing for mocking RPC calls. Behavior can be customized
+/// either through the properties on this class or by
+/// subclassing the class and overriding its methods.
 open class MockGrpc_Testing_TestServiceClient: Grpc_Testing_TestServiceClientInterface {
     /// Mocked for calls to `emptyCall()`.
     public var mockEmptyCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
@@ -151,6 +157,12 @@ open class MockGrpc_Testing_TestServiceClient: Grpc_Testing_TestServiceClientInt
     }
 }
 
+/// Mock implementation of `Grpc_Testing_UnimplementedServiceClientInterface`.
+///
+/// Production implementations can be substituted with instances of this
+/// class, allowing for mocking RPC calls. Behavior can be customized
+/// either through the properties on this class or by
+/// subclassing the class and overriding its methods.
 open class MockGrpc_Testing_UnimplementedServiceClient: Grpc_Testing_UnimplementedServiceClientInterface {
     /// Mocked for calls to `unimplementedCall()`.
     public var mockUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
@@ -181,6 +193,12 @@ open class MockGrpc_Testing_UnimplementedServiceClient: Grpc_Testing_Unimplement
     }
 }
 
+/// Mock implementation of `Grpc_Testing_ReconnectServiceClientInterface`.
+///
+/// Production implementations can be substituted with instances of this
+/// class, allowing for mocking RPC calls. Behavior can be customized
+/// either through the properties on this class or by
+/// subclassing the class and overriding its methods.
 open class MockGrpc_Testing_ReconnectServiceClient: Grpc_Testing_ReconnectServiceClientInterface {
     /// Mocked for calls to `start()`.
     public var mockStart = { (_: Grpc_Testing_ReconnectParams) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
@@ -212,6 +230,12 @@ open class MockGrpc_Testing_ReconnectServiceClient: Grpc_Testing_ReconnectServic
     }
 }
 
+/// Mock implementation of `Grpc_Testing_LoadBalancerStatsServiceClientInterface`.
+///
+/// Production implementations can be substituted with instances of this
+/// class, allowing for mocking RPC calls. Behavior can be customized
+/// either through the properties on this class or by
+/// subclassing the class and overriding its methods.
 open class MockGrpc_Testing_LoadBalancerStatsServiceClient: Grpc_Testing_LoadBalancerStatsServiceClientInterface {
     /// Mocked for calls to `getClientStats()`.
     public var mockGetClientStats = { (_: Grpc_Testing_LoadBalancerStatsRequest) -> ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse> in .init(message: .init()) }
@@ -243,6 +267,12 @@ open class MockGrpc_Testing_LoadBalancerStatsServiceClient: Grpc_Testing_LoadBal
     }
 }
 
+/// Mock implementation of `Grpc_Testing_XdsUpdateHealthServiceClientInterface`.
+///
+/// Production implementations can be substituted with instances of this
+/// class, allowing for mocking RPC calls. Behavior can be customized
+/// either through the properties on this class or by
+/// subclassing the class and overriding its methods.
 open class MockGrpc_Testing_XdsUpdateHealthServiceClient: Grpc_Testing_XdsUpdateHealthServiceClientInterface {
     /// Mocked for calls to `setServing()`.
     public var mockSetServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
@@ -274,6 +304,12 @@ open class MockGrpc_Testing_XdsUpdateHealthServiceClient: Grpc_Testing_XdsUpdate
     }
 }
 
+/// Mock implementation of `Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface`.
+///
+/// Production implementations can be substituted with instances of this
+/// class, allowing for mocking RPC calls. Behavior can be customized
+/// either through the properties on this class or by
+/// subclassing the class and overriding its methods.
 open class MockGrpc_Testing_XdsUpdateClientConfigureServiceClient: Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface {
     /// Mocked for calls to `configure()`.
     public var mockConfigure = { (_: Grpc_Testing_ClientConfigureRequest) -> ResponseMessage<Grpc_Testing_ClientConfigureResponse> in .init(message: .init()) }

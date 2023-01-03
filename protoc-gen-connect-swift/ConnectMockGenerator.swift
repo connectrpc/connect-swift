@@ -34,11 +34,15 @@ final class ConnectMockGenerator: Generator {
     }
 
     private func printMockService(_ service: ServiceDescriptor) {
+        let protocolName = service.protocolName(using: self.namer)
+        self.printLine("/// Mock implementation of `\(protocolName)`.")
+        self.printLine("///")
+        self.printLine("/// Production implementations can be substituted with instances of this")
+        self.printLine("/// class, allowing for mocking RPC calls. Behavior can be customized")
+        self.printLine("/// either through the properties on this class or by")
+        self.printLine("/// subclassing the class and overriding its methods.")
         self.printLine(
-            """
-            open class \(service.mockName(using: self.namer)): \
-            \(service.protocolName(using: self.namer)) {
-            """
+            "open class \(service.mockName(using: self.namer)): \(protocolName) {"
         )
         self.indent {
             for method in service.methods {
@@ -84,7 +88,6 @@ final class ConnectMockGenerator: Generator {
 
     private func printCallbackMethodMockImplementation(for method: MethodDescriptor) {
         self.printLine()
-
         self.printLine(
             "open "
             + method.callbackSignature(
@@ -100,7 +103,6 @@ final class ConnectMockGenerator: Generator {
 
     private func printAsyncAwaitMethodMockImplementation(for method: MethodDescriptor) {
         self.printLine()
-
         self.printLine(
             "open "
             + method.asyncAwaitSignature(

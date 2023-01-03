@@ -14,14 +14,13 @@
 
 import SwiftProtobufPluginLibrary
 
-/// Base generator class that can be used to output files from Protobuf descriptors.
+/// Base generator class that can be used to output a file from a Protobuf file descriptor.
 class Generator {
     private var printer = CodePrinter(indent: "    ".unicodeScalars)
 
     let descriptor: FileDescriptor
     let namer: SwiftProtobufNamer
     let options: GeneratorOptions
-    let visibility: String
 
     var output: String {
         return self.printer.content
@@ -34,12 +33,6 @@ class Generator {
             currentFile: descriptor,
             protoFileToModuleMappings: options.protoToModuleMappings
         )
-        switch options.visibility {
-        case .internal:
-            self.visibility = "internal"
-        case .public:
-            self.visibility = "public"
-        }
     }
 
     // MARK: - Output helpers

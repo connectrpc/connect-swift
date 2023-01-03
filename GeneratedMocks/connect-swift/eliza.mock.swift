@@ -9,6 +9,12 @@ import Foundation
 import Generated
 import SwiftProtobuf
 
+/// Mock implementation of `Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface`.
+///
+/// Production implementations can be substituted with instances of this
+/// class, allowing for mocking RPC calls. Behavior can be customized
+/// either through the properties on this class or by
+/// subclassing the class and overriding its methods.
 open class MockBuf_Connect_Demo_Eliza_V1_ElizaServiceClient: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
     /// Mocked for calls to `say()`.
     public var mockSay = { (_: Buf_Connect_Demo_Eliza_V1_SayRequest) -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse> in .init(message: .init()) }
