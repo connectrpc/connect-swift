@@ -65,7 +65,9 @@ that are specific to the `protoc-gen-connect-swift` plugin.
 | `ExtraModuleImports` | String | None | Yes | No | Allows for specifying additional modules that generated Connect sources should import |
 | `FileNaming` | String | `FullPath` | No | Yes | [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-filenaming---naming-of-generated-sources) |
 | `GenerateAsyncMethods` | Bool | `true` | No | No | If `true`, generates RPC functions that provide Swift `async`/`await` interfaces |
+| `GenerateAsyncMocks` | Bool | `false` | No | No | If `true`, generates mock classes and methods for every service and RPC. These depend on `ConnectMocks` and can be used for testing when `GenerateAsyncMethods=true` |
 | `GenerateCallbackMethods` | Bool | `true` | No | No | If `true`, generates RPC functions that provide closure-based callback interfaces |
+| `GenerateCallbackMocks` | Bool | `false` | No | No | If `true`, generates mock classes and methods for every service and RPC. These depend on `ConnectMocks` and can be used for testing when `GenerateCallbackMethods=true` |
 | `KeepMethodCasing` | Bool | `false` | No | No | If `true`, generated RPC function names will match the `rpc` specified in the `.proto` file (instead of being lower-camel-cased) |
 | `ProtoPathModuleMappings` | Custom | None | No | Yes | [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-protopathmodulemappings---swift-module-names-for-proto-paths) |
 | `SwiftProtobufModuleName` | String | `SwiftProtobuf` | No | No | Allows for overriding the `SwiftProtobuf` module name in `import` statements. Useful if the `SwiftProtobuf` dependency is being renamed in custom build configurations |
