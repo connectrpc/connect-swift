@@ -15,10 +15,6 @@
 import Combine
 import Connect
 import Dispatch
-#if !COCOAPODS
-// The CocoaPods example references these files directly instead of through Swift Package Manager
-import Generated
-#endif
 import os.log
 
 private typealias ConverseRequest = Buf_Connect_Demo_Eliza_V1_ConverseRequest
