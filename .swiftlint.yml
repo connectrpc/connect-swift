@@ -3,6 +3,7 @@ included:
   - ConnectExamples/Eliza/Eliza
   - ConnectTests
   - protoc-gen-connect-swift
+  - protoc-gen-connect-swift-tests
 excluded:
   - Connect/Implementation/Generated
 disabled_rules:
