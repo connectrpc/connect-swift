@@ -92,6 +92,16 @@ let package = Package(
             ],
             path: "Generated"
         ),
+        .target(
+            name: "GeneratedMocks",
+            dependencies: [
+                "Connect",
+                "ConnectMocks",
+                "Generated",
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+            ],
+            path: "GeneratedMocks"
+        ),
         .executableTarget(
             name: "protoc-gen-connect-swift",
             dependencies: [

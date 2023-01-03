@@ -6,6 +6,7 @@
 import Connect
 import ConnectMocks
 import Foundation
+import Generated
 import SwiftProtobuf
 
 open class MockBuf_Connect_Demo_Eliza_V1_ElizaServiceClient: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {

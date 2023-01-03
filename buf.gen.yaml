@@ -10,8 +10,8 @@ plugins:
     out: Generated/connect-swift
     path: ./plugins/protoc-gen-connect-swift
   - name: connect-swift
-    opt: GenerateAsyncMocks=true,GenerateCallbackMocks=true,GenerateAsyncMethods=false,GenerateCallbackMethods=false
-    out: Generated/connect-swift-mocks
+    opt: GenerateAsyncMocks=true,GenerateCallbackMocks=true,GenerateAsyncMethods=false,GenerateCallbackMethods=false,ExtraModuleImports=Generated
+    out: GeneratedMocks/connect-swift
     path: ./plugins/protoc-gen-connect-swift
 
   # TODO: Replace this with an official BSR plugin once open-sourced.

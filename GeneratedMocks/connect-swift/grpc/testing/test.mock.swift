@@ -6,6 +6,7 @@
 import Connect
 import ConnectMocks
 import Foundation
+import Generated
 import SwiftProtobuf
 
 open class MockGrpc_Testing_TestServiceClient: Grpc_Testing_TestServiceClientInterface {

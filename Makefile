@@ -28,6 +28,7 @@ buildplugin: ## Build the protoc-gen-connect-swift plugin binary
 .PHONY: clean
 clean: ## Clean/delete all generated outputs
 	rm -rf ./Generated
+	rm -rf ./GeneratedMocks
 
 .PHONY: crosstestserverstop
 crosstestserverstop: ## Stop the crosstest server

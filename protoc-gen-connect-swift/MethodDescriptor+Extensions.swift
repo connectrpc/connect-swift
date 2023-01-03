@@ -12,23 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Foundation
 import SwiftProtobufPluginLibrary
-
-extension ServiceDescriptor {
-    func implementationName(using namer: SwiftProtobufNamer) -> String {
-        let upperCamelName = NamingUtils.toUpperCamelCase(self.name) + "Client"
-        if self.file.package.isEmpty {
-            return upperCamelName
-        } else {
-            return namer.typePrefix(forFile: self.file) + upperCamelName
-        }
-    }
-
-    func protocolName(using namer: SwiftProtobufNamer) -> String {
-        return self.implementationName(using: namer) + "Interface"
-    }
-}
 
 extension MethodDescriptor {
     var methodPath: String {
@@ -41,8 +25,8 @@ extension MethodDescriptor {
 
     func name(using options: GeneratorOptions) -> String {
         return options.keepMethodCasing
-            ? self.name
-            : NamingUtils.toLowerCamelCase(self.name)
+        ? self.name
+        : NamingUtils.toLowerCamelCase(self.name)
     }
 
     func callbackSignature(
