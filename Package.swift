@@ -23,7 +23,7 @@ let package = Package(
         .macOS(.v10_15),
     ],
     products: [
-        // Primary library for consumers to use.
+        // Primary Connect runtime that is depended on by generated classes.
         .library(
             name: "Connect",
             targets: ["Connect"]
@@ -32,11 +32,6 @@ let package = Package(
         .library(
             name: "ConnectMocks",
             targets: ["ConnectMocks"]
-        ),
-        // Library used by example apps within this repository.
-        .library(
-            name: "Generated",
-            targets: ["Generated"]
         ),
         // Generator executable for Connect RPCs.
         .executable(
