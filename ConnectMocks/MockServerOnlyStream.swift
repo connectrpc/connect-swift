@@ -18,8 +18,10 @@ import SwiftProtobuf
 /// Mock implementation of `ServerOnlyStreamInterface` which can be used for testing.
 ///
 /// This type can be used by setting `on*` closures and observing their calls,
-/// by validating its instance variables like `inputs` at the end of invocation,
+/// by validating its instance variables such as `inputs` at the end of invocation,
 /// or by subclassing the type and overriding functions such as `send()`.
+///
+/// To return data over the stream, outputs can be specified using `init(outputs: ...)`.
 open class MockServerOnlyStream<
     Input: SwiftProtobuf.Message,
     Output: SwiftProtobuf.Message

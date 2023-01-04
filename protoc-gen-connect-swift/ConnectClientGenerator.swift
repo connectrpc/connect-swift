@@ -27,7 +27,7 @@ final class ConnectClientGenerator: Generator {
             self.visibility = "public"
         }
         super.init(descriptor, options: options)
-    
+
         self.printContent()
     }
 
