@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import Combine
 import Connect
 import SwiftProtobuf
 
@@ -30,17 +31,18 @@ open class MockBidirectionalStream<
     public var onClose: (() -> Void)?
     /// Closure that is called when `send()` is invoked.
     public var onSend: ((Input) -> Void)?
-    /// The list of outputs to return to the client.
+    /// The list of outputs to return to the client once one input has been sent.
     public var outputs: [StreamResult<Output>]
 
     /// All inputs that have been sent through the stream.
-    public private(set) var inputs = [Input]()
+    @Published public private(set) var inputs = [Input]()
     /// True if `close()` has been called.
-    public private(set) var isClosed = false
+    @Published public private(set) var isClosed = false
 
     /// Designated initializer.
     ///
-    /// - parameter outputs: The list of outputs to return to the client.
+    /// - parameter outputs: The list of outputs to return to the client once one input has been
+    ///                      sent.
     public init(outputs: [StreamResult<Output>] = []) {
         self.outputs = outputs
     }

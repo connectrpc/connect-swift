@@ -25,7 +25,11 @@ final class ConnectMockGenerator: Generator {
     private func printContent() {
         self.printFilePreamble()
 
-        self.printModuleImports(adding: ["ConnectMocks"])
+        if self.options.generateCallbackMocks {
+            self.printModuleImports(adding: ["Combine", "ConnectMocks"])
+        } else {
+            self.printModuleImports(adding: ["ConnectMocks"])
+        }
 
         for service in self.descriptor.services {
             self.printLine()
@@ -45,6 +49,11 @@ final class ConnectMockGenerator: Generator {
             "open class \(service.mockName(using: self.namer)): \(protocolName) {"
         )
         self.indent {
+            if self.options.generateCallbackMocks {
+                self.printLine("private var cancellables = [Combine.AnyCancellable]()")
+                self.printLine()
+            }
+
             for method in service.methods {
                 if self.options.generateCallbackMocks {
                     self.printLine(
@@ -102,7 +111,14 @@ final class ConnectMockGenerator: Generator {
         self.indent {
             let mockProperty = method.callbackMockPropertyName()
             if method.clientStreaming || method.serverStreaming {
-                self.printLine("self.\(mockProperty).outputs.forEach(onResult)")
+                self.printLine(
+                    """
+                    self.\(mockProperty).$inputs\
+                    .first { !$0.isEmpty }\
+                    .sink { _ in self.\(mockProperty).outputs.forEach(onResult) }\
+                    .store(in: &self.cancellables)
+                    """
+                )
                 self.printLine("return self.\(mockProperty)")
             } else {
                 self.printLine("completion(self.\(mockProperty)(request))")

@@ -3,6 +3,7 @@
 // Source: eliza.proto
 //
 
+import Combine
 import Connect
 import ConnectMocks
 import Foundation
@@ -16,6 +17,8 @@ import SwiftProtobuf
 /// either through the properties on this class or by
 /// subclassing the class and overriding its methods.
 open class Buf_Connect_Demo_Eliza_V1_ElizaServiceClientMock: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
+    private var cancellables = [Combine.AnyCancellable]()
+
     /// Mocked for calls to `say()`.
     public var mockSay = { (_: Buf_Connect_Demo_Eliza_V1_SayRequest) -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse> in .init(message: .init()) }
     /// Mocked for async calls to `say()`.
@@ -43,7 +46,7 @@ open class Buf_Connect_Demo_Eliza_V1_ElizaServiceClientMock: Buf_Connect_Demo_El
     }
 
     open func `converse`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_ConverseResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Buf_Connect_Demo_Eliza_V1_ConverseRequest> {
-        self.mockConverse.outputs.forEach(onResult)
+        self.mockConverse.$inputs.first { !$0.isEmpty }.sink { _ in self.mockConverse.outputs.forEach(onResult) }.store(in: &self.cancellables)
         return self.mockConverse
     }
 
@@ -52,7 +55,7 @@ open class Buf_Connect_Demo_Eliza_V1_ElizaServiceClientMock: Buf_Connect_Demo_El
     }
 
     open func `introduce`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest> {
-        self.mockIntroduce.outputs.forEach(onResult)
+        self.mockIntroduce.$inputs.first { !$0.isEmpty }.sink { _ in self.mockIntroduce.outputs.forEach(onResult) }.store(in: &self.cancellables)
         return self.mockIntroduce
     }
 

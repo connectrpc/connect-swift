@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import Combine
 import Connect
 import SwiftProtobuf
 
@@ -27,17 +28,21 @@ open class MockServerOnlyAsyncStream<
     Input: SwiftProtobuf.Message,
     Output: SwiftProtobuf.Message
 >: ServerOnlyAsyncStreamInterface {
+    private var cancellables = [AnyCancellable]()
+
     /// Closure that is called when `send()` is invoked.
     public var onSend: ((Input) -> Void)?
-    /// The list of outputs to return to calls to the `results()` function.
+    /// The list of outputs to return to calls to the `results()` function
+    /// once one input has been sent.
     public var outputs: [StreamResult<Output>]
 
     /// All inputs that have been sent through the stream.
-    public private(set) var inputs = [Input]()
+    @Published public private(set) var inputs = [Input]()
 
     /// Designated initializer.
     ///
-    /// - parameter outputs: The list of outputs to return to calls to the `results()` function.
+    /// - parameter outputs: The list of outputs to return to calls to the `results()` function once
+    ///                      one input has been sent.
     public init(outputs: [StreamResult<Output>] = []) {
         self.outputs = outputs
     }
@@ -48,9 +53,17 @@ open class MockServerOnlyAsyncStream<
     }
 
     open func results() -> AsyncStream<Connect.StreamResult<Output>> {
-        var outputs = Array(self.outputs)
-        return AsyncStream(unfolding: {
-            return outputs.isEmpty ? nil : outputs.removeFirst()
-        })
+        // Wait until a request is sent over the stream to return the results.
+        return AsyncStream { continuation in
+            self.$inputs
+                .first { !$0.isEmpty }
+                .sink { _ in
+                    for output in self.outputs {
+                        continuation.yield(output)
+                    }
+                    continuation.finish()
+                }
+                .store(in: &self.cancellables)
+        }
     }
 }
