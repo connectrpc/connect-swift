@@ -34,7 +34,7 @@ open class MockBidirectionalAsyncStream<
     public var onClose: (() -> Void)?
     /// Closure that is called when `send()` is invoked.
     public var onSend: ((Input) -> Void)?
-    /// The list of outputs to return to calls to the `results()` function 
+    /// The list of outputs to return to calls to the `results()` function
     /// once one input has been sent.
     public var outputs: [StreamResult<Output>]
 
