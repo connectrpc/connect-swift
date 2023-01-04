@@ -20,26 +20,27 @@ import SwiftProtobuf
 /// This type can be used by setting `on*` closures and observing their calls,
 /// by validating its instance variables like `inputs` at the end of invocation,
 /// or by subclassing the type and overriding functions such as `send()`.
-open class MockServerOnlyStream<Input: SwiftProtobuf.Message>: ServerOnlyStreamInterface {
-    /// Closure that is called when `close()` is invoked.
-    public var onClose: (() -> Void)?
+open class MockServerOnlyStream<
+    Input: SwiftProtobuf.Message,
+    Output: SwiftProtobuf.Message
+>: ServerOnlyStreamInterface {
     /// Closure that is called when `send()` is invoked.
     public var onSend: ((Input) -> Void)?
+    /// The list of outputs to return to the client.
+    public var outputs: [StreamResult<Output>]
 
     /// All inputs that have been sent through the stream.
     public private(set) var inputs = [Input]()
-    /// True if `close()` has been called.
-    public private(set) var isClosed = false
 
-    public init() {}
+    /// Designated initializer.
+    ///
+    /// - parameter outputs: The list of outputs to return to the client.
+    public init(outputs: [StreamResult<Output>] = []) {
+        self.outputs = outputs
+    }
 
     open func send(_ input: Input) throws {
         self.inputs.append(input)
         self.onSend?(input)
-    }
-
-    open func close() {
-        self.isClosed = true
-        self.onClose?()
     }
 }

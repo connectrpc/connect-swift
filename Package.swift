@@ -67,7 +67,21 @@ let package = Package(
                 .target(name: "Connect"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "ConnectMocks"
+            path: "ConnectMocks",
+            exclude: [
+                "README.md",
+            ]
+        ),
+        .testTarget(
+            name: "ConnectMocksTests",
+            dependencies: [
+                "Connect",
+                "ConnectMocks",
+                "Generated",
+                "GeneratedMocks",
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+            ],
+            path: "ConnectMocksTests"
         ),
         .testTarget(
             name: "ConnectTests",

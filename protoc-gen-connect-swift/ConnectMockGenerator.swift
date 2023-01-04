@@ -88,6 +88,10 @@ final class ConnectMockGenerator: Generator {
 
     private func printCallbackMethodMockImplementation(for method: MethodDescriptor) {
         self.printLine()
+        if !method.serverStreaming && !method.clientStreaming {
+            self.printLine("@discardableResult")
+        }
+
         self.printLine(
             "open "
             + method.callbackSignature(
@@ -96,13 +100,24 @@ final class ConnectMockGenerator: Generator {
             + " {"
         )
         self.indent {
-            self.printLine("\(method.callbackMockReturnStatement())")
+            let mockProperty = method.callbackMockPropertyName()
+            if method.clientStreaming || method.serverStreaming {
+                self.printLine("self.\(mockProperty).outputs.forEach(onResult)")
+                self.printLine("return self.\(mockProperty)")
+            } else {
+                self.printLine("completion(self.\(mockProperty)(request))")
+                self.printLine("return Connect.Cancelable {}")
+            }
         }
         self.printLine("}")
     }
 
     private func printAsyncAwaitMethodMockImplementation(for method: MethodDescriptor) {
         self.printLine()
+        if !method.serverStreaming && !method.clientStreaming {
+            self.printLine("@discardableResult")
+        }
+
         self.printLine(
             "open "
             + method.asyncAwaitSignature(
@@ -111,7 +126,11 @@ final class ConnectMockGenerator: Generator {
             + " {"
         )
         self.indent {
-            self.printLine("\(method.asyncAwaitMockReturnStatement())")
+            if method.clientStreaming || method.serverStreaming {
+                self.printLine("return self.\(method.asyncAwaitMockPropertyName())")
+            } else {
+                self.printLine("return self.\(method.asyncAwaitMockPropertyName())(request)")
+            }
         }
         self.printLine("}")
     }
@@ -119,7 +138,7 @@ final class ConnectMockGenerator: Generator {
 
 private extension ServiceDescriptor {
     func mockName(using namer: SwiftProtobufNamer) -> String {
-        return "Mock" + self.implementationName(using: namer)
+        return self.implementationName(using: namer) + "Mock"
     }
 }
 
@@ -136,11 +155,11 @@ private extension MethodDescriptor {
         let inputName = namer.fullName(message: self.inputType)
         let outputName = namer.fullName(message: self.outputType)
         if self.clientStreaming && self.serverStreaming {
-            return "MockBidirectionalStream<\(inputName)>()"
+            return "MockBidirectionalStream<\(inputName), \(outputName)>()"
         } else if self.serverStreaming {
-            return "MockServerOnlyStream<\(inputName)>()"
+            return "MockServerOnlyStream<\(inputName), \(outputName)>()"
         } else if self.clientStreaming {
-            return "MockClientOnlyStream<\(inputName)>()"
+            return "MockClientOnlyStream<\(inputName), \(outputName)>()"
         } else {
             return """
             { (_: \(inputName)) -> ResponseMessage<\(outputName)> in .init(message: .init()) }
@@ -161,25 +180,6 @@ private extension MethodDescriptor {
             return """
             { (_: \(inputName)) -> ResponseMessage<\(outputName)> in .init(message: .init()) }
             """
-        }
-    }
-
-    func callbackMockReturnStatement() -> String {
-        if self.clientStreaming || self.serverStreaming {
-            return "return self.\(self.callbackMockPropertyName())"
-        } else {
-            return """
-            completion(self.\(self.callbackMockPropertyName())(request))
-            return Connect.Cancelable {}
-            """
-        }
-    }
-
-    func asyncAwaitMockReturnStatement() -> String {
-        if self.clientStreaming || self.serverStreaming {
-            return "return self.\(self.asyncAwaitMockPropertyName())"
-        } else {
-            return "return self.\(self.callbackMockPropertyName())(request)"
         }
     }
 }

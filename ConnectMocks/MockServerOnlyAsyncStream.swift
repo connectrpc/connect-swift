@@ -27,17 +27,13 @@ open class MockServerOnlyAsyncStream<
     Input: SwiftProtobuf.Message,
     Output: SwiftProtobuf.Message
 >: ServerOnlyAsyncStreamInterface {
-    private let outputs: [StreamResult<Output>]
-
-    /// Closure that is called when `close()` is invoked.
-    public var onClose: (() -> Void)?
     /// Closure that is called when `send()` is invoked.
     public var onSend: ((Input) -> Void)?
+    /// The list of outputs to return to calls to the `results()` function.
+    public var outputs: [StreamResult<Output>]
 
     /// All inputs that have been sent through the stream.
     public private(set) var inputs = [Input]()
-    /// True if `close()` has been called.
-    public private(set) var isClosed = false
 
     /// Designated initializer.
     ///
@@ -56,10 +52,5 @@ open class MockServerOnlyAsyncStream<
         return AsyncStream(unfolding: {
             return outputs.isEmpty ? nil : outputs.removeFirst()
         })
-    }
-
-    open func close() {
-        self.isClosed = true
-        self.onClose?()
     }
 }

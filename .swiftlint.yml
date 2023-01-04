@@ -2,6 +2,7 @@ included:
   - Connect
   - ConnectExamples/Eliza/Eliza
   - ConnectMocks
+  - ConnectMocksTests
   - ConnectTests
   - protoc-gen-connect-swift
   - protoc-gen-connect-swift-tests

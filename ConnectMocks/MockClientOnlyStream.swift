@@ -21,5 +21,6 @@ import SwiftProtobuf
 /// by validating its instance variables like `inputs` at the end of invocation,
 /// or by subclassing the type and overriding functions such as `send()`.
 open class MockClientOnlyStream<
-    Input: SwiftProtobuf.Message
->: MockBidirectionalStream<Input>, ClientOnlyStreamInterface {}
+    Input: SwiftProtobuf.Message,
+    Output: SwiftProtobuf.Message
+>: MockBidirectionalStream<Input, Output>, ClientOnlyStreamInterface {}
