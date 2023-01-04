@@ -3,8 +3,8 @@
 #
 # buf registry login
 # docker login -u $USERNAME -p $PASSWORD plugins.buf.build
-# docker build --platform linux/amd64 -t plugins.buf.build/mrebello/connect-swift:v0.0.1-12 -f Dockerfile .
-# docker push plugins.buf.build/mrebello/connect-swift:v0.0.1-12
+# docker build --platform linux/amd64 -t plugins.buf.build/mrebello/connect-swift:v0.0.1-13 -f Dockerfile .
+# docker push plugins.buf.build/mrebello/connect-swift:v0.0.1-13
 
 # The following is based on:
 # https://github.com/bufbuild/remote-plugins/blob/main/swift.dockerfile
