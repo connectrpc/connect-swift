@@ -24,3 +24,26 @@ public enum StreamResult<Output> {
     /// A response message has been received over the stream.
     case message(Output)
 }
+
+extension StreamResult: Equatable where Output: Equatable {
+    public static func == (lhs: StreamResult<Output>, rhs: StreamResult<Output>) -> Bool {
+        switch (lhs, rhs) {
+        case (
+            .complete(let code1, let error1, let trailers1),
+            .complete(let code2, let error2, let trailers2)
+        ):
+            return code1 == code2
+            && trailers1 == trailers2
+            && (error1 != nil) == (error2 != nil)
+
+        case (.headers(let headers1), .headers(let headers2)):
+            return headers1 == headers2
+
+        case (.message(let message1), .message(let message2)):
+            return message1 == message2
+
+        default:
+            return false
+        }
+    }
+}

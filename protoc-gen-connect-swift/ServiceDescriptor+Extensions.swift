@@ -12,12 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// Type that wraps an action that can be canceled.
-public struct Cancelable {
-    /// Cancel the current action.
-    public let cancel: () -> Void
+import SwiftProtobufPluginLibrary
 
-    public init(cancel: @escaping () -> Void) {
-        self.cancel = cancel
+extension ServiceDescriptor {
+    func implementationName(using namer: SwiftProtobufNamer) -> String {
+        let upperCamelName = NamingUtils.toUpperCamelCase(self.name) + "Client"
+        if self.file.package.isEmpty {
+            return upperCamelName
+        } else {
+            return namer.typePrefix(forFile: self.file) + upperCamelName
+        }
+    }
+
+    func protocolName(using namer: SwiftProtobufNamer) -> String {
+        return self.implementationName(using: namer) + "Interface"
     }
 }

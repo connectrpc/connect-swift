@@ -28,6 +28,11 @@ let package = Package(
             name: "Connect",
             targets: ["Connect"]
         ),
+        // Mock types that are imported by generated mock classes and can be used for testing.
+        .library(
+            name: "ConnectMocks",
+            targets: ["ConnectMocks"]
+        ),
         // Generator executable for Connect RPCs.
         .executable(
             name: "protoc-gen-connect-swift",
@@ -51,6 +56,28 @@ let package = Package(
                 "proto",
             ]
         ),
+        .target(
+            name: "ConnectMocks",
+            dependencies: [
+                .target(name: "Connect"),
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+            ],
+            path: "ConnectMocks",
+            exclude: [
+                "README.md",
+            ]
+        ),
+        .testTarget(
+            name: "ConnectMocksTests",
+            dependencies: [
+                "Connect",
+                "ConnectMocks",
+                "Generated",
+                "GeneratedMocks",
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+            ],
+            path: "ConnectMocksTests"
+        ),
         .testTarget(
             name: "ConnectTests",
             dependencies: [
@@ -73,6 +100,16 @@ let package = Package(
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
             path: "Generated"
+        ),
+        .target(
+            name: "GeneratedMocks",
+            dependencies: [
+                "Connect",
+                "ConnectMocks",
+                "Generated",
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+            ],
+            path: "GeneratedMocks"
         ),
         .executableTarget(
             name: "protoc-gen-connect-swift",
