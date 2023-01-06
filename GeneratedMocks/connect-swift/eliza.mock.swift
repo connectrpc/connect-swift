@@ -20,9 +20,9 @@ open class Buf_Connect_Demo_Eliza_V1_ElizaServiceClientMock: Buf_Connect_Demo_El
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `say()`.
-    public var mockSay = { (_: Buf_Connect_Demo_Eliza_V1_SayRequest) -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse> in .init(message: .init()) }
+    public var mockSay = { (_: Buf_Connect_Demo_Eliza_V1_SayRequest) -> Result<ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>, ConnectError> in .success(.init(message: .init())) }
     /// Mocked for async calls to `say()`.
-    public var mockAsyncSay = { (_: Buf_Connect_Demo_Eliza_V1_SayRequest) -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse> in .init(message: .init()) }
+    public var mockAsyncSay = { (_: Buf_Connect_Demo_Eliza_V1_SayRequest) -> Result<ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>, ConnectError> in .success(.init(message: .init())) }
     /// Mocked for calls to `converse()`.
     public var mockConverse = MockBidirectionalStream<Buf_Connect_Demo_Eliza_V1_ConverseRequest, Buf_Connect_Demo_Eliza_V1_ConverseResponse>()
     /// Mocked for async calls to `converse()`.
@@ -35,13 +35,13 @@ open class Buf_Connect_Demo_Eliza_V1_ElizaServiceClientMock: Buf_Connect_Demo_El
     public init() {}
 
     @discardableResult
-    open func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>) -> Void) -> Connect.Cancelable {
+    open func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         completion(self.mockSay(request))
         return Connect.Cancelable {}
     }
 
     @discardableResult
-    open func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse> {
+    open func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>, Connect.ConnectError> {
         return self.mockAsyncSay(request)
     }
 

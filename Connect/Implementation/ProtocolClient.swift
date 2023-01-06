@@ -55,23 +55,17 @@ extension ProtocolClient: ProtocolClientInterface {
         path: String,
         request: Input,
         headers: Headers,
-        completion: @escaping (ResponseMessage<Output>) -> Void
+        completion: @escaping (Result<ResponseMessage<Output>, ConnectError>) -> Void
     ) -> Cancelable {
         let codec = self.config.codec
         let data: Data
         do {
             data = try codec.serialize(message: request)
         } catch let error {
-            completion(ResponseMessage(
-                code: .unknown,
-                headers: [:],
-                message: nil,
-                trailers: [:],
-                error: ConnectError(
-                    code: .unknown, message: "request serialization failed", exception: error,
-                    details: [], metadata: [:]
-                )
-            ))
+            completion(.failure(ConnectError(
+                code: .unknown, message: "request serialization failed", exception: error,
+                details: [], metadata: [:]
+            )))
             return Cancelable(cancel: {})
         }
 
@@ -85,50 +79,36 @@ extension ProtocolClient: ProtocolClientInterface {
         ))
         return self.config.httpClient.unary(request: request) { response in
             let response = chain.responseFunction(response)
-            let responseMessage: ResponseMessage<Output>
+            let result: Result<ResponseMessage<Output>, ConnectError>
             if response.code != .ok {
-                let error = (response.error as? ConnectError)
-                    ?? ConnectError.from(
+                result = .failure(
+                    (response.error as? ConnectError) ?? ConnectError.from(
                         code: response.code, headers: response.headers, source: response.message
                     )
-                responseMessage = ResponseMessage(
-                    code: response.code,
-                    headers: response.headers,
-                    message: nil,
-                    trailers: response.trailers,
-                    error: error
                 )
             } else if response.message == nil {
-                responseMessage = ResponseMessage(
+                result = .success(ResponseMessage(
                     code: response.code,
                     headers: response.headers,
                     message: nil,
-                    trailers: response.trailers,
-                    error: nil
-                )
+                    trailers: response.trailers
+                ))
             } else {
                 do {
-                    responseMessage = ResponseMessage(
+                    result = .success(ResponseMessage(
                         code: response.code,
                         headers: response.headers,
                         message: try response.message.map(codec.deserialize),
-                        trailers: response.trailers,
-                        error: nil
-                    )
+                        trailers: response.trailers
+                    ))
                 } catch let error {
-                    responseMessage = ResponseMessage(
-                        code: response.code,
-                        headers: response.headers,
-                        message: nil,
-                        trailers: response.trailers,
-                        error: ConnectError(
-                            code: response.code, message: nil, exception: error,
-                            details: [], metadata: response.headers
-                        )
-                    )
+                    result = .failure(ConnectError(
+                        code: response.code, message: nil, exception: error,
+                        details: [], metadata: response.headers
+                    ))
                 }
             }
-            completion(responseMessage)
+            completion(result)
         }
     }
 
@@ -185,7 +165,7 @@ extension ProtocolClient: ProtocolClientInterface {
         path: String,
         request: Input,
         headers: Headers
-    ) async -> ResponseMessage<Output> {
+    ) async -> Result<ResponseMessage<Output>, ConnectError> {
         return await UnaryAsyncWrapper { completion in
             self.unary(path: path, request: request, headers: headers, completion: completion)
         }.send()

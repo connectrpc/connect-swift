@@ -29,6 +29,12 @@ public struct ConnectError: Swift.Error {
     /// Additional key-values that were provided by the server.
     public private(set) var metadata: Headers
 
+    public static func canceled() -> Self {
+        return .init(
+            code: .canceled, message: nil, exception: nil, details: [], metadata: [:]
+        )
+    }
+
     /// Unpacks values from `self.details` and returns the first matching error, if any.
     ///
     /// - returns: The unpacked typed error details, if available.

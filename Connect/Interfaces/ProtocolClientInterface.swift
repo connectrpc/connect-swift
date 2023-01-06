@@ -36,7 +36,7 @@ public protocol ProtocolClientInterface {
         path: String,
         request: Input,
         headers: Headers,
-        completion: @escaping (ResponseMessage<Output>) -> Void
+        completion: @escaping (Result<ResponseMessage<Output>, ConnectError>) -> Void
     ) -> Cancelable
 
     /// Start a new bidirectional stream.
@@ -120,7 +120,7 @@ public protocol ProtocolClientInterface {
         path: String,
         request: Input,
         headers: Headers
-    ) async -> ResponseMessage<Output>
+    ) async -> Result<ResponseMessage<Output>, ConnectError>
 
     /// Start a new bidirectional stream.
     ///

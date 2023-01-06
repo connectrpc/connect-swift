@@ -24,17 +24,33 @@ public struct ResponseMessage<Output: SwiftProtobuf.Message> {
     public let message: Output?
     /// Trailers provided by the server.
     public let trailers: Trailers
-    /// The accompanying error, if the request failed.
-    public let error: ConnectError?
 
     public init(
-        code: Code = .ok, headers: Headers = [:], message: Output?,
-        trailers: Trailers = [:], error: ConnectError? = nil
+        code: Code = .ok, headers: Headers = [:], message: Output?, trailers: Trailers = [:]
     ) {
         self.code = code
         self.headers = headers
         self.message = message
         self.trailers = trailers
-        self.error = error
+    }
+}
+
+extension Swift.Result where Failure == ConnectError {
+    public var error: ConnectError? {
+        switch self {
+        case .success:
+            return nil
+        case .failure(let error):
+            return error
+        }
+    }
+
+    public var response: Success? {
+        switch self {
+        case .success(let message):
+            return message
+        case .failure:
+            return nil
+        }
     }
 }

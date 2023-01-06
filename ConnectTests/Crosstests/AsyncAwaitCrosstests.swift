@@ -69,8 +69,8 @@ final class AsyncAwaitCrosstests: XCTestCase {
 
     func testEmptyUnary() async {
         await self.executeTestWithClients { client in
-            let response = await client.emptyCall(request: Grpc_Testing_Empty())
-            XCTAssertEqual(response.message, Grpc_Testing_Empty())
+            let result = await client.emptyCall(request: Grpc_Testing_Empty())
+            XCTAssertEqual(result.response?.message, Grpc_Testing_Empty())
         }
     }
 
@@ -81,9 +81,8 @@ final class AsyncAwaitCrosstests: XCTestCase {
                 proto.responseSize = Int32(size)
                 proto.payload = .with { $0.body = Data(repeating: 0, count: size) }
             }
-            let response = await client.unaryCall(request: message)
-            XCTAssertNil(response.error)
-            XCTAssertEqual(response.message?.payload.body.count, size)
+            let result = await client.unaryCall(request: message)
+            XCTAssertEqual(result.response?.message?.payload.body.count, size)
         }
     }
 
@@ -149,8 +148,8 @@ final class AsyncAwaitCrosstests: XCTestCase {
         }
     }
 
-    func testCustomMetadata() async {
-        await self.executeTestWithClients { client in
+    func testCustomMetadata() async throws {
+        try await self.executeTestWithClients { client in
             let size = 314_159
             let leadingKey = "x-grpc-test-echo-initial"
             let leadingValue = "test_initial_metadata_value"
@@ -165,9 +164,9 @@ final class AsyncAwaitCrosstests: XCTestCase {
                 proto.payload = .with { $0.body = Data(repeating: 0, count: size) }
             }
 
-            let response = await client.unaryCall(request: message, headers: headers)
+            let result = await client.unaryCall(request: message, headers: headers)
+            let response = try XCTUnwrap(result.response)
             XCTAssertEqual(response.code, .ok)
-            XCTAssertNil(response.error)
             XCTAssertEqual(response.headers[leadingKey], [leadingValue])
             XCTAssertEqual(
                 response.trailers[trailingKey], [trailingValue.base64EncodedString()]
@@ -286,10 +285,10 @@ final class AsyncAwaitCrosstests: XCTestCase {
 
     func testUnimplementedMethod() async {
         await self.executeTestWithClients { client in
-            let response = await client.unimplementedCall(request: Grpc_Testing_Empty())
-            XCTAssertEqual(response.code, .unimplemented)
+            let result = await client.unimplementedCall(request: Grpc_Testing_Empty())
+            XCTAssertEqual(result.error?.code, .unimplemented)
             XCTAssertEqual(
-                response.error?.message,
+                result.error?.message,
                 "grpc.testing.TestService.UnimplementedCall is not implemented"
             )
         }
@@ -323,9 +322,8 @@ final class AsyncAwaitCrosstests: XCTestCase {
 
     func testUnimplementedService() async {
         await self.executeTestWithUnimplementedClients { client in
-            let response = await client.unimplementedCall(request: Grpc_Testing_Empty())
-            XCTAssertEqual(response.code, .unimplemented)
-            XCTAssertNotNil(response.error)
+            let result = await client.unimplementedCall(request: Grpc_Testing_Empty())
+            XCTAssertEqual(result.error?.code, .unimplemented)
         }
     }
 
@@ -414,9 +412,8 @@ final class AsyncAwaitCrosstests: XCTestCase {
         await self.executeTestWithClients { client in
             let expectation = self.expectation(description: "Receives canceled response")
             let task = Task {
-                let response = await client.emptyCall(request: Grpc_Testing_Empty())
-                XCTAssertEqual(response.code, .canceled)
-                XCTAssertEqual(response.error?.code, .canceled)
+                let error = await client.emptyCall(request: Grpc_Testing_Empty()).error
+                XCTAssertEqual(error?.code, .canceled)
                 expectation.fulfill()
             }
 
@@ -431,9 +428,8 @@ final class AsyncAwaitCrosstests: XCTestCase {
         await self.executeTestWithClients(responseDelay: 5.0) { client in
             let expectation = self.expectation(description: "Receives canceled response")
             let task = Task {
-                let response = await client.emptyCall(request: Grpc_Testing_Empty())
-                XCTAssertEqual(response.code, .canceled)
-                XCTAssertEqual(response.error?.code, .canceled)
+                let error = await client.emptyCall(request: Grpc_Testing_Empty()).error
+                XCTAssertEqual(error?.code, .canceled)
                 expectation.fulfill()
             }
 

@@ -178,7 +178,9 @@ private extension MethodDescriptor {
             return "MockClientOnlyStream<\(inputName), \(outputName)>()"
         } else {
             return """
-            { (_: \(inputName)) -> ResponseMessage<\(outputName)> in .init(message: .init()) }
+            { (_: \(inputName)) -> Result<ResponseMessage<\(outputName)>, ConnectError> in \
+            .success(.init(message: .init())) \
+            }
             """
         }
     }
@@ -194,7 +196,9 @@ private extension MethodDescriptor {
             return "MockClientOnlyAsyncStream<\(inputName), \(outputName)>()"
         } else {
             return """
-            { (_: \(inputName)) -> ResponseMessage<\(outputName)> in .init(message: .init()) }
+            { (_: \(inputName)) -> Result<ResponseMessage<\(outputName)>, ConnectError> in \
+            .success(.init(message: .init())) \
+            }
             """
         }
     }

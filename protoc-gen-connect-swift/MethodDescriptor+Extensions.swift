@@ -62,7 +62,9 @@ extension MethodDescriptor {
             return """
             func `\(methodName)`\
             (request: \(inputName), headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
-            completion: @escaping (ResponseMessage<\(outputName)>) -> Void) \
+            completion: \
+            @escaping (Swift.Result<ResponseMessage<\(outputName)>, Connect.ConnectError>) \
+            -> Void) \
             -> Connect.Cancelable
             """
         }
@@ -98,7 +100,7 @@ extension MethodDescriptor {
             return """
             func `\(methodName)`\
             (request: \(inputName), headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
-            async -> ResponseMessage<\(outputName)>
+            async -> Swift.Result<ResponseMessage<\(outputName)>, Connect.ConnectError>
             """
         }
     }

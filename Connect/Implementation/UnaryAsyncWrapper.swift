@@ -27,7 +27,7 @@ actor UnaryAsyncWrapper<Output: SwiftProtobuf.Message> {
     /// Accepts a closure to be called upon completion of a request and returns a cancelable which,
     /// when invoked, will cancel the underlying request.
     typealias PerformClosure = (
-        @escaping (ResponseMessage<Output>) -> Void
+        @escaping (Result<ResponseMessage<Output>, ConnectError>) -> Void
     ) -> Cancelable
 
     init(sendUnary: @escaping PerformClosure) {
@@ -39,31 +39,19 @@ actor UnaryAsyncWrapper<Output: SwiftProtobuf.Message> {
     /// outbound request and return a response with a `.canceled` status code.
     ///
     /// - returns: The response/result of the request.
-    func send() async -> ResponseMessage<Output> {
+    func send() async -> Result<ResponseMessage<Output>, ConnectError> {
         return await withTaskCancellationHandler(operation: {
             return await withCheckedContinuation { continuation in
                 if Task.isCancelled {
-                    continuation.resume(returning: .canceled())
+                    continuation.resume(returning: .failure(.canceled()))
                 } else {
-                    self.cancelable = self.sendUnary { response in
-                        continuation.resume(returning: response)
+                    self.cancelable = self.sendUnary { result in
+                        continuation.resume(returning: result)
                     }
                 }
             }
         }, onCancel: {
             Task { await self.cancelable?.cancel() }
         })
-    }
-}
-
-private extension ResponseMessage {
-    static func canceled() -> Self {
-        return .init(
-            code: .canceled,
-            headers: [:],
-            message: nil,
-            trailers: [:],
-            error: .from(code: .canceled, headers: [:], source: nil)
-        )
     }
 }

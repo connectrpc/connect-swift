@@ -27,12 +27,12 @@ final class ConnectMocksTests: XCTestCase {
         let client = Buf_Connect_Demo_Eliza_V1_ElizaServiceClientMock()
         client.mockSay = { request in
             XCTAssertEqual(request.sentence, "ping")
-            return ResponseMessage(message: .with { $0.sentence = "pong" })
+            return .success(.init(message: .with { $0.sentence = "pong" }))
         }
 
         var receivedMessage: Buf_Connect_Demo_Eliza_V1_SayResponse?
         client.say(request: .with { $0.sentence = "ping" }) { response in
-            receivedMessage = response.message
+            receivedMessage = try? response.get().message
         }
         XCTAssertEqual(receivedMessage?.sentence, "pong")
     }
@@ -41,11 +41,11 @@ final class ConnectMocksTests: XCTestCase {
         let client = Buf_Connect_Demo_Eliza_V1_ElizaServiceClientMock()
         client.mockAsyncSay = { request in
             XCTAssertEqual(request.sentence, "ping")
-            return ResponseMessage(message: .with { $0.sentence = "pong" })
+            return .success(.init(message: .with { $0.sentence = "pong" }))
         }
 
-        let response = await client.say(request: .with { $0.sentence = "ping" })
-        XCTAssertEqual(response.message?.sentence, "pong")
+        let result = await client.say(request: .with { $0.sentence = "ping" })
+        XCTAssertEqual(try? result.get().message?.sentence, "pong")
     }
 
     // MARK: - Bidirectional stream

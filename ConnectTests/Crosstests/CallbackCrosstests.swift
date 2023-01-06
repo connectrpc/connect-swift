@@ -69,9 +69,8 @@ final class CallbackCrosstests: XCTestCase {
     func testEmptyUnary() {
         self.executeTestWithClients { client in
             let expectation = self.expectation(description: "Receives successful response")
-            client.emptyCall(request: Grpc_Testing_Empty()) { response in
-                XCTAssertNil(response.error)
-                XCTAssertEqual(response.message, Grpc_Testing_Empty())
+            client.emptyCall(request: Grpc_Testing_Empty()) { result in
+                XCTAssertEqual(result.response?.message, Grpc_Testing_Empty())
                 expectation.fulfill()
             }
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
@@ -86,9 +85,8 @@ final class CallbackCrosstests: XCTestCase {
                 proto.payload = .with { $0.body = Data(repeating: 0, count: size) }
             }
             let expectation = self.expectation(description: "Receives successful response")
-            client.unaryCall(request: message) { response in
-                XCTAssertNil(response.error)
-                XCTAssertEqual(response.message?.payload.body.count, size)
+            client.unaryCall(request: message) { result in
+                XCTAssertEqual(result.response?.message?.payload.body.count, size)
                 expectation.fulfill()
             }
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
@@ -171,14 +169,14 @@ final class CallbackCrosstests: XCTestCase {
             }
 
             let expectation = self.expectation(description: "Receives response")
-            client.unaryCall(request: message, headers: headers) { response in
-                XCTAssertEqual(response.code, .ok)
-                XCTAssertNil(response.error)
-                XCTAssertEqual(response.headers[leadingKey], [leadingValue])
+            client.unaryCall(request: message, headers: headers) { result in
+                XCTAssertEqual(result.response?.code, .ok)
+                XCTAssertNil(result.error)
+                XCTAssertEqual(result.response?.headers[leadingKey], [leadingValue])
                 XCTAssertEqual(
-                    response.trailers[trailingKey], [trailingValue.base64EncodedString()]
+                    result.response?.trailers[trailingKey], [trailingValue.base64EncodedString()]
                 )
-                XCTAssertEqual(response.message?.payload.body.count, size)
+                XCTAssertEqual(result.response?.message?.payload.body.count, size)
                 expectation.fulfill()
             }
 
@@ -314,7 +312,7 @@ final class CallbackCrosstests: XCTestCase {
         self.executeTestWithClients { client in
             let expectation = self.expectation(description: "Request completes")
             client.unimplementedCall(request: Grpc_Testing_Empty()) { response in
-                XCTAssertEqual(response.code, .unimplemented)
+                XCTAssertEqual(response.error?.code, .unimplemented)
                 XCTAssertEqual(
                     response.error?.message,
                     "grpc.testing.TestService.UnimplementedCall is not implemented"
@@ -355,8 +353,7 @@ final class CallbackCrosstests: XCTestCase {
         self.executeTestWithUnimplementedClients { client in
             let expectation = self.expectation(description: "Request completes")
             client.unimplementedCall(request: Grpc_Testing_Empty()) { response in
-                XCTAssertEqual(response.code, .unimplemented)
-                XCTAssertNotNil(response.error)
+                XCTAssertEqual(response.error?.code, .unimplemented)
                 expectation.fulfill()
             }
 
@@ -452,7 +449,6 @@ final class CallbackCrosstests: XCTestCase {
         self.executeTestWithClients { client in
             let expectation = self.expectation(description: "Receives canceled response")
             let cancelable = client.emptyCall(request: Grpc_Testing_Empty()) { response in
-                XCTAssertEqual(response.code, .canceled)
                 XCTAssertEqual(response.error?.code, .canceled)
                 expectation.fulfill()
             }

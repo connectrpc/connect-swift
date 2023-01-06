@@ -18,11 +18,11 @@ public protocol Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
     /// Say is a unary request demo. This method should allow for a one sentence
     /// response given a one sentence request.
     @discardableResult
-    func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>) -> Void) -> Connect.Cancelable
+    func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
     /// Say is a unary request demo. This method should allow for a one sentence
     /// response given a one sentence request.
-    func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers) async -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>
+    func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>, Connect.ConnectError>
 
     /// Converse is a bi-directional streaming request demo. This method should allow for
     /// many requests and many responses.
@@ -50,11 +50,11 @@ public final class Buf_Connect_Demo_Eliza_V1_ElizaServiceClient: Buf_Connect_Dem
     }
 
     @discardableResult
-    public func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>) -> Void) -> Connect.Cancelable {
+    public func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "buf.connect.demo.eliza.v1.ElizaService/Say", request: request, headers: headers, completion: completion)
     }
 
-    public func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse> {
+    public func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>, Connect.ConnectError> {
         return await self.client.unary(path: "buf.connect.demo.eliza.v1.ElizaService/Say", request: request, headers: headers)
     }
 

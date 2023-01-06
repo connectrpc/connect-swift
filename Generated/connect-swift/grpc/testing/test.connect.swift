@@ -13,35 +13,35 @@ public protocol Grpc_Testing_TestServiceClientInterface {
 
     /// One empty request followed by one empty response.
     @discardableResult
-    func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
+    func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
     /// One empty request followed by one empty response.
-    func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
+    func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>
 
     /// One request followed by one response.
     @discardableResult
-    func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable
+    func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_SimpleResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
     /// One request followed by one response.
-    func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_SimpleResponse>
+    func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Grpc_Testing_SimpleResponse>, Connect.ConnectError>
 
     /// One request followed by one response. This RPC always fails.
     @discardableResult
-    func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable
+    func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_SimpleResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
     /// One request followed by one response. This RPC always fails.
-    func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_SimpleResponse>
+    func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Grpc_Testing_SimpleResponse>, Connect.ConnectError>
 
     /// One request followed by one response. Response has cache control
     /// headers set such that a caching HTTP proxy (such as GFE) can
     /// satisfy subsequent requests.
     @discardableResult
-    func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable
+    func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_SimpleResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
     /// One request followed by one response. Response has cache control
     /// headers set such that a caching HTTP proxy (such as GFE) can
     /// satisfy subsequent requests.
-    func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_SimpleResponse>
+    func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Grpc_Testing_SimpleResponse>, Connect.ConnectError>
 
     /// One request followed by a sequence of responses (streamed download).
     /// The server returns the payload with client desired type and sizes.
@@ -90,11 +90,11 @@ public protocol Grpc_Testing_TestServiceClientInterface {
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented methods.
     @discardableResult
-    func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
+    func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented methods.
-    func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
+    func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>
 
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented streaming output methods.
@@ -114,38 +114,38 @@ public final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceClien
     }
 
     @discardableResult
-    public func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    public func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "grpc.testing.TestService/EmptyCall", request: request, headers: headers, completion: completion)
     }
 
-    public func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+    public func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError> {
         return await self.client.unary(path: "grpc.testing.TestService/EmptyCall", request: request, headers: headers)
     }
 
     @discardableResult
-    public func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable {
+    public func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_SimpleResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "grpc.testing.TestService/UnaryCall", request: request, headers: headers, completion: completion)
     }
 
-    public func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_SimpleResponse> {
+    public func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Grpc_Testing_SimpleResponse>, Connect.ConnectError> {
         return await self.client.unary(path: "grpc.testing.TestService/UnaryCall", request: request, headers: headers)
     }
 
     @discardableResult
-    public func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable {
+    public func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_SimpleResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "grpc.testing.TestService/FailUnaryCall", request: request, headers: headers, completion: completion)
     }
 
-    public func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_SimpleResponse> {
+    public func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Grpc_Testing_SimpleResponse>, Connect.ConnectError> {
         return await self.client.unary(path: "grpc.testing.TestService/FailUnaryCall", request: request, headers: headers)
     }
 
     @discardableResult
-    public func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable {
+    public func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_SimpleResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "grpc.testing.TestService/CacheableUnaryCall", request: request, headers: headers, completion: completion)
     }
 
-    public func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_SimpleResponse> {
+    public func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Grpc_Testing_SimpleResponse>, Connect.ConnectError> {
         return await self.client.unary(path: "grpc.testing.TestService/CacheableUnaryCall", request: request, headers: headers)
     }
 
@@ -190,11 +190,11 @@ public final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceClien
     }
 
     @discardableResult
-    public func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    public func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "grpc.testing.TestService/UnimplementedCall", request: request, headers: headers, completion: completion)
     }
 
-    public func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+    public func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError> {
         return await self.client.unary(path: "grpc.testing.TestService/UnimplementedCall", request: request, headers: headers)
     }
 
@@ -213,10 +213,10 @@ public protocol Grpc_Testing_UnimplementedServiceClientInterface {
 
     /// A call that no server should implement
     @discardableResult
-    func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
+    func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
     /// A call that no server should implement
-    func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
+    func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>
 
     /// A call that no server should implement
     func `unimplementedStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty>
@@ -234,11 +234,11 @@ public final class Grpc_Testing_UnimplementedServiceClient: Grpc_Testing_Unimple
     }
 
     @discardableResult
-    public func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    public func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "grpc.testing.UnimplementedService/UnimplementedCall", request: request, headers: headers, completion: completion)
     }
 
-    public func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+    public func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError> {
         return await self.client.unary(path: "grpc.testing.UnimplementedService/UnimplementedCall", request: request, headers: headers)
     }
 
@@ -255,14 +255,14 @@ public final class Grpc_Testing_UnimplementedServiceClient: Grpc_Testing_Unimple
 public protocol Grpc_Testing_ReconnectServiceClientInterface {
 
     @discardableResult
-    func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
+    func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
-    func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
+    func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>
 
     @discardableResult
-    func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_ReconnectInfo>) -> Void) -> Connect.Cancelable
+    func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_ReconnectInfo>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
-    func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_ReconnectInfo>
+    func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Grpc_Testing_ReconnectInfo>, Connect.ConnectError>
 }
 
 /// Concrete implementation of `Grpc_Testing_ReconnectServiceClientInterface`.
@@ -274,20 +274,20 @@ public final class Grpc_Testing_ReconnectServiceClient: Grpc_Testing_ReconnectSe
     }
 
     @discardableResult
-    public func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    public func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "grpc.testing.ReconnectService/Start", request: request, headers: headers, completion: completion)
     }
 
-    public func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+    public func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError> {
         return await self.client.unary(path: "grpc.testing.ReconnectService/Start", request: request, headers: headers)
     }
 
     @discardableResult
-    public func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_ReconnectInfo>) -> Void) -> Connect.Cancelable {
+    public func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_ReconnectInfo>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "grpc.testing.ReconnectService/Stop", request: request, headers: headers, completion: completion)
     }
 
-    public func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_ReconnectInfo> {
+    public func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Grpc_Testing_ReconnectInfo>, Connect.ConnectError> {
         return await self.client.unary(path: "grpc.testing.ReconnectService/Stop", request: request, headers: headers)
     }
 }
@@ -297,17 +297,17 @@ public protocol Grpc_Testing_LoadBalancerStatsServiceClientInterface {
 
     /// Gets the backend distribution for RPCs sent by a test client.
     @discardableResult
-    func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>) -> Void) -> Connect.Cancelable
+    func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
     /// Gets the backend distribution for RPCs sent by a test client.
-    func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>
+    func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>, Connect.ConnectError>
 
     /// Gets the accumulated stats for RPCs sent by a test client.
     @discardableResult
-    func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>) -> Void) -> Connect.Cancelable
+    func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
     /// Gets the accumulated stats for RPCs sent by a test client.
-    func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>
+    func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>, Connect.ConnectError>
 }
 
 /// Concrete implementation of `Grpc_Testing_LoadBalancerStatsServiceClientInterface`.
@@ -319,20 +319,20 @@ public final class Grpc_Testing_LoadBalancerStatsServiceClient: Grpc_Testing_Loa
     }
 
     @discardableResult
-    public func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>) -> Void) -> Connect.Cancelable {
+    public func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "grpc.testing.LoadBalancerStatsService/GetClientStats", request: request, headers: headers, completion: completion)
     }
 
-    public func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse> {
+    public func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>, Connect.ConnectError> {
         return await self.client.unary(path: "grpc.testing.LoadBalancerStatsService/GetClientStats", request: request, headers: headers)
     }
 
     @discardableResult
-    public func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>) -> Void) -> Connect.Cancelable {
+    public func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "grpc.testing.LoadBalancerStatsService/GetClientAccumulatedStats", request: request, headers: headers, completion: completion)
     }
 
-    public func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse> {
+    public func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>, Connect.ConnectError> {
         return await self.client.unary(path: "grpc.testing.LoadBalancerStatsService/GetClientAccumulatedStats", request: request, headers: headers)
     }
 }
@@ -341,14 +341,14 @@ public final class Grpc_Testing_LoadBalancerStatsServiceClient: Grpc_Testing_Loa
 public protocol Grpc_Testing_XdsUpdateHealthServiceClientInterface {
 
     @discardableResult
-    func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
+    func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
-    func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
+    func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>
 
     @discardableResult
-    func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
+    func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
-    func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
+    func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>
 }
 
 /// Concrete implementation of `Grpc_Testing_XdsUpdateHealthServiceClientInterface`.
@@ -360,20 +360,20 @@ public final class Grpc_Testing_XdsUpdateHealthServiceClient: Grpc_Testing_XdsUp
     }
 
     @discardableResult
-    public func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    public func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "grpc.testing.XdsUpdateHealthService/SetServing", request: request, headers: headers, completion: completion)
     }
 
-    public func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+    public func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError> {
         return await self.client.unary(path: "grpc.testing.XdsUpdateHealthService/SetServing", request: request, headers: headers)
     }
 
     @discardableResult
-    public func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    public func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "grpc.testing.XdsUpdateHealthService/SetNotServing", request: request, headers: headers, completion: completion)
     }
 
-    public func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+    public func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Grpc_Testing_Empty>, Connect.ConnectError> {
         return await self.client.unary(path: "grpc.testing.XdsUpdateHealthService/SetNotServing", request: request, headers: headers)
     }
 }
@@ -383,10 +383,10 @@ public protocol Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface {
 
     /// Update the tes client's configuration.
     @discardableResult
-    func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_ClientConfigureResponse>) -> Void) -> Connect.Cancelable
+    func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers, completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_ClientConfigureResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable
 
     /// Update the tes client's configuration.
-    func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_ClientConfigureResponse>
+    func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers) async -> Swift.Result<ResponseMessage<Grpc_Testing_ClientConfigureResponse>, Connect.ConnectError>
 }
 
 /// Concrete implementation of `Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface`.
@@ -398,11 +398,11 @@ public final class Grpc_Testing_XdsUpdateClientConfigureServiceClient: Grpc_Test
     }
 
     @discardableResult
-    public func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_ClientConfigureResponse>) -> Void) -> Connect.Cancelable {
+    public func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers = [:], completion: @escaping (Swift.Result<ResponseMessage<Grpc_Testing_ClientConfigureResponse>, Connect.ConnectError>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "grpc.testing.XdsUpdateClientConfigureService/Configure", request: request, headers: headers, completion: completion)
     }
 
-    public func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_ClientConfigureResponse> {
+    public func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers = [:]) async -> Swift.Result<ResponseMessage<Grpc_Testing_ClientConfigureResponse>, Connect.ConnectError> {
         return await self.client.unary(path: "grpc.testing.XdsUpdateClientConfigureService/Configure", request: request, headers: headers)
     }
 }
