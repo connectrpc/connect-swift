@@ -72,7 +72,6 @@ open class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClientInt
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return self.mockAsyncEmptyCall(request)
     }
@@ -83,7 +82,6 @@ open class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClientInt
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_SimpleResponse> {
         return self.mockAsyncUnaryCall(request)
     }
@@ -94,7 +92,6 @@ open class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClientInt
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_SimpleResponse> {
         return self.mockAsyncFailUnaryCall(request)
     }
@@ -105,7 +102,6 @@ open class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClientInt
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_SimpleResponse> {
         return self.mockAsyncCacheableUnaryCall(request)
     }
@@ -161,7 +157,6 @@ open class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClientInt
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return self.mockAsyncUnimplementedCall(request)
     }
@@ -202,7 +197,6 @@ open class Grpc_Testing_UnimplementedServiceClientMock: Grpc_Testing_Unimplement
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return self.mockAsyncUnimplementedCall(request)
     }
@@ -243,7 +237,6 @@ open class Grpc_Testing_ReconnectServiceClientMock: Grpc_Testing_ReconnectServic
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return self.mockAsyncStart(request)
     }
@@ -254,7 +247,6 @@ open class Grpc_Testing_ReconnectServiceClientMock: Grpc_Testing_ReconnectServic
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_ReconnectInfo> {
         return self.mockAsyncStop(request)
     }
@@ -286,7 +278,6 @@ open class Grpc_Testing_LoadBalancerStatsServiceClientMock: Grpc_Testing_LoadBal
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse> {
         return self.mockAsyncGetClientStats(request)
     }
@@ -297,7 +288,6 @@ open class Grpc_Testing_LoadBalancerStatsServiceClientMock: Grpc_Testing_LoadBal
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse> {
         return self.mockAsyncGetClientAccumulatedStats(request)
     }
@@ -329,7 +319,6 @@ open class Grpc_Testing_XdsUpdateHealthServiceClientMock: Grpc_Testing_XdsUpdate
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return self.mockAsyncSetServing(request)
     }
@@ -340,7 +329,6 @@ open class Grpc_Testing_XdsUpdateHealthServiceClientMock: Grpc_Testing_XdsUpdate
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return self.mockAsyncSetNotServing(request)
     }
@@ -368,7 +356,6 @@ open class Grpc_Testing_XdsUpdateClientConfigureServiceClientMock: Grpc_Testing_
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_ClientConfigureResponse> {
         return self.mockAsyncConfigure(request)
     }
