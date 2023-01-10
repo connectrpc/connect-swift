@@ -40,7 +40,6 @@ open class Buf_Connect_Demo_Eliza_V1_ElizaServiceClientMock: Buf_Connect_Demo_El
         return Connect.Cancelable {}
     }
 
-    @discardableResult
     open func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse> {
         return self.mockAsyncSay(request)
     }

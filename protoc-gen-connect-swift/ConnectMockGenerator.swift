@@ -130,9 +130,6 @@ final class ConnectMockGenerator: Generator {
 
     private func printAsyncAwaitMethodMockImplementation(for method: MethodDescriptor) {
         self.printLine()
-        if !method.serverStreaming && !method.clientStreaming {
-            self.printLine("@discardableResult")
-        }
 
         self.printLine(
             "open "
