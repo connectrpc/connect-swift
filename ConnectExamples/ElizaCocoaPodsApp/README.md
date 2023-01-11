@@ -2,7 +2,7 @@
 
 This example app imports the `Connect` library using CocoaPods,
 and provides an interface for
-[chatting with Eliza](https://buf.build/bufbuild/eliza).
+[chatting with Eliza](https://connect.build/demo).
 
 The app has support for chatting using a variety of protocols supported by
 the Connect library:
