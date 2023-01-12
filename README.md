@@ -6,101 +6,129 @@ Connect-Swift
 Connect-Swift is a small library (<200KB!) that provides support for using
 generated,
 type-safe, and idiomatic Swift APIs to communicate with your app's servers
-using [Protocol Buffers (Protobuf)](https://developers.google.com/protocol-buffers).
+using [Protocol Buffers (Protobuf)][protobuf].
 Imagine a world where
 you don't have to handwrite `Codable` models for REST/JSON endpoints
 and you can instead get right to building features by calling a generated
 API method that is guaranteed to match the server's modeling. Furthermore,
 imagine never having to worry about serialization again, and being able to
 easily write tests using generated mocks that conform to the same protocol
-that the real implementations do. All of this is possible with Connect-Swift.
+that the real implementations do.
+[All of this is possible with Connect-Swift][blog].
 
-A further introduction to why you should use Connect-Swift can be found
-on our [blog][blog].
+Given a simple Protobuf schema, Connect-Swift generates idiomatic Swift
+protocol interfaces and client implementations:
 
-# Quick Start Demo (Recommended)
+<details><summary>Click to expand <code>eliza.connect.swift</code></summary>
 
-**We highly recommend starting with our
-[quick start tutorial][getting-started]. It only takes ~10 minutes to complete
-a working SwiftUI chat app that uses Connect-Swift.**
+```swift
+public protocol Eliza_V1_ChatServiceClientInterface {
+    func say(request: Eliza_V1_SayRequest, headers: Headers)
+        async -> ResponseMessage<Eliza_V1_SayResponse>
+}
+
+public final class Eliza_V1_ChatServiceClient: Eliza_V1_ChatServiceClientInterface {
+    private let client: ProtocolClientInterface
+
+    public init(client: ProtocolClientInterface) {
+        self.client = client
+    }
+
+    public func say(request: Eliza_V1_SayRequest, headers: Headers = [:])
+        async -> ResponseMessage<Eliza_V1_SayResponse>
+    {
+        return await self.client.unary(path: "buf.connect.demo.eliza.v1.ElizaService/Say", request: request, headers: headers)
+    }
+}
+```
+
+</details>
+
+This code can then be integrated with just a few lines:
+
+```swift
+final class MessagingViewModel: ObservableObject {
+    private let elizaClient: Eliza_V1_ChatServiceClientInterface
+
+    init(elizaClient: Eliza_V1_ChatServiceClientInterface) {
+        self.elizaClient = elizaClient
+    }
+
+    @Published private(set) var messages: [Message] {...}
+
+    func send(_ userSentence: String) async {
+        let request = Eliza_V1_SayRequest.with { $0.sentence = userSentence }
+        let response = await self.elizaClient.say(request: request, headers: [:])
+        if let elizaSentence = response.message?.sentence {
+            self.messages.append(Message(sentence: userSentence, author: .user))
+            self.messages.append(Message(sentence: elizaSentence, author: .eliza))
+        }
+    }
+}
+```
+
+That’s it! You no longer need to manually define Swift response models,
+add Codable conformances, type out `URL(string: ...)` initializers,
+or even create protocol interfaces to wrap services classes - all this is taken
+care of by Connect-Swift, and the underlying network transport is
+handled automatically.
+
+Testing also becomes a breeze with generated mocks which conform to the same
+protocol interfaces as the production clients:
+
+<details><summary>Click to expand <code>eliza.mock.swift</code></summary>
+
+```swift
+open class Eliza_V1_ChatServiceClientMock: Eliza_V1_ChatServiceClientInterface {
+    public var mockAsyncSay = { (_: Eliza_V1_SayRequest) -> ResponseMessage<Eliza_V1_Response> in .init(message: .init()) }
+
+    open func say(request: Eliza_V1_SayRequest, headers: Headers = [:])
+        async -> ResponseMessage<Eliza_V1_SayResponse>
+    {
+        return self.mockAsyncSay(request)
+    }
+}
+```
+
+</details>
+
+<details><summary>Click to expand example test</summary>
+
+```swift
+func testMessagingViewModel() async {
+    let client = Eliza_V1_ChatServiceClientMock()
+    client.mockAsyncSay = { request in
+        XCTAssertEqual(request.sentence, "hello!")
+        return ResponseMessage(message: .with { $0.sentence = "hi, i'm eliza!" })
+    }
+
+    let viewModel = MessagingViewModel(elizaClient: client)
+    await viewModel.send("hello!")
+
+    XCTAssertEqual(viewModel.messages.count, 2)
+    XCTAssertEqual(viewModel.messages[0].message, "hello!")
+    XCTAssertEqual(viewModel.messages[0].author, .user)
+    XCTAssertEqual(viewModel.messages[1].message, "hi, i'm eliza!")
+    XCTAssertEqual(viewModel.messages[1].author, .eliza)
+}
+```
+
+</details>
+
+## Quick Start
+
+**Head over to our [quick start tutorial][getting-started] to get started.
+It only takes ~10 minutes to complete
+a working SwiftUI chat app that uses Connect-Swift!**
+
+## Documentation
 
 Comprehensive documentation for everything, including
 [interceptors][interceptors], [mocking/testing][testing],
 [streaming][streaming], and [error handling][error-handling]
-is available on the [connect.build website][getting-started].
+is also available on the [connect.build website][getting-started].
 
-# Integrate
-
-**The connect.build site contains [extensive-documentation][getting-started]
-on how to get started with Connect-Swift. We recommend using that and treating
-the instructions below as supplementary.**
-
-## Configure Code Generation
-
-The easiest way to get started using Connect-Swift is to use
-[Buf's remote generation](https://docs.buf.build/bsr/remote-plugins/overview):
-
-1. Install Buf's CLI (`brew install bufbuild/buf/buf`).
-2. Initialize Buf in your project directory (`buf mod init`).
-3. Add a `buf.gen.yaml` file to your project which contains a configuration for running both the [SwiftProtobuf](https://github.com/apple/swift-protobuf) and Connect-Swift plugin generators:
-
-```yaml
-version: v1
-managed:
-  enabled: true
-plugins:
-  - plugin: buf.build/bufbuild/connect-swift
-    opt: >
-      GenerateAsyncMethods=true,
-      GenerateCallbackMethods=true,
-      Visibility=Public
-    out: Generated
-  - plugin: buf.build/apple/swift
-    opt: Visibility=Public
-    out: Generated
-```
-
-4. Run `make generate` (or `buf generate`), and you should see the outputted files!
-5. Now that you have generated models & APIs from your `.proto` files, you'll need to integrate the runtime using one of the methods below.
-
-## Integrate with Swift Package Manager
-
-The easiest way to integrate with connect-swift is to depend on the `Connect`
-package specified in [`Package.swift`](./Package.swift), as you would any
-other Swift package.
-
-Our getting started guide has a [complete set of steps][swift-pm-integration]
-that explain how to do this.
-
-Once you've added the `Connect` dependency (and its transitive dependency
-on `SwiftProtobuf`), add the generated `.swift` files from the code generation
-step, and your project should build!
-
-For an example of integrating `Connect` via Swift Package Manager,
-see the [`ElizaSwiftPackageApp`](./ConnectExamples/ElizaSwiftPackageApp).
-
-## Integrate with CocoaPods
-
-Although Swift Package Manager is the preferred distribution method for
-the Connect library, we also provide a [podspec](./Connect-Swift.podspec) for
-CocoaPods support.
-
-To integrate using CocoaPods, add this line to your `Podfile`:
-
-```rb
-# Use the current version (automatically pinned in Podfile.lock after):
-pod 'Connect-Swift'
-
-# Or pin a specific version:
-pod 'Connect-Swift', '~> x.y.z'
-```
-
-You can then use the library by adding `import Connect` to your sources.
-
-For an example of integrating `Connect` via CocoaPods,
-see the [`ElizaCocoaPodsApp`](./ConnectExamples/ElizaCocoaPodsApp).
-
-# Example Apps
+## Example Apps
 
 We have example apps in this repository that demonstrate:
 
@@ -113,7 +141,7 @@ We have example apps in this repository that demonstrate:
 Example apps are available in the [`ConnectExamples`](./ConnectExamples)
 directory and can be opened and built using Xcode.
 
-# Contributing
+## Contributing
 
 We'd love your help making Connect better!
 
@@ -122,16 +150,16 @@ running tests, and contributing to the repository are available in our
 [`CONTRIBUTING.md` guide](./.github/CONTRIBUTING.md). Please check it out
 for details.
 
-# Legal
-
-Offered under the [Apache 2 license](./LICENSE).
-
-# Ecosystem
+## Ecosystem
 
 - [connect-go][connect-go]: Go service stubs for servers
 - [connect-web][connect-web]: TypeScript clients for web browsers
 - [Buf Studio][buf-studio]: Web UI for ad-hoc RPCs
 - [connect-crosstest][connect-crosstest]: Connect, gRPC, and gRPC-Web interoperability tests
+
+## Legal
+
+Offered under the [Apache 2 license](./LICENSE).
 
 [blog]: https://buf.build/blog/announcing-connect-swift
 [buf-studio]: https://studio.buf.build
@@ -143,6 +171,7 @@ Offered under the [Apache 2 license](./LICENSE).
 [getting-started]: https://connect.build/docs/swift/getting-started
 [grpc-web-protocol]: https://github.com/grpc/grpc-web
 [interceptors]: https://connect.build/docs/swift/interceptors
+[protobuf]: https://developers.google.com/protocol-buffers
 [streaming]: https://connect.build/docs/swift/using-clients#using-generated-clients
 [swift-pm-integration]: https://connect.build/docs/swift/getting-started#add-the-connect-swift-package
 [testing]: https://connect.build/docs/swift/testing

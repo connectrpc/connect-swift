@@ -45,7 +45,8 @@ directory.
 
 The easiest way to contribute to the library is to
 [open the Xcode project](#setup) and
-[run the tests](#running-tests) after making changes.
+[run the tests](#running-tests) after making changes before finally
+[submitting them](#submitting-changes).
 
 ## Developing the Generator
 
