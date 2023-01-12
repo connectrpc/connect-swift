@@ -24,7 +24,7 @@ git remote add upstream https://github.com/bufbuild/connect-swift.git
 git fetch upstream
 ```
 
-You'll also need to **install Xcode** and install Buf's CLI:
+You'll also need to **install Xcode and Buf's CLI**:
 
 ```sh
 brew install bufbuild/buf/buf
@@ -33,10 +33,10 @@ brew install bufbuild/buf/buf
 This project uses Swift Package Manager for development and
 distribution. To get started contributing locally:
 
-- Open Xcode
-- Click `Open...` and select the root `connect-swift` repo directory
-- Xcode will automatically read the [`Package.swift`](../Package.swift)
-  file and open the project
+- Open Xcode.
+- Click `Open...` and select the root `connect-swift` repo directory.
+- Xcode will automatically read the [`Package.swift`](../Package.swift).
+  file and open the project.
 
 ## Developing the Library
 
