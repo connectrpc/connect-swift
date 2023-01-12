@@ -1,261 +1,173 @@
-# connect-swift
+Connect-Swift
+=============
 
 [![Build](https://github.com/bufbuild/connect-swift/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/bufbuild/connect-swift/actions/workflows/ci.yaml)
 
-- [Get started](#get-started)
-  * [Set up code generation](#set-up-code-generation)
-    + [Custom configuration](#custom-configuration)
-  * [Integrate with Swift Package Manager](#integrate-with-swift-package-manager)
-  * [Integrate with CocoaPods](#integrate-with-cocoapods)
-- [Examples](#examples)
-  * [Build and run example apps](#build-and-run-example-apps)
-  * [Writing an interceptor](#writing-an-interceptor)
-- [Contributing](#contributing)
-  * [Development setup](#development-setup)
-  * [Swift development](#swift-development)
-    + [Developing the library](#developing-the-library)
-    + [Developing the generator plugin](#developing-the-generator-plugin)
-  * [Generate code from protos](#generate-code-from-protos)
-- [Tests](#tests)
-  * [Run Connect crosstests & test server](#run-connect-crosstests---test-server)
+Connect-Swift is a small library (<200KB!) that provides support for using
+generated,
+type-safe, and idiomatic Swift APIs to communicate with your app's servers
+using [Protocol Buffers (Protobuf)][protobuf].
+Imagine a world where
+you don't have to handwrite `Codable` models for REST/JSON endpoints
+and you can instead get right to building features by calling a generated
+API method that is guaranteed to match the server's modeling. Furthermore,
+imagine never having to worry about serialization again, and being able to
+easily write tests using generated mocks that conform to the same protocol
+that the real implementations do.
+[All of this is possible with Connect-Swift][blog].
 
-# Get started
+Given a simple Protobuf schema, Connect-Swift generates idiomatic Swift
+protocol interfaces and client implementations:
 
-## Set up code generation
-
-The easiest way to get started using connect-swift is to use
-[Buf's remote generation](https://docs.buf.build/bsr/remote-plugins/overview):
-
-1. Install Buf's CLI (`brew install bufbuild/buf/buf`).
-2. Add a `buf.gen.yaml` file to your project which contains a configuration for running both the [SwiftProtobuf](https://github.com/apple/swift-protobuf) and connect-swift generators:
-
-```yaml
-version: v1
-managed:
-  enabled: true
-plugins:
-  - plugin: buf.build/apple/swift
-    opt: Visibility=Public
-    out: Generated/swift-protobuf # Or your target output directory
-  - remote: buf.build/mrebello/plugins/connect-swift
-    opt: GenerateAsyncMethods=true,GenerateCallbackMethods=true,Visibility=Public # See "custom configuration" section in docs below
-    out: Generated/connect-swift # Or your target output directory
-```
-
-3. Add a `buf.work.yaml` file to your project which specifies the input directories for your `.proto` files:
-```yaml
-version: v1
-directories:
-  - proto # Or wherever your .proto files live
-```
-
-4. Run `make generate` (or `buf generate`), and you should see the outputted files!
-5. Now that you have generated models & APIs from your `.proto` files, you'll need to integrate the runtime using one of the methods below.
-
-### Custom configuration
-
-We generally try to support the
-[same generator options that SwiftProtobuf supports](https://github.com/apple/swift-protobuf/blob/master/Documentation/PLUGIN.md)
-such as `Visibility`, `ProtoPathModuleMappings`, etc.
-when it makes sense to do so. Additionally, there are other options which may be specified
-that are specific to the `protoc-gen-connect-swift` plugin.
-
-| **Option** | **Type** | **Default** | **Repeatable** | **Supported by SwiftProtobuf** | **Details** |
-|:---:|:---:|:---:|:---:|:---:|:---:|
-| `ExtraModuleImports` | String | None | Yes | No | Allows for specifying additional modules that generated Connect sources should import |
-| `FileNaming` | String | `FullPath` | No | Yes | [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-filenaming---naming-of-generated-sources) |
-| `GenerateAsyncMethods` | Bool | `true` | No | No | If `true`, generates RPC functions that provide Swift `async`/`await` interfaces |
-| `GenerateAsyncMocks` | Bool | `false` | No | No | If `true`, generates mock classes and methods for every service and RPC. These depend on `ConnectMocks` and can be used for testing when `GenerateAsyncMethods=true` |
-| `GenerateCallbackMethods` | Bool | `true` | No | No | If `true`, generates RPC functions that provide closure-based callback interfaces |
-| `GenerateCallbackMocks` | Bool | `false` | No | No | If `true`, generates mock classes and methods for every service and RPC. These depend on `ConnectMocks` and can be used for testing when `GenerateCallbackMethods=true` |
-| `KeepMethodCasing` | Bool | `false` | No | No | If `true`, generated RPC function names will match the `rpc` specified in the `.proto` file (instead of being lower-camel-cased) |
-| `ProtoPathModuleMappings` | Custom | None | No | Yes | [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-protopathmodulemappings---swift-module-names-for-proto-paths) |
-| `SwiftProtobufModuleName` | String | `SwiftProtobuf` | No | No | Allows for overriding the `SwiftProtobuf` module name in `import` statements. Useful if the `SwiftProtobuf` dependency is being renamed in custom build configurations |
-| `Visibility` | String | `Internal` | No | Yes | [Documentation](https://github.com/apple/swift-protobuf/blob/main/Documentation/PLUGIN.md#generation-option-visibility---visibility-of-generated-types) |
-
-## Integrate with Swift Package Manager
-
-The easiest way to integrate with connect-swift is to depend on the `Connect`
-package specified in [`Package.swift`](./Package.swift), as you would any
-other Swift package.
-
-Apple has documentation for how to do this
-[here](https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app).
-
-Once you've added the `Connect` dependency (and its transitive dependency
-on `SwiftProtobuf`), add the generated `.swift` files from the code generation
-step, and your project should build!
-
-For an example of integrating `Connect` via Swift Package Manager,
-see the [`ElizaSwiftPackageApp`](./ConnectExamples/ElizaSwiftPackageApp).
-
-## Integrate with CocoaPods
-
-Although Swift Package Manager is the preferred distribution method for
-the Connect library, we also provide a [podspec](./Connect-Swift.podspec) for
-CocoaPods support.
-
-To integrate using CocoaPods, add this line to your `Podfile`:
-
-```rb
-# Use the current version (automatically pinned in Podfile.lock after):
-pod 'Connect-Swift'
-
-# Or pin a specific version:
-pod 'Connect-Swift', '~> x.y.z'
-```
-
-You can then use the library by adding `import Connect` to your sources.
-
-For an example of integrating `Connect` via CocoaPods,
-see the [`ElizaCocoaPodsApp`](./ConnectExamples/ElizaCocoaPodsApp).
-
-# Examples
-
-## Build and run example apps
-
-Tests and example apps depend on outputs in `./Generated`.
-
-Example apps are available in
-[`./ConnectExamples`](./ConnectExamples), and can be opened and built using
-Xcode.
-
-## Writing an interceptor
-
-Interceptors are a powerful way to observe and mutate outbound and inbound
-headers, data, trailers, and errors both for unary APIs and streams.
-
-An interceptor is instantiated once per request, and provides a set of
-closures that are invoked by the client during the lifecycle of that request.
-Each closure provides the ability for the interceptor to observe and store
-state, as well as the option to mutate the outbound or inbound content.
-
-For example, here is an interceptor that adds an `Authorization` header to
-all outbound requests to `demo.connect.build`:
+<details><summary>Click to expand <code>eliza.connect.swift</code></summary>
 
 ```swift
-import Connect
+public protocol Eliza_V1_ChatServiceClientInterface {
+    func say(request: Eliza_V1_SayRequest, headers: Headers)
+        async -> ResponseMessage<Eliza_V1_SayResponse>
+}
 
-/// Interceptor that adds an `Authorization` header to outbound
-/// requests to `demo.connect.build`.
-struct ExampleAuthInterceptor: Interceptor {
-    init(config: ProtocolClientConfig) {...}
+public final class Eliza_V1_ChatServiceClient: Eliza_V1_ChatServiceClientInterface {
+    private let client: ProtocolClientInterface
 
-    func unaryFunction() -> UnaryFunction {
-        return UnaryFunction(
-            requestFunction: { request in
-                if request.target.host != "demo.connect.build" {
-                    return request
-                }
-
-                var headers = request.headers
-                headers["Authorization"] = ["SOME_USER_TOKEN"]
-                return HTTPRequest(
-                    target: request.target,
-                    contentType: request.contentType,
-                    headers: headers,
-                    message: request.message
-                )
-            },
-            responseFunction: { $0 } // Return the response as-is
-        )
+    public init(client: ProtocolClientInterface) {
+        self.client = client
     }
 
-    func streamFunction() -> StreamFunction {
-        return StreamFunction(...)
+    public func say(request: Eliza_V1_SayRequest, headers: Headers = [:])
+        async -> ResponseMessage<Eliza_V1_SayResponse>
+    {
+        return await self.client.unary(path: "buf.connect.demo.eliza.v1.ElizaService/Say", request: request, headers: headers)
     }
 }
 ```
 
-Interceptor(s) are then registered with the `ProtocolClient` on initialization:
+</details>
+
+This code can then be integrated with just a few lines:
 
 ```swift
-let client = ProtocolClient(
-    target: "https://demo.connect.build",
-    httpClient: URLSessionHTTPClient(),
-    ProtoClientOption(),
-    ConnectClientOption(),
-    InterceptorsOption(interceptors: [ExampleAuthInterceptor.init])
-)
+final class MessagingViewModel: ObservableObject {
+    private let elizaClient: Eliza_V1_ChatServiceClientInterface
+
+    init(elizaClient: Eliza_V1_ChatServiceClientInterface) {
+        self.elizaClient = elizaClient
+    }
+
+    @Published private(set) var messages: [Message] {...}
+
+    func send(_ userSentence: String) async {
+        let request = Eliza_V1_SayRequest.with { $0.sentence = userSentence }
+        let response = await self.elizaClient.say(request: request, headers: [:])
+        if let elizaSentence = response.message?.sentence {
+            self.messages.append(Message(sentence: userSentence, author: .user))
+            self.messages.append(Message(sentence: elizaSentence, author: .eliza))
+        }
+    }
+}
 ```
 
-# Contributing
+That’s it! You no longer need to manually define Swift response models,
+add Codable conformances, type out `URL(string: ...)` initializers,
+or even create protocol interfaces to wrap services classes - all this is taken
+care of by Connect-Swift, and the underlying network transport is
+handled automatically.
 
-## Development setup
+Testing also becomes a breeze with generated mocks which conform to the same
+protocol interfaces as the production clients:
 
-In order to develop with this repository, **install Xcode** and
-complete the following setup:
+<details><summary>Click to expand <code>eliza.mock.swift</code></summary>
 
-```sh
-brew install bufbuild/buf/buf
+```swift
+open class Eliza_V1_ChatServiceClientMock: Eliza_V1_ChatServiceClientInterface {
+    public var mockAsyncSay = { (_: Eliza_V1_SayRequest) -> ResponseMessage<Eliza_V1_Response> in .init(message: .init()) }
+
+    open func say(request: Eliza_V1_SayRequest, headers: Headers = [:])
+        async -> ResponseMessage<Eliza_V1_SayResponse>
+    {
+        return self.mockAsyncSay(request)
+    }
+}
 ```
 
-## Swift development
+</details>
 
-This project uses Swift Package Manager for development, building, and
-distribution. To open the project and start using it:
+```swift
+func testMessagingViewModel() async {
+    let client = Eliza_V1_ChatServiceClientMock()
+    client.mockAsyncSay = { request in
+        XCTAssertEqual(request.sentence, "hello!")
+        return ResponseMessage(message: .with { $0.sentence = "hi, i'm eliza!" })
+    }
 
-- Open Xcode
-- Click `Open...` and select the root `connect-swift` repo directory
-- Xcode will automatically read the [`Package.swift`](./Package.swift) file and open the project
+    let viewModel = MessagingViewModel(elizaClient: client)
+    await viewModel.send("hello!")
 
-### Developing the library
-
-The Connect library's source code is available in the [`./Connect`](./Connect)
-directory.
-
-The easiest way to contribute to the library is to
-[open the Xcode project](#swift-development) and
-[run the tests](#tests) after making changes.
-
-### Developing the generator plugin
-
-The source code for the plugin that is used to generate Connect-compatible
-services and RPCs is in the
-[`./protoc-gen-connect-swift`](./protoc-gen-connect-swift) directory.
-
-The plugin utilizes the
-[`SwiftProtobufPluginLibrary`](https://github.com/apple/swift-protobuf/tree/main/Sources/SwiftProtobufPluginLibrary)
-module from SwiftProtobuf which provides types for interacting with the input
-`.proto` files and writing to `stdout`/`stderr` as expected by `protoc`.
-
-To build the connect-swift generator plugin, use Xcode or
-the following command:
-
-```sh
-make buildplugin
+    XCTAssertEqual(viewModel.messages.count, 2)
+    XCTAssertEqual(viewModel.messages[0].message, "hello!")
+    XCTAssertEqual(viewModel.messages[0].author, .user)
+    XCTAssertEqual(viewModel.messages[1].message, "hi, i'm eliza!")
+    XCTAssertEqual(viewModel.messages[1].author, .eliza)
+}
 ```
 
-## Generate code from protos
+## Quick Start
 
-To build the plugin and run it against the directories specified in
-[`buf.work.yaml`](./buf.work.yaml)
-using the [local plugin](./protoc-gen-connect-swift) and Buf:
+Head over to our [quick start tutorial][getting-started] to get started.
+It only takes ~10 minutes to complete
+a working SwiftUI chat app that uses Connect-Swift!
 
-```sh
-make buildplugin # Compile the plugin
-make generate # Run buf generate - uses buf.gen.yaml
-```
+## Documentation
 
-Outputted code will be available in `./Generated`.
+Comprehensive documentation for everything, including
+[interceptors][interceptors], [mocking/testing][testing],
+[streaming][streaming], and [error handling][error-handling]
+is available on the [connect.build website][getting-started].
 
-# Tests
+## Example Apps
 
-## Run Connect crosstests & test server
+We have example apps in this repository that demonstrate:
 
-A test server is used to run [crosstests](./ConnectTests)
-(integration tests which validate the behavior of the `Connect` library with
-various protocols). **Starting the server requires Docker,
-so ensure that you have Docker installed before proceeding.**
+- Using streaming APIs
+- Integrating with Swift Package Manager
+- Integrating with CocoaPods
+- Using the [Connect protocol][connect-protocol]
+- Using the [gRPC-Web protocol][grpc-web-protocol]
 
-To start the server and run tests using the command line:
+Example apps are available in the [`ConnectExamples`](./ConnectExamples)
+directory and can be opened and built using Xcode.
 
-```sh
-make test
-```
+## Contributing
 
-If you prefer to run the tests using Xcode, you can manually start the server:
+We'd love your help making Connect better!
 
-```sh
-make crosstestserverrun
-```
+Extensive instructions for building the library and generator locally,
+running tests, and contributing to the repository are available in our
+[`CONTRIBUTING.md` guide](./.github/CONTRIBUTING.md). Please check it out
+for details.
+
+## Ecosystem
+
+- [connect-go][connect-go]: Go service stubs for servers
+- [connect-web][connect-web]: TypeScript clients for web browsers
+- [Buf Studio][buf-studio]: Web UI for ad-hoc RPCs
+- [connect-crosstest][connect-crosstest]: Connect, gRPC, and gRPC-Web interoperability tests
+
+## Legal
+
+Offered under the [Apache 2 license](./LICENSE).
+
+[blog]: https://buf.build/blog/announcing-connect-swift
+[buf-studio]: https://studio.buf.build
+[connect-crosstest]: https://github.com/bufbuild/connect-crosstest
+[connect-go]: https://github.com/bufbuild/connect-go
+[connect-protocol]: https://connect.build/docs/protocol
+[connect-web]: https://www.npmjs.com/package/@bufbuild/connect-web
+[error-handling]: https://connect.build/docs/swift/errors
+[getting-started]: https://connect.build/docs/swift/getting-started
+[grpc-web-protocol]: https://github.com/grpc/grpc-web
+[interceptors]: https://connect.build/docs/swift/interceptors
+[protobuf]: https://developers.google.com/protocol-buffers
+[streaming]: https://connect.build/docs/swift/using-clients#using-generated-clients
+[swift-pm-integration]: https://connect.build/docs/swift/getting-started#add-the-connect-swift-package
+[testing]: https://connect.build/docs/swift/testing
