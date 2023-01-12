@@ -92,8 +92,6 @@ open class Eliza_V1_ChatServiceClientMock: Eliza_V1_ChatServiceClientInterface {
 
 </details>
 
-<details><summary>Click to expand example test</summary>
-
 ```swift
 func testMessagingViewModel() async {
     let client = Eliza_V1_ChatServiceClientMock()
@@ -113,20 +111,18 @@ func testMessagingViewModel() async {
 }
 ```
 
-</details>
-
 ## Quick Start
 
-**Head over to our [quick start tutorial][getting-started] to get started.
+Head over to our [quick start tutorial][getting-started] to get started.
 It only takes ~10 minutes to complete
-a working SwiftUI chat app that uses Connect-Swift!**
+a working SwiftUI chat app that uses Connect-Swift!
 
 ## Documentation
 
 Comprehensive documentation for everything, including
 [interceptors][interceptors], [mocking/testing][testing],
 [streaming][streaming], and [error handling][error-handling]
-is also available on the [connect.build website][getting-started].
+is available on the [connect.build website][getting-started].
 
 ## Example Apps
 
