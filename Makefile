@@ -32,7 +32,7 @@ clean: ## Clean/delete all generated outputs
 
 .PHONY: crosstestserverstop
 crosstestserverstop: ## Stop the crosstest server
-	-docker container stop serverconnect servergrpc
+	docker container stop serverconnect servergrpc
 
 .PHONY: crosstestserverrun
 crosstestserverrun: crosstestserverstop ## Start the crosstest server
