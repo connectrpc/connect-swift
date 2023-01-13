@@ -21,19 +21,32 @@ import XCTest
 final class ConnectErrorTests: XCTestCase {
     func testDeserializingFullErrorAndUnpackingDetails() throws {
         let expectedDetails = Grpc_Testing_SimpleResponse.with { $0.hostname = "foobar" }
-        let errorData = try self.errorData(expectedDetails: expectedDetails)
+        let errorData = try self.errorData(expectedDetails: [expectedDetails])
         let error = try JSONDecoder().decode(ConnectError.self, from: errorData)
         XCTAssertEqual(error.code, .unavailable)
         XCTAssertEqual(error.message, "overloaded: back off and retry")
         XCTAssertNil(error.exception)
         XCTAssertEqual(error.details.count, 1)
-        XCTAssertEqual(error.unpackedDetails(), expectedDetails)
+        XCTAssertEqual(error.unpackedDetails(), [expectedDetails])
+        XCTAssertTrue(error.metadata.isEmpty)
+    }
+
+    func testDeserializingMultipleFullErrorsAndUnpackingDetails() throws {
+        let expectedDetails1 = Grpc_Testing_SimpleResponse.with { $0.hostname = "foo" }
+        let expectedDetails2 = Grpc_Testing_SimpleResponse.with { $0.hostname = "bar" }
+        let errorData = try self.errorData(expectedDetails: [expectedDetails1, expectedDetails2])
+        let error = try JSONDecoder().decode(ConnectError.self, from: errorData)
+        XCTAssertEqual(error.code, .unavailable)
+        XCTAssertEqual(error.message, "overloaded: back off and retry")
+        XCTAssertNil(error.exception)
+        XCTAssertEqual(error.details.count, 2)
+        XCTAssertEqual(error.unpackedDetails(), [expectedDetails1, expectedDetails2])
         XCTAssertTrue(error.metadata.isEmpty)
     }
 
     func testDeserializingErrorUsingHelperFunctionLowercasesHeaderKeys() throws {
         let expectedDetails = Grpc_Testing_SimpleResponse.with { $0.hostname = "foobar" }
-        let errorData = try self.errorData(expectedDetails: expectedDetails)
+        let errorData = try self.errorData(expectedDetails: [expectedDetails])
         let error = ConnectError.from(
             code: .aborted,
             headers: [
@@ -46,7 +59,7 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertEqual(error.message, "overloaded: back off and retry")
         XCTAssertNil(error.exception)
         XCTAssertEqual(error.details.count, 1)
-        XCTAssertEqual(error.unpackedDetails(), expectedDetails)
+        XCTAssertEqual(error.unpackedDetails(), [expectedDetails])
         XCTAssertEqual(error.metadata, ["somekey": ["foo"], "otherkey1": ["BAR", "bAz"]])
     }
 
@@ -60,7 +73,7 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertNil(error.message)
         XCTAssertNil(error.exception)
         XCTAssertTrue(error.details.isEmpty)
-        XCTAssertNil(error.unpackedDetails() as Grpc_Testing_SimpleResponse?)
+        XCTAssertNil(error.unpackedDetails() as [Grpc_Testing_SimpleResponse])
         XCTAssertTrue(error.metadata.isEmpty)
     }
 
@@ -71,18 +84,18 @@ final class ConnectErrorTests: XCTestCase {
 
     // MARK: - Private
 
-    private func errorData(expectedDetails: SwiftProtobuf.Message) throws -> Data {
+    private func errorData(expectedDetails: [SwiftProtobuf.Message]) throws -> Data {
         // Example error from https://connect.build/docs/protocol/#error-end-stream
         let dictionary: [String: Any] = [
             "code": "unavailable",
             "message": "overloaded: back off and retry",
-            "details": [
+            "details": try expectedDetails.map { details in
                 [
-                    "type": type(of: expectedDetails).protoMessageName,
-                    "value": try expectedDetails.serializedData().base64EncodedString(),
+                    "type": type(of: details).protoMessageName,
+                    "value": try details.serializedData().base64EncodedString(),
                     "debug": ["retryDelay": "30s"],
-                ],
-            ],
+                ]
+            },
         ]
         return try JSONSerialization.data(withJSONObject: dictionary)
     }

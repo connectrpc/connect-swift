@@ -361,7 +361,7 @@ final class AsyncAwaitCrosstests: XCTestCase {
             let response = await client.failUnaryCall(request: Grpc_Testing_SimpleRequest())
             XCTAssertEqual(response.error?.code, .resourceExhausted)
             XCTAssertEqual(response.error?.message, "soirée 🎉")
-            XCTAssertEqual(response.error?.unpackedDetails(), expectedErrorDetail)
+            XCTAssertEqual(response.error?.unpackedDetails(), [expectedErrorDetail])
         }
     }
 
@@ -399,7 +399,7 @@ final class AsyncAwaitCrosstests: XCTestCase {
 
                     XCTAssertEqual(connectError.code, .resourceExhausted)
                     XCTAssertEqual(connectError.message, "soirée 🎉")
-                    XCTAssertEqual(connectError.unpackedDetails(), expectedErrorDetail)
+                    XCTAssertEqual(connectError.unpackedDetails(), [expectedErrorDetail])
                     expectation.fulfill()
                 }
             }

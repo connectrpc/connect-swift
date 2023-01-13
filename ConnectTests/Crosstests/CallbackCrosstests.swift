@@ -396,7 +396,7 @@ final class CallbackCrosstests: XCTestCase {
             client.failUnaryCall(request: Grpc_Testing_SimpleRequest()) { response in
                 XCTAssertEqual(response.error?.code, .resourceExhausted)
                 XCTAssertEqual(response.error?.message, "soirée 🎉")
-                XCTAssertEqual(response.error?.unpackedDetails(), expectedErrorDetail)
+                XCTAssertEqual(response.error?.unpackedDetails(), [expectedErrorDetail])
                 expectation.fulfill()
             }
 
@@ -427,7 +427,7 @@ final class CallbackCrosstests: XCTestCase {
 
                     XCTAssertEqual(connectError.code, .resourceExhausted)
                     XCTAssertEqual(connectError.message, "soirée 🎉")
-                    XCTAssertEqual(connectError.unpackedDetails(), expectedErrorDetail)
+                    XCTAssertEqual(connectError.unpackedDetails(), [expectedErrorDetail])
                     expectation.fulfill()
                 }
             }
