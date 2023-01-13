@@ -30,6 +30,7 @@ public struct ConnectError: Swift.Error {
     public private(set) var metadata: Headers
 
     /// Unpacks values from `self.details` and returns any matching errors.
+    /// Any decoding errors are ignored, and the detail will simply be omitted from the list.
     ///
     /// - returns: The unpacked typed error details, if available.
     public func unpackedDetails<Output: SwiftProtobuf.Message>() -> [Output] {
