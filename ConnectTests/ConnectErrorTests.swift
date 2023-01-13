@@ -31,7 +31,7 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertTrue(error.metadata.isEmpty)
     }
 
-    func testDeserializingMultipleFullErrorsAndUnpackingDetails() throws {
+    func testDeserializingFullErrorAndUnpackingMultipleDetails() throws {
         let expectedDetails1 = Grpc_Testing_SimpleResponse.with { $0.hostname = "foo" }
         let expectedDetails2 = Grpc_Testing_SimpleResponse.with { $0.hostname = "bar" }
         let errorData = try self.errorData(expectedDetails: [expectedDetails1, expectedDetails2])
