@@ -126,16 +126,14 @@ is available on the [connect.build website][getting-started].
 
 ## Example Apps
 
-We have example apps in this repository that demonstrate:
+Example apps are available in the [`ConnectExamples`](./ConnectExamples)
+directory and can be opened and built using Xcode. They demonstrate:
 
 - Using streaming APIs
 - Integrating with Swift Package Manager
 - Integrating with CocoaPods
 - Using the [Connect protocol][connect-protocol]
 - Using the [gRPC-Web protocol][grpc-web-protocol]
-
-Example apps are available in the [`ConnectExamples`](./ConnectExamples)
-directory and can be opened and built using Xcode.
 
 ## Contributing
 
