@@ -35,7 +35,7 @@ distribution. To get started contributing locally:
 
 - Open Xcode.
 - Click `Open...` and select the root `connect-swift` repo directory.
-- Xcode will automatically read the [`Package.swift`](../Package.swift).
+- Xcode will automatically read the [`Package.swift`](../Package.swift)
   file and open the project.
 
 ## Developing the Library
@@ -50,7 +50,7 @@ The easiest way to contribute to the library is to
 
 ## Developing the Generator
 
-The source code for the plugin that is used to generate Connect-compatible
+The source code for the plugin that generates Connect-compatible
 services and RPCs is in the
 [`protoc-gen-connect-swift`](../protoc-gen-connect-swift) directory.
 
@@ -77,7 +77,7 @@ make generate # Run buf generate - uses buf.gen.yaml
 
 Outputted code will be available in the [`Generated`](../Generated) directory.
 
-# Running Tests
+## Running Tests
 
 A test server is used to run [crosstests](../ConnectTests) -
 integration tests which validate the behavior of the `Connect` library with
