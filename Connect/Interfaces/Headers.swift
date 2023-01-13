@@ -12,5 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// Request/response headers. All keys are expected to be lowercased.
+/// Request/response headers.
+/// All keys are expected to be lowercased.
+/// Comma-separated values are split into individual items in the array. For example:
+/// On the wire: `accept-encoding: gzip,brotli` or `accept-encoding: gzip, brotli`
+/// Yields: `["accept-encoding": ["gzip", "brotli"]]`
 public typealias Headers = [String: [String]]
