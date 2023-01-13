@@ -36,7 +36,7 @@ public struct ConnectError: Swift.Error {
     /// To access only the first error of a specific type:
     /// `let unpackedError: MyError? = error.unpackedDetails().first`
     ///
-    /// - returns: The unpacked typed error details, if available.
+    /// - returns: The matching unpacked typed error details.
     public func unpackedDetails<Output: SwiftProtobuf.Message>() -> [Output] {
         return self.details.compactMap { detail -> Output? in
             guard detail.type == Output.protoMessageName else {
