@@ -1,0 +1,9 @@
+version: v1
+lint:
+  use:
+    - DEFAULT
+  ignore:
+    - grpc/status/v1/status.proto
+breaking:
+  use:
+    - WIRE_JSON
