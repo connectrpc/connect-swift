@@ -19,7 +19,9 @@ import XCTest
 final class ProtocolClientConfigTests: XCTestCase {
     func testCompressionPoolsWithIdentityAndGzip() {
         var config = ProtocolClientConfig(
-            target: "https://buf.build", httpClient: URLSessionHTTPClient(), codec: ProtoCodec()
+            target: "https://buf.build", httpClient: URLSessionHTTPClient(),
+            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
+            codec: ProtoCodec(), interceptors: []
         )
         config = IdentityCompressionOption().apply(config)
         config = GzipCompressionOption().apply(config)
@@ -33,7 +35,9 @@ final class ProtocolClientConfigTests: XCTestCase {
 
     func testGzipRequestOptionUsesGzipCompressionPool() {
         var config = ProtocolClientConfig(
-            target: "https://buf.build", httpClient: URLSessionHTTPClient(), codec: ProtoCodec()
+            target: "https://buf.build", httpClient: URLSessionHTTPClient(),
+            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
+            codec: ProtoCodec(), interceptors: []
         )
         config = GzipCompressionOption().apply(config)
         config = GzipRequestOption(compressionMinBytes: 10).apply(config)
@@ -61,7 +65,9 @@ final class ProtocolClientConfigTests: XCTestCase {
         final class InterceptorB: NoopInterceptor {}
 
         var config = ProtocolClientConfig(
-            target: "https://buf.build", httpClient: URLSessionHTTPClient(), codec: ProtoCodec()
+            target: "https://buf.build", httpClient: URLSessionHTTPClient(),
+            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
+            codec: ProtoCodec(), interceptors: []
         )
         config = InterceptorsOption(interceptors: [InterceptorA.init]).apply(config)
         config = InterceptorsOption(interceptors: [InterceptorB.init]).apply(config)
@@ -73,7 +79,9 @@ final class ProtocolClientConfigTests: XCTestCase {
 
     func testJSONClientOptionSetsJSONCodec() {
         var config = ProtocolClientConfig(
-            target: "https://buf.build", httpClient: URLSessionHTTPClient(), codec: ProtoCodec()
+            target: "https://buf.build", httpClient: URLSessionHTTPClient(),
+            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
+            codec: ProtoCodec(), interceptors: []
         )
         config = JSONClientOption().apply(config)
         XCTAssertTrue(config.codec is JSONCodec)
@@ -81,7 +89,9 @@ final class ProtocolClientConfigTests: XCTestCase {
 
     func testProtoClientOptionSetsProtoCodec() {
         var config = ProtocolClientConfig(
-            target: "https://buf.build", httpClient: URLSessionHTTPClient(), codec: JSONCodec()
+            target: "https://buf.build", httpClient: URLSessionHTTPClient(),
+            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
+            codec: JSONCodec(), interceptors: []
         )
         config = ProtoClientOption().apply(config)
         XCTAssertTrue(config.codec is ProtoCodec)

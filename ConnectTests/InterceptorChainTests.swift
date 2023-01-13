@@ -105,9 +105,9 @@ private struct MockStreamInterceptor: Interceptor {
 
 final class InterceptorChainTests: XCTestCase {
     private let config = ProtocolClientConfig(
-        target: "https://buf.build",
-        httpClient: CrosstestHTTPClient(timeout: 60),
-        codec: JSONCodec()
+        target: "https://buf.build", httpClient: CrosstestHTTPClient(timeout: 60),
+        compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
+        codec: JSONCodec(), interceptors: []
     )
 
     func testUnary() throws {
