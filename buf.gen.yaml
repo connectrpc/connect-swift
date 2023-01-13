@@ -2,9 +2,11 @@ version: v1
 managed:
   enabled: true
 plugins:
+  # Generate models using the official Swift plugin
   - plugin: buf.build/apple/swift
     opt: Visibility=Public
     out: Generated/swift-protobuf
+  # Generate Connect production APIs using the local connect-swift plugin
   - name: connect-swift
     opt: >
       GenerateAsyncMethods=true,
@@ -12,6 +14,7 @@ plugins:
       Visibility=Public
     out: Generated/connect-swift
     path: ./plugins/protoc-gen-connect-swift
+  # Generate Connect mocks using the local connect-swift plugin
   - name: connect-swift
     opt: >
       GenerateAsyncMocks=true,
@@ -21,9 +24,3 @@ plugins:
       ExtraModuleImports=Generated
     out: GeneratedMocks/connect-swift
     path: ./plugins/protoc-gen-connect-swift
-
-  # TODO: Replace this with an official BSR plugin once open-sourced.
-  # To use the remote plugin instead of the local one:
-  # - remote: buf.build/mrebello/plugins/connect-swift
-  #   opt: Visibility=Public # See "custom configuration" section in docs
-  #   out: Generated/connect-swift
