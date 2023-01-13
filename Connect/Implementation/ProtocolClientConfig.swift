@@ -53,16 +53,6 @@ public struct ProtocolClientConfig {
 }
 
 extension ProtocolClientConfig {
-    init(target: String, httpClient: HTTPClientInterface, codec: Codec) {
-        self.target = target
-        self.httpClient = httpClient
-        self.compressionMinBytes = nil
-        self.compressionName = nil
-        self.codec = codec
-        self.interceptors = []
-        self.compressionPools = [:]
-    }
-
     func requestCompressionPool() -> CompressionPool? {
         return self.compressionName.flatMap { self.compressionPools[$0] }
     }

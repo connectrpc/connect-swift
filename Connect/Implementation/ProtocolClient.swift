@@ -33,15 +33,54 @@ public final class ProtocolClient {
     public init(
         target: String, httpClient: HTTPClientInterface, _ options: ProtocolClientOption...
     ) {
-        var config = ProtocolClientConfig(
-            target: target, httpClient: httpClient, codec: JSONCodec()
+        var config = ProtocolClientConfig.withDefaultOptions(
+            andTarget: target, httpClient: httpClient
         )
-        config = IdentityCompressionOption().apply(config)
-        config = GzipCompressionOption().apply(config)
         for option in options {
             config = option.apply(config)
         }
         self.config = config
+    }
+
+    /// Instantiate a new client.
+    ///
+    /// - parameter target: The target host (e.g., https://buf.build).
+    /// - parameter httpClient: HTTP client to use for performing requests.
+    /// - parameter options: Series of options with which to configure the client.
+    ///                      Identity and gzip compression implementations are provided by default
+    ///                      via `IdentityCompressionOption` and `GzipCompressionOption`, and
+    ///                      encoding requests with gzip can be enabled using `GzipRequestOption`.
+    ///                      Additional compression implementations may be specified using custom
+    ///                      options.
+    public init(
+        target: String, httpClient: HTTPClientInterface, options: [ProtocolClientOption]
+    ) {
+        var config = ProtocolClientConfig.withDefaultOptions(
+            andTarget: target, httpClient: httpClient
+        )
+        for option in options {
+            config = option.apply(config)
+        }
+        self.config = config
+    }
+}
+
+private extension ProtocolClientConfig {
+    static func withDefaultOptions(
+        andTarget target: String, httpClient: HTTPClientInterface
+    ) -> Self {
+        var config = ProtocolClientConfig(
+            target: target,
+            httpClient: httpClient,
+            compressionMinBytes: nil,
+            compressionName: nil,
+            compressionPools: [:],
+            codec: JSONCodec(),
+            interceptors: []
+        )
+        config = IdentityCompressionOption().apply(config)
+        config = GzipCompressionOption().apply(config)
+        return config
     }
 }
 
