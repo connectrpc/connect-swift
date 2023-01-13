@@ -73,7 +73,7 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertNil(error.message)
         XCTAssertNil(error.exception)
         XCTAssertTrue(error.details.isEmpty)
-        XCTAssertNil(error.unpackedDetails() as [Grpc_Testing_SimpleResponse])
+        XCTAssertEqual(error.unpackedDetails(), [Grpc_Testing_SimpleResponse]())
         XCTAssertTrue(error.metadata.isEmpty)
     }
 
@@ -89,10 +89,10 @@ final class ConnectErrorTests: XCTestCase {
         let dictionary: [String: Any] = [
             "code": "unavailable",
             "message": "overloaded: back off and retry",
-            "details": try expectedDetails.map { details in
+            "details": try expectedDetails.map { detail in
                 [
-                    "type": type(of: details).protoMessageName,
-                    "value": try details.serializedData().base64EncodedString(),
+                    "type": type(of: detail).protoMessageName,
+                    "value": try detail.serializedData().base64EncodedString(),
                     "debug": ["retryDelay": "30s"],
                 ]
             },
