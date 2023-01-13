@@ -33,7 +33,7 @@ public struct ConnectError: Swift.Error {
     ///
     /// Any decoding errors are ignored, and the detail will simply be omitted from the list.
     ///
-    /// To access only the first error of this type:
+    /// To access only the first error of a specific type:
     /// `let unpackedError: MyError? = error.unpackedDetails().first`
     ///
     /// - returns: The unpacked typed error details, if available.
