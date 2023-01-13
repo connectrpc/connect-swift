@@ -29,16 +29,22 @@ public struct ConnectError: Swift.Error {
     /// Additional key-values that were provided by the server.
     public private(set) var metadata: Headers
 
-    /// Unpacks values from `self.details` and returns the first matching error, if any.
+    /// Unpacks values from `self.details` and returns all matching errors.
     ///
-    /// - returns: The unpacked typed error details, if available.
-    public func unpackedDetails<Output: SwiftProtobuf.Message>() -> Output? {
-        for detail in self.details where detail.type == Output.protoMessageName {
-            if let decoded = detail.payload.flatMap({ try? Output(serializedData: $0) }) {
-                return decoded
+    /// Any decoding errors are ignored, and the detail will simply be omitted from the list.
+    ///
+    /// To access only the first error of a specific type:
+    /// `let unpackedError: MyError? = error.unpackedDetails().first`
+    ///
+    /// - returns: The matching unpacked typed error details.
+    public func unpackedDetails<Output: SwiftProtobuf.Message>() -> [Output] {
+        return self.details.compactMap { detail -> Output? in
+            guard detail.type == Output.protoMessageName else {
+                return nil
             }
+
+            return detail.payload.flatMap { try? Output(serializedData: $0) }
         }
-        return nil
     }
 
     /// Error details are sent over the network to clients, which can then work with
