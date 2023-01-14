@@ -50,19 +50,19 @@ final class ConnectMocksTests: XCTestCase {
 
     func testMockBidirectionalStreamCallbacks() throws {
         let client = Grpc_Testing_TestServiceClientMock()
-        let expectedInputs: [Grpc_Testing_StreamingInputCallRequest] = [
-            .with { $0.fillUsername = true },
-            .with { $0.expectCompressed = .init(false) },
+        let expectedInputs: [Grpc_Testing_StreamingOutputCallRequest] = [
+            .with { $0.responseParameters = [.with { $0.size = 123 }] },
+            .with { $0.responseParameters = [.with { $0.size = 456 }] },
         ]
         let expectedResults: [StreamResult<Grpc_Testing_StreamingOutputCallResponse>] = [
             .headers(["x-header": ["123"]]),
-            .message(.with { $0.payload = "abc" }),
-            .message(.with { $0.sentence = "def" }),
+            .message(.with { $0.payload.body = Data(repeating: 0, count: 123) }),
+            .message(.with { $0.payload.body = Data(repeating: 0, count: 456) }),
             .complete(code: .ok, error: nil, trailers: nil),
         ]
         XCTAssertFalse(client.mockFullDuplexCall.isClosed)
 
-        var sentInputs = [Buf_Connect_Demo_Eliza_V1_ConverseRequest]()
+        var sentInputs = [Grpc_Testing_StreamingOutputCallRequest]()
         var closeCalled = false
         client.mockFullDuplexCall.onSend = { sentInputs.append($0) }
         client.mockFullDuplexCall.onClose = { closeCalled = true }
@@ -75,33 +75,33 @@ final class ConnectMocksTests: XCTestCase {
         stream.close()
 
         XCTAssertEqual(sentInputs, expectedInputs)
-        XCTAssertEqual(client.mockConverse.inputs, expectedInputs)
+        XCTAssertEqual(client.mockFullDuplexCall.inputs, expectedInputs)
         XCTAssertEqual(receivedResults, expectedResults)
         XCTAssertTrue(closeCalled)
-        XCTAssertTrue(client.mockConverse.isClosed)
+        XCTAssertTrue(client.mockFullDuplexCall.isClosed)
     }
 
     func testMockBidirectionalStreamAsyncAwait() async throws {
         let client = Grpc_Testing_TestServiceClientMock()
-        let expectedInputs: [Buf_Connect_Demo_Eliza_V1_ConverseRequest] = [
-            .with { $0.sentence = "hello1" },
-            .with { $0.sentence = "hello2" },
+        let expectedInputs: [Grpc_Testing_StreamingOutputCallRequest] = [
+            .with { $0.responseParameters = [.with { $0.size = 123 }] },
+            .with { $0.responseParameters = [.with { $0.size = 456 }] },
         ]
-        var expectedResults: [StreamResult<Buf_Connect_Demo_Eliza_V1_ConverseResponse>] = [
+        var expectedResults: [StreamResult<Grpc_Testing_StreamingOutputCallResponse>] = [
             .headers(["x-header": ["123"]]),
-            .message(.with { $0.sentence = "abc" }),
-            .message(.with { $0.sentence = "def" }),
+            .message(.with { $0.payload.body = Data(repeating: 0, count: 123) }),
+            .message(.with { $0.payload.body = Data(repeating: 0, count: 456) }),
             .complete(code: .ok, error: nil, trailers: nil),
         ]
-        XCTAssertFalse(client.mockConverse.isClosed)
+        XCTAssertFalse(client.mockAsyncFullDuplexCall.isClosed)
 
-        var sentInputs = [Buf_Connect_Demo_Eliza_V1_ConverseRequest]()
+        var sentInputs = [Grpc_Testing_StreamingOutputCallRequest]()
         var closeCalled = false
-        client.mockAsyncConverse.onSend = { sentInputs.append($0) }
-        client.mockAsyncConverse.onClose = { closeCalled = true }
-        client.mockAsyncConverse.outputs = Array(expectedResults)
+        client.mockAsyncFullDuplexCall.onSend = { sentInputs.append($0) }
+        client.mockAsyncFullDuplexCall.onClose = { closeCalled = true }
+        client.mockAsyncFullDuplexCall.outputs = Array(expectedResults)
 
-        let stream = client.converse()
+        let stream = client.fullDuplexCall()
         try stream.send(expectedInputs[0])
         try stream.send(expectedInputs[1])
         stream.close()
@@ -111,52 +111,52 @@ final class ConnectMocksTests: XCTestCase {
         }
 
         XCTAssertEqual(sentInputs, expectedInputs)
-        XCTAssertEqual(client.mockAsyncConverse.inputs, expectedInputs)
+        XCTAssertEqual(client.mockAsyncFullDuplexCall.inputs, expectedInputs)
         XCTAssertTrue(expectedResults.isEmpty)
         XCTAssertTrue(closeCalled)
-        XCTAssertTrue(client.mockAsyncConverse.isClosed)
+        XCTAssertTrue(client.mockAsyncFullDuplexCall.isClosed)
     }
 
     // MARK: - Server-only stream
 
     func testMockServerOnlyStreamCallbacks() throws {
         let client = Grpc_Testing_TestServiceClientMock()
-        let expectedInput = Buf_Connect_Demo_Eliza_V1_IntroduceRequest.with { $0.name = "michael" }
-        let expectedResults: [StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>] = [
+        let expectedInput = Grpc_Testing_Empty()
+        let expectedResults: [StreamResult<Grpc_Testing_Empty>] = [
             .headers(["x-header": ["123"]]),
-            .message(.with { $0.sentence = "abc" }),
-            .message(.with { $0.sentence = "def" }),
+            .message(.init()),
+            .message(.init()),
             .complete(code: .ok, error: nil, trailers: nil),
         ]
 
-        var sentInputs = [Buf_Connect_Demo_Eliza_V1_IntroduceRequest]()
-        client.mockIntroduce.onSend = { sentInputs.append($0) }
-        client.mockIntroduce.outputs = Array(expectedResults)
+        var sentInputs = [Grpc_Testing_Empty]()
+        client.mockUnimplementedStreamingOutputCall.onSend = { sentInputs.append($0) }
+        client.mockUnimplementedStreamingOutputCall.outputs = Array(expectedResults)
 
-        var receivedResults = [StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>]()
-        let stream = client.introduce { receivedResults.append($0) }
+        var receivedResults = [StreamResult<Grpc_Testing_Empty>]()
+        let stream = client.unimplementedStreamingOutputCall { receivedResults.append($0) }
         try stream.send(expectedInput)
 
         XCTAssertEqual(sentInputs, [expectedInput])
-        XCTAssertEqual(client.mockIntroduce.inputs, [expectedInput])
+        XCTAssertEqual(client.mockUnimplementedStreamingOutputCall.inputs, [expectedInput])
         XCTAssertEqual(receivedResults, expectedResults)
     }
 
     func testMockServerOnlyStreamAsyncAwait() async throws {
         let client = Grpc_Testing_TestServiceClientMock()
-        let expectedInput = Buf_Connect_Demo_Eliza_V1_IntroduceRequest.with { $0.name = "michael" }
-        var expectedResults: [StreamResult<Buf_Connect_Demo_Eliza_V1_IntroduceResponse>] = [
+        let expectedInput = Grpc_Testing_Empty()
+        var expectedResults: [StreamResult<Grpc_Testing_Empty>] = [
             .headers(["x-header": ["123"]]),
-            .message(.with { $0.sentence = "abc" }),
-            .message(.with { $0.sentence = "def" }),
+            .message(.init()),
+            .message(.init()),
             .complete(code: .ok, error: nil, trailers: nil),
         ]
 
-        var sentInputs = [Buf_Connect_Demo_Eliza_V1_IntroduceRequest]()
-        client.mockAsyncIntroduce.onSend = { sentInputs.append($0) }
-        client.mockAsyncIntroduce.outputs = Array(expectedResults)
+        var sentInputs = [Grpc_Testing_Empty]()
+        client.mockUnimplementedStreamingOutputCall.onSend = { sentInputs.append($0) }
+        client.mockUnimplementedStreamingOutputCall.outputs = Array(expectedResults)
 
-        let stream = client.introduce()
+        let stream = client.unimplementedStreamingOutputCall()
         try stream.send(expectedInput)
 
         for await result in stream.results() {
@@ -164,7 +164,7 @@ final class ConnectMocksTests: XCTestCase {
         }
 
         XCTAssertEqual(sentInputs, [expectedInput])
-        XCTAssertEqual(client.mockAsyncIntroduce.inputs, [expectedInput])
+        XCTAssertEqual(client.mockUnimplementedStreamingOutputCall.inputs, [expectedInput])
         XCTAssertTrue(expectedResults.isEmpty)
     }
 }
