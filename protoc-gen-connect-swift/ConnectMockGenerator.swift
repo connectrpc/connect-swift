@@ -17,7 +17,15 @@ import SwiftProtobufPluginLibrary
 
 /// Responsible for generating services and RPCs that are compatible with the Connect library.
 final class ConnectMockGenerator: Generator {
+    private let visibility: String
+
     override init(_ descriptor: FileDescriptor, options: GeneratorOptions) {
+        switch options.visibility {
+        case .internal:
+            self.visibility = "internal"
+        case .public:
+            self.visibility = "open"
+        }
         super.init(descriptor, options: options)
         self.printContent()
     }
@@ -46,7 +54,7 @@ final class ConnectMockGenerator: Generator {
         self.printLine("/// either through the properties on this class or by")
         self.printLine("/// subclassing the class and overriding its methods.")
         self.printLine(
-            "open class \(service.mockName(using: self.namer)): \(protocolName) {"
+            "\(self.visibility) class \(service.mockName(using: self.namer)): \(protocolName) {"
         )
         self.indent {
             if self.options.generateCallbackMocks {
@@ -102,7 +110,7 @@ final class ConnectMockGenerator: Generator {
         }
 
         self.printLine(
-            "open "
+            "\(self.visibility) "
             + method.callbackSignature(
                 using: self.namer, includeDefaults: true, options: self.options
             )
@@ -132,7 +140,7 @@ final class ConnectMockGenerator: Generator {
         self.printLine()
 
         self.printLine(
-            "open "
+            "\(self.visibility) "
             + method.asyncAwaitSignature(
                 using: self.namer, includeDefaults: true, options: self.options
             )

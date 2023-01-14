@@ -10,7 +10,12 @@ BIN := .tmp/bin
 LICENSE_HEADER_YEAR_RANGE := 2022-2023
 CROSSTEST_VERSION := 4f4e96d8fea3ed9473b90a964a5ba429e7ea5649
 LICENSE_HEADER_VERSION := f5dd847fb18b577a62aaf46dd168b6e5b25206a3
-LICENSE_IGNORE := -e Package.swift -e .tmp\/ -e Generated\/ -e GeneratedMocks\/ -e Connect\/Implementation\/Generated\/ -e ConnectTests/proto/grpc\/
+LICENSE_IGNORE := -e Package.swift \
+    -e $(BIN)\/ \
+    -e Connect\/Implementation\/Generated\/ \
+    -e ConnectExamples/ElizaSharedSources/GeneratedSources\/ \
+    -e ConnectTests/proto/grpc\/ \
+    -e ConnectTests/Generated\/
 
 .PHONY: buildlibrary
 buildlibrary: ## Build the Swift library targets
@@ -19,14 +24,19 @@ buildlibrary: ## Build the Swift library targets
 .PHONY: buildplugin
 buildplugin: ## Build the protoc-gen-connect-swift plugin binary
 	swift build -c release --product protoc-gen-connect-swift
-	mkdir -p ./plugins
-	mv ./.build/release/protoc-gen-connect-swift ./plugins
-	@echo "Success! The plugin is available in ./plugins"
+	mkdir -p $(BIN)
+	mv ./.build/release/protoc-gen-connect-swift $(BIN)
+	@echo "Success! The plugin is available in $(BIN)"
 
 .PHONY: clean
-clean: ## Clean/delete all generated outputs
-	rm -rf ./Generated
-	rm -rf ./GeneratedMocks
+clean: cleangenerated ## Delete all plugins and generated outputs
+	rm -rf $(BIN)
+
+.PHONY: cleangenerated
+cleangenerated: ## Delete all generated outputs
+	rm -rf ./Connect/Implementation/Generated/*
+	rm -rf ./ConnectExamples/ElizaSharedSources/GeneratedSources
+	rm -rf ./ConnectTests/Generated
 
 .PHONY: crosstestserverstop
 crosstestserverstop: ## Stop the crosstest server
@@ -42,8 +52,10 @@ crosstestserverrun: crosstestserverstop ## Start the crosstest server
 		/usr/local/bin/servergrpc --port "8083" --cert "cert/localhost.crt" --key "cert/localhost.key"
 
 .PHONY: generate
-generate: clean ## Regenerate outputs for all .proto files
-	buf generate
+generate: ## Regenerate outputs for all .proto files
+	cd Connect; buf generate
+	cd ConnectExamples; buf generate
+	cd ConnectTests; buf generate
 
 .PHONY: help
 help: ## Describe useful make targets

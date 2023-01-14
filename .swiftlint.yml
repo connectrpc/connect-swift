@@ -1,13 +1,13 @@
 included:
   - Connect
-  - ConnectExamples/Eliza/Eliza
+  - ConnectExamples/ElizaSharedSources/AppSources
   - ConnectMocks
-  - ConnectMocksTests
   - ConnectTests
   - protoc-gen-connect-swift
   - protoc-gen-connect-swift-tests
 excluded:
   - Connect/Implementation/Generated
+  - ConnectTests/Generated
 disabled_rules:
   - cyclomatic_complexity
   - function_body_length

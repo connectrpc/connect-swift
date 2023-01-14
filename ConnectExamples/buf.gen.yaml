@@ -1,0 +1,9 @@
+version: v1
+plugins:
+  - plugin: buf.build/apple/swift
+    opt: Visibility=Internal
+    out: ./ElizaSharedSources/GeneratedSources
+  - name: connect-swift
+    opt: Visibility=Internal
+    out: ./ElizaSharedSources/GeneratedSources
+    path: ../.tmp/bin/protoc-gen-connect-swift
