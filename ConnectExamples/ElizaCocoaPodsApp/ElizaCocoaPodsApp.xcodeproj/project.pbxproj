@@ -8,41 +8,31 @@
 
 /* Begin PBXBuildFile section */
 		00CF4618AA904D5D3AEEDAA4 /* Pods_ElizaCocoaPodsApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97B2C5809ECFFD24F0C87AB2 /* Pods_ElizaCocoaPodsApp.framework */; };
-		B22C4B912964A21000D89051 /* test.connect.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22C4B822964A21000D89051 /* test.connect.swift */; };
-		B22C4B922964A21000D89051 /* eliza.connect.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22C4B832964A21000D89051 /* eliza.connect.swift */; };
-		B22C4B932964A21000D89051 /* eliza.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22C4B852964A21000D89051 /* eliza.pb.swift */; };
-		B22C4B942964A21000D89051 /* status.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22C4B892964A21000D89051 /* status.pb.swift */; };
-		B22C4B952964A21000D89051 /* messages.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22C4B8B2964A21000D89051 /* messages.pb.swift */; };
-		B22C4B962964A21000D89051 /* empty.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22C4B8C2964A21000D89051 /* empty.pb.swift */; };
-		B22C4B972964A21000D89051 /* test.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22C4B8D2964A21000D89051 /* test.pb.swift */; };
-		B22C4B982964A21000D89051 /* server.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B22C4B902964A21000D89051 /* server.pb.swift */; };
+		B216FBF729723F2A003AB294 /* eliza.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FBEE29723F2A003AB294 /* eliza.pb.swift */; };
+		B216FBF829723F2A003AB294 /* eliza.connect.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FBEF29723F2A003AB294 /* eliza.connect.swift */; };
+		B216FBF929723F2A003AB294 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FBF129723F2A003AB294 /* Message.swift */; };
+		B216FBFA29723F2A003AB294 /* MessagingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FBF229723F2A003AB294 /* MessagingView.swift */; };
+		B216FBFB29723F2A003AB294 /* MessagingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FBF329723F2A003AB294 /* MessagingViewModel.swift */; };
+		B216FBFC29723F2A003AB294 /* ElizaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FBF429723F2A003AB294 /* ElizaApp.swift */; };
+		B216FBFD29723F2A003AB294 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FBF529723F2A003AB294 /* MenuView.swift */; };
+		B216FBFE29723F2A003AB294 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B216FBF629723F2A003AB294 /* README.md */; };
 		B236EEB8295F574F00DDCDA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B236EEB7295F574F00DDCDA9 /* Assets.xcassets */; };
-		B236EEC7295F577C00DDCDA9 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EEC2295F577C00DDCDA9 /* Message.swift */; };
-		B236EEC8295F577C00DDCDA9 /* MessagingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EEC3295F577C00DDCDA9 /* MessagingView.swift */; };
-		B236EEC9295F577C00DDCDA9 /* MessagingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EEC4295F577C00DDCDA9 /* MessagingViewModel.swift */; };
-		B236EECA295F577C00DDCDA9 /* ElizaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EEC5295F577C00DDCDA9 /* ElizaApp.swift */; };
-		B236EECB295F577C00DDCDA9 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EEC6295F577C00DDCDA9 /* MenuView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		24421109838104D5D0DBD5C7 /* Pods-ElizaCocoaPodsApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ElizaCocoaPodsApp.debug.xcconfig"; path = "Target Support Files/Pods-ElizaCocoaPodsApp/Pods-ElizaCocoaPodsApp.debug.xcconfig"; sourceTree = "<group>"; };
 		2596F885A0CF999DCDAA7364 /* Pods-ElizaCocoaPodsApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ElizaCocoaPodsApp.release.xcconfig"; path = "Target Support Files/Pods-ElizaCocoaPodsApp/Pods-ElizaCocoaPodsApp.release.xcconfig"; sourceTree = "<group>"; };
 		97B2C5809ECFFD24F0C87AB2 /* Pods_ElizaCocoaPodsApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ElizaCocoaPodsApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		B22C4B822964A21000D89051 /* test.connect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test.connect.swift; sourceTree = "<group>"; };
-		B22C4B832964A21000D89051 /* eliza.connect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = eliza.connect.swift; sourceTree = "<group>"; };
-		B22C4B852964A21000D89051 /* eliza.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = eliza.pb.swift; sourceTree = "<group>"; };
-		B22C4B892964A21000D89051 /* status.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = status.pb.swift; sourceTree = "<group>"; };
-		B22C4B8B2964A21000D89051 /* messages.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = messages.pb.swift; sourceTree = "<group>"; };
-		B22C4B8C2964A21000D89051 /* empty.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = empty.pb.swift; sourceTree = "<group>"; };
-		B22C4B8D2964A21000D89051 /* test.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test.pb.swift; sourceTree = "<group>"; };
-		B22C4B902964A21000D89051 /* server.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = server.pb.swift; sourceTree = "<group>"; };
+		B216FBEE29723F2A003AB294 /* eliza.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = eliza.pb.swift; sourceTree = "<group>"; };
+		B216FBEF29723F2A003AB294 /* eliza.connect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = eliza.connect.swift; sourceTree = "<group>"; };
+		B216FBF129723F2A003AB294 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		B216FBF229723F2A003AB294 /* MessagingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingView.swift; sourceTree = "<group>"; };
+		B216FBF329723F2A003AB294 /* MessagingViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingViewModel.swift; sourceTree = "<group>"; };
+		B216FBF429723F2A003AB294 /* ElizaApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElizaApp.swift; sourceTree = "<group>"; };
+		B216FBF529723F2A003AB294 /* MenuView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
+		B216FBF629723F2A003AB294 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B236EEB0295F574E00DDCDA9 /* ElizaCocoaPodsApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ElizaCocoaPodsApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B236EEB7295F574F00DDCDA9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		B236EEC2295F577C00DDCDA9 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
-		B236EEC3295F577C00DDCDA9 /* MessagingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingView.swift; sourceTree = "<group>"; };
-		B236EEC4295F577C00DDCDA9 /* MessagingViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingViewModel.swift; sourceTree = "<group>"; };
-		B236EEC5295F577C00DDCDA9 /* ElizaApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElizaApp.swift; sourceTree = "<group>"; };
-		B236EEC6295F577C00DDCDA9 /* MenuView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,100 +55,36 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		B22C4B7E2964A21000D89051 /* Generated */ = {
+		B216FBEC29723F2A003AB294 /* ElizaSharedSources */ = {
 			isa = PBXGroup;
 			children = (
-				B22C4B7F2964A21000D89051 /* connect-swift */,
-				B22C4B842964A21000D89051 /* swift-protobuf */,
+				B216FBED29723F2A003AB294 /* GeneratedSources */,
+				B216FBF029723F2A003AB294 /* AppSources */,
+				B216FBF629723F2A003AB294 /* README.md */,
 			);
-			name = Generated;
-			path = ../../../Generated;
+			name = ElizaSharedSources;
+			path = ../../ElizaSharedSources;
 			sourceTree = "<group>";
 		};
-		B22C4B7F2964A21000D89051 /* connect-swift */ = {
+		B216FBED29723F2A003AB294 /* GeneratedSources */ = {
 			isa = PBXGroup;
 			children = (
-				B22C4B802964A21000D89051 /* grpc */,
-				B22C4B832964A21000D89051 /* eliza.connect.swift */,
+				B216FBEE29723F2A003AB294 /* eliza.pb.swift */,
+				B216FBEF29723F2A003AB294 /* eliza.connect.swift */,
 			);
-			path = "connect-swift";
+			path = GeneratedSources;
 			sourceTree = "<group>";
 		};
-		B22C4B802964A21000D89051 /* grpc */ = {
+		B216FBF029723F2A003AB294 /* AppSources */ = {
 			isa = PBXGroup;
 			children = (
-				B22C4B812964A21000D89051 /* testing */,
+				B216FBF129723F2A003AB294 /* Message.swift */,
+				B216FBF229723F2A003AB294 /* MessagingView.swift */,
+				B216FBF329723F2A003AB294 /* MessagingViewModel.swift */,
+				B216FBF429723F2A003AB294 /* ElizaApp.swift */,
+				B216FBF529723F2A003AB294 /* MenuView.swift */,
 			);
-			path = grpc;
-			sourceTree = "<group>";
-		};
-		B22C4B812964A21000D89051 /* testing */ = {
-			isa = PBXGroup;
-			children = (
-				B22C4B822964A21000D89051 /* test.connect.swift */,
-			);
-			path = testing;
-			sourceTree = "<group>";
-		};
-		B22C4B842964A21000D89051 /* swift-protobuf */ = {
-			isa = PBXGroup;
-			children = (
-				B22C4B852964A21000D89051 /* eliza.pb.swift */,
-				B22C4B862964A21000D89051 /* grpc */,
-				B22C4B8E2964A21000D89051 /* server */,
-			);
-			path = "swift-protobuf";
-			sourceTree = "<group>";
-		};
-		B22C4B862964A21000D89051 /* grpc */ = {
-			isa = PBXGroup;
-			children = (
-				B22C4B872964A21000D89051 /* status */,
-				B22C4B8A2964A21000D89051 /* testing */,
-			);
-			path = grpc;
-			sourceTree = "<group>";
-		};
-		B22C4B872964A21000D89051 /* status */ = {
-			isa = PBXGroup;
-			children = (
-				B22C4B882964A21000D89051 /* v1 */,
-			);
-			path = status;
-			sourceTree = "<group>";
-		};
-		B22C4B882964A21000D89051 /* v1 */ = {
-			isa = PBXGroup;
-			children = (
-				B22C4B892964A21000D89051 /* status.pb.swift */,
-			);
-			path = v1;
-			sourceTree = "<group>";
-		};
-		B22C4B8A2964A21000D89051 /* testing */ = {
-			isa = PBXGroup;
-			children = (
-				B22C4B8B2964A21000D89051 /* messages.pb.swift */,
-				B22C4B8C2964A21000D89051 /* empty.pb.swift */,
-				B22C4B8D2964A21000D89051 /* test.pb.swift */,
-			);
-			path = testing;
-			sourceTree = "<group>";
-		};
-		B22C4B8E2964A21000D89051 /* server */ = {
-			isa = PBXGroup;
-			children = (
-				B22C4B8F2964A21000D89051 /* v1 */,
-			);
-			path = server;
-			sourceTree = "<group>";
-		};
-		B22C4B8F2964A21000D89051 /* v1 */ = {
-			isa = PBXGroup;
-			children = (
-				B22C4B902964A21000D89051 /* server.pb.swift */,
-			);
-			path = v1;
+			path = AppSources;
 			sourceTree = "<group>";
 		};
 		B236EEA7295F574E00DDCDA9 = {
@@ -182,24 +108,10 @@
 		B236EEB2295F574E00DDCDA9 /* ElizaCocoaPodsApp */ = {
 			isa = PBXGroup;
 			children = (
-				B236EEC1295F577C00DDCDA9 /* ElizaSharedSources */,
-				B22C4B7E2964A21000D89051 /* Generated */,
+				B216FBEC29723F2A003AB294 /* ElizaSharedSources */,
 				B236EEB7295F574F00DDCDA9 /* Assets.xcassets */,
 			);
 			path = ElizaCocoaPodsApp;
-			sourceTree = "<group>";
-		};
-		B236EEC1295F577C00DDCDA9 /* ElizaSharedSources */ = {
-			isa = PBXGroup;
-			children = (
-				B236EEC2295F577C00DDCDA9 /* Message.swift */,
-				B236EEC3295F577C00DDCDA9 /* MessagingView.swift */,
-				B236EEC4295F577C00DDCDA9 /* MessagingViewModel.swift */,
-				B236EEC5295F577C00DDCDA9 /* ElizaApp.swift */,
-				B236EEC6295F577C00DDCDA9 /* MenuView.swift */,
-			);
-			name = ElizaSharedSources;
-			path = ../../ElizaSharedSources;
 			sourceTree = "<group>";
 		};
 		E9960EDDFFBFBB99D7DBA860 /* Pods */ = {
@@ -271,6 +183,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B216FBFE29723F2A003AB294 /* README.md in Resources */,
 				B236EEB8295F574F00DDCDA9 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -324,19 +237,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B22C4B952964A21000D89051 /* messages.pb.swift in Sources */,
-				B22C4B962964A21000D89051 /* empty.pb.swift in Sources */,
-				B236EECB295F577C00DDCDA9 /* MenuView.swift in Sources */,
-				B236EEC7295F577C00DDCDA9 /* Message.swift in Sources */,
-				B22C4B972964A21000D89051 /* test.pb.swift in Sources */,
-				B236EEC8295F577C00DDCDA9 /* MessagingView.swift in Sources */,
-				B22C4B982964A21000D89051 /* server.pb.swift in Sources */,
-				B22C4B912964A21000D89051 /* test.connect.swift in Sources */,
-				B22C4B942964A21000D89051 /* status.pb.swift in Sources */,
-				B236EEC9295F577C00DDCDA9 /* MessagingViewModel.swift in Sources */,
-				B22C4B922964A21000D89051 /* eliza.connect.swift in Sources */,
-				B22C4B932964A21000D89051 /* eliza.pb.swift in Sources */,
-				B236EECA295F577C00DDCDA9 /* ElizaApp.swift in Sources */,
+				B216FBFB29723F2A003AB294 /* MessagingViewModel.swift in Sources */,
+				B216FBFA29723F2A003AB294 /* MessagingView.swift in Sources */,
+				B216FBFC29723F2A003AB294 /* ElizaApp.swift in Sources */,
+				B216FBF929723F2A003AB294 /* Message.swift in Sources */,
+				B216FBFD29723F2A003AB294 /* MenuView.swift in Sources */,
+				B216FBF729723F2A003AB294 /* eliza.pb.swift in Sources */,
+				B216FBF829723F2A003AB294 /* eliza.connect.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

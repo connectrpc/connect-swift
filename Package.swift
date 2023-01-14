@@ -53,6 +53,8 @@ let package = Package(
             ],
             path: "Connect",
             exclude: [
+                "buf.gen.yaml",
+                "buf.work.yaml",
                 "proto",
             ]
         ),
@@ -68,48 +70,21 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "ConnectMocksTests",
-            dependencies: [
-                "Connect",
-                "ConnectMocks",
-                "Generated",
-                "GeneratedMocks",
-                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
-            ],
-            path: "ConnectMocksTests"
-        ),
-        .testTarget(
             name: "ConnectTests",
             dependencies: [
                 "Connect",
-                "Generated",
+                "ConnectMocks",
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
             path: "ConnectTests",
             exclude: [
+                "buf.gen.yaml",
+                "buf.work.yaml",
                 "proto",
             ],
             resources: [
                 .copy("Resources"),
             ]
-        ),
-        .target(
-            name: "Generated",
-            dependencies: [
-                "Connect",
-                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
-            ],
-            path: "Generated"
-        ),
-        .target(
-            name: "GeneratedMocks",
-            dependencies: [
-                "Connect",
-                "ConnectMocks",
-                "Generated",
-                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
-            ],
-            path: "GeneratedMocks"
         ),
         .executableTarget(
             name: "protoc-gen-connect-swift",
