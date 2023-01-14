@@ -3,7 +3,7 @@ Pod::Spec.new do |spec|
   spec.module_name = 'Connect'
   spec.version = '0.1.0'
   spec.license = { :type => 'Apache 2.0', :file => 'LICENSE' }
-  spec.summary = 'Connect is a slim library for building Protobuf- and gRPC-compatible HTTP APIs.'
+  spec.summary = 'Idiomatic gRPC & Connect RPCs for Swift.'
   spec.homepage = 'https://github.com/bufbuild/connect-swift'
   spec.author = 'Buf Technologies, Inc.'
   spec.source = { :git => 'https://github.com/bufbuild/connect-swift.git', :tag => spec.version }
