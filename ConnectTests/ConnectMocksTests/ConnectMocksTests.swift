@@ -144,19 +144,21 @@ final class ConnectMocksTests: XCTestCase {
 
     func testMockServerOnlyStreamAsyncAwait() async throws {
         let client = Grpc_Testing_TestServiceClientMock()
-        let expectedInput = Grpc_Testing_Empty()
-        var expectedResults: [StreamResult<Grpc_Testing_Empty>] = [
+        let expectedInput = Grpc_Testing_StreamingOutputCallRequest.with { request in
+            request.responseParameters = [.with { $0.size = 123 }]
+        }
+        var expectedResults: [StreamResult<Grpc_Testing_StreamingOutputCallResponse>] = [
             .headers(["x-header": ["123"]]),
-            .message(.init()),
-            .message(.init()),
+            .message(.with { $0.payload.body = Data(repeating: 0, count: 123) }),
+            .message(.with { $0.payload.body = Data(repeating: 0, count: 456) }),
             .complete(code: .ok, error: nil, trailers: nil),
         ]
 
-        var sentInputs = [Grpc_Testing_Empty]()
-        client.mockUnimplementedStreamingOutputCall.onSend = { sentInputs.append($0) }
-        client.mockUnimplementedStreamingOutputCall.outputs = Array(expectedResults)
+        var sentInputs = [Grpc_Testing_StreamingOutputCallRequest]()
+        client.mockAsyncStreamingOutputCall.onSend = { sentInputs.append($0) }
+        client.mockAsyncStreamingOutputCall.outputs = Array(expectedResults)
 
-        let stream = client.unimplementedStreamingOutputCall()
+        let stream = client.streamingOutputCall()
         try stream.send(expectedInput)
 
         for await result in stream.results() {
@@ -164,7 +166,7 @@ final class ConnectMocksTests: XCTestCase {
         }
 
         XCTAssertEqual(sentInputs, [expectedInput])
-        XCTAssertEqual(client.mockUnimplementedStreamingOutputCall.inputs, [expectedInput])
+        XCTAssertEqual(client.mockAsyncStreamingOutputCall.inputs, [expectedInput])
         XCTAssertTrue(expectedResults.isEmpty)
     }
 }
