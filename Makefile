@@ -37,8 +37,8 @@ clean: cleangenerated ## Delete all plugins and generated outputs
 .PHONY: cleangenerated
 cleangenerated: ## Delete all generated outputs
 	rm -rf ./Connect/Implementation/Generated/*
-	rm -rf ./Generated
-	rm -rf ./GeneratedMocks
+	rm -rf ./ConnectExamples/ElizaSharedSources/GeneratedSources
+	rm -rf ./ConnectTests/Generated
 
 .PHONY: crosstestserverstop
 crosstestserverstop: ## Stop the crosstest server
