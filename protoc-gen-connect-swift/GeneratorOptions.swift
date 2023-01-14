@@ -74,7 +74,7 @@ struct GeneratorOptions {
     private(set) var fileNaming = FileNaming.fullPath
     private(set) var generateAsyncMethods = true
     private(set) var generateAsyncMocks = false
-    private(set) var generateCallbackMethods = true
+    private(set) var generateCallbackMethods = false
     private(set) var generateCallbackMocks = false
     private(set) var keepMethodCasing = false
     private(set) var protoToModuleMappings = ProtoFileToModuleMappings()

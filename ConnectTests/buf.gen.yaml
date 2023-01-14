@@ -4,7 +4,12 @@ plugins:
     opt: Visibility=Internal
     out: ./Generated
   - name: connect-swift
-    opt: Visibility=Internal
+    opt: >
+      GenerateAsyncMocks=false,
+      GenerateCallbackMocks=false,
+      GenerateAsyncMethods=true,
+      GenerateCallbackMethods=true,
+      Visibility=Internal
     out: ./Generated
     path: ../.tmp/bin/protoc-gen-connect-swift
   - name: connect-swift
