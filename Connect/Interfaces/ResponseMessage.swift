@@ -20,21 +20,38 @@ public struct ResponseMessage<Output: SwiftProtobuf.Message> {
     public let code: Code
     /// Response headers specified by the server.
     public let headers: Headers
-    /// Typed response message provided by the server.
-    public let message: Output?
+    /// The result of the RPC (either a message or an error).
+    public let result: Result<Output, ConnectError>
     /// Trailers provided by the server.
     public let trailers: Trailers
-    /// The accompanying error, if the request failed.
-    public let error: ConnectError?
+
+    /// Convenience accessor for the `result`'s wrapped error.
+    public var error: ConnectError? {
+        switch self.result {
+        case .success:
+            return nil
+        case .failure(let error):
+            return error
+        }
+    }
+
+    /// Convenience accessor for the `result`'s wrapped message.
+    public var message: Output? {
+        switch self.result {
+        case .success(let message):
+            return message
+        case .failure:
+            return nil
+        }
+    }
 
     public init(
-        code: Code = .ok, headers: Headers = [:], message: Output?,
-        trailers: Trailers = [:], error: ConnectError? = nil
+        code: Code = .ok, headers: Headers = [:],
+        result: Result<Output, ConnectError>, trailers: Trailers = [:]
     ) {
         self.code = code
         self.headers = headers
-        self.message = message
+        self.result = result
         self.trailers = trailers
-        self.error = error
     }
 }

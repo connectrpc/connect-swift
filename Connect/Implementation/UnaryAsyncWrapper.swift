@@ -60,10 +60,7 @@ private extension ResponseMessage {
     static func canceled() -> Self {
         return .init(
             code: .canceled,
-            headers: [:],
-            message: nil,
-            trailers: [:],
-            error: .from(code: .canceled, headers: [:], source: nil)
+            result: .failure(.from(code: .canceled, headers: [:], source: nil))
         )
     }
 }
