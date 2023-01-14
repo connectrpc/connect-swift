@@ -12,7 +12,12 @@ LICENSE_HEADER_YEAR_RANGE := 2022-2023
 GO ?= go
 CROSSTEST_VERSION := 4f4e96d8fea3ed9473b90a964a5ba429e7ea5649
 LICENSE_HEADER_VERSION := f5dd847fb18b577a62aaf46dd168b6e5b25206a3
-LICENSE_IGNORE := -e Package.swift -e $(BIN)\/ -e Generated\/ -e GeneratedMocks\/ -e Connect\/Implementation\/Generated\/ -e ConnectTests/proto/grpc\/
+LICENSE_IGNORE := -e Package.swift \
+    -e $(BIN)\/ \
+    -e Connect\/Implementation\/Generated\/ \
+    -e ConnectExamples/ElizaSharedSources/GeneratedSources\/ \
+    -e ConnectTests/proto/grpc\/ \
+    -e ConnectTests/Generated\/
 
 .PHONY: buildlibrary
 buildlibrary: ## Build the Swift library targets
