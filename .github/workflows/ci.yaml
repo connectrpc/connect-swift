@@ -47,8 +47,8 @@ jobs:
       - uses: bufbuild/buf-setup-action@v1.12.0
         with:
           github_token: ${{ github.token }}
-      - name: Build connect-swift plugin
-        run: make buildplugin
+      - name: Build Connect plugins
+        run: make buildplugins
       - name: Generate outputs
         run: make generate
       - name: Ensure no generated diff

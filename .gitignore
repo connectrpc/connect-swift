@@ -1,4 +1,5 @@
 *.xcscheme
+*.xcsettings
 *.xcuserdatad
 *.xcuserstate
 *.xcworkspacedata

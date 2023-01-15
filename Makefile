@@ -12,21 +12,23 @@ CROSSTEST_VERSION := 4f4e96d8fea3ed9473b90a964a5ba429e7ea5649
 LICENSE_HEADER_VERSION := f5dd847fb18b577a62aaf46dd168b6e5b25206a3
 LICENSE_IGNORE := -e Package.swift \
     -e $(BIN)\/ \
-    -e Connect\/Implementation\/Generated\/ \
-    -e ConnectExamples/ElizaSharedSources/GeneratedSources\/ \
-    -e ConnectTests/proto/grpc\/ \
-    -e ConnectTests/Generated\/
+    -e Examples/ElizaSharedSources/GeneratedSources\/ \
+    -e Libraries/Connect/Implementation/Generated\/ \
+    -e Tests/ConnectLibraryTests/proto/grpc\/ \
+    -e Tests/ConnectLibraryTests/Generated\/
 
 .PHONY: buildlibrary
 buildlibrary: ## Build the Swift library targets
 	swift build
 
-.PHONY: buildplugin
-buildplugin: ## Build the protoc-gen-connect-swift plugin binary
-	swift build -c release --product protoc-gen-connect-swift
+.PHONY: buildplugins
+buildplugins: ## Build all plugin binaries
 	mkdir -p $(BIN)
+	swift build -c release --product protoc-gen-connect-swift
 	mv ./.build/release/protoc-gen-connect-swift $(BIN)
-	@echo "Success! The plugin is available in $(BIN)"
+	swift build -c release --product protoc-gen-connect-swift-mocks
+	mv ./.build/release/protoc-gen-connect-swift-mocks $(BIN)
+	@echo "Success! The plugins are available in $(BIN)"
 
 .PHONY: clean
 clean: cleangenerated ## Delete all plugins and generated outputs
@@ -34,9 +36,9 @@ clean: cleangenerated ## Delete all plugins and generated outputs
 
 .PHONY: cleangenerated
 cleangenerated: ## Delete all generated outputs
-	rm -rf ./Connect/Implementation/Generated/*
-	rm -rf ./ConnectExamples/ElizaSharedSources/GeneratedSources
-	rm -rf ./ConnectTests/Generated
+	rm -rf ./Examples/ElizaSharedSources/GeneratedSources
+	rm -rf ./Libraries/Connect/Implementation/Generated/*
+	rm -rf ./Tests/ConnectLibraryTests/Generated
 
 .PHONY: crosstestserverstop
 crosstestserverstop: ## Stop the crosstest server
@@ -53,9 +55,9 @@ crosstestserverrun: crosstestserverstop ## Start the crosstest server
 
 .PHONY: generate
 generate: ## Regenerate outputs for all .proto files
-	cd Connect; buf generate
-	cd ConnectExamples; buf generate
-	cd ConnectTests; buf generate
+	cd Libraries/Connect; buf generate
+	cd Examples; buf generate
+	cd Tests/ConnectLibraryTests; buf generate
 
 .PHONY: help
 help: ## Describe useful make targets

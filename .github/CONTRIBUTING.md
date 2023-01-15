@@ -40,8 +40,8 @@ distribution. To get started contributing locally:
 
 ## Developing the Library
 
-The Connect library's source code is available in the [`Connect`](../Connect)
-directory.
+The Connect library's source code is available in the
+[`Libraries/Connect`](../Libraries/Connect) directory.
 
 The easiest way to contribute to the library is to
 [open the Xcode project](#setup) and
@@ -52,34 +52,38 @@ The easiest way to contribute to the library is to
 
 The source code for the plugin that generates Connect-compatible
 services and RPCs is in the
-[`protoc-gen-connect-swift`](../protoc-gen-connect-swift) directory.
+[`Plugins/ConnectSwiftPlugin`](../Plugins/ConnectSwiftPlugin) directory,
+and the plugin responsible for generating mock implementations is in
+[`Plugins/ConnectMocksPlugin`](../Plugins/ConnectMocksPlugin).
 
 The plugin utilizes the [`SwiftProtobufPluginLibrary`][swift-plugin-library]
 module from SwiftProtobuf which provides types for interacting with the input
 `.proto` files and writing to `stdout`/`stderr` as expected by `protoc`.
 
-To build the generator plugin, use Xcode or the following command:
+To build the generator plugins, use Xcode or the following command:
 
 ```sh
-make buildplugin
+make buildplugins
 ```
 
 ## Generating Code
 
 To build the plugin and run it against the directories specified in
-[`buf.work.yaml`](../buf.work.yaml)
-using the [local plugin](../protoc-gen-connect-swift) and Buf:
+the repository's `buf.work.yaml` files
+using the [local plugins](../Plugins) and Buf:
 
 ```sh
-make buildplugin # Compile the plugin
+make buildplugins # Compile the plugins
 make generate # Run buf generate - uses buf.gen.yaml
 ```
 
-Outputted code will be available in the [`Generated`](../Generated) directory.
+Outputted code will be available in the `out` directories specified by
+`buf.gen.yaml` files in the repository.
 
 ## Running Tests
 
-A test server is used to run [crosstests](../ConnectTests) -
+A test server is used to run
+[crosstests](../Tests/ConnectLibraryTests/ConnectCrosstests) -
 integration tests which validate the behavior of the `Connect` library with
 various protocols. **Starting the server requires Docker,
 so ensure that you have Docker installed before proceeding.**
