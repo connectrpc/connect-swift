@@ -47,7 +47,7 @@ jobs:
       - uses: bufbuild/buf-setup-action@v1.12.0
         with:
           github_token: ${{ github.token }}
-      - name: Build Connect plugins
+      - name: Build plugins
         run: make buildplugins
       - name: Generate outputs
         run: make generate

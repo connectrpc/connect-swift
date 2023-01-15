@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+@testable import ConnectPluginUtilities
 import Foundation
-@testable import protoc_gen_connect_swift
 import XCTest
 
 final class FilePathComponentsTests: XCTestCase {
