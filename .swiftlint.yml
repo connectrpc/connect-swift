@@ -1,9 +1,8 @@
 included:
   - Examples/ElizaSharedSources/AppSources
-  - Libraries/Connect
-  - Libraries/ConnectMocks
+  - Libraries
   - Plugins
-  - Tests/ConnectLibraryTests
+  - Tests
 excluded:
   - Libraries/Connect/Implementation/Generated
   - Tests/ConnectLibraryTests/Generated

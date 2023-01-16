@@ -6,6 +6,6 @@
 .build
 .DS_Store
 /.tmp
-ConnectExamples/ElizaCocoaPodsApp/ElizaCocoaPodsApp.xcworkspace
 DerivedData
+Examples/ElizaCocoaPodsApp/ElizaCocoaPodsApp.xcworkspace
 Pods

@@ -17,8 +17,8 @@ LICENSE_IGNORE := -e Package.swift \
     -e Tests/ConnectLibraryTests/proto/grpc\/ \
     -e Tests/ConnectLibraryTests/Generated\/
 
-.PHONY: buildlibrary
-buildlibrary: ## Build the Swift library targets
+.PHONY: buildpackage
+buildpackage: ## Build all targets in the Swift package
 	swift build
 
 .PHONY: buildplugins
@@ -28,7 +28,7 @@ buildplugins: ## Build all plugin binaries
 	mv ./.build/release/protoc-gen-connect-swift $(BIN)
 	swift build -c release --product protoc-gen-connect-swift-mocks
 	mv ./.build/release/protoc-gen-connect-swift-mocks $(BIN)
-	@echo "Success! The plugins are available in $(BIN)"
+	@echo "Success! Plugins are available in $(BIN)"
 
 .PHONY: clean
 clean: cleangenerated ## Delete all plugins and generated outputs
@@ -36,9 +36,9 @@ clean: cleangenerated ## Delete all plugins and generated outputs
 
 .PHONY: cleangenerated
 cleangenerated: ## Delete all generated outputs
-	rm -rf ./Examples/ElizaSharedSources/GeneratedSources
+	rm -rf ./Examples/ElizaSharedSources/GeneratedSources/*
 	rm -rf ./Libraries/Connect/Implementation/Generated/*
-	rm -rf ./Tests/ConnectLibraryTests/Generated
+	rm -rf ./Tests/ConnectLibraryTests/Generated/*
 
 .PHONY: crosstestserverstop
 crosstestserverstop: ## Stop the crosstest server

@@ -56,7 +56,7 @@ services and RPCs is in the
 and the plugin responsible for generating mock implementations is in
 [`Plugins/ConnectMocksPlugin`](../Plugins/ConnectMocksPlugin).
 
-The plugin utilizes the [`SwiftProtobufPluginLibrary`][swift-plugin-library]
+The plugins utilize the [`SwiftProtobufPluginLibrary`][swift-plugin-library]
 module from SwiftProtobuf which provides types for interacting with the input
 `.proto` files and writing to `stdout`/`stderr` as expected by `protoc`.
 
@@ -68,13 +68,12 @@ make buildplugins
 
 ## Generating Code
 
-To build the plugin and run it against the directories specified in
-the repository's `buf.work.yaml` files
-using the [local plugins](../Plugins) and Buf:
+To build the [local plugins](../Plugins) and run them against the directories
+specified in the repository's `buf.work.yaml` files using Buf:
 
 ```sh
 make buildplugins # Compile the plugins
-make generate # Run buf generate - uses buf.gen.yaml
+make generate # Run buf generate
 ```
 
 Outputted code will be available in the `out` directories specified by
@@ -112,7 +111,7 @@ git checkout -b cool_new_feature
 ```
 
 Ensure that [the tests pass](#running-tests). If you are changing the generator
-plugin, also ensure that any [generated diff](#generating-code) is checked in.
+plugins, also ensure that any [generated diff](#generating-code) is checked in.
 
 ```sh
 git commit -a
