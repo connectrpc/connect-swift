@@ -2,6 +2,9 @@ Connect-Swift
 =============
 
 [![Build](https://github.com/bufbuild/connect-swift/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/bufbuild/connect-swift/actions/workflows/ci.yaml)
+[![Version](https://img.shields.io/cocoapods/v/Connect-Swift.svg?style=flat)](https://cocoapods.org/pods/Connect-Swift)
+[![Platform](https://img.shields.io/cocoapods/p/Connect-Swift.svg?style=flat)](https://cocoapods.org/pods/Connect-Swift)
+[![License](https://img.shields.io/cocoapods/l/Connect-Swift.svg?style=flat)](https://cocoapods.org/pods/Connect-Swift)
 
 Connect-Swift is a small library (<200KB!) that provides support for using
 generated,
