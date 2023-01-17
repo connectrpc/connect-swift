@@ -16,7 +16,7 @@ jobs:
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
       - name: Build Connect library
-        run: swift build
+        run: make buildpackage
   build-eliza-cocoapods-example:
     runs-on: macos-12
     steps:
@@ -26,7 +26,7 @@ jobs:
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
       - name: Build Eliza CocoaPods example
         run: |
-          cd ConnectExamples/ElizaCocoaPodsApp
+          cd Examples/ElizaCocoaPodsApp
           pod install
           xcodebuild -workspace ElizaCocoaPodsApp.xcworkspace -scheme ElizaCocoaPodsApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
   build-eliza-swiftpm-example:
@@ -38,17 +38,17 @@ jobs:
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
       - name: Build Eliza Swift PM example
         run: |
-          cd ConnectExamples/ElizaSwiftPackageApp
+          cd Examples/ElizaSwiftPackageApp
           xcodebuild -scheme ElizaSwiftPackageApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
   build-plugin-and-generate:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
-      - uses: bufbuild/buf-setup-action@v1.11.0
+      - uses: bufbuild/buf-setup-action@v1.12.0
         with:
           github_token: ${{ github.token }}
-      - name: Build connect-swift plugin
-        run: make buildplugin
+      - name: Build plugins
+        run: make buildplugins
       - name: Generate outputs
         run: make generate
       - name: Ensure no generated diff

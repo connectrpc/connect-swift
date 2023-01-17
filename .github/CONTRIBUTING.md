@@ -40,8 +40,8 @@ distribution. To get started contributing locally:
 
 ## Developing the Library
 
-The Connect library's source code is available in the [`Connect`](../Connect)
-directory.
+The Connect library's source code is available in the
+[`Libraries/Connect`](../Libraries/Connect) directory.
 
 The easiest way to contribute to the library is to
 [open the Xcode project](#setup) and
@@ -52,34 +52,37 @@ The easiest way to contribute to the library is to
 
 The source code for the plugin that generates Connect-compatible
 services and RPCs is in the
-[`protoc-gen-connect-swift`](../protoc-gen-connect-swift) directory.
+[`Plugins/ConnectSwiftPlugin`](../Plugins/ConnectSwiftPlugin) directory,
+and the plugin responsible for generating mock implementations is in
+[`Plugins/ConnectMocksPlugin`](../Plugins/ConnectMocksPlugin).
 
-The plugin utilizes the [`SwiftProtobufPluginLibrary`][swift-plugin-library]
+The plugins utilize the [`SwiftProtobufPluginLibrary`][swift-plugin-library]
 module from SwiftProtobuf which provides types for interacting with the input
 `.proto` files and writing to `stdout`/`stderr` as expected by `protoc`.
 
-To build the generator plugin, use Xcode or the following command:
+To build the generator plugins, use Xcode or the following command:
 
 ```sh
-make buildplugin
+make buildplugins
 ```
 
 ## Generating Code
 
-To build the plugin and run it against the directories specified in
-[`buf.work.yaml`](../buf.work.yaml)
-using the [local plugin](../protoc-gen-connect-swift) and Buf:
+To build the [local plugins](../Plugins) and run them against the directories
+specified in the repository's `buf.work.yaml` files using Buf:
 
 ```sh
-make buildplugin # Compile the plugin
-make generate # Run buf generate - uses buf.gen.yaml
+make buildplugins # Compile the plugins
+make generate # Run buf generate
 ```
 
-Outputted code will be available in the [`Generated`](../Generated) directory.
+Outputted code will be available in the `out` directories specified by
+`buf.gen.yaml` files in the repository.
 
 ## Running Tests
 
-A test server is used to run [crosstests](../ConnectTests) -
+A test server is used to run
+[crosstests](../Tests/ConnectLibraryTests/ConnectCrosstests) -
 integration tests which validate the behavior of the `Connect` library with
 various protocols. **Starting the server requires Docker,
 so ensure that you have Docker installed before proceeding.**
@@ -96,6 +99,19 @@ If you prefer to run the tests using Xcode, you can manually start the server:
 make crosstestserverrun
 ```
 
+## Linting
+
+Connect-Swift uses [SwiftLint][swiftlint] for linting `.swift` files. To
+install the linter locally, see the [instructions][swiftlint-install]. Ensure
+that the version you install matches the version being used on the
+[`run-swiftlint` CI job](./workflows/ci.yaml).
+
+You can run the linter by executing the following in the **root of the repo**:
+
+```sh
+swiftlint lint
+```
+
 ## Submitting Changes
 
 Start by creating a new branch for your changes:
@@ -108,7 +124,7 @@ git checkout -b cool_new_feature
 ```
 
 Ensure that [the tests pass](#running-tests). If you are changing the generator
-plugin, also ensure that any [generated diff](#generating-code) is checked in.
+plugins, also ensure that any [generated diff](#generating-code) is checked in.
 
 ```sh
 git commit -a
@@ -132,4 +148,6 @@ We're much more likely to approve your changes if you:
 [commit-message]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
 [fork]: https://github.com/bufbuild/connect-swift/fork
 [open-issue]: https://github.com/bufbuild/connect-swift/issues/new
+[swiftlint]: https://github.com/realm/SwiftLint
+[swiftlint-install]: https://github.com/realm/SwiftLint#installation
 [swift-plugin-library]: https://github.com/apple/swift-protobuf/tree/main/Sources/SwiftProtobufPluginLibrary

@@ -17,7 +17,7 @@ import Foundation
 import os.log
 
 /// Concrete implementation of `HTTPClientInterface` backed by `URLSession`.
-open class URLSessionHTTPClient: NSObject {
+open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
     /// Lock used for safely accessing stream storage.
     private let lock = Lock()
     /// Force unwrapped to allow using `self` as the delegate.
@@ -36,11 +36,9 @@ open class URLSessionHTTPClient: NSObject {
             delegateQueue: .main
         )
     }
-}
 
-extension URLSessionHTTPClient: HTTPClientInterface {
     @discardableResult
-    public func unary(
+    open func unary(
         request: HTTPRequest, completion: @escaping (HTTPResponse) -> Void
     ) -> Cancelable {
         let urlRequest = URLRequest(httpRequest: request)
@@ -76,7 +74,7 @@ extension URLSessionHTTPClient: HTTPClientInterface {
         return Cancelable(cancel: task.cancel)
     }
 
-    public func stream(
+    open func stream(
         request: HTTPRequest, responseCallbacks: ResponseCallbacks
     ) -> RequestCallbacks {
         let urlSessionStream = URLSessionStream(

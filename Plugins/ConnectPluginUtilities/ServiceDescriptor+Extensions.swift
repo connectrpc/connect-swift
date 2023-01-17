@@ -15,7 +15,7 @@
 import SwiftProtobufPluginLibrary
 
 extension ServiceDescriptor {
-    func implementationName(using namer: SwiftProtobufNamer) -> String {
+    public func implementationName(using namer: SwiftProtobufNamer) -> String {
         let upperCamelName = NamingUtils.toUpperCamelCase(self.name) + "Client"
         if self.file.package.isEmpty {
             return upperCamelName
@@ -24,7 +24,7 @@ extension ServiceDescriptor {
         }
     }
 
-    func protocolName(using namer: SwiftProtobufNamer) -> String {
+    public func protocolName(using namer: SwiftProtobufNamer) -> String {
         return self.implementationName(using: namer) + "Interface"
     }
 }

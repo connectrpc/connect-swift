@@ -68,7 +68,7 @@ final class MessagingViewModel: ObservableObject {
 ```
 
 That’s it! You no longer need to manually define Swift response models,
-add Codable conformances, type out `URL(string: ...)` initializers,
+add `Codable` conformances, type out `URL(string: ...)` initializers,
 or even create protocol interfaces to wrap services classes - all this is taken
 care of by Connect-Swift, and the underlying network transport is
 handled automatically.
@@ -126,7 +126,7 @@ is available on the [connect.build website][getting-started].
 
 ## Example Apps
 
-Example apps are available in the [`ConnectExamples`](./ConnectExamples)
+Example apps are available in the [`Examples`](./Examples)
 directory and can be opened and built using Xcode. They demonstrate:
 
 - Using streaming APIs
@@ -139,7 +139,7 @@ directory and can be opened and built using Xcode. They demonstrate:
 
 We'd love your help making Connect better!
 
-Extensive instructions for building the library and generator locally,
+Extensive instructions for building the library and generator plugins locally,
 running tests, and contributing to the repository are available in our
 [`CONTRIBUTING.md` guide](./.github/CONTRIBUTING.md). Please check it out
 for details.

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import ConnectPluginUtilities
 import Foundation
 import SwiftProtobufPluginLibrary
 
@@ -19,7 +20,7 @@ import SwiftProtobufPluginLibrary
 final class ConnectClientGenerator: Generator {
     private let visibility: String
 
-    override init(_ descriptor: FileDescriptor, options: GeneratorOptions) {
+    required init(_ descriptor: FileDescriptor, options: GeneratorOptions) {
         switch options.visibility {
         case .internal:
             self.visibility = "internal"
