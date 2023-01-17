@@ -19,21 +19,21 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `emptyCall()`.
-    public var mockEmptyCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
+    public var mockEmptyCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `emptyCall()`.
-    public var mockAsyncEmptyCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
+    public var mockAsyncEmptyCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `unaryCall()`.
-    public var mockUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(message: .init()) }
+    public var mockUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `unaryCall()`.
-    public var mockAsyncUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(message: .init()) }
+    public var mockAsyncUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(result: .success(.init())) }
     /// Mocked for calls to `failUnaryCall()`.
-    public var mockFailUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(message: .init()) }
+    public var mockFailUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `failUnaryCall()`.
-    public var mockAsyncFailUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(message: .init()) }
+    public var mockAsyncFailUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(result: .success(.init())) }
     /// Mocked for calls to `cacheableUnaryCall()`.
-    public var mockCacheableUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(message: .init()) }
+    public var mockCacheableUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `cacheableUnaryCall()`.
-    public var mockAsyncCacheableUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(message: .init()) }
+    public var mockAsyncCacheableUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(result: .success(.init())) }
     /// Mocked for calls to `streamingOutputCall()`.
     public var mockStreamingOutputCall = MockServerOnlyStream<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>()
     /// Mocked for async calls to `streamingOutputCall()`.
@@ -55,9 +55,9 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
     /// Mocked for async calls to `halfDuplexCall()`.
     public var mockAsyncHalfDuplexCall = MockBidirectionalAsyncStream<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>()
     /// Mocked for calls to `unimplementedCall()`.
-    public var mockUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
+    public var mockUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `unimplementedCall()`.
-    public var mockAsyncUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
+    public var mockAsyncUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `unimplementedStreamingOutputCall()`.
     public var mockUnimplementedStreamingOutputCall = MockServerOnlyStream<Grpc_Testing_Empty, Grpc_Testing_Empty>()
     /// Mocked for async calls to `unimplementedStreamingOutputCall()`.
@@ -180,9 +180,9 @@ internal class Grpc_Testing_UnimplementedServiceClientMock: Grpc_Testing_Unimple
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `unimplementedCall()`.
-    public var mockUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
+    public var mockUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `unimplementedCall()`.
-    public var mockAsyncUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
+    public var mockAsyncUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `unimplementedStreamingOutputCall()`.
     public var mockUnimplementedStreamingOutputCall = MockServerOnlyStream<Grpc_Testing_Empty, Grpc_Testing_Empty>()
     /// Mocked for async calls to `unimplementedStreamingOutputCall()`.
@@ -220,13 +220,13 @@ internal class Grpc_Testing_ReconnectServiceClientMock: Grpc_Testing_ReconnectSe
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `start()`.
-    public var mockStart = { (_: Grpc_Testing_ReconnectParams) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
+    public var mockStart = { (_: Grpc_Testing_ReconnectParams) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `start()`.
-    public var mockAsyncStart = { (_: Grpc_Testing_ReconnectParams) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
+    public var mockAsyncStart = { (_: Grpc_Testing_ReconnectParams) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `stop()`.
-    public var mockStop = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_ReconnectInfo> in .init(message: .init()) }
+    public var mockStop = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_ReconnectInfo> in .init(result: .success(.init())) }
     /// Mocked for async calls to `stop()`.
-    public var mockAsyncStop = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_ReconnectInfo> in .init(message: .init()) }
+    public var mockAsyncStop = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_ReconnectInfo> in .init(result: .success(.init())) }
 
     public init() {}
 
@@ -261,13 +261,13 @@ internal class Grpc_Testing_LoadBalancerStatsServiceClientMock: Grpc_Testing_Loa
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `getClientStats()`.
-    public var mockGetClientStats = { (_: Grpc_Testing_LoadBalancerStatsRequest) -> ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse> in .init(message: .init()) }
+    public var mockGetClientStats = { (_: Grpc_Testing_LoadBalancerStatsRequest) -> ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `getClientStats()`.
-    public var mockAsyncGetClientStats = { (_: Grpc_Testing_LoadBalancerStatsRequest) -> ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse> in .init(message: .init()) }
+    public var mockAsyncGetClientStats = { (_: Grpc_Testing_LoadBalancerStatsRequest) -> ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse> in .init(result: .success(.init())) }
     /// Mocked for calls to `getClientAccumulatedStats()`.
-    public var mockGetClientAccumulatedStats = { (_: Grpc_Testing_LoadBalancerAccumulatedStatsRequest) -> ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse> in .init(message: .init()) }
+    public var mockGetClientAccumulatedStats = { (_: Grpc_Testing_LoadBalancerAccumulatedStatsRequest) -> ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `getClientAccumulatedStats()`.
-    public var mockAsyncGetClientAccumulatedStats = { (_: Grpc_Testing_LoadBalancerAccumulatedStatsRequest) -> ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse> in .init(message: .init()) }
+    public var mockAsyncGetClientAccumulatedStats = { (_: Grpc_Testing_LoadBalancerAccumulatedStatsRequest) -> ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse> in .init(result: .success(.init())) }
 
     public init() {}
 
@@ -302,13 +302,13 @@ internal class Grpc_Testing_XdsUpdateHealthServiceClientMock: Grpc_Testing_XdsUp
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `setServing()`.
-    public var mockSetServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
+    public var mockSetServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `setServing()`.
-    public var mockAsyncSetServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
+    public var mockAsyncSetServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `setNotServing()`.
-    public var mockSetNotServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
+    public var mockSetNotServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `setNotServing()`.
-    public var mockAsyncSetNotServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(message: .init()) }
+    public var mockAsyncSetNotServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
 
     public init() {}
 
@@ -343,9 +343,9 @@ internal class Grpc_Testing_XdsUpdateClientConfigureServiceClientMock: Grpc_Test
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `configure()`.
-    public var mockConfigure = { (_: Grpc_Testing_ClientConfigureRequest) -> ResponseMessage<Grpc_Testing_ClientConfigureResponse> in .init(message: .init()) }
+    public var mockConfigure = { (_: Grpc_Testing_ClientConfigureRequest) -> ResponseMessage<Grpc_Testing_ClientConfigureResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `configure()`.
-    public var mockAsyncConfigure = { (_: Grpc_Testing_ClientConfigureRequest) -> ResponseMessage<Grpc_Testing_ClientConfigureResponse> in .init(message: .init()) }
+    public var mockAsyncConfigure = { (_: Grpc_Testing_ClientConfigureRequest) -> ResponseMessage<Grpc_Testing_ClientConfigureResponse> in .init(result: .success(.init())) }
 
     public init() {}
 

@@ -25,7 +25,7 @@ final class ConnectMocksTests: XCTestCase {
         let client = Grpc_Testing_TestServiceClientMock()
         client.mockUnaryCall = { request in
             XCTAssertTrue(request.fillUsername)
-            return ResponseMessage(message: .with { $0.hostname = "pong" })
+            return ResponseMessage(result: .success(.with { $0.hostname = "pong" }))
         }
 
         var receivedMessage: Grpc_Testing_SimpleResponse?
@@ -39,7 +39,7 @@ final class ConnectMocksTests: XCTestCase {
         let client = Grpc_Testing_TestServiceClientMock()
         client.mockAsyncUnaryCall = { request in
             XCTAssertTrue(request.fillUsername)
-            return ResponseMessage(message: .with { $0.hostname = "pong" })
+            return ResponseMessage(result: .success(.with { $0.hostname = "pong" }))
         }
 
         let response = await client.unaryCall(request: .with { $0.fillUsername = true })

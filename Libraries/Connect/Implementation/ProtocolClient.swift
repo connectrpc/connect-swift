@@ -103,13 +103,10 @@ extension ProtocolClient: ProtocolClientInterface {
         } catch let error {
             completion(ResponseMessage(
                 code: .unknown,
-                headers: [:],
-                message: nil,
-                trailers: [:],
-                error: ConnectError(
+                result: .failure(ConnectError(
                     code: .unknown, message: "request serialization failed", exception: error,
                     details: [], metadata: [:]
-                )
+                ))
             ))
             return Cancelable(cancel: {})
         }
@@ -133,39 +130,35 @@ extension ProtocolClient: ProtocolClientInterface {
                 responseMessage = ResponseMessage(
                     code: response.code,
                     headers: response.headers,
-                    message: nil,
-                    trailers: response.trailers,
-                    error: error
+                    result: .failure(error),
+                    trailers: response.trailers
                 )
-            } else if response.message == nil {
-                responseMessage = ResponseMessage(
-                    code: response.code,
-                    headers: response.headers,
-                    message: nil,
-                    trailers: response.trailers,
-                    error: nil
-                )
-            } else {
+            } else if let message = response.message {
                 do {
                     responseMessage = ResponseMessage(
                         code: response.code,
                         headers: response.headers,
-                        message: try response.message.map(codec.deserialize),
-                        trailers: response.trailers,
-                        error: nil
+                        result: .success(try codec.deserialize(source: message)),
+                        trailers: response.trailers
                     )
                 } catch let error {
                     responseMessage = ResponseMessage(
                         code: response.code,
                         headers: response.headers,
-                        message: nil,
-                        trailers: response.trailers,
-                        error: ConnectError(
+                        result: .failure(ConnectError(
                             code: response.code, message: nil, exception: error,
                             details: [], metadata: response.headers
-                        )
+                        )),
+                        trailers: response.trailers
                     )
                 }
+            } else {
+                responseMessage = ResponseMessage(
+                    code: response.code,
+                    headers: response.headers,
+                    result: .success(.init()),
+                    trailers: response.trailers
+                )
             }
             completion(responseMessage)
         }
