@@ -46,6 +46,10 @@ private enum CommandLineParameter: String {
         return try commandLineParameters
             .components(separatedBy: ",")
             .compactMap { parameter in
+                if parameter.isEmpty {
+                    return nil
+                }
+
                 guard let index = parameter.firstIndex(of: "=") else {
                     throw Error.unknownParameter(string: parameter)
                 }
