@@ -54,9 +54,9 @@ crosstestserverrun: crosstestserverstop ## Start the crosstest server
 		/usr/local/bin/servergrpc --port "8083" --cert "cert/localhost.crt" --key "cert/localhost.key"
 
 .PHONY: generate
-generate: ## Regenerate outputs for all .proto files
-	cd Libraries/Connect; buf generate
+generate: cleangenerated ## Regenerate outputs for all .proto files
 	cd Examples; buf generate
+	cd Libraries/Connect; buf generate
 	cd Tests/ConnectLibraryTests; buf generate
 
 .PHONY: help

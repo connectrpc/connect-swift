@@ -99,6 +99,19 @@ If you prefer to run the tests using Xcode, you can manually start the server:
 make crosstestserverrun
 ```
 
+## Linting
+
+Connect-Swift uses [SwiftLint][swiftlint] for linting `.swift` files. To
+install the linter locally, see the [instructions][swiftlint-install]. Ensure
+that the version you install matches the version being used on the
+[`run-swiftlint` CI job](./workflows/ci.yaml).
+
+You can run the linter by executing the following in the **root of the repo**:
+
+```sh
+swiftlint lint
+```
+
 ## Submitting Changes
 
 Start by creating a new branch for your changes:
@@ -135,4 +148,6 @@ We're much more likely to approve your changes if you:
 [commit-message]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
 [fork]: https://github.com/bufbuild/connect-swift/fork
 [open-issue]: https://github.com/bufbuild/connect-swift/issues/new
+[swiftlint]: https://github.com/realm/SwiftLint
+[swiftlint-install]: https://github.com/realm/SwiftLint#installation
 [swift-plugin-library]: https://github.com/apple/swift-protobuf/tree/main/Sources/SwiftProtobufPluginLibrary
