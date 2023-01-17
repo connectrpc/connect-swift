@@ -14,6 +14,6 @@
 
 import ConnectPluginUtilities
 
-MainGeneratorStandardIORuntime(
+MainGeneratorFunction(
     generatorType: ConnectClientGenerator.self, outputFileExtension: ".connect.swift"
 ).generateFromStandardInToStandardOut()

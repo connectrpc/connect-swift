@@ -14,6 +14,6 @@
 
 import ConnectPluginUtilities
 
-MainGeneratorStandardIORuntime(
+MainGeneratorFunction(
     generatorType: ConnectMockGenerator.self, outputFileExtension: ".mock.swift"
 ).generateFromStandardInToStandardOut()

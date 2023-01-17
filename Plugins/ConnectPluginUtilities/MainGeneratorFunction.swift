@@ -20,8 +20,8 @@ private struct GeneratorError: Swift.Error {
 }
 
 /// Provides the implementation of a `main()` function for generating outputs at runtime
-/// using standard in/out and a specific generator.
-public final class MainGeneratorStandardIORuntime {
+/// using standard in/out and a specific generator type.
+public final class MainGeneratorFunction {
     private let generatorType: Generator.Type
     private let outputFileExtension: String
 
