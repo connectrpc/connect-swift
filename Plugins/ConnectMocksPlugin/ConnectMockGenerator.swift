@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import ConnectPluginUtilities
 import Foundation
 import SwiftProtobufPluginLibrary
 
@@ -19,7 +20,7 @@ import SwiftProtobufPluginLibrary
 final class ConnectMockGenerator: Generator {
     private let visibility: String
 
-    override init(_ descriptor: FileDescriptor, options: GeneratorOptions) {
+    required init(_ descriptor: FileDescriptor, options: GeneratorOptions) {
         switch options.visibility {
         case .internal:
             self.visibility = "internal"
@@ -33,7 +34,7 @@ final class ConnectMockGenerator: Generator {
     private func printContent() {
         self.printFilePreamble()
 
-        if self.options.generateCallbackMocks {
+        if self.options.generateCallbackMethods {
             self.printModuleImports(adding: ["Combine", "ConnectMocks"])
         } else {
             self.printModuleImports(adding: ["ConnectMocks"])
@@ -57,13 +58,13 @@ final class ConnectMockGenerator: Generator {
             "\(self.visibility) class \(service.mockName(using: self.namer)): \(protocolName) {"
         )
         self.indent {
-            if self.options.generateCallbackMocks {
+            if self.options.generateCallbackMethods {
                 self.printLine("private var cancellables = [Combine.AnyCancellable]()")
                 self.printLine()
             }
 
             for method in service.methods {
-                if self.options.generateCallbackMocks {
+                if self.options.generateCallbackMethods {
                     self.printLine(
                         "/// Mocked for calls to `\(method.name(using: self.options))()`."
                     )
@@ -74,7 +75,7 @@ final class ConnectMockGenerator: Generator {
                         """
                     )
                 }
-                if self.options.generateAsyncMocks {
+                if self.options.generateAsyncMethods {
                     self.printLine(
                         "/// Mocked for async calls to `\(method.name(using: self.options))()`."
                     )
@@ -91,10 +92,10 @@ final class ConnectMockGenerator: Generator {
             self.printLine("public init() {}")
 
             for method in service.methods {
-                if self.options.generateCallbackMocks {
+                if self.options.generateCallbackMethods {
                     self.printCallbackMethodMockImplementation(for: method)
                 }
-                if self.options.generateAsyncMocks {
+                if self.options.generateAsyncMethods {
                     self.printAsyncAwaitMethodMockImplementation(for: method)
                 }
             }

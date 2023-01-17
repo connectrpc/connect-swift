@@ -14,7 +14,7 @@ Pod::Spec.new do |spec|
   spec.dependency 'Connect-Swift', "#{spec.version.to_s}"
   spec.dependency 'SwiftProtobuf', '~> 1.20.3'
 
-  spec.source_files = 'ConnectMocks/**/*.swift'
+  spec.source_files = 'Libraries/ConnectMocks/**/*.swift'
 
   spec.swift_versions = ['5.0']
 end

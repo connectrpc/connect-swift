@@ -23,20 +23,21 @@ let package = Package(
         .macOS(.v10_15),
     ],
     products: [
-        // Primary Connect runtime that is depended on by generated classes.
         .library(
             name: "Connect",
             targets: ["Connect"]
         ),
-        // Mock types that are imported by generated mock classes and can be used for testing.
         .library(
             name: "ConnectMocks",
             targets: ["ConnectMocks"]
         ),
-        // Generator executable for Connect RPCs.
         .executable(
             name: "protoc-gen-connect-swift",
-            targets: ["protoc-gen-connect-swift"]
+            targets: ["ConnectSwiftPlugin"]
+        ),
+        .executable(
+            name: "protoc-gen-connect-swift-mocks",
+            targets: ["ConnectMocksPlugin"]
         ),
     ],
     dependencies: [
@@ -51,12 +52,42 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "Connect",
+            path: "Libraries/Connect",
             exclude: [
                 "buf.gen.yaml",
                 "buf.work.yaml",
                 "proto",
             ]
+        ),
+        .executableTarget(
+            name: "ConnectMocksPlugin",
+            dependencies: [
+                "ConnectPluginUtilities",
+                .product(name: "SwiftProtobufPluginLibrary", package: "swift-protobuf"),
+            ],
+            path: "Plugins/ConnectMocksPlugin"
+        ),
+        .target(
+            name: "ConnectPluginUtilities",
+            dependencies: [
+                .product(name: "SwiftProtobufPluginLibrary", package: "swift-protobuf"),
+            ],
+            path: "Plugins/ConnectPluginUtilities"
+        ),
+        .testTarget(
+            name: "ConnectPluginUtilitiesTests",
+            dependencies: [
+                "ConnectPluginUtilities",
+            ],
+            path: "Tests/ConnectPluginUtilitiesTests"
+        ),
+        .executableTarget(
+            name: "ConnectSwiftPlugin",
+            dependencies: [
+                "ConnectPluginUtilities",
+                .product(name: "SwiftProtobufPluginLibrary", package: "swift-protobuf"),
+            ],
+            path: "Plugins/ConnectSwiftPlugin"
         ),
         .target(
             name: "ConnectMocks",
@@ -64,19 +95,19 @@ let package = Package(
                 .target(name: "Connect"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "ConnectMocks",
+            path: "Libraries/ConnectMocks",
             exclude: [
                 "README.md",
             ]
         ),
         .testTarget(
-            name: "ConnectTests",
+            name: "ConnectLibraryTests",
             dependencies: [
                 "Connect",
                 "ConnectMocks",
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "ConnectTests",
+            path: "Tests/ConnectLibraryTests",
             exclude: [
                 "buf.gen.yaml",
                 "buf.work.yaml",
@@ -85,20 +116,6 @@ let package = Package(
             resources: [
                 .copy("Resources"),
             ]
-        ),
-        .executableTarget(
-            name: "protoc-gen-connect-swift",
-            dependencies: [
-                .product(name: "SwiftProtobufPluginLibrary", package: "swift-protobuf"),
-            ],
-            path: "protoc-gen-connect-swift"
-        ),
-        .testTarget(
-            name: "protoc-gen-connect-swift-tests",
-            dependencies: [
-                "protoc-gen-connect-swift",
-            ],
-            path: "protoc-gen-connect-swift-tests"
         ),
     ],
     swiftLanguageVersions: [.v5]

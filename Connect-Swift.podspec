@@ -13,7 +13,7 @@ Pod::Spec.new do |spec|
 
   spec.dependency 'SwiftProtobuf', '~> 1.20.3'
 
-  spec.source_files = 'Connect/**/*.swift'
+  spec.source_files = 'Libraries/Connect/**/*.swift'
 
   spec.swift_versions = ['5.0']
 end

@@ -19,9 +19,7 @@ private enum CommandLineParameter: String {
     case extraModuleImports = "ExtraModuleImports"
     case fileNaming = "FileNaming"
     case generateAsyncMethods = "GenerateAsyncMethods"
-    case generateAsyncMocks = "GenerateAsyncMocks"
     case generateCallbackMethods = "GenerateCallbackMethods"
-    case generateCallbackMocks = "GenerateCallbackMocks"
     case keepMethodCasing = "KeepMethodCasing"
     case protoPathModuleMappings = "ProtoPathModuleMappings"
     case swiftProtobufModuleName = "SwiftProtobufModuleName"
@@ -69,25 +67,23 @@ private enum CommandLineParameter: String {
 }
 
 /// A set of options that are used to customize generator outputs.
-struct GeneratorOptions {
-    private(set) var extraModuleImports = [String]()
-    private(set) var fileNaming = FileNaming.fullPath
-    private(set) var generateAsyncMethods = true
-    private(set) var generateAsyncMocks = false
-    private(set) var generateCallbackMethods = false
-    private(set) var generateCallbackMocks = false
-    private(set) var keepMethodCasing = false
-    private(set) var protoToModuleMappings = ProtoFileToModuleMappings()
-    private(set) var swiftProtobufModuleName = "SwiftProtobuf"
-    private(set) var visibility = Visibility.internal
+public struct GeneratorOptions {
+    public private(set) var extraModuleImports = [String]()
+    public private(set) var fileNaming = FileNaming.fullPath
+    public private(set) var generateAsyncMethods = true
+    public private(set) var generateCallbackMethods = false
+    public private(set) var keepMethodCasing = false
+    public private(set) var protoToModuleMappings = ProtoFileToModuleMappings()
+    public private(set) var swiftProtobufModuleName = "SwiftProtobuf"
+    public private(set) var visibility = Visibility.internal
 
-    enum FileNaming: String {
+    public enum FileNaming: String {
         case fullPath = "FullPath"
         case pathToUnderscores = "PathToUnderscores"
         case dropPath = "DropPath"
     }
 
-    enum Visibility: String {
+    public enum Visibility: String {
         case `internal` = "Internal"
         case `public` = "Public"
     }
@@ -98,7 +94,7 @@ struct GeneratorOptions {
     /// Handles trimming whitespace, and some parameters may be specified multiple times.
     ///
     /// - parameter commandLineParameters: The raw CLI parameters.
-    init(commandLineParameters: String) throws {
+    public init(commandLineParameters: String) throws {
         let parsedParameters = try CommandLineParameter.parse(
             commandLineParameters: commandLineParameters
         )
@@ -120,21 +116,9 @@ struct GeneratorOptions {
                     continue
                 }
 
-            case .generateAsyncMocks:
-                if let value = Bool(rawValue) {
-                    self.generateAsyncMocks = value
-                    continue
-                }
-
             case .generateCallbackMethods:
                 if let value = Bool(rawValue) {
                     self.generateCallbackMethods = value
-                    continue
-                }
-
-            case .generateCallbackMocks:
-                if let value = Bool(rawValue) {
-                    self.generateCallbackMocks = value
                     continue
                 }
 

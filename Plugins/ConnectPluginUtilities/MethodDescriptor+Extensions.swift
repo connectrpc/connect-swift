@@ -15,7 +15,7 @@
 import SwiftProtobufPluginLibrary
 
 extension MethodDescriptor {
-    var methodPath: String {
+    public var methodPath: String {
         if self.file.package.isEmpty {
             return "\(self.service.name)/\(self.name)"
         } else {
@@ -23,13 +23,13 @@ extension MethodDescriptor {
         }
     }
 
-    func name(using options: GeneratorOptions) -> String {
+    public func name(using options: GeneratorOptions) -> String {
         return options.keepMethodCasing
         ? self.name
         : NamingUtils.toLowerCamelCase(self.name)
     }
 
-    func callbackSignature(
+    public func callbackSignature(
         using namer: SwiftProtobufNamer, includeDefaults: Bool, options: GeneratorOptions
     ) -> String {
         let methodName = self.name(using: options)
@@ -68,7 +68,7 @@ extension MethodDescriptor {
         }
     }
 
-    func asyncAwaitSignature(
+    public func asyncAwaitSignature(
         using namer: SwiftProtobufNamer, includeDefaults: Bool, options: GeneratorOptions
     ) -> String {
         let methodName = self.name(using: options)
