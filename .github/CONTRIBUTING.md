@@ -144,6 +144,26 @@ We're much more likely to approve your changes if you:
 * Write a [good commit message][commit-message].
 * Maintain backward compatibility.
 
+## Releasing
+
+Releases should be tagged in `x.y.z` SemVer format.
+
+1. Update both [`Connect-Swift.podspec`](../Connect-Swift.podspec) and
+   [`Connect-Swift-Mocks.podspec`](../Connect-Swift-Mocks.podspec) to reflect
+   the new version that will be tagged.
+2. Create a new GitHub release.
+3. Push both specs to CocoaPods:
+
+```sh
+pod trunk push Connect-Swift.podspec
+pod repo update
+pod trunk push Connect-Swift-Mocks.podspec
+```
+
+Note: If pushing the mocks podspec fails because CocoaPods cannot find the new
+`Connect-Swift` podspec in the specs repo, you may have to wait ~30 min
+for it to populate before trying again.
+
 [cla]: https://cla-assistant.io/bufbuild/connect-swift
 [commit-message]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
 [fork]: https://github.com/bufbuild/connect-swift/fork
