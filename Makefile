@@ -9,7 +9,7 @@ MAKEFLAGS += --no-print-directory
 BIN := .tmp/bin
 LICENSE_HEADER_YEAR_RANGE := 2022-2023
 CROSSTEST_VERSION := 4f4e96d8fea3ed9473b90a964a5ba429e7ea5649
-LICENSE_HEADER_VERSION := f5dd847fb18b577a62aaf46dd168b6e5b25206a3
+LICENSE_HEADER_VERSION := v1.12.0
 LICENSE_IGNORE := -e Package.swift \
     -e $(BIN)\/ \
     -e Examples/ElizaSharedSources/GeneratedSources\/ \
