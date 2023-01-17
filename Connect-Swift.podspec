@@ -6,7 +6,7 @@ Pod::Spec.new do |spec|
   spec.summary = 'Idiomatic gRPC & Connect RPCs for Swift.'
   spec.homepage = 'https://github.com/bufbuild/connect-swift'
   spec.author = 'Buf Technologies, Inc.'
-  spec.source = { :git => 'https://github.com/bufbuild/connect-swift.git', :tag => spec.version }
+  spec.source = { :git => 'https://github.com/bufbuild/connect-swift.git', :tag => "v#{spec.version.to_s}" }
 
   spec.ios.deployment_target = '14.0'
   spec.osx.deployment_target = '10.15'
