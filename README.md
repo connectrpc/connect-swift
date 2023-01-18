@@ -72,7 +72,7 @@ final class MessagingViewModel: ObservableObject {
 
 That’s it! You no longer need to manually define Swift response models,
 add `Codable` conformances, type out `URL(string: ...)` initializers,
-or even create protocol interfaces to wrap services classes - all this is taken
+or even create protocol interfaces to wrap service classes - all this is taken
 care of by Connect-Swift, and the underlying network transport is
 handled automatically.
 
