@@ -47,6 +47,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
                 completion(HTTPResponse(
                     code: Code.fromURLSessionCode(httpURLResponse.statusCode),
                     headers: httpURLResponse.formattedLowercasedHeaders(),
+                    httpStatus: httpURLResponse.statusCode,
                     message: data,
                     trailers: [:], // URLSession does not support trailers
                     error: error
@@ -54,7 +55,8 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
             } else if let error = error {
                 let code = Code.fromURLSessionCode((error as NSError).code)
                 completion(HTTPResponse(
-                    code: code, headers: [:], message: data, trailers: [:], error: ConnectError(
+                    code: code, headers: [:], httpStatus: nil,
+                    message: data, trailers: [:], error: ConnectError(
                         code: code,
                         message: error.localizedDescription,
                         exception: error, details: [], metadata: [:]
@@ -62,7 +64,8 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
                 ))
             } else {
                 completion(HTTPResponse(
-                    code: .unknown, headers: [:], message: data, trailers: [:], error: ConnectError(
+                    code: .unknown, headers: [:], httpStatus: nil,
+                    message: data, trailers: [:], error: ConnectError(
                         code: .unknown,
                         message: "unexpected response type \(type(of: urlResponse))",
                         exception: error, details: [], metadata: [:]

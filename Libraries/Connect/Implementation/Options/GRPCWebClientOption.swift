@@ -68,6 +68,7 @@ extension GRPCWebInterceptor: Interceptor {
                     return HTTPResponse(
                         code: code,
                         headers: response.headers,
+                        httpStatus: response.httpStatus,
                         message: response.message,
                         trailers: response.trailers,
                         error: response.error ?? ConnectError.fromGRPCWebTrailers(
@@ -113,6 +114,7 @@ extension GRPCWebInterceptor: Interceptor {
                     return HTTPResponse(
                         code: .unknown,
                         headers: response.headers,
+                        httpStatus: response.httpStatus,
                         message: response.message,
                         trailers: response.trailers,
                         error: error
@@ -282,6 +284,7 @@ private extension HTTPResponse {
             return HTTPResponse(
                 code: grpcStatus,
                 headers: self.headers,
+                httpStatus: self.httpStatus,
                 message: message,
                 trailers: trailers,
                 error: nil
@@ -290,6 +293,7 @@ private extension HTTPResponse {
             return HTTPResponse(
                 code: grpcStatus,
                 headers: self.headers,
+                httpStatus: self.httpStatus,
                 message: message,
                 trailers: trailers,
                 error: ConnectError.fromGRPCWebTrailers(trailers, code: grpcStatus)

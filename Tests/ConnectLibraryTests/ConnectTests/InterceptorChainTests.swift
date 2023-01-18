@@ -40,6 +40,7 @@ private struct MockUnaryInterceptor: Interceptor {
                 return HTTPResponse(
                     code: response.code,
                     headers: headers,
+                    httpStatus: 200,
                     message: response.message,
                     trailers: response.trailers,
                     error: response.error
@@ -146,6 +147,7 @@ final class InterceptorChainTests: XCTestCase {
         let interceptedResponse = chain.responseFunction(HTTPResponse(
             code: .ok,
             headers: Headers(),
+            httpStatus: 200,
             message: nil,
             trailers: Trailers(),
             error: nil
