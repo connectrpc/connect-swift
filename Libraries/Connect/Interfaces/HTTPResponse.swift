@@ -17,6 +17,7 @@ import Foundation
 /// Unary HTTP response received from the server.
 public struct HTTPResponse {
     /// The status code of the response.
+    /// See https://connect.build/docs/protocol/#error-codes for more info.
     public let code: Code
     /// Response headers specified by the server.
     public let headers: Headers
