@@ -19,7 +19,7 @@ import XCTest
 final class ProtocolClientConfigTests: XCTestCase {
     func testCompressionPoolsWithIdentityAndGzip() {
         var config = ProtocolClientConfig(
-            target: "https://buf.build", httpClient: URLSessionHTTPClient(),
+            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
             compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
             codec: ProtoCodec(), interceptors: []
         )
@@ -35,7 +35,7 @@ final class ProtocolClientConfigTests: XCTestCase {
 
     func testGzipRequestOptionUsesGzipCompressionPool() {
         var config = ProtocolClientConfig(
-            target: "https://buf.build", httpClient: URLSessionHTTPClient(),
+            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
             compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
             codec: ProtoCodec(), interceptors: []
         )
@@ -65,7 +65,7 @@ final class ProtocolClientConfigTests: XCTestCase {
         final class InterceptorB: NoopInterceptor {}
 
         var config = ProtocolClientConfig(
-            target: "https://buf.build", httpClient: URLSessionHTTPClient(),
+            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
             compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
             codec: ProtoCodec(), interceptors: []
         )
@@ -79,7 +79,7 @@ final class ProtocolClientConfigTests: XCTestCase {
 
     func testJSONClientOptionSetsJSONCodec() {
         var config = ProtocolClientConfig(
-            target: "https://buf.build", httpClient: URLSessionHTTPClient(),
+            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
             compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
             codec: ProtoCodec(), interceptors: []
         )
@@ -89,7 +89,7 @@ final class ProtocolClientConfigTests: XCTestCase {
 
     func testProtoClientOptionSetsProtoCodec() {
         var config = ProtocolClientConfig(
-            target: "https://buf.build", httpClient: URLSessionHTTPClient(),
+            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
             compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
             codec: JSONCodec(), interceptors: []
         )

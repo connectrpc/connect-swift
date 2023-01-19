@@ -66,7 +66,7 @@ extension ConnectInterceptor: Interceptor {
                 }
 
                 return HTTPRequest(
-                    target: request.target,
+                    url: request.url,
                     contentType: request.contentType,
                     headers: headers,
                     message: finalRequestBody
@@ -123,7 +123,7 @@ extension ConnectInterceptor: Interceptor {
                 headers[HeaderConstants.connectStreamingAcceptEncoding] = self.config
                     .acceptCompressionPoolNames()
                 return HTTPRequest(
-                    target: request.target,
+                    url: request.url,
                     contentType: request.contentType,
                     headers: headers,
                     message: request.message
