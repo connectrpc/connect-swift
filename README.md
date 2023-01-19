@@ -175,7 +175,7 @@ Offered under the [Apache 2 license](./LICENSE).
 [grpc-web-protocol]: https://github.com/grpc/grpc-web
 [interceptors]: https://connect.build/docs/swift/interceptors
 [protobuf]: https://developers.google.com/protocol-buffers
-[slack]: https://join.slack.com/t/bufbuild/shared_invite/zt-f5k547ki-VDs_iC4TblNCu7ubhRD17w
+[slack]: https://buf.build/links/slack
 [streaming]: https://connect.build/docs/swift/using-clients#using-generated-clients
 [swift-pm-integration]: https://connect.build/docs/swift/getting-started#add-the-connect-swift-package
 [testing]: https://connect.build/docs/swift/testing
