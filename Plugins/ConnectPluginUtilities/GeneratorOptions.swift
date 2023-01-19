@@ -77,7 +77,7 @@ public struct GeneratorOptions {
     public private(set) var fileNaming = FileNaming.fullPath
     public private(set) var generateAsyncMethods = true
     public private(set) var generateCallbackMethods = false
-    public private(set) var generateServiceMetadata = false
+    public private(set) var generateServiceMetadata = true
     public private(set) var keepMethodCasing = false
     public private(set) var protoToModuleMappings = ProtoFileToModuleMappings()
     public private(set) var swiftProtobufModuleName = "SwiftProtobuf"

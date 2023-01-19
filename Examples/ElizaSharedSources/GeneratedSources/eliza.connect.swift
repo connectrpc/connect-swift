@@ -47,4 +47,12 @@ internal final class Buf_Connect_Demo_Eliza_V1_ElizaServiceClient: Buf_Connect_D
     internal func `introduce`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest, Buf_Connect_Demo_Eliza_V1_IntroduceResponse> {
         return self.client.serverOnlyStream(path: "buf.connect.demo.eliza.v1.ElizaService/Introduce", headers: headers)
     }
+
+    internal enum Metadata {
+        internal enum Methods {
+            internal static let say = Connect.MethodSpec(name: "Say", service: "buf.connect.demo.eliza.v1.ElizaService", type: .unary)
+            internal static let converse = Connect.MethodSpec(name: "Converse", service: "buf.connect.demo.eliza.v1.ElizaService", type: .bidirectionalStream)
+            internal static let introduce = Connect.MethodSpec(name: "Introduce", service: "buf.connect.demo.eliza.v1.ElizaService", type: .serverStream)
+        }
+    }
 }

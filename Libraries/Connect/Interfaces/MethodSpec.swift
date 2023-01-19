@@ -12,15 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// Contains metadata on a specifific RPC method.
-public struct MethodDescriptor: Equatable {
+/// Contains metadata for a specific RPC method.
+public struct MethodSpec: Equatable, Codable {
     /// The name of the RPC method (1:1 with the `.proto` file).
     public let name: String
-    /// The path of the RPC, constructed using the package, service, and RPC name.
-    public let path: String
+    /// The fully qualified name of the method's service.
+    public let service: String
+    /// The type of method that this is (unary, bidirectional stream, etc.).
+    public let type: MethodType
 
-    public init(name: String, path: String) {
+    /// The path of the RPC, constructed using the package, service, and RPC name.
+    public var path: String {
+        return "\(self.service)/\(self.name)"
+    }
+
+    public enum MethodType: Equatable, Codable {
+        case unary
+        case clientStream
+        case serverStream
+        case bidirectionalStream
+    }
+
+    public init(name: String, service: String, type: MethodType) {
         self.name = name
-        self.path = path
+        self.service = service
+        self.type = type
     }
 }

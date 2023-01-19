@@ -16,11 +16,7 @@ import SwiftProtobufPluginLibrary
 
 extension MethodDescriptor {
     public var methodPath: String {
-        if self.file.package.isEmpty {
-            return "\(self.service.name)/\(self.name)"
-        } else {
-            return "\(self.file.package).\(self.service.name)/\(self.name)"
-        }
+        return "\(self.service.servicePath)/\(self.name)"
     }
 
     public func name(using options: GeneratorOptions) -> String {

@@ -40,11 +40,6 @@ final class ConnectClientGenerator: Generator {
         for service in self.descriptor.services {
             self.printLine()
             self.printService(service)
-
-            if self.options.generateServiceMetadata {
-                self.printLine()
-                self.printDescriptors(for: service)
-            }
         }
     }
 
@@ -87,18 +82,17 @@ final class ConnectClientGenerator: Generator {
                     self.printAsyncAwaitMethodImplementation(for: method)
                 }
             }
+
+            if self.options.generateServiceMetadata {
+                self.printSpecs(for: service)
+            }
         }
         self.printLine("}")
     }
 
-    private func printDescriptors(for service: ServiceDescriptor) {
-        let metadataTypeName = self.namer.typePrefix(forFile: service.file)
-            + NamingUtils.toUpperCamelCase(service.name)
-            + "Metadata"
-        self.printLine(
-            "/// Provides metadata for `\(service.implementationName(using: self.namer))`."
-        )
-        self.printLine("\(self.visibility) enum \(metadataTypeName) {")
+    private func printSpecs(for service: ServiceDescriptor) {
+        self.printLine()
+        self.printLine("\(self.visibility) enum Metadata {")
         self.indent {
             self.printLine("\(self.visibility) enum Methods {")
             self.indent {
@@ -106,8 +100,11 @@ final class ConnectClientGenerator: Generator {
                     self.printLine(
                         """
                         \(self.visibility) static let \(method.name(using: self.options)) = \
-                        Connect.MethodDescriptor(name: "\(method.name)", \
-                        path: "\(method.methodPath)")
+                        Connect.MethodSpec(\
+                        name: "\(method.name)", \
+                        service: "\(method.service.servicePath)", \
+                        type: \(method.specStreamType())\
+                        )
                         """
                     )
                 }
@@ -177,6 +174,18 @@ final class ConnectClientGenerator: Generator {
 }
 
 private extension MethodDescriptor {
+    func specStreamType() -> String {
+        if self.clientStreaming && self.serverStreaming {
+            return ".bidirectionalStream"
+        } else if self.serverStreaming {
+            return ".serverStream"
+        } else if self.clientStreaming {
+            return ".clientStream"
+        } else {
+            return ".unary"
+        }
+    }
+
     func callbackReturnValue() -> String {
         if self.clientStreaming && self.serverStreaming {
             return """

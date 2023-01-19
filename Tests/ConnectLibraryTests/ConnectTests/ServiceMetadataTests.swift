@@ -16,11 +16,54 @@ import Connect
 import XCTest
 
 final class ServiceMetadataTests: XCTestCase {
-    func testMethodDescriptorsAreGeneratedForService() {
-        let expectedDescriptor = MethodDescriptor(
-            name: "UnaryCall",
-            path: "grpc.testing.TestService/UnaryCall"
+    func testMethodSpecsAreGeneratedCorrectlyForService() {
+        XCTAssertEqual(
+            Grpc_Testing_TestServiceClient.Metadata.Methods.unaryCall,
+            MethodSpec(
+                name: "UnaryCall",
+                service: "grpc.testing.TestService",
+                type: .unary
+            )
         )
-        XCTAssertEqual(Grpc_Testing_TestServiceMetadata.Methods.unaryCall, expectedDescriptor)
+        XCTAssertEqual(
+            Grpc_Testing_TestServiceClient.Metadata.Methods.unaryCall.path,
+            "grpc.testing.TestService/UnaryCall"
+        )
+        XCTAssertEqual(
+            Grpc_Testing_TestServiceClient.Metadata.Methods.streamingOutputCall,
+            MethodSpec(
+                name: "StreamingOutputCall",
+                service: "grpc.testing.TestService",
+                type: .serverStream
+            )
+        )
+        XCTAssertEqual(
+            Grpc_Testing_TestServiceClient.Metadata.Methods.streamingOutputCall.path,
+            "grpc.testing.TestService/StreamingOutputCall"
+        )
+        XCTAssertEqual(
+            Grpc_Testing_TestServiceClient.Metadata.Methods.streamingInputCall,
+            MethodSpec(
+                name: "StreamingInputCall",
+                service: "grpc.testing.TestService",
+                type: .clientStream
+            )
+        )
+        XCTAssertEqual(
+            Grpc_Testing_TestServiceClient.Metadata.Methods.streamingInputCall.path,
+            "grpc.testing.TestService/StreamingInputCall"
+        )
+        XCTAssertEqual(
+            Grpc_Testing_TestServiceClient.Metadata.Methods.fullDuplexCall,
+            MethodSpec(
+                name: "FullDuplexCall",
+                service: "grpc.testing.TestService",
+                type: .bidirectionalStream
+            )
+        )
+        XCTAssertEqual(
+            Grpc_Testing_TestServiceClient.Metadata.Methods.fullDuplexCall.path,
+            "grpc.testing.TestService/FullDuplexCall"
+        )
     }
 }
