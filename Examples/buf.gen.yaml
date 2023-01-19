@@ -4,6 +4,8 @@ plugins:
     opt: Visibility=Internal
     out: ./ElizaSharedSources/GeneratedSources
   - name: connect-swift
-    opt: Visibility=Internal
+    opt: >
+      GenerateServiceMetadata=false,
+      Visibility=Internal
     out: ./ElizaSharedSources/GeneratedSources
     path: ../.tmp/bin/protoc-gen-connect-swift
