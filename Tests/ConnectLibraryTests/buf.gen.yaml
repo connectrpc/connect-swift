@@ -7,6 +7,7 @@ plugins:
     opt: >
       GenerateAsyncMethods=true,
       GenerateCallbackMethods=true,
+      GenerateServiceMetadata=true,
       Visibility=Internal
     out: ./Generated
     path: ../../.tmp/bin/protoc-gen-connect-swift

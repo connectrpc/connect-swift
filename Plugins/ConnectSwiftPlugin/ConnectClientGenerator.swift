@@ -40,6 +40,11 @@ final class ConnectClientGenerator: Generator {
         for service in self.descriptor.services {
             self.printLine()
             self.printService(service)
+
+            if self.options.generateServiceMetadata {
+                self.printLine()
+                self.printDescriptors(for: service)
+            }
         }
     }
 
@@ -82,6 +87,31 @@ final class ConnectClientGenerator: Generator {
                     self.printAsyncAwaitMethodImplementation(for: method)
                 }
             }
+        }
+        self.printLine("}")
+    }
+
+    private func printDescriptors(for service: ServiceDescriptor) {
+        let metadataTypeName = self.namer.typePrefix(forFile: service.file)
+            + NamingUtils.toUpperCamelCase(service.name)
+            + "Metadata"
+        self.printLine(
+            "/// Provides metadata for `\(service.implementationName(using: self.namer))`."
+        )
+        self.printLine("\(self.visibility) enum \(metadataTypeName) {")
+        self.indent {
+            self.printLine("\(self.visibility) enum Methods {")
+            self.indent {
+                for method in service.methods {
+                    self.printLine(
+                    """
+                    \(self.visibility) static let \(method.name(using: self.options)) = \
+                    Connect.MethodDescriptor(name: "\(method.name)", path: "\(method.methodPath)")
+                    """
+                    )
+                }
+            }
+            self.printLine("}")
         }
         self.printLine("}")
     }

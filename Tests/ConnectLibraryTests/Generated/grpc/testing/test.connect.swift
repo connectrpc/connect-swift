@@ -207,6 +207,23 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
     }
 }
 
+/// Provides metadata for `Grpc_Testing_TestServiceClient`.
+internal enum Grpc_Testing_TestServiceMetadata {
+    internal enum Methods {
+        internal static let emptyCall = Connect.MethodDescriptor(name: "EmptyCall", path: "grpc.testing.TestService/EmptyCall")
+        internal static let unaryCall = Connect.MethodDescriptor(name: "UnaryCall", path: "grpc.testing.TestService/UnaryCall")
+        internal static let failUnaryCall = Connect.MethodDescriptor(name: "FailUnaryCall", path: "grpc.testing.TestService/FailUnaryCall")
+        internal static let cacheableUnaryCall = Connect.MethodDescriptor(name: "CacheableUnaryCall", path: "grpc.testing.TestService/CacheableUnaryCall")
+        internal static let streamingOutputCall = Connect.MethodDescriptor(name: "StreamingOutputCall", path: "grpc.testing.TestService/StreamingOutputCall")
+        internal static let failStreamingOutputCall = Connect.MethodDescriptor(name: "FailStreamingOutputCall", path: "grpc.testing.TestService/FailStreamingOutputCall")
+        internal static let streamingInputCall = Connect.MethodDescriptor(name: "StreamingInputCall", path: "grpc.testing.TestService/StreamingInputCall")
+        internal static let fullDuplexCall = Connect.MethodDescriptor(name: "FullDuplexCall", path: "grpc.testing.TestService/FullDuplexCall")
+        internal static let halfDuplexCall = Connect.MethodDescriptor(name: "HalfDuplexCall", path: "grpc.testing.TestService/HalfDuplexCall")
+        internal static let unimplementedCall = Connect.MethodDescriptor(name: "UnimplementedCall", path: "grpc.testing.TestService/UnimplementedCall")
+        internal static let unimplementedStreamingOutputCall = Connect.MethodDescriptor(name: "UnimplementedStreamingOutputCall", path: "grpc.testing.TestService/UnimplementedStreamingOutputCall")
+    }
+}
+
 /// A simple service NOT implemented at servers so clients can test for
 /// that case.
 internal protocol Grpc_Testing_UnimplementedServiceClientInterface {
@@ -251,6 +268,14 @@ internal final class Grpc_Testing_UnimplementedServiceClient: Grpc_Testing_Unimp
     }
 }
 
+/// Provides metadata for `Grpc_Testing_UnimplementedServiceClient`.
+internal enum Grpc_Testing_UnimplementedServiceMetadata {
+    internal enum Methods {
+        internal static let unimplementedCall = Connect.MethodDescriptor(name: "UnimplementedCall", path: "grpc.testing.UnimplementedService/UnimplementedCall")
+        internal static let unimplementedStreamingOutputCall = Connect.MethodDescriptor(name: "UnimplementedStreamingOutputCall", path: "grpc.testing.UnimplementedService/UnimplementedStreamingOutputCall")
+    }
+}
+
 /// A service used to control reconnect server.
 internal protocol Grpc_Testing_ReconnectServiceClientInterface {
 
@@ -289,6 +314,14 @@ internal final class Grpc_Testing_ReconnectServiceClient: Grpc_Testing_Reconnect
 
     internal func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_ReconnectInfo> {
         return await self.client.unary(path: "grpc.testing.ReconnectService/Stop", request: request, headers: headers)
+    }
+}
+
+/// Provides metadata for `Grpc_Testing_ReconnectServiceClient`.
+internal enum Grpc_Testing_ReconnectServiceMetadata {
+    internal enum Methods {
+        internal static let start = Connect.MethodDescriptor(name: "Start", path: "grpc.testing.ReconnectService/Start")
+        internal static let stop = Connect.MethodDescriptor(name: "Stop", path: "grpc.testing.ReconnectService/Stop")
     }
 }
 
@@ -337,6 +370,14 @@ internal final class Grpc_Testing_LoadBalancerStatsServiceClient: Grpc_Testing_L
     }
 }
 
+/// Provides metadata for `Grpc_Testing_LoadBalancerStatsServiceClient`.
+internal enum Grpc_Testing_LoadBalancerStatsServiceMetadata {
+    internal enum Methods {
+        internal static let getClientStats = Connect.MethodDescriptor(name: "GetClientStats", path: "grpc.testing.LoadBalancerStatsService/GetClientStats")
+        internal static let getClientAccumulatedStats = Connect.MethodDescriptor(name: "GetClientAccumulatedStats", path: "grpc.testing.LoadBalancerStatsService/GetClientAccumulatedStats")
+    }
+}
+
 /// A service to remotely control health status of an xDS test server.
 internal protocol Grpc_Testing_XdsUpdateHealthServiceClientInterface {
 
@@ -378,6 +419,14 @@ internal final class Grpc_Testing_XdsUpdateHealthServiceClient: Grpc_Testing_Xds
     }
 }
 
+/// Provides metadata for `Grpc_Testing_XdsUpdateHealthServiceClient`.
+internal enum Grpc_Testing_XdsUpdateHealthServiceMetadata {
+    internal enum Methods {
+        internal static let setServing = Connect.MethodDescriptor(name: "SetServing", path: "grpc.testing.XdsUpdateHealthService/SetServing")
+        internal static let setNotServing = Connect.MethodDescriptor(name: "SetNotServing", path: "grpc.testing.XdsUpdateHealthService/SetNotServing")
+    }
+}
+
 /// A service to dynamically update the configuration of an xDS test client.
 internal protocol Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface {
 
@@ -404,5 +453,12 @@ internal final class Grpc_Testing_XdsUpdateClientConfigureServiceClient: Grpc_Te
 
     internal func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_ClientConfigureResponse> {
         return await self.client.unary(path: "grpc.testing.XdsUpdateClientConfigureService/Configure", request: request, headers: headers)
+    }
+}
+
+/// Provides metadata for `Grpc_Testing_XdsUpdateClientConfigureServiceClient`.
+internal enum Grpc_Testing_XdsUpdateClientConfigureServiceMetadata {
+    internal enum Methods {
+        internal static let configure = Connect.MethodDescriptor(name: "Configure", path: "grpc.testing.XdsUpdateClientConfigureService/Configure")
     }
 }

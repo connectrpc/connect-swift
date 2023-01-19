@@ -20,6 +20,7 @@ private enum CommandLineParameter: String {
     case fileNaming = "FileNaming"
     case generateAsyncMethods = "GenerateAsyncMethods"
     case generateCallbackMethods = "GenerateCallbackMethods"
+    case generateServiceMetadata = "GenerateServiceMetadata"
     case keepMethodCasing = "KeepMethodCasing"
     case protoPathModuleMappings = "ProtoPathModuleMappings"
     case swiftProtobufModuleName = "SwiftProtobufModuleName"
@@ -76,6 +77,7 @@ public struct GeneratorOptions {
     public private(set) var fileNaming = FileNaming.fullPath
     public private(set) var generateAsyncMethods = true
     public private(set) var generateCallbackMethods = false
+    public private(set) var generateServiceMetadata = false
     public private(set) var keepMethodCasing = false
     public private(set) var protoToModuleMappings = ProtoFileToModuleMappings()
     public private(set) var swiftProtobufModuleName = "SwiftProtobuf"
@@ -123,6 +125,12 @@ public struct GeneratorOptions {
             case .generateCallbackMethods:
                 if let value = Bool(rawValue) {
                     self.generateCallbackMethods = value
+                    continue
+                }
+
+            case .generateServiceMetadata:
+                if let value = Bool(rawValue) {
+                    self.generateServiceMetadata = value
                     continue
                 }
 
