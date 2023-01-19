@@ -14,14 +14,15 @@
 
 /// Contains metadata for a specific RPC method.
 public struct MethodSpec: Equatable, Codable {
-    /// The name of the RPC method (1:1 with the `.proto` file).
+    /// The name of the method (1:1 with the `.proto` file). E.g., `Foo`.
     public let name: String
-    /// The fully qualified name of the method's service.
+    /// The fully qualified name of the method's service. E.g., `foo.v1.FooService`.
     public let service: String
-    /// The type of method that this is (unary, bidirectional stream, etc.).
+    /// The type of method (unary, bidirectional stream, etc.).
     public let type: MethodType
 
-    /// The path of the RPC, constructed using the package, service, and RPC name.
+    /// The path of the RPC, constructed using the package, service, and method name.
+    /// E.g., `foo.v1.FooService/Foo`.
     public var path: String {
         return "\(self.service)/\(self.name)"
     }
