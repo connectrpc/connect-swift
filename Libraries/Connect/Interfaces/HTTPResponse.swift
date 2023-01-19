@@ -26,4 +26,12 @@ public struct HTTPResponse {
     public let trailers: Trailers
     /// The accompanying error, if the request failed.
     public let error: Swift.Error?
+
+    public init(code: Code, headers: Headers, message: Data?, trailers: Trailers, error: Error?) {
+        self.code = code
+        self.headers = headers
+        self.message = message
+        self.trailers = trailers
+        self.error = error
+    }
 }
