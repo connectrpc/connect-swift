@@ -49,7 +49,7 @@ final class UnaryMessagingViewModel: MessagingViewModel {
 
     init(protocolOption: ProtocolClientOption) {
         self.protocolClient = ProtocolClient(
-            target: "https://demo.connect.build",
+            host: "https://demo.connect.build",
             httpClient: URLSessionHTTPClient(),
             ProtoClientOption(), // Send protobuf binary on the wire
             protocolOption // Specify the protocol to use for the client
@@ -87,7 +87,7 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
 
     init(protocolOption: ProtocolClientOption) {
         self.protocolClient = ProtocolClient(
-            target: "https://demo.connect.build",
+            host: "https://demo.connect.build",
             httpClient: URLSessionHTTPClient(),
             ProtoClientOption(), // Send protobuf binary on the wire
             protocolOption // Specify the protocol to use for the client
