@@ -104,10 +104,11 @@ final class ConnectClientGenerator: Generator {
             self.indent {
                 for method in service.methods {
                     self.printLine(
-                    """
-                    \(self.visibility) static let \(method.name(using: self.options)) = \
-                    Connect.MethodDescriptor(name: "\(method.name)", path: "\(method.methodPath)")
-                    """
+                        """
+                        \(self.visibility) static let \(method.name(using: self.options)) = \
+                        Connect.MethodDescriptor(name: "\(method.name)", \
+                        path: "\(method.methodPath)")
+                        """
                     )
                 }
             }
