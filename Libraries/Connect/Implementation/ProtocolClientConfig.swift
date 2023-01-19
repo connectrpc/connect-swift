@@ -17,7 +17,7 @@ import Foundation
 /// Set of configuration (usually modified through `ClientOption` types) used to set up clients.
 public struct ProtocolClientConfig {
     /// The target host (e.g., https://buf.build).
-    public let target: String
+    public let host: String
     /// The client to use for performing requests.
     public let httpClient: HTTPClientInterface
     /// The minimum number of bytes that a request message should be for compression to be used.
@@ -41,7 +41,7 @@ public struct ProtocolClientConfig {
         interceptors: [(ProtocolClientConfig) -> Interceptor]? = nil
     ) -> Self {
         return .init(
-            target: self.target,
+            host: self.host,
             httpClient: self.httpClient,
             compressionMinBytes: compressionMinBytes ?? self.compressionMinBytes,
             compressionName: compressionName ?? self.compressionName,

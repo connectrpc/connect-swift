@@ -22,7 +22,7 @@ public final class ProtocolClient {
 
     /// Instantiate a new client.
     ///
-    /// - parameter target: The target host (e.g., https://buf.build).
+    /// - parameter host: The target host (e.g., https://buf.build).
     /// - parameter httpClient: HTTP client to use for performing requests.
     /// - parameter options: Series of options with which to configure the client.
     ///                      Identity and gzip compression implementations are provided by default
@@ -31,10 +31,10 @@ public final class ProtocolClient {
     ///                      Additional compression implementations may be specified using custom
     ///                      options.
     public init(
-        target: String, httpClient: HTTPClientInterface, _ options: ProtocolClientOption...
+        host: String, httpClient: HTTPClientInterface, _ options: ProtocolClientOption...
     ) {
         var config = ProtocolClientConfig.withDefaultOptions(
-            andTarget: target, httpClient: httpClient
+            andHost: host, httpClient: httpClient
         )
         for option in options {
             config = option.apply(config)
@@ -44,7 +44,7 @@ public final class ProtocolClient {
 
     /// Instantiate a new client.
     ///
-    /// - parameter target: The target host (e.g., https://buf.build).
+    /// - parameter host: The target host (e.g., https://buf.build).
     /// - parameter httpClient: HTTP client to use for performing requests.
     /// - parameter options: Series of options with which to configure the client.
     ///                      Identity and gzip compression implementations are provided by default
@@ -53,10 +53,10 @@ public final class ProtocolClient {
     ///                      Additional compression implementations may be specified using custom
     ///                      options.
     public init(
-        target: String, httpClient: HTTPClientInterface, options: [ProtocolClientOption]
+        host: String, httpClient: HTTPClientInterface, options: [ProtocolClientOption]
     ) {
         var config = ProtocolClientConfig.withDefaultOptions(
-            andTarget: target, httpClient: httpClient
+            andHost: host, httpClient: httpClient
         )
         for option in options {
             config = option.apply(config)
@@ -67,10 +67,10 @@ public final class ProtocolClient {
 
 private extension ProtocolClientConfig {
     static func withDefaultOptions(
-        andTarget target: String, httpClient: HTTPClientInterface
+        andHost host: String, httpClient: HTTPClientInterface
     ) -> Self {
         var config = ProtocolClientConfig(
-            target: target,
+            host: host,
             httpClient: httpClient,
             compressionMinBytes: nil,
             compressionName: nil,
@@ -112,9 +112,9 @@ extension ProtocolClient: ProtocolClientInterface {
         }
 
         let chain = self.config.createInterceptorChain().unaryFunction()
-        let url = URL(string: path, relativeTo: URL(string: self.config.target))!
+        let url = URL(string: path, relativeTo: URL(string: self.config.host))!
         let request = chain.requestFunction(HTTPRequest(
-            target: url,
+            url: url,
             contentType: "application/\(codec.name())",
             headers: headers,
             message: data
@@ -273,9 +273,9 @@ extension ProtocolClient: ProtocolClientInterface {
     ) -> RequestCallbacks {
         let codec = self.config.codec
         let chain = self.config.createInterceptorChain().streamFunction()
-        let url = URL(string: path, relativeTo: URL(string: self.config.target))!
+        let url = URL(string: path, relativeTo: URL(string: self.config.host))!
         let request = chain.requestFunction(HTTPRequest(
-            target: url,
+            url: url,
             contentType: "application/connect+\(codec.name())",
             headers: headers,
             message: nil
