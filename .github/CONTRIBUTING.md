@@ -148,10 +148,10 @@ We're much more likely to approve your changes if you:
 
 Releases should be tagged in `x.y.z` SemVer format.
 
-1. Update both [`Connect-Swift.podspec`](../Connect-Swift.podspec) and
+1. Create a new GitHub release.
+2. Update both [`Connect-Swift.podspec`](../Connect-Swift.podspec) and
    [`Connect-Swift-Mocks.podspec`](../Connect-Swift-Mocks.podspec) to reflect
-   the new version that will be tagged.
-2. Create a new GitHub release.
+   the newly tagged version.
 3. Push both specs to CocoaPods:
 
 ```sh

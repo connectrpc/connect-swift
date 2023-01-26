@@ -50,7 +50,7 @@ extension GRPCWebInterceptor: Interceptor {
                 )
 
                 return HTTPRequest(
-                    target: request.target,
+                    url: request.url,
                     // Override the content type to be gRPC Web.
                     contentType: "application/grpc-web+\(self.config.codec.name())",
                     headers: request.headers.addingGRPCWebHeaders(using: self.config),
@@ -129,7 +129,7 @@ extension GRPCWebInterceptor: Interceptor {
         return StreamFunction(
             requestFunction: { request in
                 return HTTPRequest(
-                    target: request.target,
+                    url: request.url,
                     // Override the content type to be gRPC Web.
                     contentType: "application/grpc-web+\(self.config.codec.name())",
                     headers: request.headers.addingGRPCWebHeaders(using: self.config),

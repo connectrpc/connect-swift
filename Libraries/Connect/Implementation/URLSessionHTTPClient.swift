@@ -174,7 +174,7 @@ extension Code {
 
 private extension URLRequest {
     init(httpRequest: HTTPRequest) {
-        self.init(url: httpRequest.target)
+        self.init(url: httpRequest.url)
         self.httpMethod = "POST"
         self.httpBody = httpRequest.message
         self.setValue(httpRequest.contentType, forHTTPHeaderField: HeaderConstants.contentType)

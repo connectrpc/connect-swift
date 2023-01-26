@@ -15,6 +15,14 @@
 import SwiftProtobufPluginLibrary
 
 extension ServiceDescriptor {
+    public var servicePath: String {
+        if self.file.package.isEmpty {
+            return self.name
+        } else {
+            return "\(self.file.package).\(self.name)"
+        }
+    }
+
     public func implementationName(using namer: SwiftProtobufNamer) -> String {
         let upperCamelName = NamingUtils.toUpperCamelCase(self.name) + "Client"
         if self.file.package.isEmpty {

@@ -15,7 +15,7 @@
 import Foundation
 
 /// Unary HTTP response received from the server.
-public struct HTTPResponse {
+public struct HTTPResponse: Sendable {
     /// The status code of the response.
     /// See https://connect.build/docs/protocol/#error-codes for more info.
     public let code: Code

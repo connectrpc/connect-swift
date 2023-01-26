@@ -25,10 +25,10 @@ final class CrosstestClients {
         let httpClient = CrosstestHTTPClient(
             timeout: timeout, delayAfterChallenge: responseDelay
         )
-        let target = "https://localhost:8081"
+        let host = "https://localhost:8081"
 
         self.connectJSONClient = ProtocolClient(
-            target: target,
+            host: host,
             httpClient: httpClient,
             ConnectClientOption(),
             JSONClientOption(),
@@ -36,7 +36,7 @@ final class CrosstestClients {
             GzipCompressionOption()
         )
         self.connectProtoClient = ProtocolClient(
-            target: target,
+            host: host,
             httpClient: httpClient,
             ConnectClientOption(),
             ProtoClientOption(),
@@ -44,7 +44,7 @@ final class CrosstestClients {
             GzipCompressionOption()
         )
         self.grpcWebJSONClient = ProtocolClient(
-            target: target,
+            host: host,
             httpClient: httpClient,
             GRPCWebClientOption(),
             JSONClientOption(),
@@ -52,7 +52,7 @@ final class CrosstestClients {
             GzipCompressionOption()
         )
         self.grpcWebProtoClient = ProtocolClient(
-            target: target,
+            host: host,
             httpClient: httpClient,
             GRPCWebClientOption(),
             ProtoClientOption(),

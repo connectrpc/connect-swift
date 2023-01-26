@@ -27,7 +27,7 @@ private struct MockUnaryInterceptor: Interceptor {
                 headers["filter-chain", default: []].append(self.headerID)
                 self.requestExpectation.fulfill()
                 return HTTPRequest(
-                    target: request.target,
+                    url: request.url,
                     contentType: request.contentType,
                     headers: headers,
                     message: request.message
@@ -73,7 +73,7 @@ private struct MockStreamInterceptor: Interceptor {
                 headers["filter-chain", default: []].append(self.headerID)
                 self.requestExpectation.fulfill()
                 return HTTPRequest(
-                    target: request.target,
+                    url: request.url,
                     contentType: request.contentType,
                     headers: headers,
                     message: request.message
@@ -106,7 +106,7 @@ private struct MockStreamInterceptor: Interceptor {
 
 final class InterceptorChainTests: XCTestCase {
     private let config = ProtocolClientConfig(
-        target: "https://buf.build", httpClient: CrosstestHTTPClient(timeout: 60),
+        host: "https://buf.build", httpClient: CrosstestHTTPClient(timeout: 60),
         compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
         codec: JSONCodec(), interceptors: []
     )
@@ -137,7 +137,7 @@ final class InterceptorChainTests: XCTestCase {
         ).unaryFunction()
 
         let interceptedRequest = chain.requestFunction(HTTPRequest(
-            target: try XCTUnwrap(URL(string: "https://buf.build/mock")),
+            url: try XCTUnwrap(URL(string: "https://buf.build/mock")),
             contentType: "application/json",
             headers: Headers(),
             message: nil
@@ -201,7 +201,7 @@ final class InterceptorChainTests: XCTestCase {
         ).streamFunction()
 
         let interceptedRequest = chain.requestFunction(HTTPRequest(
-            target: try XCTUnwrap(URL(string: "https://buf.build/mock")),
+            url: try XCTUnwrap(URL(string: "https://buf.build/mock")),
             contentType: "application/json",
             headers: Headers(),
             message: nil

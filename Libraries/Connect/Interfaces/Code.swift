@@ -14,7 +14,7 @@
 
 /// Indicates a status of an RPC.
 /// The zero code in gRPC is OK, which indicates that the operation was a success.
-public enum Code: Int, CaseIterable, Equatable {
+public enum Code: Int, CaseIterable, Equatable, Sendable {
     case ok = 0
     case canceled = 1
     case unknown = 2
