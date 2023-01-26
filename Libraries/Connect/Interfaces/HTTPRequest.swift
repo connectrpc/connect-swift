@@ -15,7 +15,7 @@
 import Foundation
 
 /// HTTP request used for sending primitive data to the server.
-public struct HTTPRequest {
+public struct HTTPRequest: Sendable {
     /// Target URL for the request.
     public let url: URL
     /// Value to assign to the `content-type` header.
