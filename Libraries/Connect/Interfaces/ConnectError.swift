@@ -17,7 +17,7 @@ import SwiftProtobuf
 
 /// Typed error provided by Connect RPCs that may optionally wrap additional typed custom errors
 /// using `details`.
-public struct ConnectError: Swift.Error {
+public struct ConnectError: Swift.Error, Sendable {
     /// The resulting status code.
     public let code: Code
     /// User-readable error message.
@@ -64,7 +64,7 @@ public struct ConnectError: Swift.Error {
     ///
     /// The `google.golang.org/genproto/googleapis/rpc/errdetails` package contains a
     /// variety of Protobuf messages commonly used as error details.
-    public struct Detail: Swift.Decodable {
+    public struct Detail: Swift.Decodable, Sendable {
         public let type: String
         public let payload: Data?
 

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /// Contains metadata for a specific RPC method.
-public struct MethodSpec: Equatable, Codable {
+public struct MethodSpec: Equatable, Codable, Sendable {
     /// The name of the method (1:1 with the `.proto` file). E.g., `Foo`.
     public let name: String
     /// The fully qualified name of the method's service. E.g., `foo.v1.FooService`.
@@ -27,7 +27,7 @@ public struct MethodSpec: Equatable, Codable {
         return "\(self.service)/\(self.name)"
     }
 
-    public enum MethodType: Equatable, Codable {
+    public enum MethodType: Equatable, Codable, Sendable {
         case unary
         case clientStream
         case serverStream
