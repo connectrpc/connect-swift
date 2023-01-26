@@ -16,53 +16,62 @@
 import Foundation
 import XCTest
 
+private struct NoopInterceptor: Interceptor {
+    func unaryFunction() -> UnaryFunction {
+        return .init(requestFunction: { $0 }, responseFunction: { $0 })
+    }
+
+    func streamFunction() -> StreamFunction {
+        return .init(
+            requestFunction: { $0 },
+            requestDataFunction: { $0 },
+            streamResultFunc: { $0 }
+        )
+    }
+
+    init(config: ProtocolClientConfig) {}
+}
+
 final class ProtocolClientConfigTests: XCTestCase {
     func testDefaultResponseCompressionPoolIncludesGzip() {
         let config = ProtocolClientConfig(host: "https://buf.build")
-        XCTAssertEqual(config.responseCompressionPools.map { $0.name() }, ["gzip"])
+        XCTAssertTrue(config.responseCompressionPools[0] is GzipCompressionPool)
+        XCTAssertEqual(config.acceptCompressionPoolNames(), ["gzip"])
     }
 
-    func testGzipRequestOptionUsesGzipCompressionPool() {
-        var config = ProtocolClientConfig(
-            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
-            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
-            codec: ProtoCodec(), interceptors: []
+    func testShouldCompressDataLargerThanMinBytes() {
+        let data = Data(repeating: 0xa, count: 50)
+        let compression = ProtocolClientConfig.RequestCompression(
+            minBytes: 10, pool: GzipCompressionPool()
         )
-        config = GzipCompressionOption().apply(config)
-        config = GzipRequestOption(compressionMinBytes: 10).apply(config)
-        XCTAssertTrue(config.requestCompressionPool() is GzipCompressionPool)
+        XCTAssertTrue(compression.shouldCompress(data))
     }
 
-    func testInterceptorsOptionAddsToExistingInterceptorsIfCalledMultipleTimes() {
-        class NoopInterceptor: Interceptor {
-            func unaryFunction() -> UnaryFunction {
-                return .init(requestFunction: { $0 }, responseFunction: { $0 })
-            }
-
-            func streamFunction() -> StreamFunction {
-                return .init(
-                    requestFunction: { $0 },
-                    requestDataFunction: { $0 },
-                    streamResultFunc: { $0 }
-                )
-            }
-
-            init(config: ProtocolClientConfig) {}
-        }
-
-        final class InterceptorA: NoopInterceptor {}
-        final class InterceptorB: NoopInterceptor {}
-
-        var config = ProtocolClientConfig(
-            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
-            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
-            codec: ProtoCodec(), interceptors: []
+    func testShouldNotCompressDataSmallerThanMinBytes() {
+        let data = Data(repeating: 0xa, count: 50)
+        let compression = ProtocolClientConfig.RequestCompression(
+            minBytes: 100, pool: GzipCompressionPool()
         )
-        config = InterceptorsOption(interceptors: [InterceptorA.init]).apply(config)
-        config = InterceptorsOption(interceptors: [InterceptorB.init]).apply(config)
+        XCTAssertFalse(compression.shouldCompress(data))
+    }
 
-        let interceptors = config.interceptors.map { $0(config) }
-        XCTAssertTrue(interceptors[0] is InterceptorA)
-        XCTAssertTrue(interceptors[1] is InterceptorB)
+    func testAddsConnectInterceptorLastWhenUsingConnectProtocol() {
+        let config = ProtocolClientConfig(
+            host: "https://buf.build",
+            networkProtocol: .connect,
+            interceptors: [NoopInterceptor.init]
+        )
+        XCTAssertTrue(config.interceptors[0](config) is NoopInterceptor)
+        XCTAssertTrue(config.interceptors[1](config) is ConnectInterceptor)
+    }
+
+    func testAddsGRPCWebInterceptorLastWhenUsingGRPCWebProtocol() {
+        let config = ProtocolClientConfig(
+            host: "https://buf.build",
+            networkProtocol: .grpcWeb,
+            interceptors: [NoopInterceptor.init]
+        )
+        XCTAssertTrue(config.interceptors[0](config) is NoopInterceptor)
+        XCTAssertTrue(config.interceptors[1](config) is GRPCWebInterceptor)
     }
 }

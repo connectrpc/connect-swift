@@ -46,7 +46,6 @@ final class CrosstestClients {
             )
         )
         self.grpcWebJSONClient = ProtocolClient(
-            host: host,
             httpClient: httpClient,
             config: ProtocolClientConfig(
                 host: host,
@@ -56,7 +55,6 @@ final class CrosstestClients {
             )
         )
         self.grpcWebProtoClient = ProtocolClient(
-            host: host,
             httpClient: httpClient,
             config: ProtocolClientConfig(
                 host: host,

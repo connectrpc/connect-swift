@@ -31,6 +31,20 @@ extension MessagingConnectionType: Identifiable {
 }
 
 struct MenuView: View {
+    private func createClient(withProtocol networkProtocol: NetworkProtocol)
+        -> Buf_Connect_Demo_Eliza_V1_ElizaServiceClient
+    {
+        let protocolClient = ProtocolClient(
+            httpClient: URLSessionHTTPClient(),
+            config: ProtocolClientConfig(
+                host: "https://demo.connect.build",
+                networkProtocol: networkProtocol,
+                codec: ProtoCodec() // Use Protobuf binary, not JSON
+            )
+        )
+        return Buf_Connect_Demo_Eliza_V1_ElizaServiceClient(client: protocolClient)
+    }
+
     var body: some View {
         NavigationView {
             VStack(spacing: 15) {
@@ -51,7 +65,7 @@ struct MenuView: View {
                             destination: LazyNavigationView {
                                 MessagingView(
                                     viewModel: UnaryMessagingViewModel(
-                                        protocolOption: ConnectClientOption()
+                                        client: self.createClient(withProtocol: .connect)
                                     )
                                 )
                             }
@@ -64,7 +78,7 @@ struct MenuView: View {
                             destination: LazyNavigationView {
                                 MessagingView(
                                     viewModel: BidirectionalStreamingMessagingViewModel(
-                                        protocolOption: ConnectClientOption()
+                                        client: self.createClient(withProtocol: .connect)
                                     )
                                 )
                             }
@@ -77,7 +91,7 @@ struct MenuView: View {
                             destination: LazyNavigationView {
                                 MessagingView(
                                     viewModel: UnaryMessagingViewModel(
-                                        protocolOption: GRPCWebClientOption()
+                                        client: self.createClient(withProtocol: .grpcWeb)
                                     )
                                 )
                             }
@@ -90,7 +104,7 @@ struct MenuView: View {
                             destination: LazyNavigationView {
                                 MessagingView(
                                     viewModel: BidirectionalStreamingMessagingViewModel(
-                                        protocolOption: GRPCWebClientOption()
+                                        client: self.createClient(withProtocol: .grpcWeb)
                                     )
                                 )
                             }

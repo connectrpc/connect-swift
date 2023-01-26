@@ -104,11 +104,7 @@ private struct MockStreamInterceptor: Interceptor {
 }
 
 final class InterceptorChainTests: XCTestCase {
-    private let config = ProtocolClientConfig(
-        host: "https://buf.build", httpClient: CrosstestHTTPClient(timeout: 60),
-        compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
-        codec: JSONCodec(), interceptors: []
-    )
+    private let config = ProtocolClientConfig(host: "https://buf.build")
 
     func testUnary() throws {
         let aRequestExpectation = self.expectation(description: "Filter A called with request")

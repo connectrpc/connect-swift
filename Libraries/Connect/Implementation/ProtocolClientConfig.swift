@@ -25,12 +25,12 @@ public struct ProtocolClientConfig {
     /// Compression settings to use for oubound requests.
     public let requestCompression: RequestCompression?
     /// Compression pools that can be used to decompress responses based on
-    /// the `content-encoding` response header.
+    /// response headers like `content-encoding`.
     public let responseCompressionPools: [CompressionPool]
     /// Set of interceptors that should be invoked with requests/responses.
     public let interceptors: [(ProtocolClientConfig) -> Interceptor]
 
-    /// Configuration used to specify if/how request should be compressed.
+    /// Configuration used to specify if/how requests should be compressed.
     public struct RequestCompression {
         /// The minimum number of bytes that a request message should be for compression to be used.
         public let minBytes: Int
@@ -76,8 +76,7 @@ extension ProtocolClientConfig {
     }
 
     func responseCompressionPool(forName name: String) -> CompressionPool? {
-        return self.responseCompressionPools
-            .first { $0.name() == name }
+        return self.responseCompressionPools.first { $0.name() == name }
     }
 
     func createInterceptorChain() -> InterceptorChain {

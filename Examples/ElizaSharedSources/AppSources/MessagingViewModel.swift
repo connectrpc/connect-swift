@@ -41,27 +41,19 @@ protocol MessagingViewModel: ObservableObject {
 /// View model that uses unary requests for messaging.
 @MainActor
 final class UnaryMessagingViewModel: MessagingViewModel {
-    private let protocolClient: ProtocolClient
-    private lazy var elizaClient = Buf_Connect_Demo_Eliza_V1_ElizaServiceClient(
-        client: self.protocolClient
-    )
+    private let client: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface
 
     @Published private(set) var messages = [Message]()
 
-    init(protocolOption: ProtocolClientOption) {
-        self.protocolClient = ProtocolClient(
-            host: "https://demo.connect.build",
-            httpClient: URLSessionHTTPClient(),
-            ProtoClientOption(), // Send protobuf binary on the wire
-            protocolOption // Specify the protocol to use for the client
-        )
+    init(client: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface) {
+        self.client = client
     }
 
     func send(_ sentence: String) async {
         let request = SayRequest.with { $0.sentence = sentence }
         self.addMessage(Message(message: sentence, author: .user))
 
-        let response = await self.elizaClient.say(request: request)
+        let response = await self.client.say(request: request, headers: [:])
         os_log(.debug, "Eliza unary response: %@", String(describing: response))
         self.addMessage(Message(
             message: response.message?.sentence ?? "No response", author: .eliza
@@ -78,21 +70,13 @@ final class UnaryMessagingViewModel: MessagingViewModel {
 /// View model that uses bidirectional streaming for messaging.
 @MainActor
 final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
-    private let protocolClient: ProtocolClient
-    private lazy var elizaClient = Buf_Connect_Demo_Eliza_V1_ElizaServiceClient(
-        client: self.protocolClient
-    )
-    private lazy var elizaStream = self.elizaClient.converse()
+    private let client: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface
+    private lazy var elizaStream = self.client.converse(headers: [:])
 
     @Published private(set) var messages = [Message]()
 
-    init(protocolOption: ProtocolClientOption) {
-        self.protocolClient = ProtocolClient(
-            host: "https://demo.connect.build",
-            httpClient: URLSessionHTTPClient(),
-            ProtoClientOption(), // Send protobuf binary on the wire
-            protocolOption // Specify the protocol to use for the client
-        )
+    init(client: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface) {
+        self.client = client
         self.observeResponses()
     }
 
