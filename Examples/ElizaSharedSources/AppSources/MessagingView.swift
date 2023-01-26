@@ -70,9 +70,9 @@ struct MessagingView<ViewModel: MessagingViewModel>: View {
 
             HStack {
                 TextField("Write your message...", text: self.$currentMessage)
-                    .onSubmit(self.sendMessage)
+                    .onSubmit { self.sendMessage() }
                     .submitLabel(.send)
-                Button("Send", action: self.sendMessage)
+                Button("Send", action: { self.sendMessage() })
                     .foregroundColor(.blue)
             }
         }
@@ -82,7 +82,7 @@ struct MessagingView<ViewModel: MessagingViewModel>: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("End Chat") {
-                    self.viewModel.endChat()
+                    Task { await self.viewModel.endChat() }
                     self.presentationMode.wrappedValue.dismiss()
                 }
             }
