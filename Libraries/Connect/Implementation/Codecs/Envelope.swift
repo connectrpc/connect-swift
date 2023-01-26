@@ -49,25 +49,6 @@ public enum Envelope {
         return Int(messageLength)
     }
 
-    /// Determines whether message data should be compressed.
-    ///
-    /// - parameter source: The message payload to optionally be compressed.
-    /// - parameter compressionMinBytes: The minimum size of the input message for compression to be
-    ///                                  applied.
-    ///
-    /// - returns: Whether the message should be compressed.
-    public static func shouldCompress(_ source: Data, compressionMinBytes: Int?) -> Bool {
-        if source.isEmpty {
-            return false
-        }
-
-        if let minBytes = compressionMinBytes, source.count >= minBytes {
-            return true
-        }
-
-        return false
-    }
-
     /// Packs a message into an "envelope", adding required header bytes and optionally
     /// applying compression.
     ///
@@ -75,18 +56,15 @@ public enum Envelope {
     /// And gRPC: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md#requests
     ///
     /// - parameter source: The input message data.
-    /// - parameter compressionPool: A compression pool that can be used for this envelope.
-    /// - parameter compressionMinBytes: The minimum size of the input message for compression to be
-    ///                                  applied.
+    /// - parameter compression: Configuration to use for compressing the message.
     ///
     /// - returns: Serialized/enveloped data for transmission.
     public static func packMessage(
-        _ source: Data, compressionPool: CompressionPool?, compressionMinBytes: Int?
+        _ source: Data, using compression: ProtocolClientConfig.RequestCompression?
     ) -> Data {
         var buffer = Data()
-        if self.shouldCompress(source, compressionMinBytes: compressionMinBytes),
-           let compressionPool = compressionPool,
-           let compressedSource = try? compressionPool.compress(data: source)
+        if let compression = compression, compression.shouldCompress(source),
+           let compressedSource = try? compression.pool.compress(data: source)
         {
             buffer.append(0b00000001) // 1 byte with the compression bit active
             self.write(lengthOf: compressedSource, to: &buffer)

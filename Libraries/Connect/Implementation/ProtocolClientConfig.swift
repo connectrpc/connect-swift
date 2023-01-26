@@ -14,51 +14,70 @@
 
 import Foundation
 
-/// Set of configuration (usually modified through `ClientOption` types) used to set up clients.
+/// Configuration used to set up `ProtocolClient` instances.
 public struct ProtocolClientConfig {
-    /// The target host (e.g., https://buf.build).
+    /// The target host (e.g., `https://buf.build`).
     public let host: String
-    /// The client to use for performing requests.
-    public let httpClient: HTTPClientInterface
-    /// The minimum number of bytes that a request message should be for compression to be used.
-    public let compressionMinBytes: Int?
-    /// The compression type that should be used (e.g., "gzip").
-    /// Requires a matching `compressionPools` entry.
-    public let compressionName: String?
-    /// Compression pools that provide support for the provided `compressionName`, as well as any
-    /// other compression methods that need to be supported for inbound responses.
-    public let compressionPools: [String: CompressionPool]
-    /// Codec to use for serializing/deserializing requests/responses.
+    /// The protocol to use for requests and streams.
+    public let networkProtocol: NetworkProtocol
+    /// Codec to use for serializing requests and deserializing responses.
     public let codec: Codec
+    /// Compression settings to use for oubound requests.
+    public let requestCompression: RequestCompression?
+    /// Compression pools that can be used to decompress responses based on
+    /// the `content-encoding` response header.
+    public let responseCompressionPools: [CompressionPool]
     /// Set of interceptors that should be invoked with requests/responses.
     public let interceptors: [(ProtocolClientConfig) -> Interceptor]
 
-    public func clone(
-        compressionMinBytes: Int? = nil,
-        compressionName: String? = nil,
-        compressionPools: [String: CompressionPool]? = nil,
-        codec: Codec? = nil,
-        interceptors: [(ProtocolClientConfig) -> Interceptor]? = nil
-    ) -> Self {
-        return .init(
-            host: self.host,
-            httpClient: self.httpClient,
-            compressionMinBytes: compressionMinBytes ?? self.compressionMinBytes,
-            compressionName: compressionName ?? self.compressionName,
-            compressionPools: compressionPools ?? self.compressionPools,
-            codec: codec ?? self.codec,
-            interceptors: interceptors ?? self.interceptors
-        )
+    /// Configuration used to specify if/how request should be compressed.
+    public struct RequestCompression {
+        /// The minimum number of bytes that a request message should be for compression to be used.
+        public let minBytes: Int
+        /// The compression pool that should be used for compressing outbound requests.
+        public let pool: CompressionPool
+
+        public func shouldCompress(_ data: Data) -> Bool {
+            return data.count >= self.minBytes
+        }
+
+        public init(minBytes: Int, pool: CompressionPool) {
+            self.minBytes = minBytes
+            self.pool = pool
+        }
+    }
+
+    public init(
+        host: String,
+        networkProtocol: NetworkProtocol = .connect,
+        codec: Codec = JSONCodec(),
+        requestCompression: RequestCompression? = nil,
+        responseCompressionPools: [CompressionPool] = [GzipCompressionPool()],
+        interceptors: [(ProtocolClientConfig) -> Interceptor] = []
+    ) {
+        self.host = host
+        self.networkProtocol = networkProtocol
+        self.codec = codec
+        self.requestCompression = requestCompression
+        self.responseCompressionPools = responseCompressionPools
+
+        switch networkProtocol {
+        case .connect:
+            self.interceptors = interceptors + [ConnectInterceptor.init]
+        case .grpcWeb:
+            self.interceptors = interceptors + [GRPCWebInterceptor.init]
+        }
     }
 }
 
 extension ProtocolClientConfig {
-    func requestCompressionPool() -> CompressionPool? {
-        return self.compressionName.flatMap { self.compressionPools[$0] }
+    func acceptCompressionPoolNames() -> [String] {
+        return self.responseCompressionPools.map { $0.name() }
     }
 
-    func acceptCompressionPoolNames() -> [String] {
-        return self.compressionPools.keys.filter { $0 != IdentityCompressionPool.name() }
+    func responseCompressionPool(forName name: String) -> CompressionPool? {
+        return self.responseCompressionPools
+            .first { $0.name() == name }
     }
 
     func createInterceptorChain() -> InterceptorChain {

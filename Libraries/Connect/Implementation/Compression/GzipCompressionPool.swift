@@ -26,7 +26,7 @@ public struct GzipCompressionPool {
 }
 
 extension GzipCompressionPool: CompressionPool {
-    public static func name() -> String {
+    public func name() -> String {
         return "gzip"
     }
 

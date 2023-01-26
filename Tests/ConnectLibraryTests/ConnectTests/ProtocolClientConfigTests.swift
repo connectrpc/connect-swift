@@ -17,20 +17,9 @@ import Foundation
 import XCTest
 
 final class ProtocolClientConfigTests: XCTestCase {
-    func testCompressionPoolsWithIdentityAndGzip() {
-        var config = ProtocolClientConfig(
-            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
-            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
-            codec: ProtoCodec(), interceptors: []
-        )
-        config = IdentityCompressionOption().apply(config)
-        config = GzipCompressionOption().apply(config)
-
-        XCTAssertTrue(config.compressionPools["identity"] is IdentityCompressionPool)
-        XCTAssertTrue(config.compressionPools["gzip"] is GzipCompressionPool)
-
-        // Identity is omitted from "accept" since it's a no-op
-        XCTAssertEqual(config.acceptCompressionPoolNames(), ["gzip"])
+    func testDefaultResponseCompressionPoolIncludesGzip() {
+        let config = ProtocolClientConfig(host: "https://buf.build")
+        XCTAssertEqual(config.responseCompressionPools.map { $0.name() }, ["gzip"])
     }
 
     func testGzipRequestOptionUsesGzipCompressionPool() {
@@ -75,25 +64,5 @@ final class ProtocolClientConfigTests: XCTestCase {
         let interceptors = config.interceptors.map { $0(config) }
         XCTAssertTrue(interceptors[0] is InterceptorA)
         XCTAssertTrue(interceptors[1] is InterceptorB)
-    }
-
-    func testJSONClientOptionSetsJSONCodec() {
-        var config = ProtocolClientConfig(
-            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
-            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
-            codec: ProtoCodec(), interceptors: []
-        )
-        config = JSONClientOption().apply(config)
-        XCTAssertTrue(config.codec is JSONCodec)
-    }
-
-    func testProtoClientOptionSetsProtoCodec() {
-        var config = ProtocolClientConfig(
-            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
-            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
-            codec: JSONCodec(), interceptors: []
-        )
-        config = ProtoClientOption().apply(config)
-        XCTAssertTrue(config.codec is ProtoCodec)
     }
 }

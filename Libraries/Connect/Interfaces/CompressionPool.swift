@@ -28,7 +28,7 @@ public protocol CompressionPool {
     ///
     /// - returns: The name of the compression pool that can be used with the `content-encoding`
     ///            header.
-    static func name() -> String
+    func name() -> String
 
     /// Compress an outbound request message.
     ///

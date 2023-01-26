@@ -14,23 +14,9 @@
 
 import Foundation
 
-/// Enables the client to speak using the gRPC Web protocol:
+/// Implementation of the gRPC-Web protocol as an interceptor.
 /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
-///
-/// Should not be specified alongside other options like `ConnectClientOption`, as only one protocol
-/// should be used per `ProtocolClient`.
-public struct GRPCWebClientOption {
-    public init() {}
-}
-
-extension GRPCWebClientOption: ProtocolClientOption {
-    public func apply(_ config: ProtocolClientConfig) -> ProtocolClientConfig {
-        return config.clone(interceptors: [GRPCWebInterceptor.init] + config.interceptors)
-    }
-}
-
-/// The gRPC Web protocol is implemented as an interceptor in the request/response chain.
-private struct GRPCWebInterceptor {
+struct GRPCWebInterceptor {
     private let config: ProtocolClientConfig
 
     init(config: ProtocolClientConfig) {
@@ -44,9 +30,7 @@ extension GRPCWebInterceptor: Interceptor {
             requestFunction: { request in
                 // GRPC unary payloads are enveloped.
                 let envelopedRequestBody = Envelope.packMessage(
-                    request.message ?? Data(),
-                    compressionPool: self.config.requestCompressionPool(),
-                    compressionMinBytes: self.config.compressionMinBytes
+                    request.message ?? Data(), using: self.config.requestCompression
                 )
 
                 return HTTPRequest(
@@ -78,7 +62,7 @@ extension GRPCWebInterceptor: Interceptor {
 
                 let compressionPool = response.headers[HeaderConstants.grpcContentEncoding]?
                     .first
-                    .flatMap { self.config.compressionPools[$0] }
+                    .flatMap { self.config.responseCompressionPool(forName: $0) }
                 do {
                     // gRPC Web returns data in 2 chunks (either/both of which may be compressed):
                     // 1. OPTIONAL (when not trailers-only): The (headers and length prefixed)
@@ -135,11 +119,7 @@ extension GRPCWebInterceptor: Interceptor {
                 )
             },
             requestDataFunction: { data in
-                return Envelope.packMessage(
-                    data,
-                    compressionPool: self.config.requestCompressionPool(),
-                    compressionMinBytes: self.config.compressionMinBytes
-                )
+                return Envelope.packMessage(data, using: self.config.requestCompression)
             },
             streamResultFunc: { result in
                 switch result {
@@ -160,7 +140,7 @@ extension GRPCWebInterceptor: Interceptor {
                     do {
                         let responseCompressionPool = responseHeaders?[
                             HeaderConstants.grpcContentEncoding
-                        ]?.first.flatMap { self.config.compressionPools[$0] }
+                        ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
                         let (headerByte, unpackedData) = try Envelope.unpackMessage(
                             data, compressionPool: responseCompressionPool
                         )
@@ -204,8 +184,8 @@ private extension Headers {
         var headers = self
         headers[HeaderConstants.grpcAcceptEncoding] = config
             .acceptCompressionPoolNames()
-        headers[HeaderConstants.grpcContentEncoding] = config.requestCompressionPool()
-            .map { [type(of: $0).name()] }
+        headers[HeaderConstants.grpcContentEncoding] = config.requestCompression
+            .map { [$0.pool.name()] }
         headers[HeaderConstants.grpcTE] = ["trailers"]
 
         // Note that we do not comply with the recommended structure for user-agent:
