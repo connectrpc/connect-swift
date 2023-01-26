@@ -14,11 +14,11 @@
 
 import Foundation
 
-/// Configuration used to set up `ProtocolClient` instances.
+/// Configuration used to set up `ProtocolClientInterface` implementations.
 public struct ProtocolClientConfig {
-    /// The target host (e.g., `https://buf.build`).
+    /// Target host (e.g., `https://buf.build`).
     public let host: String
-    /// The protocol to use for requests and streams.
+    /// Protocol to use for requests and streams.
     public let networkProtocol: NetworkProtocol
     /// Codec to use for serializing requests and deserializing responses.
     public let codec: Codec
@@ -27,7 +27,7 @@ public struct ProtocolClientConfig {
     /// Compression pools that can be used to decompress responses based on
     /// response headers like `content-encoding`.
     public let responseCompressionPools: [CompressionPool]
-    /// Set of interceptors that should be invoked with requests/responses.
+    /// List of interceptors that should be invoked with requests/responses.
     public let interceptors: [(ProtocolClientConfig) -> Interceptor]
 
     /// Configuration used to specify if/how requests should be compressed.

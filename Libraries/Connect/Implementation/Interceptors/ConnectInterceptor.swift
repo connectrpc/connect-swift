@@ -15,7 +15,7 @@
 import Foundation
 
 /// Implementation of the Connect protocol as an interceptor.
-/// The Connect protocol: https://connect.build/docs/protocol
+/// https://connect.build/docs/protocol
 struct ConnectInterceptor {
     private let config: ProtocolClientConfig
 
@@ -40,8 +40,8 @@ extension ConnectInterceptor: Interceptor {
                     compression.shouldCompress(requestBody)
                 {
                     do {
-                        headers[HeaderConstants.contentEncoding] = [compression.pool.name()]
                         finalRequestBody = try compression.pool.compress(data: requestBody)
+                        headers[HeaderConstants.contentEncoding] = [compression.pool.name()]
                     } catch {
                         finalRequestBody = requestBody
                     }

@@ -24,7 +24,7 @@ public final class ProtocolClient {
     /// Designated initializer.
     ///
     /// - parameter httpClient: The HTTP client to use for sending requests and starting streams.
-    /// - parameter config: The configuration to use for making requests.
+    /// - parameter config: The configuration to use for requests and streams.
     public init(httpClient: HTTPClientInterface, config: ProtocolClientConfig) {
         self.httpClient = httpClient
         self.config = config
