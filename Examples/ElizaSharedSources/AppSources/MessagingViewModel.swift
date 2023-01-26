@@ -35,17 +35,18 @@ protocol MessagingViewModel: ObservableObject {
     func send(_ message: String) async
 
     /// End the chat session (and close connections if needed).
-    func endChat()
+    func endChat() async
 }
 
 /// View model that uses unary requests for messaging.
+@MainActor
 final class UnaryMessagingViewModel: MessagingViewModel {
     private let protocolClient: ProtocolClient
     private lazy var elizaClient = Buf_Connect_Demo_Eliza_V1_ElizaServiceClient(
         client: self.protocolClient
     )
 
-    @MainActor @Published private(set) var messages = [Message]()
+    @Published private(set) var messages = [Message]()
 
     init(protocolOption: ProtocolClientOption) {
         self.protocolClient = ProtocolClient(
@@ -58,24 +59,24 @@ final class UnaryMessagingViewModel: MessagingViewModel {
 
     func send(_ sentence: String) async {
         let request = SayRequest.with { $0.sentence = sentence }
-        await self.addMessage(Message(message: sentence, author: .user))
+        self.addMessage(Message(message: sentence, author: .user))
 
         let response = await self.elizaClient.say(request: request)
         os_log(.debug, "Eliza unary response: %@", String(describing: response))
-        await self.addMessage(Message(
+        self.addMessage(Message(
             message: response.message?.sentence ?? "No response", author: .eliza
         ))
      }
 
-    func endChat() {}
+    func endChat() async {}
 
-    @MainActor
     private func addMessage(_ message: Message) {
         self.messages.append(message)
     }
 }
 
 /// View model that uses bidirectional streaming for messaging.
+@MainActor
 final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
     private let protocolClient: ProtocolClient
     private lazy var elizaClient = Buf_Connect_Demo_Eliza_V1_ElizaServiceClient(
@@ -83,7 +84,7 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
     )
     private lazy var elizaStream = self.elizaClient.converse()
 
-    @MainActor @Published private(set) var messages = [Message]()
+    @Published private(set) var messages = [Message]()
 
     init(protocolOption: ProtocolClientOption) {
         self.protocolClient = ProtocolClient(
@@ -98,7 +99,7 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
     func send(_ sentence: String) async {
         do {
             let request = ConverseRequest.with { $0.sentence = sentence }
-            await self.addMessage(Message(message: sentence, author: .user))
+            self.addMessage(Message(message: sentence, author: .user))
             try self.elizaStream.send(request)
         } catch let error {
             os_log(
@@ -120,7 +121,7 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
 
                 case .message(let message):
                     os_log(.debug, "Eliza message: %@", String(describing: message))
-                    await self.addMessage(Message(message: message.sentence, author: .eliza))
+                    self.addMessage(Message(message: message.sentence, author: .eliza))
 
                 case .complete(_, let error, let trailers):
                     os_log(.debug, "Eliza completed with trailers: %@", trailers ?? [:])
@@ -131,13 +132,12 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
                     } else {
                         sentence = "[Conversation ended]"
                     }
-                    await self.addMessage(Message(message: sentence, author: .eliza))
+                    self.addMessage(Message(message: sentence, author: .eliza))
                 }
             }
         }
     }
 
-    @MainActor
     private func addMessage(_ message: Message) {
         self.messages.append(message)
         print(self.messages)
