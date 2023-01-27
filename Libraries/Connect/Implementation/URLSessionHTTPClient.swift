@@ -49,24 +49,35 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
                     headers: httpURLResponse.formattedLowercasedHeaders(),
                     message: data,
                     trailers: [:], // URLSession does not support trailers
-                    error: error
+                    error: error,
+                    tracingInfo: .init(httpStatus: httpURLResponse.statusCode)
                 ))
             } else if let error = error {
                 let code = Code.fromURLSessionCode((error as NSError).code)
                 completion(HTTPResponse(
-                    code: code, headers: [:], message: data, trailers: [:], error: ConnectError(
+                    code: code,
+                    headers: [:],
+                    message: data,
+                    trailers: [:],
+                    error: ConnectError(
                         code: code,
                         message: error.localizedDescription,
                         exception: error, details: [], metadata: [:]
-                    )
+                    ),
+                    tracingInfo: nil
                 ))
             } else {
                 completion(HTTPResponse(
-                    code: .unknown, headers: [:], message: data, trailers: [:], error: ConnectError(
+                    code: .unknown,
+                    headers: [:],
+                    message: data,
+                    trailers: [:],
+                    error: ConnectError(
                         code: .unknown,
                         message: "unexpected response type \(type(of: urlResponse))",
                         exception: error, details: [], metadata: [:]
-                    )
+                    ),
+                    tracingInfo: nil
                 ))
             }
         }
