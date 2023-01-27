@@ -39,7 +39,7 @@ struct MenuView: View {
             config: ProtocolClientConfig(
                 host: "https://demo.connect.build",
                 networkProtocol: networkProtocol,
-                codec: ProtoCodec() // Use Protobuf binary, not JSON
+                codec: ProtoCodec() // Protobuf binary, or JSONCodec() for JSON
             )
         )
         return Buf_Connect_Demo_Eliza_V1_ElizaServiceClient(client: protocolClient)
