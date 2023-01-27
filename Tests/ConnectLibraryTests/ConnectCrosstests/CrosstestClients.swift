@@ -28,36 +28,40 @@ final class CrosstestClients {
         let host = "https://localhost:8081"
 
         self.connectJSONClient = ProtocolClient(
-            host: host,
             httpClient: httpClient,
-            ConnectClientOption(),
-            JSONClientOption(),
-            GzipRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption()
+            config: ProtocolClientConfig(
+                host: host,
+                networkProtocol: .connect,
+                codec: JSONCodec(),
+                requestCompression: .init(minBytes: 10, pool: GzipCompressionPool())
+            )
         )
         self.connectProtoClient = ProtocolClient(
-            host: host,
             httpClient: httpClient,
-            ConnectClientOption(),
-            ProtoClientOption(),
-            GzipRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption()
+            config: ProtocolClientConfig(
+                host: host,
+                networkProtocol: .connect,
+                codec: ProtoCodec(),
+                requestCompression: .init(minBytes: 10, pool: GzipCompressionPool())
+            )
         )
         self.grpcWebJSONClient = ProtocolClient(
-            host: host,
             httpClient: httpClient,
-            GRPCWebClientOption(),
-            JSONClientOption(),
-            GzipRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption()
+            config: ProtocolClientConfig(
+                host: host,
+                networkProtocol: .grpcWeb,
+                codec: JSONCodec(),
+                requestCompression: .init(minBytes: 10, pool: GzipCompressionPool())
+            )
         )
         self.grpcWebProtoClient = ProtocolClient(
-            host: host,
             httpClient: httpClient,
-            GRPCWebClientOption(),
-            ProtoClientOption(),
-            GzipRequestOption(compressionMinBytes: 10),
-            GzipCompressionOption()
+            config: ProtocolClientConfig(
+                host: host,
+                networkProtocol: .grpcWeb,
+                codec: ProtoCodec(),
+                requestCompression: .init(minBytes: 10, pool: GzipCompressionPool())
+            )
         )
     }
 }

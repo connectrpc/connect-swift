@@ -14,23 +14,9 @@
 
 import Foundation
 
-/// Enables the client to speak using the Connect protocol:
-/// https://connect.build/docs
-///
-/// Should not be specified alongside other options like `GRPCWebClientOption`, as only one protocol
-/// should be used per `ProtocolClient`.
-public struct ConnectClientOption {
-    public init() {}
-}
-
-extension ConnectClientOption: ProtocolClientOption {
-    public func apply(_ config: ProtocolClientConfig) -> ProtocolClientConfig {
-        return config.clone(interceptors: [ConnectInterceptor.init] + config.interceptors)
-    }
-}
-
-/// The Connect protocol is implemented as an interceptor in the request/response chain.
-private struct ConnectInterceptor {
+/// Implementation of the Connect protocol as an interceptor.
+/// https://connect.build/docs/protocol
+struct ConnectInterceptor {
     private let config: ProtocolClientConfig
 
     private static let protocolVersion = "1"
@@ -50,14 +36,12 @@ extension ConnectInterceptor: Interceptor {
 
                 let requestBody = request.message ?? Data()
                 let finalRequestBody: Data
-                if Envelope.shouldCompress(
-                    requestBody, compressionMinBytes: self.config.compressionMinBytes
-                ), let compressionPool = self.config.requestCompressionPool() {
+                if let compression = self.config.requestCompression,
+                    compression.shouldCompress(requestBody)
+                {
                     do {
-                        headers[HeaderConstants.contentEncoding] = [
-                            type(of: compressionPool).name(),
-                        ]
-                        finalRequestBody = try compressionPool.compress(data: requestBody)
+                        finalRequestBody = try compression.pool.compress(data: requestBody)
+                        headers[HeaderConstants.contentEncoding] = [compression.pool.name()]
                     } catch {
                         finalRequestBody = requestBody
                     }
@@ -87,7 +71,7 @@ extension ConnectInterceptor: Interceptor {
                     })
 
                 if let encoding = response.headers[HeaderConstants.contentEncoding]?.first,
-                   let compressionPool = self.config.compressionPools[encoding],
+                   let compressionPool = self.config.responseCompressionPool(forName: encoding),
                    let message = response.message.flatMap({ data in
                        return try? compressionPool.decompress(data: data)
                    })
@@ -121,7 +105,7 @@ extension ConnectInterceptor: Interceptor {
                 var headers = request.headers
                 headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
                 headers[HeaderConstants.connectStreamingContentEncoding] = self.config
-                    .compressionName.map { [$0] }
+                    .requestCompression.map { [$0.pool.name()] }
                 headers[HeaderConstants.connectStreamingAcceptEncoding] = self.config
                     .acceptCompressionPoolNames()
                 return HTTPRequest(
@@ -132,11 +116,7 @@ extension ConnectInterceptor: Interceptor {
                 )
             },
             requestDataFunction: { data in
-                return Envelope.packMessage(
-                    data,
-                    compressionPool: self.config.requestCompressionPool(),
-                    compressionMinBytes: self.config.compressionMinBytes
-                )
+                return Envelope.packMessage(data, using: self.config.requestCompression)
             },
             streamResultFunc: { result in
                 switch result {
@@ -148,7 +128,7 @@ extension ConnectInterceptor: Interceptor {
                     do {
                         let responseCompressionPool = responseHeaders?[
                             HeaderConstants.connectStreamingContentEncoding
-                        ]?.first.flatMap { self.config.compressionPools[$0] }
+                        ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
                         let (headerByte, message) = try Envelope.unpackMessage(
                             data, compressionPool: responseCompressionPool
                         )

@@ -16,7 +16,7 @@ import Foundation
 import zlib
 
 /// Compression pool that handles gzip compression/decompression.
-public struct GzipCompressionPool {
+public struct GzipCompressionPool: Sendable {
     public init() {}
 
     public enum GzipError: Error {
@@ -26,7 +26,7 @@ public struct GzipCompressionPool {
 }
 
 extension GzipCompressionPool: CompressionPool {
-    public static func name() -> String {
+    public func name() -> String {
         return "gzip"
     }
 

@@ -16,84 +16,62 @@
 import Foundation
 import XCTest
 
-final class ProtocolClientConfigTests: XCTestCase {
-    func testCompressionPoolsWithIdentityAndGzip() {
-        var config = ProtocolClientConfig(
-            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
-            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
-            codec: ProtoCodec(), interceptors: []
+private struct NoopInterceptor: Interceptor {
+    func unaryFunction() -> UnaryFunction {
+        return .init(requestFunction: { $0 }, responseFunction: { $0 })
+    }
+
+    func streamFunction() -> StreamFunction {
+        return .init(
+            requestFunction: { $0 },
+            requestDataFunction: { $0 },
+            streamResultFunc: { $0 }
         )
-        config = IdentityCompressionOption().apply(config)
-        config = GzipCompressionOption().apply(config)
+    }
 
-        XCTAssertTrue(config.compressionPools["identity"] is IdentityCompressionPool)
-        XCTAssertTrue(config.compressionPools["gzip"] is GzipCompressionPool)
+    init(config: ProtocolClientConfig) {}
+}
 
-        // Identity is omitted from "accept" since it's a no-op
+final class ProtocolClientConfigTests: XCTestCase {
+    func testDefaultResponseCompressionPoolIncludesGzip() {
+        let config = ProtocolClientConfig(host: "https://buf.build")
+        XCTAssertTrue(config.responseCompressionPools[0] is GzipCompressionPool)
         XCTAssertEqual(config.acceptCompressionPoolNames(), ["gzip"])
     }
 
-    func testGzipRequestOptionUsesGzipCompressionPool() {
-        var config = ProtocolClientConfig(
-            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
-            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
-            codec: ProtoCodec(), interceptors: []
+    func testShouldCompressDataLargerThanMinBytes() {
+        let data = Data(repeating: 0xa, count: 50)
+        let compression = ProtocolClientConfig.RequestCompression(
+            minBytes: 10, pool: GzipCompressionPool()
         )
-        config = GzipCompressionOption().apply(config)
-        config = GzipRequestOption(compressionMinBytes: 10).apply(config)
-        XCTAssertTrue(config.requestCompressionPool() is GzipCompressionPool)
+        XCTAssertTrue(compression.shouldCompress(data))
     }
 
-    func testInterceptorsOptionAddsToExistingInterceptorsIfCalledMultipleTimes() {
-        class NoopInterceptor: Interceptor {
-            func unaryFunction() -> UnaryFunction {
-                return .init(requestFunction: { $0 }, responseFunction: { $0 })
-            }
-
-            func streamFunction() -> StreamFunction {
-                return .init(
-                    requestFunction: { $0 },
-                    requestDataFunction: { $0 },
-                    streamResultFunc: { $0 }
-                )
-            }
-
-            init(config: ProtocolClientConfig) {}
-        }
-
-        final class InterceptorA: NoopInterceptor {}
-        final class InterceptorB: NoopInterceptor {}
-
-        var config = ProtocolClientConfig(
-            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
-            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
-            codec: ProtoCodec(), interceptors: []
+    func testShouldNotCompressDataSmallerThanMinBytes() {
+        let data = Data(repeating: 0xa, count: 50)
+        let compression = ProtocolClientConfig.RequestCompression(
+            minBytes: 100, pool: GzipCompressionPool()
         )
-        config = InterceptorsOption(interceptors: [InterceptorA.init]).apply(config)
-        config = InterceptorsOption(interceptors: [InterceptorB.init]).apply(config)
-
-        let interceptors = config.interceptors.map { $0(config) }
-        XCTAssertTrue(interceptors[0] is InterceptorA)
-        XCTAssertTrue(interceptors[1] is InterceptorB)
+        XCTAssertFalse(compression.shouldCompress(data))
     }
 
-    func testJSONClientOptionSetsJSONCodec() {
-        var config = ProtocolClientConfig(
-            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
-            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
-            codec: ProtoCodec(), interceptors: []
+    func testAddsConnectInterceptorLastWhenUsingConnectProtocol() {
+        let config = ProtocolClientConfig(
+            host: "https://buf.build",
+            networkProtocol: .connect,
+            interceptors: [NoopInterceptor.init]
         )
-        config = JSONClientOption().apply(config)
-        XCTAssertTrue(config.codec is JSONCodec)
+        XCTAssertTrue(config.interceptors[0](config) is NoopInterceptor)
+        XCTAssertTrue(config.interceptors[1](config) is ConnectInterceptor)
     }
 
-    func testProtoClientOptionSetsProtoCodec() {
-        var config = ProtocolClientConfig(
-            host: "https://buf.build", httpClient: URLSessionHTTPClient(),
-            compressionMinBytes: nil, compressionName: nil, compressionPools: [:],
-            codec: JSONCodec(), interceptors: []
+    func testAddsGRPCWebInterceptorLastWhenUsingGRPCWebProtocol() {
+        let config = ProtocolClientConfig(
+            host: "https://buf.build",
+            networkProtocol: .grpcWeb,
+            interceptors: [NoopInterceptor.init]
         )
-        config = ProtoClientOption().apply(config)
-        XCTAssertTrue(config.codec is ProtoCodec)
+        XCTAssertTrue(config.interceptors[0](config) is NoopInterceptor)
+        XCTAssertTrue(config.interceptors[1](config) is GRPCWebInterceptor)
     }
 }

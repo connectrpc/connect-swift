@@ -19,68 +19,18 @@ import SwiftProtobuf
 /// Concrete implementation of the `ProtocolClientInterface`.
 public final class ProtocolClient {
     private let config: ProtocolClientConfig
+    private let httpClient: HTTPClientInterface
 
-    /// Instantiate a new client.
+    /// Designated initializer.
     ///
-    /// - parameter host: The target host (e.g., https://buf.build).
-    /// - parameter httpClient: HTTP client to use for performing requests.
-    /// - parameter options: Series of options with which to configure the client.
-    ///                      Identity and gzip compression implementations are provided by default
-    ///                      via `IdentityCompressionOption` and `GzipCompressionOption`, and
-    ///                      encoding requests with gzip can be enabled using `GzipRequestOption`.
-    ///                      Additional compression implementations may be specified using custom
-    ///                      options.
+    /// - parameter httpClient: The HTTP client to use for sending requests and starting streams.
+    /// - parameter config: The configuration to use for requests and streams.
     public init(
-        host: String, httpClient: HTTPClientInterface, _ options: ProtocolClientOption...
+        httpClient: HTTPClientInterface = URLSessionHTTPClient(),
+        config: ProtocolClientConfig
     ) {
-        var config = ProtocolClientConfig.withDefaultOptions(
-            andHost: host, httpClient: httpClient
-        )
-        for option in options {
-            config = option.apply(config)
-        }
+        self.httpClient = httpClient
         self.config = config
-    }
-
-    /// Instantiate a new client.
-    ///
-    /// - parameter host: The target host (e.g., https://buf.build).
-    /// - parameter httpClient: HTTP client to use for performing requests.
-    /// - parameter options: Series of options with which to configure the client.
-    ///                      Identity and gzip compression implementations are provided by default
-    ///                      via `IdentityCompressionOption` and `GzipCompressionOption`, and
-    ///                      encoding requests with gzip can be enabled using `GzipRequestOption`.
-    ///                      Additional compression implementations may be specified using custom
-    ///                      options.
-    public init(
-        host: String, httpClient: HTTPClientInterface, options: [ProtocolClientOption]
-    ) {
-        var config = ProtocolClientConfig.withDefaultOptions(
-            andHost: host, httpClient: httpClient
-        )
-        for option in options {
-            config = option.apply(config)
-        }
-        self.config = config
-    }
-}
-
-private extension ProtocolClientConfig {
-    static func withDefaultOptions(
-        andHost host: String, httpClient: HTTPClientInterface
-    ) -> Self {
-        var config = ProtocolClientConfig(
-            host: host,
-            httpClient: httpClient,
-            compressionMinBytes: nil,
-            compressionName: nil,
-            compressionPools: [:],
-            codec: JSONCodec(),
-            interceptors: []
-        )
-        config = IdentityCompressionOption().apply(config)
-        config = GzipCompressionOption().apply(config)
-        return config
     }
 }
 
@@ -119,7 +69,7 @@ extension ProtocolClient: ProtocolClientInterface {
             headers: headers,
             message: data
         ))
-        return self.config.httpClient.unary(request: request) { response in
+        return self.httpClient.unary(request: request) { response in
             let response = chain.responseFunction(response)
             let responseMessage: ResponseMessage<Output>
             if response.code != .ok {
@@ -330,7 +280,7 @@ extension ProtocolClient: ProtocolClientInterface {
                 }
             }
         )
-        let httpRequestCallbacks = self.config.httpClient.stream(
+        let httpRequestCallbacks = self.httpClient.stream(
             request: request,
             responseCallbacks: responseCallbacks
         )

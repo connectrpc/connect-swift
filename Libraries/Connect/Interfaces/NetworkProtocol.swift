@@ -12,23 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Foundation
-
-/// Compression pool that keeps data in its default untransformed ("identity") state.
-public struct IdentityCompressionPool {
-    public init() {}
-}
-
-extension IdentityCompressionPool: CompressionPool {
-    public static func name() -> String {
-        return "identity"
-    }
-
-    public func compress(data: Data) throws -> Data {
-        return data
-    }
-
-    public func decompress(data: Data) throws -> Data {
-        return data
-    }
+/// Protocols that are supported by the library.
+public enum NetworkProtocol {
+    /// The Connect protocol:
+    /// https://connect.build/docs/protocol
+    case connect
+    /// The gRPC-Web protocol:
+    /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
+    case grpcWeb
 }
