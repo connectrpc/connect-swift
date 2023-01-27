@@ -95,19 +95,19 @@ extension ConnectInterceptor: Interceptor {
                     return HTTPResponse(
                         code: response.code,
                         headers: headers,
-                        httpStatus: response.httpStatus,
                         message: message,
                         trailers: trailers,
-                        error: response.error
+                        error: response.error,
+                        tracingInfo: response.tracingInfo
                     )
                 } else {
                     return HTTPResponse(
                         code: response.code,
                         headers: headers,
-                        httpStatus: response.httpStatus,
                         message: response.message,
                         trailers: trailers,
-                        error: response.error
+                        error: response.error,
+                        tracingInfo: response.tracingInfo
                     )
                 }
             }

@@ -21,26 +21,36 @@ public struct HTTPResponse: Sendable {
     public let code: Code
     /// Response headers specified by the server.
     public let headers: Headers
-    /// HTTP status received by the response. Note that `code` is generally preferred,
-    /// except for HTTP-specific use cases such as tracing.
-    /// Nil in cases where no response was received from the server.
-    public let httpStatus: Int?
     /// Body data provided by the server.
     public let message: Data?
     /// Trailers provided by the server.
     public let trailers: Trailers
     /// The accompanying error, if the request failed.
     public let error: Swift.Error?
+    /// Tracing information that can be used for logging or debugging network-level data.
+    /// This information is expected to change when switching protocols (i.e., from Connect to
+    /// gRPC-Web), as each protocol has different HTTP semantics.
+    /// Nil in cases where no response was received from the server.
+    public let tracingInfo: TracingInfo?
+
+    public struct TracingInfo: Equatable, Sendable {
+        /// HTTP status received from the server.
+        public let httpStatus: Int
+
+        public init(httpStatus: Int) {
+            self.httpStatus = httpStatus
+        }
+    }
 
     public init(
-        code: Code, headers: Headers, httpStatus: Int?,
-        message: Data?, trailers: Trailers, error: Error?
+        code: Code, headers: Headers, message: Data?,
+        trailers: Trailers, error: Swift.Error?, tracingInfo: TracingInfo?
     ) {
         self.code = code
         self.headers = headers
-        self.httpStatus = httpStatus
         self.message = message
         self.trailers = trailers
         self.error = error
+        self.tracingInfo = tracingInfo
     }
 }
