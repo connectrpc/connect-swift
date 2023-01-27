@@ -25,7 +25,10 @@ public final class ProtocolClient {
     ///
     /// - parameter httpClient: The HTTP client to use for sending requests and starting streams.
     /// - parameter config: The configuration to use for requests and streams.
-    public init(httpClient: HTTPClientInterface, config: ProtocolClientConfig) {
+    public init(
+        httpClient: HTTPClientInterface = URLSessionHTTPClient(),
+        config: ProtocolClientConfig
+    ) {
         self.httpClient = httpClient
         self.config = config
     }
