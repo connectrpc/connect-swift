@@ -97,7 +97,8 @@ extension ConnectInterceptor: Interceptor {
                         headers: headers,
                         message: message,
                         trailers: trailers,
-                        error: response.error
+                        error: response.error,
+                        tracingInfo: response.tracingInfo
                     )
                 } else {
                     return HTTPResponse(
@@ -105,7 +106,8 @@ extension ConnectInterceptor: Interceptor {
                         headers: headers,
                         message: response.message,
                         trailers: trailers,
-                        error: response.error
+                        error: response.error,
+                        tracingInfo: response.tracingInfo
                     )
                 }
             }

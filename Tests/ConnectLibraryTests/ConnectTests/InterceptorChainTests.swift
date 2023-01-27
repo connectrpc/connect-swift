@@ -42,7 +42,8 @@ private struct MockUnaryInterceptor: Interceptor {
                     headers: headers,
                     message: response.message,
                     trailers: response.trailers,
-                    error: response.error
+                    error: response.error,
+                    tracingInfo: .init(httpStatus: 200)
                 )
             }
         )
@@ -148,7 +149,8 @@ final class InterceptorChainTests: XCTestCase {
             headers: Headers(),
             message: nil,
             trailers: Trailers(),
-            error: nil
+            error: nil,
+            tracingInfo: .init(httpStatus: 200)
         ))
         XCTAssertEqual(interceptedResponse.headers["filter-chain"], ["filter-b", "filter-a"])
 

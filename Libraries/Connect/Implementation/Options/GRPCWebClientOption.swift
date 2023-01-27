@@ -72,7 +72,8 @@ extension GRPCWebInterceptor: Interceptor {
                         trailers: response.trailers,
                         error: response.error ?? ConnectError.fromGRPCWebTrailers(
                             response.headers, code: code
-                        )
+                        ),
+                        tracingInfo: response.tracingInfo
                     )
                 }
 
@@ -115,7 +116,8 @@ extension GRPCWebInterceptor: Interceptor {
                         headers: response.headers,
                         message: response.message,
                         trailers: response.trailers,
-                        error: error
+                        error: error,
+                        tracingInfo: response.tracingInfo
                     )
                 }
             }
@@ -284,7 +286,8 @@ private extension HTTPResponse {
                 headers: self.headers,
                 message: message,
                 trailers: trailers,
-                error: nil
+                error: nil,
+                tracingInfo: self.tracingInfo
             )
         } else {
             return HTTPResponse(
@@ -292,7 +295,8 @@ private extension HTTPResponse {
                 headers: self.headers,
                 message: message,
                 trailers: trailers,
-                error: ConnectError.fromGRPCWebTrailers(trailers, code: grpcStatus)
+                error: ConnectError.fromGRPCWebTrailers(trailers, code: grpcStatus),
+                tracingInfo: self.tracingInfo
             )
         }
     }
