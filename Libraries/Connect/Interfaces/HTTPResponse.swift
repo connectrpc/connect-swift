@@ -27,7 +27,7 @@ public struct HTTPResponse: Sendable {
     public let trailers: Trailers
     /// The accompanying error, if the request failed.
     public let error: Swift.Error?
-    /// Tracing information that can be used for logging or debugging network-level data.
+    /// Tracing information that can be used for logging or debugging network-level details.
     /// This information is expected to change when switching protocols (i.e., from Connect to
     /// gRPC-Web), as each protocol has different HTTP semantics.
     /// Nil in cases where no response was received from the server.
