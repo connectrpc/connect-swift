@@ -21,7 +21,8 @@ public protocol HTTPClientInterface {
     ///
     /// - returns: A type which can be used to cancel the outbound request.
     @discardableResult
-    func unary(request: HTTPRequest, completion: @escaping (HTTPResponse) -> Void) -> Cancelable
+    func unary(request: HTTPRequest, completion: @Sendable @escaping (HTTPResponse) -> Void)
+        -> Cancelable
 
     /// Initialize a new HTTP stream.
     ///

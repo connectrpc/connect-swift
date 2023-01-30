@@ -39,7 +39,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
 
     @discardableResult
     open func unary(
-        request: HTTPRequest, completion: @escaping (HTTPResponse) -> Void
+        request: HTTPRequest, completion: @Sendable @escaping (HTTPResponse) -> Void
     ) -> Cancelable {
         let urlRequest = URLRequest(httpRequest: request)
         let task = self.session.dataTask(with: urlRequest) { data, urlResponse, error in
