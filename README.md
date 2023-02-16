@@ -149,6 +149,7 @@ for details.
 
 ## Ecosystem
 
+- [connect-kotlin][connect-kotlin]: Idiomatic gRPC & Connect RPCs for Kotlin
 - [connect-go][connect-go]: Go service stubs for servers
 - [connect-web][connect-web]: TypeScript clients for web browsers
 - [Buf Studio][buf-studio]: Web UI for ad-hoc RPCs
@@ -167,7 +168,8 @@ Offered under the [Apache 2 license](./LICENSE).
 [blog]: https://buf.build/blog/announcing-connect-swift
 [buf-studio]: https://studio.buf.build
 [connect-crosstest]: https://github.com/bufbuild/connect-crosstest
-[connect-go]: https://github.com/bufbuild/connect-go
+[connect-go]: https://github.com/bufbuild/connect-go\
+[connect-kotlin]: https://github.com/bufbuild/connect-kotlin
 [connect-protocol]: https://connect.build/docs/protocol
 [connect-web]: https://www.npmjs.com/package/@bufbuild/connect-web
 [error-handling]: https://connect.build/docs/swift/errors
