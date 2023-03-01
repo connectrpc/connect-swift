@@ -19,7 +19,7 @@ import PackageDescription
 let package = Package(
     name: "Connect",
     platforms: [
-        .iOS(.v14),
+        .iOS(.v13),
         .macOS(.v10_15),
     ],
     products: [
