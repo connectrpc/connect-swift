@@ -17,14 +17,17 @@ internal protocol Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
 
     /// Say is a unary request demo. This method should allow for a one sentence
     /// response given a one sentence request.
+    @available(iOS 13, *)
     func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers) async -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>
 
     /// Converse is a bi-directional streaming request demo. This method should allow for
     /// many requests and many responses.
+    @available(iOS 13, *)
     func `converse`(headers: Connect.Headers) -> any Connect.BidirectionalAsyncStreamInterface<Buf_Connect_Demo_Eliza_V1_ConverseRequest, Buf_Connect_Demo_Eliza_V1_ConverseResponse>
 
     /// Introduce is a server-streaming request demo.  This method allows for a single request that will return a series
     /// of responses
+    @available(iOS 13, *)
     func `introduce`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest, Buf_Connect_Demo_Eliza_V1_IntroduceResponse>
 }
 
@@ -36,14 +39,17 @@ internal final class Buf_Connect_Demo_Eliza_V1_ElizaServiceClient: Buf_Connect_D
         self.client = client
     }
 
+    @available(iOS 13, *)
     internal func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse> {
         return await self.client.unary(path: "buf.connect.demo.eliza.v1.ElizaService/Say", request: request, headers: headers)
     }
 
+    @available(iOS 13, *)
     internal func `converse`(headers: Connect.Headers = [:]) -> any Connect.BidirectionalAsyncStreamInterface<Buf_Connect_Demo_Eliza_V1_ConverseRequest, Buf_Connect_Demo_Eliza_V1_ConverseResponse> {
         return self.client.bidirectionalStream(path: "buf.connect.demo.eliza.v1.ElizaService/Converse", headers: headers)
     }
 
+    @available(iOS 13, *)
     internal func `introduce`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest, Buf_Connect_Demo_Eliza_V1_IntroduceResponse> {
         return self.client.serverOnlyStream(path: "buf.connect.demo.eliza.v1.ElizaService/Introduce", headers: headers)
     }

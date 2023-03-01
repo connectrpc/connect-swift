@@ -82,6 +82,7 @@ final class ConnectMockGenerator: Generator {
                     self.printLine(
                         "/// Mocked for async calls to `\(method.name(using: self.options))()`."
                     )
+                    self.printLine("@available(iOS 13, *)")
                     self.printLine(
                         """
                         \(self.propertyVisibility) var \(method.asyncAwaitMockPropertyName()) = \
@@ -143,6 +144,7 @@ final class ConnectMockGenerator: Generator {
     private func printAsyncAwaitMethodMockImplementation(for method: MethodDescriptor) {
         self.printLine()
 
+        self.printLine("@available(iOS 13, *)")
         self.printLine(
             "\(self.typeVisibility) "
             + method.asyncAwaitSignature(

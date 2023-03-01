@@ -131,6 +131,7 @@ final class ConnectClientGenerator: Generator {
     private func printAsyncAwaitMethodInterface(for method: MethodDescriptor) {
         self.printLine()
         self.printCommentsIfNeeded(for: method)
+        self.printLine("@available(iOS 13, *)")
         self.printLine(
             method.asyncAwaitSignature(
                 using: self.namer, includeDefaults: false, options: self.options
@@ -159,6 +160,7 @@ final class ConnectClientGenerator: Generator {
 
     private func printAsyncAwaitMethodImplementation(for method: MethodDescriptor) {
         self.printLine()
+        self.printLine("@available(iOS 13, *)")
         self.printLine(
             "\(self.visibility) "
             + method.asyncAwaitSignature(

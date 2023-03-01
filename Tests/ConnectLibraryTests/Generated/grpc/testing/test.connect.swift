@@ -16,6 +16,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
     func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
 
     /// One empty request followed by one empty response.
+    @available(iOS 13, *)
     func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
 
     /// One request followed by one response.
@@ -23,6 +24,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
     func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable
 
     /// One request followed by one response.
+    @available(iOS 13, *)
     func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_SimpleResponse>
 
     /// One request followed by one response. This RPC always fails.
@@ -30,6 +32,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
     func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable
 
     /// One request followed by one response. This RPC always fails.
+    @available(iOS 13, *)
     func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_SimpleResponse>
 
     /// One request followed by one response. Response has cache control
@@ -41,6 +44,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
     /// One request followed by one response. Response has cache control
     /// headers set such that a caching HTTP proxy (such as GFE) can
     /// satisfy subsequent requests.
+    @available(iOS 13, *)
     func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_SimpleResponse>
 
     /// One request followed by a sequence of responses (streamed download).
@@ -49,12 +53,14 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
 
     /// One request followed by a sequence of responses (streamed download).
     /// The server returns the payload with client desired type and sizes.
+    @available(iOS 13, *)
     func `streamingOutputCall`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>
 
     /// One request followed by a sequence of responses (streamed download). This RPC always fails.
     func `failStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_StreamingOutputCallRequest>
 
     /// One request followed by a sequence of responses (streamed download). This RPC always fails.
+    @available(iOS 13, *)
     func `failStreamingOutputCall`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>
 
     /// A sequence of requests followed by one response (streamed upload).
@@ -63,6 +69,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
 
     /// A sequence of requests followed by one response (streamed upload).
     /// The server returns the aggregated size of client payload as the result.
+    @available(iOS 13, *)
     func `streamingInputCall`(headers: Connect.Headers) -> any Connect.ClientOnlyAsyncStreamInterface<Grpc_Testing_StreamingInputCallRequest, Grpc_Testing_StreamingInputCallResponse>
 
     /// A sequence of requests with each request served by the server immediately.
@@ -73,6 +80,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
     /// A sequence of requests with each request served by the server immediately.
     /// As one request could lead to multiple responses, this interface
     /// demonstrates the idea of full duplexing.
+    @available(iOS 13, *)
     func `fullDuplexCall`(headers: Connect.Headers) -> any Connect.BidirectionalAsyncStreamInterface<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>
 
     /// A sequence of requests followed by a sequence of responses.
@@ -85,6 +93,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
     /// The server buffers all the client requests and then serves them in order. A
     /// stream of responses are returned to the client when the server starts with
     /// first request.
+    @available(iOS 13, *)
     func `halfDuplexCall`(headers: Connect.Headers) -> any Connect.BidirectionalAsyncStreamInterface<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>
 
     /// The test server will not implement this method. It will be used
@@ -94,6 +103,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
 
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented methods.
+    @available(iOS 13, *)
     func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
 
     /// The test server will not implement this method. It will be used
@@ -102,6 +112,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
 
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented streaming output methods.
+    @available(iOS 13, *)
     func `unimplementedStreamingOutputCall`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_Empty, Grpc_Testing_Empty>
 }
 
@@ -118,6 +129,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.unary(path: "grpc.testing.TestService/EmptyCall", request: request, headers: headers, completion: completion)
     }
 
+    @available(iOS 13, *)
     internal func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return await self.client.unary(path: "grpc.testing.TestService/EmptyCall", request: request, headers: headers)
     }
@@ -127,6 +139,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.unary(path: "grpc.testing.TestService/UnaryCall", request: request, headers: headers, completion: completion)
     }
 
+    @available(iOS 13, *)
     internal func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_SimpleResponse> {
         return await self.client.unary(path: "grpc.testing.TestService/UnaryCall", request: request, headers: headers)
     }
@@ -136,6 +149,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.unary(path: "grpc.testing.TestService/FailUnaryCall", request: request, headers: headers, completion: completion)
     }
 
+    @available(iOS 13, *)
     internal func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_SimpleResponse> {
         return await self.client.unary(path: "grpc.testing.TestService/FailUnaryCall", request: request, headers: headers)
     }
@@ -145,6 +159,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.unary(path: "grpc.testing.TestService/CacheableUnaryCall", request: request, headers: headers, completion: completion)
     }
 
+    @available(iOS 13, *)
     internal func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_SimpleResponse> {
         return await self.client.unary(path: "grpc.testing.TestService/CacheableUnaryCall", request: request, headers: headers)
     }
@@ -153,6 +168,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.serverOnlyStream(path: "grpc.testing.TestService/StreamingOutputCall", headers: headers, onResult: onResult)
     }
 
+    @available(iOS 13, *)
     internal func `streamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse> {
         return self.client.serverOnlyStream(path: "grpc.testing.TestService/StreamingOutputCall", headers: headers)
     }
@@ -161,6 +177,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.serverOnlyStream(path: "grpc.testing.TestService/FailStreamingOutputCall", headers: headers, onResult: onResult)
     }
 
+    @available(iOS 13, *)
     internal func `failStreamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse> {
         return self.client.serverOnlyStream(path: "grpc.testing.TestService/FailStreamingOutputCall", headers: headers)
     }
@@ -169,6 +186,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.clientOnlyStream(path: "grpc.testing.TestService/StreamingInputCall", headers: headers, onResult: onResult)
     }
 
+    @available(iOS 13, *)
     internal func `streamingInputCall`(headers: Connect.Headers = [:]) -> any Connect.ClientOnlyAsyncStreamInterface<Grpc_Testing_StreamingInputCallRequest, Grpc_Testing_StreamingInputCallResponse> {
         return self.client.clientOnlyStream(path: "grpc.testing.TestService/StreamingInputCall", headers: headers)
     }
@@ -177,6 +195,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.bidirectionalStream(path: "grpc.testing.TestService/FullDuplexCall", headers: headers, onResult: onResult)
     }
 
+    @available(iOS 13, *)
     internal func `fullDuplexCall`(headers: Connect.Headers = [:]) -> any Connect.BidirectionalAsyncStreamInterface<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse> {
         return self.client.bidirectionalStream(path: "grpc.testing.TestService/FullDuplexCall", headers: headers)
     }
@@ -185,6 +204,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.bidirectionalStream(path: "grpc.testing.TestService/HalfDuplexCall", headers: headers, onResult: onResult)
     }
 
+    @available(iOS 13, *)
     internal func `halfDuplexCall`(headers: Connect.Headers = [:]) -> any Connect.BidirectionalAsyncStreamInterface<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse> {
         return self.client.bidirectionalStream(path: "grpc.testing.TestService/HalfDuplexCall", headers: headers)
     }
@@ -194,6 +214,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.unary(path: "grpc.testing.TestService/UnimplementedCall", request: request, headers: headers, completion: completion)
     }
 
+    @available(iOS 13, *)
     internal func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return await self.client.unary(path: "grpc.testing.TestService/UnimplementedCall", request: request, headers: headers)
     }
@@ -202,6 +223,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.serverOnlyStream(path: "grpc.testing.TestService/UnimplementedStreamingOutputCall", headers: headers, onResult: onResult)
     }
 
+    @available(iOS 13, *)
     internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_Empty, Grpc_Testing_Empty> {
         return self.client.serverOnlyStream(path: "grpc.testing.TestService/UnimplementedStreamingOutputCall", headers: headers)
     }
@@ -232,12 +254,14 @@ internal protocol Grpc_Testing_UnimplementedServiceClientInterface {
     func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
 
     /// A call that no server should implement
+    @available(iOS 13, *)
     func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
 
     /// A call that no server should implement
     func `unimplementedStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty>
 
     /// A call that no server should implement
+    @available(iOS 13, *)
     func `unimplementedStreamingOutputCall`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_Empty, Grpc_Testing_Empty>
 }
 
@@ -254,6 +278,7 @@ internal final class Grpc_Testing_UnimplementedServiceClient: Grpc_Testing_Unimp
         return self.client.unary(path: "grpc.testing.UnimplementedService/UnimplementedCall", request: request, headers: headers, completion: completion)
     }
 
+    @available(iOS 13, *)
     internal func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return await self.client.unary(path: "grpc.testing.UnimplementedService/UnimplementedCall", request: request, headers: headers)
     }
@@ -262,6 +287,7 @@ internal final class Grpc_Testing_UnimplementedServiceClient: Grpc_Testing_Unimp
         return self.client.serverOnlyStream(path: "grpc.testing.UnimplementedService/UnimplementedStreamingOutputCall", headers: headers, onResult: onResult)
     }
 
+    @available(iOS 13, *)
     internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_Empty, Grpc_Testing_Empty> {
         return self.client.serverOnlyStream(path: "grpc.testing.UnimplementedService/UnimplementedStreamingOutputCall", headers: headers)
     }
@@ -280,11 +306,13 @@ internal protocol Grpc_Testing_ReconnectServiceClientInterface {
     @discardableResult
     func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
 
+    @available(iOS 13, *)
     func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
 
     @discardableResult
     func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_ReconnectInfo>) -> Void) -> Connect.Cancelable
 
+    @available(iOS 13, *)
     func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_ReconnectInfo>
 }
 
@@ -301,6 +329,7 @@ internal final class Grpc_Testing_ReconnectServiceClient: Grpc_Testing_Reconnect
         return self.client.unary(path: "grpc.testing.ReconnectService/Start", request: request, headers: headers, completion: completion)
     }
 
+    @available(iOS 13, *)
     internal func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return await self.client.unary(path: "grpc.testing.ReconnectService/Start", request: request, headers: headers)
     }
@@ -310,6 +339,7 @@ internal final class Grpc_Testing_ReconnectServiceClient: Grpc_Testing_Reconnect
         return self.client.unary(path: "grpc.testing.ReconnectService/Stop", request: request, headers: headers, completion: completion)
     }
 
+    @available(iOS 13, *)
     internal func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_ReconnectInfo> {
         return await self.client.unary(path: "grpc.testing.ReconnectService/Stop", request: request, headers: headers)
     }
@@ -330,6 +360,7 @@ internal protocol Grpc_Testing_LoadBalancerStatsServiceClientInterface {
     func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>) -> Void) -> Connect.Cancelable
 
     /// Gets the backend distribution for RPCs sent by a test client.
+    @available(iOS 13, *)
     func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>
 
     /// Gets the accumulated stats for RPCs sent by a test client.
@@ -337,6 +368,7 @@ internal protocol Grpc_Testing_LoadBalancerStatsServiceClientInterface {
     func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>) -> Void) -> Connect.Cancelable
 
     /// Gets the accumulated stats for RPCs sent by a test client.
+    @available(iOS 13, *)
     func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>
 }
 
@@ -353,6 +385,7 @@ internal final class Grpc_Testing_LoadBalancerStatsServiceClient: Grpc_Testing_L
         return self.client.unary(path: "grpc.testing.LoadBalancerStatsService/GetClientStats", request: request, headers: headers, completion: completion)
     }
 
+    @available(iOS 13, *)
     internal func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse> {
         return await self.client.unary(path: "grpc.testing.LoadBalancerStatsService/GetClientStats", request: request, headers: headers)
     }
@@ -362,6 +395,7 @@ internal final class Grpc_Testing_LoadBalancerStatsServiceClient: Grpc_Testing_L
         return self.client.unary(path: "grpc.testing.LoadBalancerStatsService/GetClientAccumulatedStats", request: request, headers: headers, completion: completion)
     }
 
+    @available(iOS 13, *)
     internal func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse> {
         return await self.client.unary(path: "grpc.testing.LoadBalancerStatsService/GetClientAccumulatedStats", request: request, headers: headers)
     }
@@ -380,11 +414,13 @@ internal protocol Grpc_Testing_XdsUpdateHealthServiceClientInterface {
     @discardableResult
     func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
 
+    @available(iOS 13, *)
     func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
 
     @discardableResult
     func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
 
+    @available(iOS 13, *)
     func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
 }
 
@@ -401,6 +437,7 @@ internal final class Grpc_Testing_XdsUpdateHealthServiceClient: Grpc_Testing_Xds
         return self.client.unary(path: "grpc.testing.XdsUpdateHealthService/SetServing", request: request, headers: headers, completion: completion)
     }
 
+    @available(iOS 13, *)
     internal func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return await self.client.unary(path: "grpc.testing.XdsUpdateHealthService/SetServing", request: request, headers: headers)
     }
@@ -410,6 +447,7 @@ internal final class Grpc_Testing_XdsUpdateHealthServiceClient: Grpc_Testing_Xds
         return self.client.unary(path: "grpc.testing.XdsUpdateHealthService/SetNotServing", request: request, headers: headers, completion: completion)
     }
 
+    @available(iOS 13, *)
     internal func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return await self.client.unary(path: "grpc.testing.XdsUpdateHealthService/SetNotServing", request: request, headers: headers)
     }
@@ -430,6 +468,7 @@ internal protocol Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface {
     func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_ClientConfigureResponse>) -> Void) -> Connect.Cancelable
 
     /// Update the tes client's configuration.
+    @available(iOS 13, *)
     func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_ClientConfigureResponse>
 }
 
@@ -446,6 +485,7 @@ internal final class Grpc_Testing_XdsUpdateClientConfigureServiceClient: Grpc_Te
         return self.client.unary(path: "grpc.testing.XdsUpdateClientConfigureService/Configure", request: request, headers: headers, completion: completion)
     }
 
+    @available(iOS 13, *)
     internal func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_ClientConfigureResponse> {
         return await self.client.unary(path: "grpc.testing.XdsUpdateClientConfigureService/Configure", request: request, headers: headers)
     }
