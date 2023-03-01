@@ -17,6 +17,7 @@ import SwiftProtobuf
 /// Concrete implementation of `BidirectionalAsyncStreamInterface`.
 /// Provides the necessary wiring to bridge from closures/callbacks to Swift's `AsyncStream`
 /// to work with async/await.
+@available(iOS 13, *)
 final class BidirectionalAsyncStream<Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message> {
     /// The underlying async stream that will be exposed to the consumer.
     /// Force unwrapped because it captures `self` on `init`.
@@ -81,6 +82,7 @@ final class BidirectionalAsyncStream<Input: SwiftProtobuf.Message, Output: Swift
     }
 }
 
+@available(iOS 13, *)
 extension BidirectionalAsyncStream: BidirectionalAsyncStreamInterface {
     @discardableResult
     func send(_ input: Input) throws -> Self {
@@ -102,4 +104,5 @@ extension BidirectionalAsyncStream: BidirectionalAsyncStreamInterface {
 }
 
 // Conforms to the client-only interface since it matches exactly and the implementation is internal
+@available(iOS 13, *)
 extension BidirectionalAsyncStream: ClientOnlyAsyncStreamInterface {}

@@ -16,6 +16,7 @@ import SwiftProtobuf
 
 /// Represents a server-only stream (a stream where the server streams data to the client after
 /// receiving an initial request) that can be interacted with using async/await.
+@available(iOS 13, *)
 public protocol ServerOnlyAsyncStreamInterface<Input, Output> {
     /// The input (request) message type.
     associatedtype Input: SwiftProtobuf.Message
