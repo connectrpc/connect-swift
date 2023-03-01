@@ -114,6 +114,7 @@ public protocol ProtocolClientInterface {
     /// - parameter headers: The outbound request headers to include.
     ///
     /// - returns: The response which is returned asynchronously.
+    @available(iOS 13, *)
     func unary<
         Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
@@ -134,6 +135,7 @@ public protocol ProtocolClientInterface {
     /// - parameter headers: The outbound request headers to include.
     ///
     /// - returns: An interface for sending and receiving data over the stream using async/await.
+    @available(iOS 13, *)
     func bidirectionalStream<
         Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
@@ -153,6 +155,7 @@ public protocol ProtocolClientInterface {
     /// - parameter headers: The outbound request headers to include.
     ///
     /// - returns: An interface for sending and receiving data over the stream using async/await.
+    @available(iOS 13, *)
     func clientOnlyStream<
         Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
@@ -172,6 +175,7 @@ public protocol ProtocolClientInterface {
     /// - parameter headers: The outbound request headers to include.
     ///
     /// - returns: An interface for sending and receiving data over the stream using async/await.
+    @available(iOS 13, *)
     func serverOnlyStream<
         Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(

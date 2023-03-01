@@ -161,6 +161,7 @@ extension ProtocolClient: ProtocolClientInterface {
 
     // MARK: - Async/await
 
+    @available(iOS 13, *)
     public func unary<
         Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
@@ -173,6 +174,7 @@ extension ProtocolClient: ProtocolClientInterface {
         }.send()
     }
 
+    @available(iOS 13, *)
     public func bidirectionalStream<
         Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
@@ -186,6 +188,7 @@ extension ProtocolClient: ProtocolClientInterface {
         return bidirectionalAsync.configureForSending(with: callbacks)
     }
 
+    @available(iOS 13, *)
     public func clientOnlyStream<
         Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
@@ -199,6 +202,7 @@ extension ProtocolClient: ProtocolClientInterface {
         return bidirectionalAsync.configureForSending(with: callbacks)
     }
 
+    @available(iOS 13, *)
     public func serverOnlyStream<
         Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
     >(
