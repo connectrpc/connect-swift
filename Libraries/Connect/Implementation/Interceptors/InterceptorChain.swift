@@ -69,9 +69,9 @@ struct InterceptorChain {
             requestDataFunction: { data in
                 return executeInterceptors(interceptors.map(\.requestDataFunction), initial: data)
             },
-            streamResultFunc: { result in
+            streamResultFunction: { result in
                 return executeInterceptors(
-                    interceptors.reversed().map(\.streamResultFunc),
+                    interceptors.reversed().map(\.streamResultFunction),
                     initial: result
                 )
             }

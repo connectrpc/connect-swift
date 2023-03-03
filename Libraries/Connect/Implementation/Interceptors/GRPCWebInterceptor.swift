@@ -123,7 +123,7 @@ extension GRPCWebInterceptor: Interceptor {
             requestDataFunction: { data in
                 return Envelope.packMessage(data, using: self.config.requestCompression)
             },
-            streamResultFunc: { result in
+            streamResultFunction: { result in
                 switch result {
                 case .headers(let headers):
                     if let grpcCode = headers.grpcStatus() {
