@@ -71,7 +71,10 @@ extension ProtocolClient: ProtocolClientInterface {
         ))
         return self.httpClient.unary(
             request: request,
-            onMetrics: { _ = chain.responseMetricsFunction($0) },
+            onMetrics: { metrics in
+                // Response is unused, but metrics are passed to interceptors
+                _ = chain.responseMetricsFunction(metrics)
+            },
             onResponse: { response in
                 let response = chain.responseFunction(response)
                 let responseMessage: ResponseMessage<Output>
