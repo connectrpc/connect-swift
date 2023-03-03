@@ -94,7 +94,8 @@ extension ConnectInterceptor: Interceptor {
                         tracingInfo: response.tracingInfo
                     )
                 }
-            }
+            },
+            responseMetricsFunction: { $0 }
         )
     }
 

@@ -48,6 +48,12 @@ struct InterceptorChain {
                     interceptors.reversed().map(\.responseFunction),
                     initial: response
                 )
+            },
+            responseMetricsFunction: { metrics in
+                return executeInterceptors(
+                    interceptors.reversed().map(\.responseMetricsFunction),
+                    initial: metrics
+                )
             }
         )
     }

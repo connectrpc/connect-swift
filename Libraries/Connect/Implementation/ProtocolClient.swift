@@ -69,7 +69,10 @@ extension ProtocolClient: ProtocolClientInterface {
             headers: headers,
             message: data
         ))
-        return self.httpClient.unary(request: request) { response in
+        return self.httpClient.unary(
+            request: request,
+            onMetrics: { _ = chain.responseMetricsFunction($0) }
+        ) { response in
             let response = chain.responseFunction(response)
             let responseMessage: ResponseMessage<Output>
             if response.code != .ok {
