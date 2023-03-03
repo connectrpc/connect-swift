@@ -11,7 +11,7 @@ Pod::Spec.new do |spec|
   spec.ios.deployment_target = '14.0'
   spec.osx.deployment_target = '10.15'
 
-  spec.dependency 'SwiftProtobuf', '~> 1.21.0'
+  spec.dependency 'SwiftProtobuf', '~> 1.20.3'
 
   spec.source_files = 'Libraries/Connect/**/*.swift'
 
