@@ -14,7 +14,7 @@
 
 import Foundation
 
-/// Contains metrics from HTTP requests/streams.
+/// Contains metrics collected during the span of an HTTP request.
 public struct HTTPMetrics: Sendable {
     public let taskMetrics: URLSessionTaskMetrics
 
