@@ -164,8 +164,8 @@ final class InterceptorChainTests: XCTestCase {
             bRequestExpectation,
             bResponseExpectation,
             aResponseExpectation,
-            aMetricsExpectation,
             bMetricsExpectation,
+            aMetricsExpectation,
         ], timeout: 1.0, enforceOrder: true), .completed)
     }
 
