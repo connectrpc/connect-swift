@@ -43,7 +43,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/apple/swift-protobuf.git",
-            from: "1.20.3"
+            from: "1.21.0"
         ),
     ],
     targets: [
