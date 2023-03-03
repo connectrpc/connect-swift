@@ -117,7 +117,8 @@ extension ProtocolClient: ProtocolClientInterface {
                     )
                 }
                 completion(responseMessage)
-        })
+            }
+        )
     }
 
     public func bidirectionalStream<
