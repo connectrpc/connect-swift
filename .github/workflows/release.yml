@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 jobs:
-  release-plugin-binaries:
+  plugin-artifacts:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
