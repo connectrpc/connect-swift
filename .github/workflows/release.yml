@@ -1,7 +1,7 @@
 name: release
 on:
-  release:
-    types: [published]
+  push:
+    tags:
   workflow_dispatch: {} # support manual runs
 permissions:
   contents: read
