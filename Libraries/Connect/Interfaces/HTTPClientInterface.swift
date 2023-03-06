@@ -17,12 +17,17 @@ public protocol HTTPClientInterface {
     /// Perform a unary HTTP request.
     ///
     /// - parameter request: The outbound request headers and data.
-    /// - parameter completion: Closure that should be called upon completion of the request.
+    /// - parameter onMetrics: Closure that should be called when metrics are finalized. This may be
+    ///                        called before or after `onResponse`.
+    /// - parameter onResponse: Closure that should be called when a response is received.
     ///
     /// - returns: A type which can be used to cancel the outbound request.
     @discardableResult
-    func unary(request: HTTPRequest, completion: @Sendable @escaping (HTTPResponse) -> Void)
-        -> Cancelable
+    func unary(
+        request: HTTPRequest,
+        onMetrics: @Sendable @escaping (HTTPMetrics) -> Void,
+        onResponse: @Sendable @escaping (HTTPResponse) -> Void
+    ) -> Cancelable
 
     /// Initialize a new HTTP stream.
     ///

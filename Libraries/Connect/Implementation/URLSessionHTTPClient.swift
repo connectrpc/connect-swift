@@ -20,6 +20,8 @@ import os.log
 open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
     /// Lock used for safely accessing stream storage.
     private let lock = Lock()
+    /// Closures stored for notifying when metrics are available.
+    private var metricsClosures = [Int: (HTTPMetrics) -> Void]()
     /// Force unwrapped to allow using `self` as the delegate.
     private var session: URLSession!
     /// List of active streams.
@@ -39,12 +41,14 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
 
     @discardableResult
     open func unary(
-        request: HTTPRequest, completion: @Sendable @escaping (HTTPResponse) -> Void
+        request: HTTPRequest,
+        onMetrics: @Sendable @escaping (HTTPMetrics) -> Void,
+        onResponse: @Sendable @escaping (HTTPResponse) -> Void
     ) -> Cancelable {
         let urlRequest = URLRequest(httpRequest: request)
         let task = self.session.dataTask(with: urlRequest) { data, urlResponse, error in
             if let httpURLResponse = urlResponse as? HTTPURLResponse {
-                completion(HTTPResponse(
+                onResponse(HTTPResponse(
                     code: Code.fromURLSessionCode(httpURLResponse.statusCode),
                     headers: httpURLResponse.formattedLowercasedHeaders(),
                     message: data,
@@ -54,7 +58,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
                 ))
             } else if let error = error {
                 let code = Code.fromURLSessionCode((error as NSError).code)
-                completion(HTTPResponse(
+                onResponse(HTTPResponse(
                     code: code,
                     headers: [:],
                     message: data,
@@ -67,7 +71,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
                     tracingInfo: nil
                 ))
             } else {
-                completion(HTTPResponse(
+                onResponse(HTTPResponse(
                     code: .unknown,
                     headers: [:],
                     message: data,
@@ -81,6 +85,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
                 ))
             }
         }
+        self.lock.perform { self.metricsClosures[task.taskIdentifier] = onMetrics }
         task.resume()
         return Cancelable(cancel: task.cancel)
     }
@@ -141,6 +146,17 @@ extension URLSessionHTTPClient: URLSessionTaskDelegate {
     ) {
         let stream = self.lock.perform { self.streams.removeValue(forKey: task.taskIdentifier) }
         stream?.handleCompletion(error: error)
+    }
+
+    open func urlSession(
+        _ session: URLSession, task: URLSessionTask,
+        didFinishCollecting metrics: URLSessionTaskMetrics
+    ) {
+        if let metricsClosure = self.lock.perform(
+            action: { self.metricsClosures.removeValue(forKey: task.taskIdentifier) }
+        ) {
+            metricsClosure(HTTPMetrics(taskMetrics: metrics))
+        }
     }
 }
 

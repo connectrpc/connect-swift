@@ -69,49 +69,56 @@ extension ProtocolClient: ProtocolClientInterface {
             headers: headers,
             message: data
         ))
-        return self.httpClient.unary(request: request) { response in
-            let response = chain.responseFunction(response)
-            let responseMessage: ResponseMessage<Output>
-            if response.code != .ok {
-                let error = (response.error as? ConnectError)
+        return self.httpClient.unary(
+            request: request,
+            onMetrics: { metrics in
+                // Response is unused, but metrics are passed to interceptors
+                _ = chain.responseMetricsFunction(metrics)
+            },
+            onResponse: { response in
+                let response = chain.responseFunction(response)
+                let responseMessage: ResponseMessage<Output>
+                if response.code != .ok {
+                    let error = (response.error as? ConnectError)
                     ?? ConnectError.from(
                         code: response.code, headers: response.headers, source: response.message
                     )
-                responseMessage = ResponseMessage(
-                    code: response.code,
-                    headers: response.headers,
-                    result: .failure(error),
-                    trailers: response.trailers
-                )
-            } else if let message = response.message {
-                do {
                     responseMessage = ResponseMessage(
                         code: response.code,
                         headers: response.headers,
-                        result: .success(try codec.deserialize(source: message)),
+                        result: .failure(error),
                         trailers: response.trailers
                     )
-                } catch let error {
+                } else if let message = response.message {
+                    do {
+                        responseMessage = ResponseMessage(
+                            code: response.code,
+                            headers: response.headers,
+                            result: .success(try codec.deserialize(source: message)),
+                            trailers: response.trailers
+                        )
+                    } catch let error {
+                        responseMessage = ResponseMessage(
+                            code: response.code,
+                            headers: response.headers,
+                            result: .failure(ConnectError(
+                                code: response.code, message: nil, exception: error,
+                                details: [], metadata: response.headers
+                            )),
+                            trailers: response.trailers
+                        )
+                    }
+                } else {
                     responseMessage = ResponseMessage(
                         code: response.code,
                         headers: response.headers,
-                        result: .failure(ConnectError(
-                            code: response.code, message: nil, exception: error,
-                            details: [], metadata: response.headers
-                        )),
+                        result: .success(.init()),
                         trailers: response.trailers
                     )
                 }
-            } else {
-                responseMessage = ResponseMessage(
-                    code: response.code,
-                    headers: response.headers,
-                    result: .success(.init()),
-                    trailers: response.trailers
-                )
+                completion(responseMessage)
             }
-            completion(responseMessage)
-        }
+        )
     }
 
     public func bidirectionalStream<

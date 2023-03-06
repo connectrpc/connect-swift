@@ -40,13 +40,16 @@ public protocol Interceptor {
 public struct UnaryFunction {
     public let requestFunction: (HTTPRequest) -> HTTPRequest
     public let responseFunction: (HTTPResponse) -> HTTPResponse
+    public let responseMetricsFunction: (HTTPMetrics) -> HTTPMetrics
 
     public init(
         requestFunction: @escaping (HTTPRequest) -> HTTPRequest,
-        responseFunction: @escaping (HTTPResponse) -> HTTPResponse
+        responseFunction: @escaping (HTTPResponse) -> HTTPResponse,
+        responseMetricsFunction: @escaping (HTTPMetrics) -> HTTPMetrics = { $0 }
     ) {
         self.requestFunction = requestFunction
         self.responseFunction = responseFunction
+        self.responseMetricsFunction = responseMetricsFunction
     }
 }
 

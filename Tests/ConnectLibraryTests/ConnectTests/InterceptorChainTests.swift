@@ -19,6 +19,7 @@ private struct MockUnaryInterceptor: Interceptor {
     let headerID: String
     let requestExpectation: XCTestExpectation
     let responseExpectation: XCTestExpectation
+    let responseMetricsExpectation: XCTestExpectation
 
     func unaryFunction() -> Connect.UnaryFunction {
         return UnaryFunction(
@@ -45,6 +46,10 @@ private struct MockUnaryInterceptor: Interceptor {
                     error: response.error,
                     tracingInfo: .init(httpStatus: 200)
                 )
+            },
+            responseMetricsFunction: { metrics in
+                self.responseMetricsExpectation.fulfill()
+                return metrics
             }
         )
     }
@@ -112,20 +117,24 @@ final class InterceptorChainTests: XCTestCase {
         let bRequestExpectation = self.expectation(description: "Filter B called with request")
         let aResponseExpectation = self.expectation(description: "Filter A called with response")
         let bResponseExpectation = self.expectation(description: "Filter B called with response")
+        let aMetricsExpectation = self.expectation(description: "Filter A called with metrics")
+        let bMetricsExpectation = self.expectation(description: "Filter B called with metrics")
         let chain = InterceptorChain(
             interceptors: [
                 { _ in
                     return MockUnaryInterceptor(
                         headerID: "filter-a",
                         requestExpectation: aRequestExpectation,
-                        responseExpectation: aResponseExpectation
+                        responseExpectation: aResponseExpectation,
+                        responseMetricsExpectation: aMetricsExpectation
                     )
                 },
                 { _ in
                     return MockUnaryInterceptor(
                         headerID: "filter-b",
                         requestExpectation: bRequestExpectation,
-                        responseExpectation: bResponseExpectation
+                        responseExpectation: bResponseExpectation,
+                        responseMetricsExpectation: bMetricsExpectation
                     )
                 },
             ],
@@ -150,11 +159,16 @@ final class InterceptorChainTests: XCTestCase {
         ))
         XCTAssertEqual(interceptedResponse.headers["filter-chain"], ["filter-b", "filter-a"])
 
+        let interceptedMetrics = chain.responseMetricsFunction(HTTPMetrics(taskMetrics: nil))
+        XCTAssertNil(interceptedMetrics.taskMetrics)
+
         XCTAssertEqual(XCTWaiter().wait(for: [
             aRequestExpectation,
             bRequestExpectation,
             bResponseExpectation,
             aResponseExpectation,
+            bMetricsExpectation,
+            aMetricsExpectation,
         ], timeout: 1.0, enforceOrder: true), .completed)
     }
 
