@@ -57,6 +57,7 @@ final class ConnectMockGenerator: Generator {
         self.printLine("/// class, allowing for mocking RPC calls. Behavior can be customized")
         self.printLine("/// either through the properties on this class or by")
         self.printLine("/// subclassing the class and overriding its methods.")
+        self.printLine("@available(iOS 13, *)")
         self.printLine(
             "\(self.typeVisibility) class \(service.mockName(using: self.namer)): \(protocolName) {"
         )
@@ -82,7 +83,6 @@ final class ConnectMockGenerator: Generator {
                     self.printLine(
                         "/// Mocked for async calls to `\(method.name(using: self.options))()`."
                     )
-                    self.printLine("@available(iOS 13, *)")
                     self.printLine(
                         """
                         \(self.propertyVisibility) var \(method.asyncAwaitMockPropertyName()) = \
@@ -144,7 +144,6 @@ final class ConnectMockGenerator: Generator {
     private func printAsyncAwaitMethodMockImplementation(for method: MethodDescriptor) {
         self.printLine()
 
-        self.printLine("@available(iOS 13, *)")
         self.printLine(
             "\(self.typeVisibility) "
             + method.asyncAwaitSignature(

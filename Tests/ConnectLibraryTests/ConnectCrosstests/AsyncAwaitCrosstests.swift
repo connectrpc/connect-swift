@@ -27,6 +27,7 @@ private typealias UnimplementedServiceClient = Grpc_Testing_UnimplementedService
 /// Tests are based on https://github.com/bufbuild/connect-crosstest
 ///
 /// Tests are written using async/await APIs.
+@available(iOS 13, *)
 final class AsyncAwaitCrosstests: XCTestCase {
     private func executeTestWithClients(
         function: Selector = #function,

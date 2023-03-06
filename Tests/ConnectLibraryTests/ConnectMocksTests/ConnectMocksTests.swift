@@ -18,6 +18,7 @@ import SwiftProtobuf
 import XCTest
 
 /// Test suite that validates the behavior of generated mock classes.
+@available(iOS 13, *)
 final class ConnectMocksTests: XCTestCase {
     // MARK: - Unary
 
