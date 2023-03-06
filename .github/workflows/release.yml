@@ -1,6 +1,5 @@
 name: release
 on:
-  pull_request:
   release:
     types: [published]
   workflow_dispatch: {} # support manual runs
