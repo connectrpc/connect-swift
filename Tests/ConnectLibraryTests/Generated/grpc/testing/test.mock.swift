@@ -15,63 +15,53 @@ import SwiftProtobuf
 /// class, allowing for mocking RPC calls. Behavior can be customized
 /// either through the properties on this class or by
 /// subclassing the class and overriding its methods.
+@available(iOS 13, *)
 internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClientInterface {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `emptyCall()`.
     internal var mockEmptyCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `emptyCall()`.
-    @available(iOS 13, *)
     internal var mockAsyncEmptyCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `unaryCall()`.
     internal var mockUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `unaryCall()`.
-    @available(iOS 13, *)
     internal var mockAsyncUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(result: .success(.init())) }
     /// Mocked for calls to `failUnaryCall()`.
     internal var mockFailUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `failUnaryCall()`.
-    @available(iOS 13, *)
     internal var mockAsyncFailUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(result: .success(.init())) }
     /// Mocked for calls to `cacheableUnaryCall()`.
     internal var mockCacheableUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `cacheableUnaryCall()`.
-    @available(iOS 13, *)
     internal var mockAsyncCacheableUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(result: .success(.init())) }
     /// Mocked for calls to `streamingOutputCall()`.
     internal var mockStreamingOutputCall = MockServerOnlyStream<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>()
     /// Mocked for async calls to `streamingOutputCall()`.
-    @available(iOS 13, *)
     internal var mockAsyncStreamingOutputCall = MockServerOnlyAsyncStream<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>()
     /// Mocked for calls to `failStreamingOutputCall()`.
     internal var mockFailStreamingOutputCall = MockServerOnlyStream<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>()
     /// Mocked for async calls to `failStreamingOutputCall()`.
-    @available(iOS 13, *)
     internal var mockAsyncFailStreamingOutputCall = MockServerOnlyAsyncStream<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>()
     /// Mocked for calls to `streamingInputCall()`.
     internal var mockStreamingInputCall = MockClientOnlyStream<Grpc_Testing_StreamingInputCallRequest, Grpc_Testing_StreamingInputCallResponse>()
     /// Mocked for async calls to `streamingInputCall()`.
-    @available(iOS 13, *)
     internal var mockAsyncStreamingInputCall = MockClientOnlyAsyncStream<Grpc_Testing_StreamingInputCallRequest, Grpc_Testing_StreamingInputCallResponse>()
     /// Mocked for calls to `fullDuplexCall()`.
     internal var mockFullDuplexCall = MockBidirectionalStream<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>()
     /// Mocked for async calls to `fullDuplexCall()`.
-    @available(iOS 13, *)
     internal var mockAsyncFullDuplexCall = MockBidirectionalAsyncStream<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>()
     /// Mocked for calls to `halfDuplexCall()`.
     internal var mockHalfDuplexCall = MockBidirectionalStream<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>()
     /// Mocked for async calls to `halfDuplexCall()`.
-    @available(iOS 13, *)
     internal var mockAsyncHalfDuplexCall = MockBidirectionalAsyncStream<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>()
     /// Mocked for calls to `unimplementedCall()`.
     internal var mockUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `unimplementedCall()`.
-    @available(iOS 13, *)
     internal var mockAsyncUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `unimplementedStreamingOutputCall()`.
     internal var mockUnimplementedStreamingOutputCall = MockServerOnlyStream<Grpc_Testing_Empty, Grpc_Testing_Empty>()
     /// Mocked for async calls to `unimplementedStreamingOutputCall()`.
-    @available(iOS 13, *)
     internal var mockAsyncUnimplementedStreamingOutputCall = MockServerOnlyAsyncStream<Grpc_Testing_Empty, Grpc_Testing_Empty>()
 
     internal init() {}
@@ -82,7 +72,6 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
         return Connect.Cancelable {}
     }
 
-    @available(iOS 13, *)
     internal func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return self.mockAsyncEmptyCall(request)
     }
@@ -93,7 +82,6 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
         return Connect.Cancelable {}
     }
 
-    @available(iOS 13, *)
     internal func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_SimpleResponse> {
         return self.mockAsyncUnaryCall(request)
     }
@@ -104,7 +92,6 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
         return Connect.Cancelable {}
     }
 
-    @available(iOS 13, *)
     internal func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_SimpleResponse> {
         return self.mockAsyncFailUnaryCall(request)
     }
@@ -115,7 +102,6 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
         return Connect.Cancelable {}
     }
 
-    @available(iOS 13, *)
     internal func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_SimpleResponse> {
         return self.mockAsyncCacheableUnaryCall(request)
     }
@@ -125,7 +111,6 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
         return self.mockStreamingOutputCall
     }
 
-    @available(iOS 13, *)
     internal func `streamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse> {
         return self.mockAsyncStreamingOutputCall
     }
@@ -135,7 +120,6 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
         return self.mockFailStreamingOutputCall
     }
 
-    @available(iOS 13, *)
     internal func `failStreamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse> {
         return self.mockAsyncFailStreamingOutputCall
     }
@@ -145,7 +129,6 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
         return self.mockStreamingInputCall
     }
 
-    @available(iOS 13, *)
     internal func `streamingInputCall`(headers: Connect.Headers = [:]) -> any Connect.ClientOnlyAsyncStreamInterface<Grpc_Testing_StreamingInputCallRequest, Grpc_Testing_StreamingInputCallResponse> {
         return self.mockAsyncStreamingInputCall
     }
@@ -155,7 +138,6 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
         return self.mockFullDuplexCall
     }
 
-    @available(iOS 13, *)
     internal func `fullDuplexCall`(headers: Connect.Headers = [:]) -> any Connect.BidirectionalAsyncStreamInterface<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse> {
         return self.mockAsyncFullDuplexCall
     }
@@ -165,7 +147,6 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
         return self.mockHalfDuplexCall
     }
 
-    @available(iOS 13, *)
     internal func `halfDuplexCall`(headers: Connect.Headers = [:]) -> any Connect.BidirectionalAsyncStreamInterface<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse> {
         return self.mockAsyncHalfDuplexCall
     }
@@ -176,7 +157,6 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
         return Connect.Cancelable {}
     }
 
-    @available(iOS 13, *)
     internal func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return self.mockAsyncUnimplementedCall(request)
     }
@@ -186,7 +166,6 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
         return self.mockUnimplementedStreamingOutputCall
     }
 
-    @available(iOS 13, *)
     internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_Empty, Grpc_Testing_Empty> {
         return self.mockAsyncUnimplementedStreamingOutputCall
     }
@@ -198,18 +177,17 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
 /// class, allowing for mocking RPC calls. Behavior can be customized
 /// either through the properties on this class or by
 /// subclassing the class and overriding its methods.
+@available(iOS 13, *)
 internal class Grpc_Testing_UnimplementedServiceClientMock: Grpc_Testing_UnimplementedServiceClientInterface {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `unimplementedCall()`.
     internal var mockUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `unimplementedCall()`.
-    @available(iOS 13, *)
     internal var mockAsyncUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `unimplementedStreamingOutputCall()`.
     internal var mockUnimplementedStreamingOutputCall = MockServerOnlyStream<Grpc_Testing_Empty, Grpc_Testing_Empty>()
     /// Mocked for async calls to `unimplementedStreamingOutputCall()`.
-    @available(iOS 13, *)
     internal var mockAsyncUnimplementedStreamingOutputCall = MockServerOnlyAsyncStream<Grpc_Testing_Empty, Grpc_Testing_Empty>()
 
     internal init() {}
@@ -220,7 +198,6 @@ internal class Grpc_Testing_UnimplementedServiceClientMock: Grpc_Testing_Unimple
         return Connect.Cancelable {}
     }
 
-    @available(iOS 13, *)
     internal func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return self.mockAsyncUnimplementedCall(request)
     }
@@ -230,7 +207,6 @@ internal class Grpc_Testing_UnimplementedServiceClientMock: Grpc_Testing_Unimple
         return self.mockUnimplementedStreamingOutputCall
     }
 
-    @available(iOS 13, *)
     internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_Empty, Grpc_Testing_Empty> {
         return self.mockAsyncUnimplementedStreamingOutputCall
     }
@@ -242,18 +218,17 @@ internal class Grpc_Testing_UnimplementedServiceClientMock: Grpc_Testing_Unimple
 /// class, allowing for mocking RPC calls. Behavior can be customized
 /// either through the properties on this class or by
 /// subclassing the class and overriding its methods.
+@available(iOS 13, *)
 internal class Grpc_Testing_ReconnectServiceClientMock: Grpc_Testing_ReconnectServiceClientInterface {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `start()`.
     internal var mockStart = { (_: Grpc_Testing_ReconnectParams) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `start()`.
-    @available(iOS 13, *)
     internal var mockAsyncStart = { (_: Grpc_Testing_ReconnectParams) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `stop()`.
     internal var mockStop = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_ReconnectInfo> in .init(result: .success(.init())) }
     /// Mocked for async calls to `stop()`.
-    @available(iOS 13, *)
     internal var mockAsyncStop = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_ReconnectInfo> in .init(result: .success(.init())) }
 
     internal init() {}
@@ -264,7 +239,6 @@ internal class Grpc_Testing_ReconnectServiceClientMock: Grpc_Testing_ReconnectSe
         return Connect.Cancelable {}
     }
 
-    @available(iOS 13, *)
     internal func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return self.mockAsyncStart(request)
     }
@@ -275,7 +249,6 @@ internal class Grpc_Testing_ReconnectServiceClientMock: Grpc_Testing_ReconnectSe
         return Connect.Cancelable {}
     }
 
-    @available(iOS 13, *)
     internal func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_ReconnectInfo> {
         return self.mockAsyncStop(request)
     }
@@ -287,18 +260,17 @@ internal class Grpc_Testing_ReconnectServiceClientMock: Grpc_Testing_ReconnectSe
 /// class, allowing for mocking RPC calls. Behavior can be customized
 /// either through the properties on this class or by
 /// subclassing the class and overriding its methods.
+@available(iOS 13, *)
 internal class Grpc_Testing_LoadBalancerStatsServiceClientMock: Grpc_Testing_LoadBalancerStatsServiceClientInterface {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `getClientStats()`.
     internal var mockGetClientStats = { (_: Grpc_Testing_LoadBalancerStatsRequest) -> ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `getClientStats()`.
-    @available(iOS 13, *)
     internal var mockAsyncGetClientStats = { (_: Grpc_Testing_LoadBalancerStatsRequest) -> ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse> in .init(result: .success(.init())) }
     /// Mocked for calls to `getClientAccumulatedStats()`.
     internal var mockGetClientAccumulatedStats = { (_: Grpc_Testing_LoadBalancerAccumulatedStatsRequest) -> ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `getClientAccumulatedStats()`.
-    @available(iOS 13, *)
     internal var mockAsyncGetClientAccumulatedStats = { (_: Grpc_Testing_LoadBalancerAccumulatedStatsRequest) -> ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse> in .init(result: .success(.init())) }
 
     internal init() {}
@@ -309,7 +281,6 @@ internal class Grpc_Testing_LoadBalancerStatsServiceClientMock: Grpc_Testing_Loa
         return Connect.Cancelable {}
     }
 
-    @available(iOS 13, *)
     internal func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse> {
         return self.mockAsyncGetClientStats(request)
     }
@@ -320,7 +291,6 @@ internal class Grpc_Testing_LoadBalancerStatsServiceClientMock: Grpc_Testing_Loa
         return Connect.Cancelable {}
     }
 
-    @available(iOS 13, *)
     internal func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse> {
         return self.mockAsyncGetClientAccumulatedStats(request)
     }
@@ -332,18 +302,17 @@ internal class Grpc_Testing_LoadBalancerStatsServiceClientMock: Grpc_Testing_Loa
 /// class, allowing for mocking RPC calls. Behavior can be customized
 /// either through the properties on this class or by
 /// subclassing the class and overriding its methods.
+@available(iOS 13, *)
 internal class Grpc_Testing_XdsUpdateHealthServiceClientMock: Grpc_Testing_XdsUpdateHealthServiceClientInterface {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `setServing()`.
     internal var mockSetServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `setServing()`.
-    @available(iOS 13, *)
     internal var mockAsyncSetServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `setNotServing()`.
     internal var mockSetNotServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `setNotServing()`.
-    @available(iOS 13, *)
     internal var mockAsyncSetNotServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
 
     internal init() {}
@@ -354,7 +323,6 @@ internal class Grpc_Testing_XdsUpdateHealthServiceClientMock: Grpc_Testing_XdsUp
         return Connect.Cancelable {}
     }
 
-    @available(iOS 13, *)
     internal func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return self.mockAsyncSetServing(request)
     }
@@ -365,7 +333,6 @@ internal class Grpc_Testing_XdsUpdateHealthServiceClientMock: Grpc_Testing_XdsUp
         return Connect.Cancelable {}
     }
 
-    @available(iOS 13, *)
     internal func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
         return self.mockAsyncSetNotServing(request)
     }
@@ -377,13 +344,13 @@ internal class Grpc_Testing_XdsUpdateHealthServiceClientMock: Grpc_Testing_XdsUp
 /// class, allowing for mocking RPC calls. Behavior can be customized
 /// either through the properties on this class or by
 /// subclassing the class and overriding its methods.
+@available(iOS 13, *)
 internal class Grpc_Testing_XdsUpdateClientConfigureServiceClientMock: Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `configure()`.
     internal var mockConfigure = { (_: Grpc_Testing_ClientConfigureRequest) -> ResponseMessage<Grpc_Testing_ClientConfigureResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `configure()`.
-    @available(iOS 13, *)
     internal var mockAsyncConfigure = { (_: Grpc_Testing_ClientConfigureRequest) -> ResponseMessage<Grpc_Testing_ClientConfigureResponse> in .init(result: .success(.init())) }
 
     internal init() {}
@@ -394,7 +361,6 @@ internal class Grpc_Testing_XdsUpdateClientConfigureServiceClientMock: Grpc_Test
         return Connect.Cancelable {}
     }
 
-    @available(iOS 13, *)
     internal func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_ClientConfigureResponse> {
         return self.mockAsyncConfigure(request)
     }

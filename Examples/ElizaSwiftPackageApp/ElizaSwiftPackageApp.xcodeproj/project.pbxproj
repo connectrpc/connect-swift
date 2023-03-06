@@ -31,6 +31,7 @@
 		B236EE84295F564800DDCDA9 /* ElizaSwiftPackageApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ElizaSwiftPackageApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B236EE8B295F564900DDCDA9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B236EEA1295F568C00DDCDA9 /* connect-swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "connect-swift"; path = ../..; sourceTree = "<group>"; };
+		B28B406129B2B79A00F8CCA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +99,7 @@
 		B236EE86295F564800DDCDA9 /* ElizaSwiftPackageApp */ = {
 			isa = PBXGroup;
 			children = (
+				B28B406129B2B79A00F8CCA4 /* Info.plist */,
 				B216FBFF29723F65003AB294 /* ElizaSharedSources */,
 				B236EE8B295F564900DDCDA9 /* Assets.xcassets */,
 			);
@@ -329,12 +331,11 @@
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ElizaSwiftPackageApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Eliza;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -363,12 +364,11 @@
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ElizaSwiftPackageApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Eliza;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

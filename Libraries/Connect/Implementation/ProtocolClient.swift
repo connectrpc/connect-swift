@@ -244,7 +244,7 @@ extension ProtocolClient: ProtocolClientInterface {
 
         let interceptAndHandleResult: (StreamResult<Data>) -> Void = { streamResult in
             do {
-                let interceptedResult = chain.streamResultFunc(streamResult)
+                let interceptedResult = chain.streamResultFunction(streamResult)
                 onResult(try interceptedResult.toTypedResult(using: codec))
             } catch let error {
                 // TODO: Should we terminate the stream here?

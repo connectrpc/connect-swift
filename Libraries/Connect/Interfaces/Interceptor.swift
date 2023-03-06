@@ -56,15 +56,15 @@ public struct UnaryFunction {
 public struct StreamFunction {
     public let requestFunction: (HTTPRequest) -> HTTPRequest
     public let requestDataFunction: (Data) -> Data
-    public let streamResultFunc: (StreamResult<Data>) -> StreamResult<Data>
+    public let streamResultFunction: (StreamResult<Data>) -> StreamResult<Data>
 
     public init(
         requestFunction: @escaping (HTTPRequest) -> HTTPRequest,
         requestDataFunction: @escaping (Data) -> Data,
-        streamResultFunc: @escaping (StreamResult<Data>) -> StreamResult<Data>
+        streamResultFunction: @escaping (StreamResult<Data>) -> StreamResult<Data>
     ) {
         self.requestFunction = requestFunction
         self.requestDataFunction = requestDataFunction
-        self.streamResultFunc = streamResultFunc
+        self.streamResultFunction = streamResultFunction
     }
 }
