@@ -159,6 +159,9 @@ final class InterceptorChainTests: XCTestCase {
         ))
         XCTAssertEqual(interceptedResponse.headers["filter-chain"], ["filter-b", "filter-a"])
 
+        let interceptedMetrics = chain.responseMetricsFunction(HTTPMetrics(taskMetrics: nil))
+        XCTAssertEqual(interceptedMetrics.taskMetrics, nil)
+
         XCTAssertEqual(XCTWaiter().wait(for: [
             aRequestExpectation,
             bRequestExpectation,
