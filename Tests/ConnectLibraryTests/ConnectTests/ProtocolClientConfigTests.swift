@@ -25,7 +25,7 @@ private struct NoopInterceptor: Interceptor {
         return .init(
             requestFunction: { $0 },
             requestDataFunction: { $0 },
-            streamResultFunc: { $0 }
+            streamResultFunction: { $0 }
         )
     }
 

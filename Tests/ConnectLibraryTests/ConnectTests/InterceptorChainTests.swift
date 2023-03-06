@@ -83,7 +83,7 @@ private struct MockStreamInterceptor: Interceptor {
                 self.requestDataExpectation.fulfill()
                 return self.outboundMessageData
             },
-            streamResultFunc: { result in
+            streamResultFunction: { result in
                 self.resultExpectation.fulfill()
                 switch result {
                 case .headers(let headers):
@@ -208,21 +208,21 @@ final class InterceptorChainTests: XCTestCase {
         let interceptedRequestData = chain.requestDataFunction(Data())
         XCTAssertEqual(interceptedRequestData, filterBData)
 
-        switch chain.streamResultFunc(.headers(Headers())) {
+        switch chain.streamResultFunction(.headers(Headers())) {
         case .headers(let interceptedResultHeaders):
             XCTAssertEqual(interceptedResultHeaders["filter-chain"], ["filter-b", "filter-a"])
         case .message, .complete:
             XCTFail("Unexpected result")
         }
 
-        switch chain.streamResultFunc(.message(Data())) {
+        switch chain.streamResultFunction(.message(Data())) {
         case .message(let interceptedData):
             XCTAssertEqual(interceptedData, filterAData)
         case .headers, .complete:
             XCTFail("Unexpected result")
         }
 
-        switch chain.streamResultFunc(.complete(code: .ok, error: nil, trailers: nil)) {
+        switch chain.streamResultFunction(.complete(code: .ok, error: nil, trailers: nil)) {
         case .complete(_, _, let interceptedTrailers):
             XCTAssertEqual(interceptedTrailers?["filter-chain"], ["filter-b", "filter-a"])
         case .headers, .message:
