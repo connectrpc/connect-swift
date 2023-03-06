@@ -45,7 +45,7 @@ public struct UnaryFunction {
     public init(
         requestFunction: @escaping (HTTPRequest) -> HTTPRequest,
         responseFunction: @escaping (HTTPResponse) -> HTTPResponse,
-        responseMetricsFunction: @escaping (HTTPMetrics) -> HTTPMetrics
+        responseMetricsFunction: @escaping (HTTPMetrics) -> HTTPMetrics = { $0 }
     ) {
         self.requestFunction = requestFunction
         self.responseFunction = responseFunction
