@@ -19,13 +19,17 @@ jobs:
       - name: Zip artifacts
         run: |
           cd ./.tmp/bin
-          tar -zcvf ./protoc-gen-connect-swift.tar.gz ./protoc-gen-connect-swift
-          tar -zcvf ./protoc-gen-connect-swift-mocks.tar.gz ./protoc-gen-connect-swift-mocks
+          mkdir ./artifacts
+          tar -zcvf ./artifacts/protoc-gen-connect-swift.tar.gz ./protoc-gen-connect-swift
+          tar -zcvf ./artifacts/protoc-gen-connect-swift-mocks.tar.gz ./protoc-gen-connect-swift-mocks
+          cd ./artifacts
+          for file in $(find . -maxdepth 1 -type f | sed 's/^\.\///' | sort | uniq); do
+            shasum -a 256 "${file}" >> sha256.txt
+          done
       - name: Publish release
         uses: softprops/action-gh-release@v1
         with:
           generate_release_notes: true
           append_body: true
           files: |
-            ./.tmp/bin/protoc-gen-connect-swift.tar.gz
-            ./.tmp/bin/protoc-gen-connect-swift-mocks.tar.gz
+            ./.tmp/bin/artifacts/*
