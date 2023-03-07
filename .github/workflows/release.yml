@@ -1,12 +1,13 @@
 name: release
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - "*"
   workflow_dispatch: {} # support manual runs
 permissions:
-  contents: read
+  contents: write
 jobs:
-  plugin-artifacts:
+  release:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
@@ -18,15 +19,13 @@ jobs:
       - name: Zip artifacts
         run: |
           cd ./.tmp/bin
-          tar -zcvf protoc-gen-connect-swift.tar.gz protoc-gen-connect-swift
-          tar -zcvf protoc-gen-connect-swift-mocks.tar.gz protoc-gen-connect-swift-mocks
-      - name: Upload protoc-gen-connect-swift artifact
-        uses: actions/upload-artifact@v3
+          tar -zcvf ./protoc-gen-connect-swift.tar.gz ./protoc-gen-connect-swift
+          tar -zcvf ./protoc-gen-connect-swift-mocks.tar.gz ./protoc-gen-connect-swift-mocks
+      - name: Publish release
+        uses: softprops/action-gh-release@v1
         with:
-          name: protoc-gen-connect-swift.tar.gz
-          path: ./.tmp/bin/protoc-gen-connect-swift.tar.gz
-      - name: Upload protoc-gen-connect-swift-mocks artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: protoc-gen-connect-swift-mocks.tar.gz
-          path: ./.tmp/bin/protoc-gen-connect-swift-mocks.tar.gz
+          generate_release_notes: true
+          append_body: true
+          files: |
+            ./.tmp/bin/protoc-gen-connect-swift.tar.gz
+            ./.tmp/bin/protoc-gen-connect-swift-mocks.tar.gz
