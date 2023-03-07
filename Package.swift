@@ -59,6 +59,34 @@ let package = Package(
                 "proto",
             ]
         ),
+        .testTarget(
+            name: "ConnectLibraryTests",
+            dependencies: [
+                "Connect",
+                "ConnectMocks",
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+            ],
+            path: "Tests/ConnectLibraryTests",
+            exclude: [
+                "buf.gen.yaml",
+                "buf.work.yaml",
+                "proto",
+            ],
+            resources: [
+                .copy("Resources"),
+            ]
+        ),
+        .target(
+            name: "ConnectMocks",
+            dependencies: [
+                .target(name: "Connect"),
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+            ],
+            path: "Libraries/ConnectMocks",
+            exclude: [
+                "README.md",
+            ]
+        ),
         .executableTarget(
             name: "ConnectMocksPlugin",
             dependencies: [
@@ -88,34 +116,6 @@ let package = Package(
                 .product(name: "SwiftProtobufPluginLibrary", package: "swift-protobuf"),
             ],
             path: "Plugins/ConnectSwiftPlugin"
-        ),
-        .target(
-            name: "ConnectMocks",
-            dependencies: [
-                .target(name: "Connect"),
-                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
-            ],
-            path: "Libraries/ConnectMocks",
-            exclude: [
-                "README.md",
-            ]
-        ),
-        .testTarget(
-            name: "ConnectLibraryTests",
-            dependencies: [
-                "Connect",
-                "ConnectMocks",
-                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
-            ],
-            path: "Tests/ConnectLibraryTests",
-            exclude: [
-                "buf.gen.yaml",
-                "buf.work.yaml",
-                "proto",
-            ],
-            resources: [
-                .copy("Resources"),
-            ]
         ),
     ],
     swiftLanguageVersions: [.v5]
