@@ -18,13 +18,14 @@ jobs:
         run: make buildplugins
       - name: Zip artifacts
         run: |
-          mkdir -p ./.tmp/artifacts
-          tar -zcvf ./.tmp/artifacts/protoc-gen-connect-swift.tar.gz ./.tmp/bin/protoc-gen-connect-swift
-          tar -zcvf ./.tmp/artifacts/protoc-gen-connect-swift-mocks.tar.gz ./.tmp/bin/protoc-gen-connect-swift-mocks
+          cd ./.tmp/bin
+          tar -zcvf ./protoc-gen-connect-swift.tar.gz ./protoc-gen-connect-swift
+          tar -zcvf ./protoc-gen-connect-swift-mocks.tar.gz ./protoc-gen-connect-swift-mocks
       - name: Publish release
         uses: softprops/action-gh-release@v1
         with:
           generate_release_notes: true
           append_body: true
           files: |
-            ./.tmp/artifacts/*
+            ./.tmp/bin/protoc-gen-connect-swift.tar.gz
+            ./.tmp/bin/protoc-gen-connect-swift-mocks.tar.gz
