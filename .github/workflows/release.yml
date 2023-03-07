@@ -7,7 +7,7 @@ on:
 permissions:
   contents: write
 jobs:
-  plugin-artifacts:
+  release:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
@@ -25,5 +25,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           generate_release_notes: true
+          append_body: true
           files: |
             ./.tmp/artifacts/*
