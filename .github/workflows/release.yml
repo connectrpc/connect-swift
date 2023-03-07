@@ -4,6 +4,8 @@ on:
     tags:
       - "*"
   workflow_dispatch: {} # support manual runs
+permissions:
+  contents: write
 jobs:
   plugin-artifacts:
     runs-on: macos-12
