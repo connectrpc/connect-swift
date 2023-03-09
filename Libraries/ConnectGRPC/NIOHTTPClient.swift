@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import Connect
+import Foundation
 import NIOCore
 import NIOPosix
 import NIOHTTP1
@@ -26,22 +27,22 @@ private final class ConnectChannelHandler: NIOCore.ChannelInboundHandler {
     func channelActive(context: ChannelHandlerContext) {
         print("**Active: \(context)")
 
-        var headers = NIOHTTP1.HTTPHeaders()
-        headers.add(name: "content-type", value: "text/plain")
-        headers.add(name: "accept", value: "*/*")
-        headers.add(name: "user-agent", value: "curl/7.86.0")
-        //        headers.add(name: "Content-Length", value: "\(request.message?.count ?? 0)")
-        //        for (name, value) in request.headers {
-        //            headers.add(name: name, value: value.joined(separator: ","))
-        //        }
-
-        let requestHead = HTTPRequestHead(
-            version: .http1_1,
-            method: .GET,
-            uri: "/LICENSE",
-            headers: headers
-        )
-        context.channel.writeAndFlush(self.wrapOutboundOut(.head(requestHead)))
+//        var headers = NIOHTTP1.HTTPHeaders()
+//        headers.add(name: "Content-Type", value: "text/plain")
+//        headers.add(name: "Accept", value: "application/json")
+//        headers.add(name: "User-Agent", value: "curl/7.86.0")
+////        headers.add(name: "Content-Length", value: "0")
+//        //        for (name, value) in request.headers {
+//        //            headers.add(name: name, value: value.joined(separator: ","))
+//        //        }
+//
+//        let requestHead = HTTPRequestHead(
+//            version: .http1_1,
+//            method: .GET,
+//            uri: "/bin/astro.php?lon=113.2&lat=23.1&ac=0&unit=metric&output=json&tzshift=0",
+//            headers: headers
+//        )
+//        context.channel.writeAndFlush(self.wrapOutboundOut(.head(requestHead)))
 //        context.channel.writeAndFlush(NIOAny(HTTPClientRequestPart.body(.byteBuffer(.init()))))
     }
 
@@ -75,55 +76,49 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
     private var channel: NIOCore.Channel?
     private let loopGroup = NIOPosix.MultiThreadedEventLoopGroup(numberOfThreads: 1)
 
-    public init(host: String, port: Int = 8000) {
-//        let bootstrap = NIOPosix.ClientBootstrap(group: self.loopGroup)
-//            .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
-//            .channelInitializer { channel in
-//                let sslContext: NIOSSLContext
-//                let tlsHandler: NIOSSLServerHandler
-//                do {
-//                    sslContext = try NIOSSLContext(configuration: .clientDefault)
-//                    tlsHandler = NIOSSLServerHandler(context: sslContext)
-//                } catch {
-//                    return channel.close(mode: .all)
-//                }
-//
-//                return channel.pipeline.addHandlers(tlsHandler)
-//                    .flatMap { channel.pipeline.addHTTPClientHandlers() }
-//                    .flatMap { channel.pipeline.addHandler(ConnectChannelHandler()) }
-//            }
-//        return channel.pipeline.addHandler(tlsHandler).flatMap { _ in
-//            channel.configureHTTP2SecureUpgrade(h2ChannelConfigurator: { channel in
-//                channel.configureHTTP2Pipeline(
-//                    mode: .server,
-//                    inboundStreamInitializer: { channel in
-//                        channel.pipeline.addVaporHTTP2Handlers(
-//                            application: application!,
-//                            responder: responder,
-//                            configuration: configuration
-//                        )
-//                    }
-//                ).map { _ in }
-//            }, http1ChannelConfigurator: { channel in
-//                channel.pipeline.addVaporHTTP1Handlers(
-//                    application: application!,
-//                    responder: responder,
-//                    configuration: configuration
-//                )
-//            })
-//        }
-
-        let bootstrap = ClientBootstrap(group: self.loopGroup)
-            .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
+    public init(host: String, port: Int? = nil) {
+        let baseURL = URL(string: host)!
+        let host = baseURL.host!
+        let useSSL = baseURL.scheme?.lowercased() == "https"
+        let port = port ?? (useSSL ? 443 : 80)
+        print("**using SSL: \(useSSL) on port \(port)")
+        let bootstrap = NIOPosix.ClientBootstrap(group: self.loopGroup)
+            .channelOption(NIOCore.ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .channelInitializer { channel in
-                channel.pipeline.addHTTPClientHandlers(
-                    position: .first, leftOverBytesStrategy: .fireError
-                ).flatMap {
-                    channel.pipeline.addHandler(ConnectChannelHandler())
+                if useSSL {
+                    do {
+                        let tlsHandler = try NIOSSLClientHandler(
+                            context: try NIOSSLContext(configuration: .clientDefault),
+                            serverHostname: host
+                        )
+                        return channel.pipeline
+                            .addHandler(tlsHandler)
+                            .flatMap { _ in
+                                channel.configureHTTP2SecureUpgrade(
+                                    h2ChannelConfigurator: { channel in
+                                        return channel.configureHTTP2Pipeline(
+                                            mode: .client, inboundStreamInitializer: nil
+                                        )
+                                        .map { _ in }
+                                    },
+                                    http1ChannelConfigurator: { channel in
+                                        return channel.pipeline.eventLoop.makeSucceededVoidFuture()
+                                    }
+                                )
+                            }
+                            .flatMap { channel.pipeline.addHTTPClientHandlers() }
+                            .flatMap { channel.pipeline.addHandler(ConnectChannelHandler()) }
+                    } catch {
+                        return channel.close(mode: .all)
+                    }
+                } else {
+                    return channel.pipeline
+                        .addHTTPClientHandlers()
+                        .flatMap { channel.pipeline.addHandler(ConnectChannelHandler()) }
                 }
             }
 
-        bootstrap.connect(host: "localhost", port: port).whenComplete { [weak self] result in
+        bootstrap.connect(host: host, port: port).whenComplete { [weak self] result in
             switch result {
             case .success(let channel):
                 print("**Connected to channel \(channel)")
@@ -150,22 +145,22 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
         }
 
         var headers = NIOHTTP1.HTTPHeaders()
-//        headers.add(name: "Content-Type", value: "application/json")
-        headers.add(name: "accept", value: "application/json")
-//        headers.add(name: "Content-Length", value: "\(request.message?.count ?? 0)")
-//        for (name, value) in request.headers {
-//            headers.add(name: name, value: value.joined(separator: ","))
-//        }
+        headers.add(name: "Content-Type", value: request.contentType)
+//        headers.add(name: "accept", value: "application/json")
+        headers.add(name: "Content-Length", value: "\(request.message?.count ?? 0)")
+        for (name, value) in request.headers {
+            headers.add(name: name, value: value.joined(separator: ","))
+        }
 
         print(channel.isActive)
         let requestHead = HTTPRequestHead(
             version: .http1_1,
-            method: .GET,
-            uri: "/todos/1",
+            method: .POST,
+            uri: request.url.path,
             headers: headers
         )
         channel.write(NIOAny(HTTPClientRequestPart.head(requestHead)))
-        channel.writeAndFlush(NIOAny(HTTPClientRequestPart.body(.byteBuffer(.init()))))
+        channel.writeAndFlush(NIOAny(HTTPClientRequestPart.body(.byteBuffer(.init(bytes: request.message!)))))
 //        channel.writeAndFlush(NIOAny(HTTPClientRequestPart.body(.byteBuffer(.init(bytes: request.message!)))))
 //        channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
 //            .whenComplete { result in

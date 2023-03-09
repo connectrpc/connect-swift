@@ -36,7 +36,9 @@ struct MenuView: View {
         -> Buf_Connect_Demo_Eliza_V1_ElizaServiceClient
     {
         let protocolClient = ProtocolClient(
-            httpClient: NIOHTTPClient(host: "demo.connect.build"),
+            httpClient: NIOHTTPClient(host: "https://demo.connect.build"),
+//            httpClient: NIOHTTPClient(host: "localhost", port: 8000),
+//            httpClient: NIOHTTPClient(host: "https://www.7timer.info"),
             config: ProtocolClientConfig(
                 host: "https://demo.connect.build",
                 networkProtocol: networkProtocol,
