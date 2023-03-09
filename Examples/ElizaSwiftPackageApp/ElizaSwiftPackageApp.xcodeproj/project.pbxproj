@@ -15,6 +15,7 @@
 		B216FC0F29723F65003AB294 /* ElizaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FC0729723F65003AB294 /* ElizaApp.swift */; };
 		B216FC1029723F65003AB294 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FC0829723F65003AB294 /* MenuView.swift */; };
 		B216FC1129723F65003AB294 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B216FC0929723F65003AB294 /* README.md */; };
+		B21A175929B916B700350B78 /* ConnectGRPC in Frameworks */ = {isa = PBXBuildFile; productRef = B21A175829B916B700350B78 /* ConnectGRPC */; };
 		B236EE8C295F564900DDCDA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B236EE8B295F564900DDCDA9 /* Assets.xcassets */; };
 		B236EEA4295F569700DDCDA9 /* Connect in Frameworks */ = {isa = PBXBuildFile; productRef = B236EEA3295F569700DDCDA9 /* Connect */; };
 /* End PBXBuildFile section */
@@ -40,6 +41,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B236EEA4295F569700DDCDA9 /* Connect in Frameworks */,
+				B21A175929B916B700350B78 /* ConnectGRPC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,6 +141,7 @@
 			name = ElizaSwiftPackageApp;
 			packageProductDependencies = (
 				B236EEA3295F569700DDCDA9 /* Connect */,
+				B21A175829B916B700350B78 /* ConnectGRPC */,
 			);
 			productName = ElizaSwiftPackageApp;
 			productReference = B236EE84295F564800DDCDA9 /* ElizaSwiftPackageApp.app */;
@@ -411,6 +414,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		B21A175829B916B700350B78 /* ConnectGRPC */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ConnectGRPC;
+		};
 		B236EEA3295F569700DDCDA9 /* Connect */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Connect;

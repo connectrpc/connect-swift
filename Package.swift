@@ -28,6 +28,10 @@ let package = Package(
             targets: ["Connect"]
         ),
         .library(
+            name: "ConnectGRPC",
+            targets: ["ConnectGRPC"]
+        ),
+        .library(
             name: "ConnectMocks",
             targets: ["ConnectMocks"]
         ),
@@ -41,6 +45,18 @@ let package = Package(
         ),
     ],
     dependencies: [
+        .package(
+            url: "https://github.com/apple/swift-nio.git",
+            from: "2.48.0"
+        ),
+        .package(
+            url: "https://github.com/apple/swift-nio-http2.git",
+            from: "1.25.0"
+        ),
+        .package(
+            url: "https://github.com/apple/swift-nio-ssl.git",
+            from: "2.23.0"
+        ),
         .package(
             url: "https://github.com/apple/swift-protobuf.git",
             from: "1.21.0"
@@ -58,6 +74,18 @@ let package = Package(
                 "buf.work.yaml",
                 "proto",
             ]
+        ),
+        .target(
+            name: "ConnectGRPC",
+            dependencies: [
+                "Connect",
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+                .product(name: "NIOHTTP2", package: "swift-nio-http2"),
+                .product(name: "NIOPosix", package: "swift-nio"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+            ],
+            path: "Libraries/ConnectGRPC"
         ),
         .testTarget(
             name: "ConnectLibraryTests",

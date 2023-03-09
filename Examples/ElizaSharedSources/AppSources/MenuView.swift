@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import Connect
+import ConnectGRPC
 import SwiftUI
 
 private enum MessagingConnectionType: Int, CaseIterable {
@@ -35,7 +36,7 @@ struct MenuView: View {
         -> Buf_Connect_Demo_Eliza_V1_ElizaServiceClient
     {
         let protocolClient = ProtocolClient(
-            httpClient: URLSessionHTTPClient(),
+            httpClient: NIOHTTPClient(host: "demo.connect.build"),
             config: ProtocolClientConfig(
                 host: "https://demo.connect.build",
                 networkProtocol: networkProtocol,
