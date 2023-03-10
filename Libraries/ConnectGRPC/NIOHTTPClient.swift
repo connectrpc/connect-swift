@@ -21,33 +21,54 @@ import NIOHTTP2
 import NIOSSL
 
 private final class ConnectChannelHandler: NIOCore.ChannelInboundHandler {
-    typealias OutboundOut = HTTPClientRequestPart
-    typealias InboundIn = HTTPClientResponsePart
+    private let request: Connect.HTTPRequest
+    private let onMetrics: (Connect.HTTPMetrics) -> Void
+    private let onResponse: (Connect.HTTPResponse) -> Void
+
+    typealias OutboundOut = NIOHTTP1.HTTPClientRequestPart
+    typealias InboundIn = NIOHTTP1.HTTPClientResponsePart
+
+    init(
+        request: Connect.HTTPRequest,
+        onMetrics: @escaping (Connect.HTTPMetrics) -> Void,
+        onResponse: @escaping (Connect.HTTPResponse) -> Void
+    ) {
+        self.request = request
+        self.onMetrics = onMetrics
+        self.onResponse = onResponse
+    }
+
+    func cancel() {
+        #warning("todo")
+    }
 
     func channelActive(context: ChannelHandlerContext) {
         print("**Active: \(context)")
 
-//        var headers = NIOHTTP1.HTTPHeaders()
-//        headers.add(name: "Content-Type", value: "text/plain")
-//        headers.add(name: "Accept", value: "application/json")
-//        headers.add(name: "User-Agent", value: "curl/7.86.0")
-////        headers.add(name: "Content-Length", value: "0")
-//        //        for (name, value) in request.headers {
-//        //            headers.add(name: name, value: value.joined(separator: ","))
-//        //        }
-//
-//        let requestHead = HTTPRequestHead(
-//            version: .http1_1,
-//            method: .GET,
-//            uri: "/bin/astro.php?lon=113.2&lat=23.1&ac=0&unit=metric&output=json&tzshift=0",
-//            headers: headers
-//        )
-//        context.channel.writeAndFlush(self.wrapOutboundOut(.head(requestHead)))
-//        context.channel.writeAndFlush(NIOAny(HTTPClientRequestPart.body(.byteBuffer(.init()))))
+        var headers = NIOHTTP1.HTTPHeaders()
+        headers.add(name: "Content-Type", value: self.request.contentType)
+        headers.add(name: "Content-Length", value: "\(self.request.message?.count ?? 0)")
+        headers.add(name: "Host", value: self.request.url.host!)
+        for (name, value) in self.request.headers {
+            headers.add(name: name, value: value.joined(separator: ","))
+        }
+
+        let requestHead = HTTPRequestHead(
+            version: .http1_1,
+            method: .POST,
+            uri: self.request.url.path,
+            headers: headers
+        )
+        context.write(self.wrapOutboundOut(.head(requestHead))).cascade(to: nil)
+        if let message = self.request.message {
+            context.write(self.wrapOutboundOut(.body(.byteBuffer(.init(bytes: message)))))
+                .cascade(to: nil)
+        }
+        context.writeAndFlush(self.wrapOutboundOut(.end(.init()))).cascade(to: nil)
+        context.fireChannelActive()
     }
 
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-
         let clientResponse = self.unwrapInboundIn(data)
 
         switch clientResponse {
@@ -58,7 +79,7 @@ private final class ConnectChannelHandler: NIOCore.ChannelInboundHandler {
             print("Response data:")
             print(string)
         case .end:
-            print("Closing channel.")
+            print("Trailers received")
 //            context.close(promise: nil)
         }
     }
@@ -75,54 +96,27 @@ private final class ConnectChannelHandler: NIOCore.ChannelInboundHandler {
 open class NIOHTTPClient: Connect.HTTPClientInterface {
     private var channel: NIOCore.Channel?
     private let loopGroup = NIOPosix.MultiThreadedEventLoopGroup(numberOfThreads: 1)
+    private var multiplexer: NIOHTTP2.HTTP2StreamMultiplexer?
 
     public init(host: String, port: Int? = nil) {
         let baseURL = URL(string: host)!
         let host = baseURL.host!
         let useSSL = baseURL.scheme?.lowercased() == "https"
         let port = port ?? (useSSL ? 443 : 80)
-        print("**using SSL: \(useSSL) on port \(port)")
         let bootstrap = NIOPosix.ClientBootstrap(group: self.loopGroup)
             .channelOption(NIOCore.ChannelOptions.socketOption(.so_reuseaddr), value: 1)
-            .channelInitializer { channel in
-                if useSSL {
-                    do {
-                        let tlsHandler = try NIOSSLClientHandler(
-                            context: try NIOSSLContext(configuration: .clientDefault),
-                            serverHostname: host
-                        )
-                        return channel.pipeline
-                            .addHandler(tlsHandler)
-                            .flatMap { _ in
-                                channel.configureHTTP2SecureUpgrade(
-                                    h2ChannelConfigurator: { channel in
-                                        return channel.configureHTTP2Pipeline(
-                                            mode: .client, inboundStreamInitializer: nil
-                                        )
-                                        .map { _ in }
-                                    },
-                                    http1ChannelConfigurator: { channel in
-                                        return channel.pipeline.eventLoop.makeSucceededVoidFuture()
-                                    }
-                                )
-                            }
-                            .flatMap { channel.pipeline.addHTTPClientHandlers() }
-                            .flatMap { channel.pipeline.addHandler(ConnectChannelHandler()) }
-                    } catch {
-                        return channel.close(mode: .all)
-                    }
-                } else {
-                    return channel.pipeline
-                        .addHTTPClientHandlers()
-                        .flatMap { channel.pipeline.addHandler(ConnectChannelHandler()) }
-                }
-            }
+//            .channelInitializer { channel in
+//                return channel.configureForConnect(url: baseURL)
+//            }
 
         bootstrap.connect(host: host, port: port).whenComplete { [weak self] result in
             switch result {
             case .success(let channel):
                 print("**Connected to channel \(channel)")
                 self?.channel = channel
+                self?.multiplexer = .init(
+                    mode: .client, channel: channel, inboundStreamInitializer: nil
+                )
             case .failure(let error):
                 print("**Failed: \(error)")
             }
@@ -139,47 +133,72 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
         onMetrics: @escaping @Sendable (Connect.HTTPMetrics) -> Void,
         onResponse: @escaping @Sendable (Connect.HTTPResponse) -> Void
     ) -> Connect.Cancelable {
-        guard let channel = self.channel else {
+        guard let multiplexer = self.multiplexer else {
             onResponse(.init(code: .unknown, headers: [:], message: nil, trailers: [:], error: nil, tracingInfo: nil))
             return .init(cancel: {})
         }
 
-        var headers = NIOHTTP1.HTTPHeaders()
-        headers.add(name: "Content-Type", value: request.contentType)
-//        headers.add(name: "accept", value: "application/json")
-        headers.add(name: "Content-Length", value: "\(request.message?.count ?? 0)")
-        for (name, value) in request.headers {
-            headers.add(name: name, value: value.joined(separator: ","))
-        }
-
-        print(channel.isActive)
-        let requestHead = HTTPRequestHead(
-            version: .http1_1,
-            method: .POST,
-            uri: request.url.path,
-            headers: headers
+        let connectHandler = ConnectChannelHandler(
+            request: request,
+            onMetrics: onMetrics,
+            onResponse: onResponse
         )
-        channel.write(NIOAny(HTTPClientRequestPart.head(requestHead)))
-        channel.writeAndFlush(NIOAny(HTTPClientRequestPart.body(.byteBuffer(.init(bytes: request.message!)))))
-//        channel.writeAndFlush(NIOAny(HTTPClientRequestPart.body(.byteBuffer(.init(bytes: request.message!)))))
-//        channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
-//            .whenComplete { result in
-//                print("**Sent: \(result)")
-//            }
-//        channel.closeFuture.whenComplete({ result in
-//            print("**Closed: \(result)")
-//        })
-//
-//            .flatMap {  }
-//            .flatMap {  }
-
-        return .init(cancel: {})
+        multiplexer.createStreamChannel(promise: nil) { channel in
+            return channel.configureForConnect(
+                url: request.url,
+                connectHandler: connectHandler
+            )
+        }
+        return .init(cancel: connectHandler.cancel)
     }
 
     open func stream(
         request: Connect.HTTPRequest,
         responseCallbacks: Connect.ResponseCallbacks
     ) -> Connect.RequestCallbacks {
+        #warning("todo")
         fatalError()
+    }
+}
+
+private extension NIOCore.Channel {
+    func configureForConnect(
+        url: URL, connectHandler: any ChannelInboundHandler
+    ) -> EventLoopFuture<Void> {
+        let useSSL = url.scheme?.lowercased() == "https"
+        guard useSSL else {
+            return self.pipeline
+                .addHTTPClientHandlers()
+                .flatMap { self.pipeline.addHandler(connectHandler) }
+                .flatMap { self.pipeline.addHandler(HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .http)) }
+        }
+
+        do {
+            let tlsHandler = try NIOSSLClientHandler(
+                context: try NIOSSLContext(configuration: .clientDefault),
+                serverHostname: url.host!
+            )
+            return self.pipeline.addHandlers([HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https), connectHandler], position: .last)
+            return self.pipeline
+                .addHandler(tlsHandler)
+                .flatMap { self.pipeline.addHTTPClientHandlers() }
+                .flatMap { self.pipeline.addHandler(connectHandler) }
+                .flatMap { self.pipeline.addHandler(HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https)) }
+//                .flatMap {
+//                    self.configureHTTP2SecureUpgrade(
+//                        h2ChannelConfigurator: { channel in
+//                            return channel.configureHTTP2Pipeline(
+//                                mode: .client, inboundStreamInitializer: nil
+//                            )
+//                            .map { _ in }
+//                        },
+//                        http1ChannelConfigurator: { channel in
+//                            return channel.pipeline.eventLoop.makeSucceededVoidFuture()
+//                        }
+//                    )
+//                }
+        } catch {
+            return self.close(mode: .all)
+        }
     }
 }
