@@ -24,11 +24,16 @@ public struct HTTPRequest: Sendable {
     public let headers: Headers
     /// Body data to send with the request.
     public let message: Data?
+    /// Outbound trailers for the request.
+    public let trailers: Headers?
 
-    public init(url: URL, contentType: String, headers: Headers, message: Data?) {
+    public init(
+        url: URL, contentType: String, headers: Headers, message: Data?, trailers: Headers?
+    ) {
         self.url = url
         self.contentType = contentType
         self.headers = headers
         self.message = message
+        self.trailers = trailers
     }
 }

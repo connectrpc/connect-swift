@@ -53,7 +53,8 @@ extension ConnectInterceptor: Interceptor {
                     url: request.url,
                     contentType: request.contentType,
                     headers: headers,
-                    message: finalRequestBody
+                    message: finalRequestBody,
+                    trailers: nil
                 )
             },
             responseFunction: { response in
@@ -113,7 +114,8 @@ extension ConnectInterceptor: Interceptor {
                     url: request.url,
                     contentType: request.contentType,
                     headers: headers,
-                    message: request.message
+                    message: request.message,
+                    trailers: nil
                 )
             },
             requestDataFunction: { data in

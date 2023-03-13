@@ -28,7 +28,7 @@ extension GRPCWebInterceptor: Interceptor {
     func unaryFunction() -> UnaryFunction {
         return UnaryFunction(
             requestFunction: { request in
-                // GRPC unary payloads are enveloped.
+                // gRPC-Web unary payloads are enveloped.
                 let envelopedRequestBody = Envelope.packMessage(
                     request.message ?? Data(), using: self.config.requestCompression
                 )
@@ -38,12 +38,13 @@ extension GRPCWebInterceptor: Interceptor {
                     // Override the content type to be gRPC Web.
                     contentType: "application/grpc-web+\(self.config.codec.name())",
                     headers: request.headers.addingGRPCWebHeaders(using: self.config),
-                    message: envelopedRequestBody
+                    message: envelopedRequestBody,
+                    trailers: nil
                 )
             },
             responseFunction: { response in
                 guard response.code == .ok else {
-                    // Invalid gRPC response - expects HTTP 200. Potentially a network error.
+                    // Invalid gRPC-Web response - expects HTTP 200. Potentially a network error.
                     return response
                 }
 
@@ -118,7 +119,8 @@ extension GRPCWebInterceptor: Interceptor {
                     // Override the content type to be gRPC Web.
                     contentType: "application/grpc-web+\(self.config.codec.name())",
                     headers: request.headers.addingGRPCWebHeaders(using: self.config),
-                    message: request.message
+                    message: request.message,
+                    trailers: nil
                 )
             },
             requestDataFunction: { data in
