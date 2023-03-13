@@ -20,7 +20,7 @@ extension Connect.NetworkProtocol {
     ///
     /// IMPORTANT: This protocol must be used in conjunction with an HTTP client that supports
     /// trailers, such as the `NIOHTTPClient` included in this library.
-    public static var gRPC: Self {
+    public static var grpc: Self {
         return .custom(protocolInterceptor: GRPCInterceptor.init)
     }
 }
