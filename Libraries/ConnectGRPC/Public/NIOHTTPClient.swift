@@ -141,14 +141,15 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
     }
 
     private func startChannel(
-        on multiplexer: NIOHTTP2.HTTP2StreamMultiplexer,
         for url: URL,
+        on eventLoop: NIOCore.EventLoop,
+        using multiplexer: NIOHTTP2.HTTP2StreamMultiplexer,
         with connectHandler: any NIOCore.ChannelInboundHandler
     ) {
         let codec = self.useSSL
         ? HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https)
         : HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .http)
-        let promise = self.loopGroup.next().makePromise(of: NIOCore.Channel.self)
+        let promise = eventLoop.makePromise(of: NIOCore.Channel.self)
         multiplexer.createStreamChannel(promise: promise) { channel in
             return channel.pipeline.addHandlers([
                 codec,
@@ -169,41 +170,49 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
         onMetrics: @escaping @Sendable (Connect.HTTPMetrics) -> Void,
         onResponse: @escaping @Sendable (Connect.HTTPResponse) -> Void
     ) -> Connect.Cancelable {
-        let connectHandler = ConnectUnaryChannelHandler(
+        let eventLoop = self.loopGroup.next()
+        let handler = ConnectUnaryChannelHandler(
             request: request,
+            eventLoop: eventLoop,
             onMetrics: onMetrics,
             onResponse: onResponse
         )
         switch self.state {
         case .connected(_, let multiplexer):
-            self.startChannel(on: multiplexer, for: request.url, with: connectHandler)
+            self.startChannel(for: request.url, on: eventLoop, using: multiplexer, with: handler)
         case .disconnected:
             self.queuePendingRequest { [weak self] multiplexer in
-                self?.startChannel(on: multiplexer, for: request.url, with: connectHandler)
+                self?.startChannel(
+                    for: request.url, on: eventLoop, using: multiplexer, with: handler
+                )
             }
         }
-        return .init(cancel: connectHandler.cancel)
+        return .init(cancel: handler.cancel)
     }
 
     open func stream(
         request: Connect.HTTPRequest,
         responseCallbacks: Connect.ResponseCallbacks
     ) -> Connect.RequestCallbacks {
-        let connectHandler = ConnectStreamChannelHandler(
+        let eventLoop = self.loopGroup.next()
+        let handler = ConnectStreamChannelHandler(
             request: request,
-            responseCallbacks: responseCallbacks
+            responseCallbacks: responseCallbacks,
+            eventLoop: eventLoop
         )
         switch self.state {
         case .connected(_, let multiplexer):
-            self.startChannel(on: multiplexer, for: request.url, with: connectHandler)
+            self.startChannel(for: request.url, on: eventLoop, using: multiplexer, with: handler)
         case .disconnected:
             self.queuePendingRequest { [weak self] multiplexer in
-                self?.startChannel(on: multiplexer, for: request.url, with: connectHandler)
+                self?.startChannel(
+                    for: request.url, on: eventLoop, using: multiplexer, with: handler
+                )
             }
         }
         return .init(
-            sendData: connectHandler.sendData,
-            sendClose: { connectHandler.close(trailers: nil) }
+            sendData: handler.sendData,
+            sendClose: { handler.close(trailers: nil) }
         )
     }
 }

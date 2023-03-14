@@ -19,6 +19,7 @@ import NIOHTTP1
 
 /// NIO-based channel handler for unary requests made through the Connect library.
 final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
+    private let eventLoop: NIOCore.EventLoop
     private let request: Connect.HTTPRequest
     private let onMetrics: (Connect.HTTPMetrics) -> Void
     private let onResponse: (Connect.HTTPResponse) -> Void
@@ -31,30 +32,42 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
 
     init(
         request: Connect.HTTPRequest,
+        eventLoop: NIOCore.EventLoop,
         onMetrics: @escaping (Connect.HTTPMetrics) -> Void,
         onResponse: @escaping (Connect.HTTPResponse) -> Void
     ) {
         self.request = request
+        self.eventLoop = eventLoop
         self.onMetrics = onMetrics
         self.onResponse = onResponse
     }
 
     /// Cancel the in-flight request, if currently active.
     func cancel() {
-        if self.isClosed {
-            return
-        }
+        self.runOnEventLoop {
+            if self.isClosed {
+                return
+            }
 
-        self.isClosed = true
-        self.context?.close(promise: nil)
-        self.onResponse(HTTPResponse(
-            code: .canceled,
-            headers: [:],
-            message: nil,
-            trailers: [:],
-            error: nil,
-            tracingInfo: nil
-        ))
+            self.isClosed = true
+            self.context?.close(promise: nil)
+            self.onResponse(HTTPResponse(
+                code: .canceled,
+                headers: [:],
+                message: nil,
+                trailers: [:],
+                error: nil,
+                tracingInfo: nil
+            ))
+        }
+    }
+
+    private func runOnEventLoop(action: @escaping () -> Void) {
+        if self.eventLoop.inEventLoop {
+            action()
+        } else {
+            self.eventLoop.submit(action).cascade(to: nil)
+        }
     }
 
     private func createResponse(error: Swift.Error?) -> Connect.HTTPResponse {

@@ -19,6 +19,7 @@ import NIOHTTP1
 
 /// NIO-based channel handler for streams made through the Connect library.
 final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler {
+    private let eventLoop: NIOCore.EventLoop
     private let request: Connect.HTTPRequest
     private let responseCallbacks: Connect.ResponseCallbacks
 
@@ -28,24 +29,28 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler {
 
     init(
         request: Connect.HTTPRequest,
-        responseCallbacks: Connect.ResponseCallbacks
+        responseCallbacks: Connect.ResponseCallbacks,
+        eventLoop: NIOCore.EventLoop
     ) {
         self.request = request
         self.responseCallbacks = responseCallbacks
+        self.eventLoop = eventLoop
     }
 
     /// Send outbound data over the stream.
     ///
     /// - parameter data: The data to send.
     func sendData(_ data: Data) {
-        if self.isClosed {
-            return
-        }
+        self.runOnEventLoop {
+            if self.isClosed {
+                return
+            }
 
-        if let context = self.context {
-            self.sendPendingData(data, using: context)
-        } else {
-            self.pendingData.append(contentsOf: data)
+            if let context = self.context {
+                self.sendPendingData(data, using: context)
+            } else {
+                self.pendingData.append(contentsOf: data)
+            }
         }
     }
 
@@ -53,33 +58,45 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler {
     ///
     /// - parameter trailers: Optional trailers to send when closing the stream.
     func close(trailers: Connect.Trailers?) {
-        if self.isClosed {
-            return
-        }
+        self.runOnEventLoop {
+            if self.isClosed {
+                return
+            }
 
-        if let trailers = trailers {
-            var nioTrailers = NIOHTTP1.HTTPHeaders()
-            nioTrailers.addConnectHeaders(trailers)
-            self.context?.writeAndFlush(self.wrapOutboundOut(.end(nioTrailers))).cascade(to: nil)
-        } else {
-            self.context?.writeAndFlush(self.wrapOutboundOut(.end(nil))).cascade(to: nil)
+            if let trailers = trailers {
+                var nioTrailers = NIOHTTP1.HTTPHeaders()
+                nioTrailers.addConnectHeaders(trailers)
+                self.context?.writeAndFlush(self.wrapOutboundOut(.end(nioTrailers))).cascade(to: nil)
+            } else {
+                self.context?.writeAndFlush(self.wrapOutboundOut(.end(nil))).cascade(to: nil)
+            }
         }
     }
 
     /// Cancel the stream, if currently active.
     func cancel() {
-        if self.isClosed {
-            return
-        }
+        self.runOnEventLoop {
+            if self.isClosed {
+                return
+            }
 
-        self.isClosed = true
-        self.context?.close(promise: nil)
-        self.responseCallbacks.receiveClose(.canceled, [:], nil)
+            self.isClosed = true
+            self.context?.close(promise: nil)
+            self.responseCallbacks.receiveClose(.canceled, [:], nil)
+        }
     }
 
     private func sendPendingData(_ data: Data, using context: NIOCore.ChannelHandlerContext) {
         context.writeAndFlush(self.wrapOutboundOut(.body(.byteBuffer(.init(bytes: data)))))
             .cascade(to: nil)
+    }
+
+    private func runOnEventLoop(action: @escaping () -> Void) {
+        if self.eventLoop.inEventLoop {
+            action()
+        } else {
+            self.eventLoop.submit(action).cascade(to: nil)
+        }
     }
 
     // MARK: - ChannelInboundHandler

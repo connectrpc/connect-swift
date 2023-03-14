@@ -73,14 +73,18 @@ public struct ProtocolClientConfig {
 }
 
 extension ProtocolClientConfig {
-    func acceptCompressionPoolNames() -> [String] {
+    public func acceptCompressionPoolNames() -> [String] {
         return self.responseCompressionPools.map { $0.name() }
     }
 
-    func responseCompressionPool(forName name: String) -> CompressionPool? {
+    public func responseCompressionPool(forName name: String) -> CompressionPool? {
         return self.responseCompressionPools.first { $0.name() == name }
     }
+}
 
+// MARK: - Internal
+
+extension ProtocolClientConfig {
     func createInterceptorChain() -> InterceptorChain {
         return InterceptorChain(interceptors: self.interceptors, config: self)
     }
