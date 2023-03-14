@@ -79,6 +79,7 @@ let package = Package(
             name: "ConnectGRPC",
             dependencies: [
                 "Connect",
+                .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "NIOHTTP2", package: "swift-nio-http2"),

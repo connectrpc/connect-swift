@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import Connect
-import Dispatch
 import Foundation
+import NIOConcurrencyHelpers
 import NIOCore
 import NIOPosix
 import NIOHTTP1
@@ -25,17 +25,19 @@ import os.log
 /// HTTP client powered by Swift NIO and also supports trailers (unlike URLSession).
 open class NIOHTTPClient: Connect.HTTPClientInterface {
     private lazy var bootstrap: NIOPosix.ClientBootstrap = {
-        NIOPosix.ClientBootstrap(group: self.loopGroup)
+        let host = self.host
+        let useSSL = self.useSSL
+        return NIOPosix.ClientBootstrap(group: self.loopGroup)
             .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
             .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .channelInitializer { channel in
                 do {
-                    if self.useSSL {
+                    if useSSL {
                         var tlsConfiguration = NIOSSL.TLSConfiguration.makeClientConfiguration()
                         tlsConfiguration.applicationProtocols = ["h2"]
                         let sslContext = try NIOSSL.NIOSSLContext(configuration: tlsConfiguration)
                         let sslHandler = try NIOSSL.NIOSSLClientHandler(
-                            context: sslContext, serverHostname: self.host
+                            context: sslContext, serverHostname: host
                         )
                         return channel.pipeline
                             .addHandler(sslHandler)
@@ -58,17 +60,22 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
             }
     }()
     private let host: String
+    private let lock = NIOConcurrencyHelpers.NIOLock()
     private let loopGroup = NIOPosix.MultiThreadedEventLoopGroup(numberOfThreads: 1)
     private let port: Int
-    private let reconnectDelay: () -> TimeInterval
     private let useSSL: Bool
 
-    private var pendingRequests = [(NIOHTTP2.HTTP2StreamMultiplexer) -> Void]()
+    private var pendingRequests = [(NIOHTTP2.HTTP2StreamMultiplexer?) -> Void]()
     private var state = State.disconnected
 
     private enum State {
         case disconnected
+        case connecting
         case connected(channel: NIOCore.Channel, multiplexer: NIOHTTP2.HTTP2StreamMultiplexer)
+    }
+
+    private enum Error: Swift.Error {
+        case disconnected
     }
 
     /// Designated initializer for the client.
@@ -76,25 +83,77 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
     /// - parameter host: Target host (e.g., `https://buf.build`).
     /// - parameter port: Port to use for the connection. Default is provided based on whether a
     ///                   secure connection is being established to the host via HTTPS.
-    /// - parameter reconnectDelay: Closure to use for calculating the delay that should be used
-    ///                             when reconnecting if an error with the connection is
-    ///                             encountered. Invoked each time a connection is being
-    ///                             re-established.
-    public init(
-        host: String,
-        port: Int? = nil,
-        reconnectDelay: @escaping () -> TimeInterval = { 1.0 }
-    ) {
+    public init(host: String, port: Int? = nil) {
         let baseURL = URL(string: host)!
         let useSSL = baseURL.scheme?.lowercased() == "https"
         self.host = baseURL.host!
         self.port = port ?? (useSSL ? 443 : 80)
-        self.reconnectDelay = reconnectDelay
         self.useSSL = useSSL
-        self.connect()
     }
 
-    private func connect() {
+    open func unary(
+        request: Connect.HTTPRequest,
+        onMetrics: @escaping @Sendable (Connect.HTTPMetrics) -> Void,
+        onResponse: @escaping @Sendable (Connect.HTTPResponse) -> Void
+    ) -> Connect.Cancelable {
+        let eventLoop = self.loopGroup.next()
+        let handler = ConnectUnaryChannelHandler(
+            request: request,
+            eventLoop: eventLoop,
+            onMetrics: onMetrics,
+            onResponse: onResponse
+        )
+        self.sendOrQueueRequest { [weak self] multiplexer in
+            if let multiplexer = multiplexer {
+                self?.startChannel(
+                    for: request.url, on: eventLoop, using: multiplexer, with: handler
+                )
+            } else {
+                onResponse(.init(
+                    code: .unknown,
+                    headers: [:],
+                    message: nil,
+                    trailers: [:],
+                    error: Error.disconnected,
+                    tracingInfo: nil
+                ))
+            }
+        }
+        return .init(cancel: handler.cancel)
+    }
+
+    open func stream(
+        request: Connect.HTTPRequest,
+        responseCallbacks: Connect.ResponseCallbacks
+    ) -> Connect.RequestCallbacks {
+        let eventLoop = self.loopGroup.next()
+        let handler = ConnectStreamChannelHandler(
+            request: request,
+            responseCallbacks: responseCallbacks,
+            eventLoop: eventLoop
+        )
+        self.sendOrQueueRequest { [weak self] multiplexer in
+            if let multiplexer = multiplexer {
+                self?.startChannel(
+                    for: request.url, on: eventLoop, using: multiplexer, with: handler
+                )
+            } else {
+                responseCallbacks.receiveClose(.unknown, [:], Error.disconnected)
+            }
+        }
+        return .init(
+            sendData: handler.sendData,
+            sendClose: { handler.close(trailers: nil) }
+        )
+    }
+
+    // MARK: - Private
+
+    private func connectChannelAndMultiplexerIfNeeded() {
+        guard case .disconnected = self.state else {
+            return
+        }
+
         self.bootstrap
             .connect(host: self.host, port: self.port)
             .flatMap { channel -> EventLoopFuture<(Channel, HTTP2StreamMultiplexer)> in
@@ -106,38 +165,39 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
                 switch result {
                 case .success((let channel, let multiplexer)):
                     channel.closeFuture.whenComplete { result in
-                        self?.state = .disconnected
-                        self?.scheduleReconnect()
+                        self?.lock.withLock { self?.state = .disconnected }
                     }
-                    self?.state = .connected(channel: channel, multiplexer: multiplexer)
-                    self?.flushPendingRequests(using: multiplexer)
-
+                    self?.lock.withLock {
+                        self?.state = .connected(channel: channel, multiplexer: multiplexer)
+                        self?.flushOrFailPendingRequests(using: multiplexer)
+                    }
                 case .failure(let error):
                     os_log(.error, "NIOHTTPClient disconnected: %@", "\(error)")
-                    self?.state = .disconnected
-                    self?.scheduleReconnect()
+                    self?.lock.withLock {
+                        self?.state = .disconnected
+                        self?.flushOrFailPendingRequests(using: nil)
+                    }
                 }
             }
     }
 
-    private func queuePendingRequest(send: @escaping (NIOHTTP2.HTTP2StreamMultiplexer) -> Void) {
-        self.pendingRequests.append(send)
+    private func sendOrQueueRequest(send: @escaping (NIOHTTP2.HTTP2StreamMultiplexer?) -> Void) {
+        self.lock.withLock {
+            switch self.state {
+            case .connected(_, let multiplexer):
+                send(multiplexer)
+            case .connecting, .disconnected:
+                self.pendingRequests.append(send)
+                self.connectChannelAndMultiplexerIfNeeded()
+            }
+        }
     }
 
-    private func flushPendingRequests(using multiplexer: NIOHTTP2.HTTP2StreamMultiplexer) {
+    private func flushOrFailPendingRequests(using multiplexer: NIOHTTP2.HTTP2StreamMultiplexer?) {
         for request in self.pendingRequests {
             request(multiplexer)
         }
         self.pendingRequests = []
-    }
-
-    private func scheduleReconnect() {
-        let delayMS = Int(self.reconnectDelay() * 1_000.0)
-        os_log(.error, "NIOHTTPClient reconnecting after: %@", "\(delayMS)ms")
-        DispatchQueue.global(qos: .userInitiated)
-            .asyncAfter(deadline: .now() + .milliseconds(delayMS)) { [weak self] in
-                self?.connect()
-            }
     }
 
     private func startChannel(
@@ -159,60 +219,11 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
     }
 
     deinit {
-        if case .connected(let channel, _) = self.state {
-            try? channel.closeFuture.wait()
+        self.lock.withLock {
+            if case .connected(let channel, _) = self.state {
+                try? channel.closeFuture.wait()
+            }
         }
         try? self.loopGroup.syncShutdownGracefully()
-    }
-
-    open func unary(
-        request: Connect.HTTPRequest,
-        onMetrics: @escaping @Sendable (Connect.HTTPMetrics) -> Void,
-        onResponse: @escaping @Sendable (Connect.HTTPResponse) -> Void
-    ) -> Connect.Cancelable {
-        let eventLoop = self.loopGroup.next()
-        let handler = ConnectUnaryChannelHandler(
-            request: request,
-            eventLoop: eventLoop,
-            onMetrics: onMetrics,
-            onResponse: onResponse
-        )
-        switch self.state {
-        case .connected(_, let multiplexer):
-            self.startChannel(for: request.url, on: eventLoop, using: multiplexer, with: handler)
-        case .disconnected:
-            self.queuePendingRequest { [weak self] multiplexer in
-                self?.startChannel(
-                    for: request.url, on: eventLoop, using: multiplexer, with: handler
-                )
-            }
-        }
-        return .init(cancel: handler.cancel)
-    }
-
-    open func stream(
-        request: Connect.HTTPRequest,
-        responseCallbacks: Connect.ResponseCallbacks
-    ) -> Connect.RequestCallbacks {
-        let eventLoop = self.loopGroup.next()
-        let handler = ConnectStreamChannelHandler(
-            request: request,
-            responseCallbacks: responseCallbacks,
-            eventLoop: eventLoop
-        )
-        switch self.state {
-        case .connected(_, let multiplexer):
-            self.startChannel(for: request.url, on: eventLoop, using: multiplexer, with: handler)
-        case .disconnected:
-            self.queuePendingRequest { [weak self] multiplexer in
-                self?.startChannel(
-                    for: request.url, on: eventLoop, using: multiplexer, with: handler
-                )
-            }
-        }
-        return .init(
-            sendData: handler.sendData,
-            sendClose: { handler.close(trailers: nil) }
-        )
     }
 }
