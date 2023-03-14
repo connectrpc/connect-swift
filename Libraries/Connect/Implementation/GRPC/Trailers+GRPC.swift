@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Connect
-
-extension Connect.NetworkProtocol {
-    /// The gRPC protocol:
-    /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
+extension Trailers {
+    /// Identifies the status code from gRPC and gRPC-Web trailers.
     ///
-    /// IMPORTANT: This protocol must be used in conjunction with an HTTP client that supports
-    /// trailers, such as the `NIOHTTPClient` included in this library.
-    public static var grpc: Self {
-        return .custom(protocolInterceptor: GRPCInterceptor.init)
+    /// - returns: The gRPC status code, if specified.
+    public func grpcStatus() -> Code? {
+        return self[HeaderConstants.grpcStatus]?
+            .first
+            .flatMap(Int.init)
+            .flatMap { Code(rawValue: $0) }
     }
 }

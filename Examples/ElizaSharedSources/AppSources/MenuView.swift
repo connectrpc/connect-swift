@@ -19,6 +19,7 @@ import SwiftUI
 private enum MessagingConnectionType: Int, CaseIterable {
     case connectUnary
     case connectStreaming
+    case grpcUnary
     case grpcWebUnary
     case grpcWebStreaming
 }
@@ -37,8 +38,6 @@ struct MenuView: View {
     {
         let protocolClient = ProtocolClient(
             httpClient: NIOHTTPClient(host: "https://demo.connect.build"),
-//            httpClient: NIOHTTPClient(host: "localhost", port: 8000),
-//            httpClient: NIOHTTPClient(host: "https://www.7timer.info"),
             config: ProtocolClientConfig(
                 host: "https://demo.connect.build",
                 networkProtocol: networkProtocol,
@@ -86,6 +85,19 @@ struct MenuView: View {
                                 )
                             }
                             .navigationTitle("Eliza Chat (Streaming)")
+                        )
+
+                    case .grpcUnary:
+                        NavigationLink(
+                            "gRPC (Unary)",
+                            destination: LazyNavigationView {
+                                MessagingView(
+                                    viewModel: UnaryMessagingViewModel(
+                                        client: self.createClient(withProtocol: .grpc)
+                                    )
+                                )
+                            }
+                            .navigationTitle("Eliza Chat (gRPC Unary)")
                         )
 
                     case .grpcWebUnary:
