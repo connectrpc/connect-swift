@@ -20,6 +20,7 @@ private enum MessagingConnectionType: Int, CaseIterable {
     case connectUnary
     case connectStreaming
     case grpcUnary
+    case grpcStreaming
     case grpcWebUnary
     case grpcWebStreaming
 }
@@ -36,10 +37,11 @@ struct MenuView: View {
     private func createClient(withProtocol networkProtocol: NetworkProtocol)
         -> Buf_Connect_Demo_Eliza_V1_ElizaServiceClient
     {
+        let host = "https://demo.connect.build"
         let protocolClient = ProtocolClient(
-            httpClient: NIOHTTPClient(host: "https://demo.connect.build"),
+            httpClient: NIOHTTPClient(host: host), // Or URLSessionHTTPClient() for non-gRPC
             config: ProtocolClientConfig(
-                host: "https://demo.connect.build",
+                host: host,
                 networkProtocol: networkProtocol,
                 codec: ProtoCodec() // Protobuf binary, or JSONCodec() for JSON
             )
@@ -111,6 +113,19 @@ struct MenuView: View {
                                 )
                             }
                             .navigationTitle("Eliza Chat (gRPC-W Unary)")
+                        )
+
+                    case .grpcStreaming:
+                        NavigationLink(
+                            "gRPC (Streaming)",
+                            destination: LazyNavigationView {
+                                MessagingView(
+                                    viewModel: BidirectionalStreamingMessagingViewModel(
+                                        client: self.createClient(withProtocol: .grpc)
+                                    )
+                                )
+                            }
+                            .navigationTitle("Eliza Chat (gRPC Streaming)")
                         )
 
                     case .grpcWebStreaming:

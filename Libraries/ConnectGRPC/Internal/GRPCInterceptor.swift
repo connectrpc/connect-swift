@@ -30,11 +30,11 @@ extension GRPCInterceptor: Connect.Interceptor {
         return Connect.UnaryFunction(
             requestFunction: { request in
                 // gRPC unary payloads are enveloped.
-                let envelopedRequestBody = Envelope.packMessage(
+                let envelopedRequestBody = Connect.Envelope.packMessage(
                     request.message ?? Data(), using: self.config.requestCompression
                 )
 
-                return HTTPRequest(
+                return Connect.HTTPRequest(
                     url: request.url,
                     // Override the content type to be gRPC.
                     contentType: "application/grpc+\(self.config.codec.name())",
@@ -51,7 +51,7 @@ extension GRPCInterceptor: Connect.Interceptor {
 
                 guard let responseData = response.message, !responseData.isEmpty else {
                     let code = response.trailers.grpcStatus() ?? response.code
-                    return HTTPResponse(
+                    return Connect.HTTPResponse(
                         code: code,
                         headers: response.headers,
                         message: response.message,
@@ -63,27 +63,28 @@ extension GRPCInterceptor: Connect.Interceptor {
                     )
                 }
 
-                let compressionPool = response.headers[HeaderConstants.grpcContentEncoding]?
+                let compressionPool = response
+                    .headers[Connect.HeaderConstants.grpcContentEncoding]?
                     .first
                     .flatMap { self.config.responseCompressionPool(forName: $0) }
                 do {
-                    let messageData = try Envelope.unpackMessage(
+                    let messageData = try Connect.Envelope.unpackMessage(
                         responseData,
                         compressionPool: compressionPool
                     ).unpacked
-                    let grpcStatus = response.trailers.grpcStatus() ?? .unknown
-                    return HTTPResponse(
-                        code: grpcStatus,
+                    let grpcCode = response.trailers.grpcStatus() ?? .unknown
+                    return Connect.HTTPResponse(
+                        code: grpcCode,
                         headers: response.headers,
                         message: messageData,
                         trailers: response.trailers,
-                        error: grpcStatus == .ok
+                        error: grpcCode == .ok
                             ? nil
-                            : ConnectError.fromGRPCTrailers(response.trailers, code: grpcStatus),
+                            : ConnectError.fromGRPCTrailers(response.trailers, code: grpcCode),
                         tracingInfo: response.tracingInfo
                     )
                 } catch let error {
-                    return HTTPResponse(
+                    return Connect.HTTPResponse(
                         code: .unknown,
                         headers: response.headers,
                         message: response.message,
@@ -98,72 +99,60 @@ extension GRPCInterceptor: Connect.Interceptor {
     }
 
     func streamFunction() -> Connect.StreamFunction {
-        fatalError()
-//        var responseHeaders: Headers?
-//        return Connect.StreamFunction(
-//            requestFunction: { request in
-//                return HTTPRequest(
-//                    url: request.url,
-//                    // Override the content type to be gRPC Web.
-//                    contentType: "application/grpc-web+\(self.config.codec.name())",
-//                    headers: request.headers.addingGRPCHeaders(using: self.config),
-//                    message: request.message,
-//                    trailers: nil
-//                )
-//            },
-//            requestDataFunction: { data in
-//                return Envelope.packMessage(data, using: self.config.requestCompression)
-//            },
-//            streamResultFunction: { result in
-//                switch result {
-//                case .headers(let headers):
-//                    if let grpcCode = headers.grpcStatus() {
-//                        // Headers-only response.
-//                        return .complete(
-//                            code: grpcCode,
-//                            error: ConnectError.fromGRPCWebTrailers(headers, code: grpcCode),
-//                            trailers: headers
-//                        )
-//                    } else {
-//                        responseHeaders = headers
-//                        return result
-//                    }
-//
-//                case .message(let data):
-//                    do {
-//                        let responseCompressionPool = responseHeaders?[
-//                            HeaderConstants.grpcContentEncoding
-//                        ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
-//                        let (headerByte, unpackedData) = try Envelope.unpackMessage(
-//                            data, compressionPool: responseCompressionPool
-//                        )
-//                        let isTrailers = 0b10000000 & headerByte != 0
-//                        if isTrailers {
-//                            let trailers = try Trailers.fromGRPCHeadersBlock(unpackedData)
-//                            let grpcCode = trailers.grpcStatus() ?? .unknown
-//                            if grpcCode == .ok {
-//                                return .complete(code: .ok, error: nil, trailers: trailers)
-//                            } else {
-//                                return .complete(
-//                                    code: grpcCode,
-//                                    error: ConnectError.fromGRPCWebTrailers(
-//                                        trailers, code: grpcCode
-//                                    ),
-//                                    trailers: trailers
-//                                )
-//                            }
-//                        } else {
-//                            return .message(unpackedData)
-//                        }
-//                    } catch let error {
-//                        // TODO: Close the stream here?
-//                        return .complete(code: .unknown, error: error, trailers: nil)
-//                    }
-//
-//                case .complete:
-//                    return result
-//                }
-//            }
-//        )
+        var responseHeaders: Connect.Headers?
+        return Connect.StreamFunction(
+            requestFunction: { request in
+                return Connect.HTTPRequest(
+                    url: request.url,
+                    // Override the content type to be gRPC.
+                    contentType: "application/grpc+\(self.config.codec.name())",
+                    headers: request.headers.addingGRPCHeaders(using: self.config),
+                    message: request.message,
+                    trailers: nil
+                )
+            },
+            requestDataFunction: { data in
+                return Connect.Envelope.packMessage(data, using: self.config.requestCompression)
+            },
+            streamResultFunction: { result in
+                switch result {
+                case .headers(let headers):
+                    responseHeaders = headers
+                    return result
+
+                case .message(let data):
+                    do {
+                        let responseCompressionPool = responseHeaders?[
+                            Connect.HeaderConstants.grpcContentEncoding
+                        ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
+                        return .message(try Connect.Envelope.unpackMessage(
+                            data,
+                            compressionPool: responseCompressionPool
+                        ).unpacked)
+                    } catch let error {
+                        // TODO: Close the stream here?
+                        return .complete(code: .unknown, error: error, trailers: nil)
+                    }
+
+                case .complete(_, let error, let trailers):
+                    let grpcCode = trailers?.grpcStatus() ?? .unknown
+                    if grpcCode == .ok {
+                        return .complete(
+                            code: .ok,
+                            error: nil,
+                            trailers: trailers
+                        )
+                    } else {
+                        return .complete(
+                            code: grpcCode,
+                            error: trailers
+                                .map { ConnectError.fromGRPCTrailers($0, code: grpcCode) }
+                                ?? error,
+                            trailers: trailers
+                        )
+                    }
+                }
+            }
+        )
     }
 }
