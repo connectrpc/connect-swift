@@ -168,13 +168,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
             headers: [:],
             message: nil,
             trailers: [:],
-            error: ConnectError(
-                code: .deadlineExceeded,
-                message: "timed out",
-                exception: nil,
-                details: [],
-                metadata: [:]
-            ),
+            error: ConnectError.deadlineExceeded(),
             tracingInfo: nil
         ))
     }

@@ -57,7 +57,7 @@ extension GRPCInterceptor: Connect.Interceptor {
                         message: response.message,
                         trailers: response.trailers,
                         error: response.error ?? ConnectError.fromGRPCTrailers(
-                            response.headers, code: code
+                            response.trailers, code: code
                         ),
                         tracingInfo: response.tracingInfo
                     )
@@ -134,7 +134,12 @@ extension GRPCInterceptor: Connect.Interceptor {
                         return .complete(code: .unknown, error: error, trailers: nil)
                     }
 
-                case .complete(_, let error, let trailers):
+                case .complete(let code, let error, let trailers):
+                    guard code == .ok else {
+                        // Invalid gRPC response - expects HTTP 200. Potentially a network error.
+                        return .complete(code: code, error: error, trailers: trailers)
+                    }
+
                     let grpcCode = trailers?.grpcStatus() ?? .unknown
                     if grpcCode == .ok {
                         return .complete(

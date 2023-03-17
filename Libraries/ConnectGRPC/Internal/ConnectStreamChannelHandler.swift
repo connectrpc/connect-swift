@@ -179,6 +179,6 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler {
 
         self.isClosed = true
         context.close(promise: nil)
-        self.responseCallbacks.receiveClose(.deadlineExceeded, [:], nil)
+        self.responseCallbacks.receiveClose(.deadlineExceeded, [:], ConnectError.deadlineExceeded())
     }
 }
