@@ -38,11 +38,3 @@ extension Connect.Code {
         return .fromHTTPStatus(Int(nioStatus.code))
     }
 }
-
-extension NIOCore.ByteBuffer {
-    func data() -> Foundation.Data? {
-        return self.withUnsafeReadableBytes { pointer in
-            return pointer.baseAddress.map { Data(bytes: $0, count: pointer.count) }
-        }
-    }
-}

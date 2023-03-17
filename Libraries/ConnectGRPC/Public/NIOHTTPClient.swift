@@ -24,45 +24,12 @@ import os.log
 
 /// HTTP client powered by Swift NIO and also supports trailers (unlike URLSession).
 open class NIOHTTPClient: Connect.HTTPClientInterface {
-    private lazy var bootstrap: NIOPosix.ClientBootstrap = {
-        let host = self.host
-        let useSSL = self.useSSL
-        return NIOPosix.ClientBootstrap(group: self.loopGroup)
-            .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
-            .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
-            .channelInitializer { channel in
-                do {
-                    if useSSL {
-                        var tlsConfiguration = NIOSSL.TLSConfiguration.makeClientConfiguration()
-                        tlsConfiguration.applicationProtocols = ["h2"]
-                        let sslContext = try NIOSSL.NIOSSLContext(configuration: tlsConfiguration)
-                        let sslHandler = try NIOSSL.NIOSSLClientHandler(
-                            context: sslContext, serverHostname: host
-                        )
-                        return channel.pipeline
-                            .addHandler(sslHandler)
-                            .flatMap {
-                                return channel.configureHTTP2Pipeline(mode: .client) { channel in
-                                    return channel.eventLoop.makeSucceededVoidFuture()
-                                }
-                            }
-                            .map { (_: NIOHTTP2.HTTP2StreamMultiplexer) in }
-                    } else {
-                        return channel
-                            .configureHTTP2Pipeline(mode: .client) { channel in
-                                return channel.eventLoop.makeSucceededVoidFuture()
-                            }
-                            .map { (_: NIOHTTP2.HTTP2StreamMultiplexer) in }
-                    }
-                } catch {
-                    return channel.close(mode: .all)
-                }
-            }
-    }()
+    private lazy var bootstrap = self.createBootstrap()
     private let host: String
     private let lock = NIOConcurrencyHelpers.NIOLock()
     private let loopGroup = NIOPosix.MultiThreadedEventLoopGroup(numberOfThreads: 1)
     private let port: Int
+    private let timeout: TimeInterval?
     private let useSSL: Bool
 
     private var pendingRequests = [(NIOHTTP2.HTTP2StreamMultiplexer?) -> Void]()
@@ -83,13 +50,71 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
     /// - parameter host: Target host (e.g., `https://buf.build`).
     /// - parameter port: Port to use for the connection. Default is provided based on whether a
     ///                   secure connection is being established to the host via HTTPS.
-    public init(host: String, port: Int? = nil) {
+    /// - parameter timeout: Optional timeout after which to terminate requests/streams if no
+    ///                      activity has been performed.
+    public init(host: String, port: Int? = nil, timeout: TimeInterval? = nil) {
         let baseURL = URL(string: host)!
         let useSSL = baseURL.scheme?.lowercased() == "https"
         self.host = baseURL.host!
         self.port = port ?? (useSSL ? 443 : 80)
+        self.timeout = timeout
         self.useSSL = useSSL
     }
+
+    /// Called before the first request/stream is initialized, and is used to create new
+    /// connections. The bootstrap instance is stored for reuse thereafter.
+    /// This function may be used as an external customization point.
+    ///
+    /// - returns: The bootstrap that should be used for creating new connections.
+    open func createBootstrap() -> NIOPosix.ClientBootstrap {
+        let host = self.host
+        let tlsConfiguration: NIOSSL.TLSConfiguration? = self.useSSL
+        ? self.createTLSConfiguration(forHost: host)
+        : nil
+
+        return NIOPosix.ClientBootstrap(group: self.loopGroup)
+            .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
+            .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
+            .channelInitializer { channel in
+                do {
+                    let channelPipeline: EventLoopFuture<Void>
+                    if let tlsConfiguration = tlsConfiguration {
+                        let sslContext = try NIOSSL.NIOSSLContext(configuration: tlsConfiguration)
+                        let sslHandler = try NIOSSL.NIOSSLClientHandler(
+                            context: sslContext, serverHostname: host
+                        )
+                        channelPipeline = channel.pipeline
+                            .addHandler(sslHandler)
+                    } else {
+                        channelPipeline = channel.pipeline
+                            .addHandlers([])
+                    }
+
+                    return channelPipeline.flatMap {
+                        return channel.configureHTTP2Pipeline(mode: .client) { channel in
+                            return channel.eventLoop.makeSucceededVoidFuture()
+                        }
+                    }
+                    .map { (_: NIOHTTP2.HTTP2StreamMultiplexer) in }
+                } catch {
+                    return channel.close(mode: .all)
+                }
+            }
+    }
+
+    /// Called during `createBootstrap()` to set up TLS if the client is configured to use SSL.
+    /// This function may be used as an external customization point.
+    ///
+    /// - parameter host: The host for which to create the TLS configuration.
+    ///
+    /// - returns: The TLS configuration that should be used for creating new connections.
+    open func createTLSConfiguration(forHost host: String) -> NIOSSL.TLSConfiguration {
+        var tlsConfiguration = NIOSSL.TLSConfiguration.makeClientConfiguration()
+        tlsConfiguration.applicationProtocols = ["h2"]
+        return tlsConfiguration
+    }
+
+    // MARK: - HTTPClientInterface
 
     open func unary(
         request: Connect.HTTPRequest,
@@ -119,7 +144,10 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
                 ))
             }
         }
-        return .init(cancel: handler.cancel)
+        return .init(cancel: {
+            print("Canceling")
+            handler.cancel()
+        })
     }
 
     open func stream(
@@ -206,22 +234,28 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
         using multiplexer: NIOHTTP2.HTTP2StreamMultiplexer,
         with connectHandler: any NIOCore.ChannelInboundHandler
     ) {
-        let codec = self.useSSL
-        ? HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https)
-        : HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .http)
+        var handlers: [ChannelHandler] = [
+            self.useSSL
+            ? HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https)
+            : HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .http),
+            connectHandler,
+        ]
+        if let timeout = self.timeout {
+            handlers.insert(
+                IdleStateHandler(allTimeout: .milliseconds(Int64(timeout * 1_000.0))), at: 0
+            )
+        }
+
         let promise = eventLoop.makePromise(of: NIOCore.Channel.self)
         multiplexer.createStreamChannel(promise: promise) { channel in
-            return channel.pipeline.addHandlers([
-                codec,
-                connectHandler,
-            ])
+            return channel.pipeline.addHandlers(handlers)
         }
     }
 
     deinit {
         self.lock.withLock {
             if case .connected(let channel, _) = self.state {
-                try? channel.closeFuture.wait()
+                channel.close(mode: .all, promise: nil)
             }
         }
         try? self.loopGroup.syncShutdownGracefully()

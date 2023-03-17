@@ -15,11 +15,12 @@
 import Connect
 import Foundation
 
-/// HTTP client used by crosstests in order to handle SSL challenges with the crosstest server.
-final class CrosstestHTTPClient: URLSessionHTTPClient {
+/// HTTP client backed by URLSession and used by crosstests in order to handle SSL challenges
+/// with the crosstest server.
+final class CrosstestURLSessionHTTPClient: URLSessionHTTPClient {
     private let delayAfterChallenge: TimeInterval?
 
-    init(timeout: TimeInterval, delayAfterChallenge: TimeInterval? = nil) {
+    init(timeout: TimeInterval, delayAfterChallenge: TimeInterval?) {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = timeout
         configuration.timeoutIntervalForResource = timeout

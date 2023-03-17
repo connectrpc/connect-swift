@@ -15,6 +15,7 @@
 import Connect
 import Foundation
 import NIOCore
+import NIOFoundationCompat
 import NIOHTTP1
 
 /// NIO-based channel handler for streams made through the Connect library.
@@ -26,6 +27,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler {
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
     private var pendingData = Data()
+    private var receivedStatus: NIOHTTP1.HTTPResponseStatus?
 
     init(
         request: Connect.HTTPRequest,
@@ -139,16 +141,15 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler {
         let clientResponse = self.unwrapInboundIn(data)
         switch clientResponse {
         case .head(let head):
+            self.receivedStatus = head.status
             self.responseCallbacks.receiveResponseHeaders(.fromNIOHeaders(head.headers))
             context.fireChannelRead(data)
         case .body(let byteBuffer):
-            if let data = byteBuffer.data() {
-                self.responseCallbacks.receiveResponseData(data)
-            }
+            self.responseCallbacks.receiveResponseData(Data(buffer: byteBuffer))
             context.fireChannelRead(data)
         case .end(let trailers):
             self.responseCallbacks.receiveClose(
-                .ok,
+                self.receivedStatus.map { .fromNIOStatus($0) } ?? .ok,
                 trailers.map { .fromNIOHeaders($0) } ?? [:],
                 nil
             )
@@ -169,5 +170,15 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler {
         )
         context.close(promise: nil)
         self.isClosed = true
+    }
+
+    func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
+        guard event is NIOCore.IdleStateHandler.IdleStateEvent else {
+            return context.fireUserInboundEventTriggered(event)
+        }
+
+        self.isClosed = true
+        context.close(promise: nil)
+        self.responseCallbacks.receiveClose(.deadlineExceeded, [:], nil)
     }
 }

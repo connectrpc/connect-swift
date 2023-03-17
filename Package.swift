@@ -81,6 +81,7 @@ let package = Package(
                 "Connect",
                 .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
                 .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "NIOHTTP2", package: "swift-nio-http2"),
                 .product(name: "NIOPosix", package: "swift-nio"),
@@ -92,7 +93,9 @@ let package = Package(
             name: "ConnectLibraryTests",
             dependencies: [
                 "Connect",
+                "ConnectGRPC",
                 "ConnectMocks",
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
             path: "Tests/ConnectLibraryTests",
@@ -102,7 +105,7 @@ let package = Package(
                 "proto",
             ],
             resources: [
-                .copy("Resources"),
+                .copy("TestResources"),
             ]
         ),
         .target(

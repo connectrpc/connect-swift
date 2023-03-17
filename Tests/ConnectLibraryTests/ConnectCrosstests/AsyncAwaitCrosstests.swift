@@ -35,34 +35,22 @@ final class AsyncAwaitCrosstests: XCTestCase {
         responseDelay: TimeInterval? = nil,
         runTestsWithClient: (TestServiceClient) async throws -> Void
     ) async rethrows {
-        let clients = CrosstestClients(timeout: timeout, responseDelay: responseDelay)
-
-        print("Running \(function) with Connect + JSON...")
-        try await runTestsWithClient(TestServiceClient(client: clients.connectJSONClient))
-        print("Running \(function) with Connect + proto...")
-        try await runTestsWithClient(TestServiceClient(client: clients.connectProtoClient))
-
-        print("Running \(function) with gRPC Web + JSON...")
-        try await runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
-        print("Running \(function) with gRPC Web + proto...")
-        try await runTestsWithClient(TestServiceClient(client: clients.grpcWebProtoClient))
+        let clients = CrosstestClient.all(timeout: timeout, responseDelay: responseDelay)
+        for client in clients {
+            print("Running \(function) with \(client.description)...")
+            try await runTestsWithClient(TestServiceClient(client: client.protocolClient))
+        }
     }
 
     private func executeTestWithUnimplementedClients(
         function: Selector = #function,
         runTestsWithClient: (UnimplementedServiceClient) async throws -> Void
     ) async rethrows {
-        let clients = CrosstestClients(timeout: 60, responseDelay: nil)
-
-        print("Running \(function) with Connect + JSON...")
-        try await runTestsWithClient(UnimplementedServiceClient(client: clients.connectJSONClient))
-        print("Running \(function) with Connect + proto...")
-        try await runTestsWithClient(UnimplementedServiceClient(client: clients.connectProtoClient))
-
-        print("Running \(function) with gRPC Web + JSON...")
-        try await runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebJSONClient))
-        print("Running \(function) with gRPC Web + proto...")
-        try await runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebProtoClient))
+        let clients = CrosstestClient.all(timeout: 60, responseDelay: nil)
+        for client in clients {
+            print("Running \(function) with \(client.description)...")
+            try await runTestsWithClient(UnimplementedServiceClient(client: client.protocolClient))
+        }
     }
 
     // MARK: - Crosstest cases
@@ -172,6 +160,7 @@ final class AsyncAwaitCrosstests: XCTestCase {
             XCTAssertEqual(
                 response.trailers[trailingKey], [trailingValue.base64EncodedString()]
             )
+            print("\(response.message?.payload.body.count) vs \(size)")
             XCTAssertEqual(response.message?.payload.body.count, size)
         }
     }
@@ -343,6 +332,7 @@ final class AsyncAwaitCrosstests: XCTestCase {
                     XCTFail("Unexpectedly received message")
 
                 case .complete(let code, _, _):
+                    print(code)
                     XCTAssertEqual(code, .unimplemented)
                     expectation.fulfill()
                 }

@@ -44,8 +44,10 @@ actor UnaryAsyncWrapper<Output: SwiftProtobuf.Message> {
         return await withTaskCancellationHandler(operation: {
             return await withCheckedContinuation { continuation in
                 if Task.isCancelled {
+                    print("**Canceled")
                     continuation.resume(returning: .canceled())
                 } else {
+                    print("**Sending")
                     self.cancelable = self.sendUnary { response in
                         continuation.resume(returning: response)
                     }

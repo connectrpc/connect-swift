@@ -33,34 +33,22 @@ final class CallbackCrosstests: XCTestCase {
         timeout: TimeInterval = 60,
         runTestsWithClient: (TestServiceClient) throws -> Void
     ) rethrows {
-        let clients = CrosstestClients(timeout: timeout, responseDelay: nil)
-
-        print("Running \(function) with Connect + JSON...")
-        try runTestsWithClient(TestServiceClient(client: clients.connectJSONClient))
-        print("Running \(function) with Connect + proto...")
-        try runTestsWithClient(TestServiceClient(client: clients.connectProtoClient))
-
-        print("Running \(function) with gRPC Web + JSON...")
-        try runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
-        print("Running \(function) with gRPC Web + proto...")
-        try runTestsWithClient(TestServiceClient(client: clients.grpcWebProtoClient))
+        let clients = CrosstestClient.all(timeout: timeout, responseDelay: nil)
+        for client in clients {
+            print("Running \(function) with \(client.description)...")
+            try runTestsWithClient(TestServiceClient(client: client.protocolClient))
+        }
     }
 
     private func executeTestWithUnimplementedClients(
         function: Selector = #function,
         runTestsWithClient: (UnimplementedServiceClient) throws -> Void
     ) rethrows {
-        let clients = CrosstestClients(timeout: 60, responseDelay: nil)
-
-        print("Running \(function) with Connect + JSON...")
-        try runTestsWithClient(UnimplementedServiceClient(client: clients.connectJSONClient))
-        print("Running \(function) with Connect + proto...")
-        try runTestsWithClient(UnimplementedServiceClient(client: clients.connectProtoClient))
-
-        print("Running \(function) with gRPC Web + JSON...")
-        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebJSONClient))
-        print("Running \(function) with gRPC Web + proto...")
-        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebProtoClient))
+        let clients = CrosstestClient.all(timeout: 60, responseDelay: nil)
+        for client in clients {
+            print("Running \(function) with \(client.description)...")
+            try runTestsWithClient(UnimplementedServiceClient(client: client.protocolClient))
+        }
     }
 
     // MARK: - Crosstest cases

@@ -15,6 +15,7 @@
 import Connect
 import Foundation
 import NIOCore
+import NIOFoundationCompat
 import NIOHTTP1
 
 /// NIO-based channel handler for unary requests made through the Connect library.
@@ -74,7 +75,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
         return HTTPResponse(
             code: self.receivedHead.map { .fromNIOStatus($0.status) } ?? .unknown,
             headers: self.receivedHead.map { .fromNIOHeaders($0.headers) } ?? [:],
-            message: self.receivedBytes?.data(),
+            message: self.receivedBytes.map { Data(buffer: $0) },
             trailers: self.receivedEnd.map { .fromNIOHeaders($0) } ?? [:],
             error: error,
             tracingInfo: self.receivedHead.map { .init(httpStatus: Int($0.status.code)) }
@@ -132,6 +133,9 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
             context.fireChannelRead(data)
         case .body(let byteBuffer):
             self.receivedBytes = byteBuffer
+            print("0**\(Data(buffer: byteBuffer).count)")
+            print("1**\(String(data: Data(buffer: byteBuffer), encoding: .utf8))")
+            print("2**\(String(buffer: byteBuffer))")
             context.fireChannelRead(data)
         case .end(let trailers):
             self.receivedEnd = trailers
@@ -150,5 +154,28 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
         self.onResponse(self.createResponse(error: error))
         context.close(promise: nil)
         self.isClosed = true
+    }
+
+    func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
+        guard event is NIOCore.IdleStateHandler.IdleStateEvent else {
+            return context.fireUserInboundEventTriggered(event)
+        }
+
+        self.isClosed = true
+        context.close(promise: nil)
+        self.onResponse(.init(
+            code: .deadlineExceeded,
+            headers: [:],
+            message: nil,
+            trailers: [:],
+            error: ConnectError(
+                code: .deadlineExceeded,
+                message: "timed out",
+                exception: nil,
+                details: [],
+                metadata: [:]
+            ),
+            tracingInfo: nil
+        ))
     }
 }
