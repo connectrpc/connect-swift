@@ -10,6 +10,7 @@ Pod::Spec.new do |spec|
 
   spec.ios.deployment_target = '12.0'
   spec.osx.deployment_target = '10.15'
+  spec.tvos.deployment_target = '13.0'
 
   spec.dependency 'SwiftProtobuf', '~> 1.21.0'
 
