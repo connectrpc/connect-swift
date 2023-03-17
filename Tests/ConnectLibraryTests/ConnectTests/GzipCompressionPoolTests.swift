@@ -51,7 +51,7 @@ final class GzipCompressionPoolTests: XCTestCase {
     private func gzippedFileData() throws -> Data {
         let gzippedFileURL = try XCTUnwrap(
             Bundle.module.url(
-                forResource: "gzip-test.txt.gz", withExtension: nil, subdirectory: "Resources"
+                forResource: "gzip-test.txt.gz", withExtension: nil, subdirectory: "TestResources"
             )
         )
         return try Data(contentsOf: gzippedFileURL)

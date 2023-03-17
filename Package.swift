@@ -73,7 +73,7 @@ let package = Package(
                 "proto",
             ],
             resources: [
-                .copy("Resources"),
+                .copy("TestResources"),
             ]
         ),
         .target(
