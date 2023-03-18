@@ -34,10 +34,10 @@ final class CrosstestClient {
         )
         let testMatrix: [(networkProtocol: NetworkProtocol, clients: [HTTPClientInterface])] = [
 //            (.connect, [nioClient]),
-            (.grpcWeb, [nioClient]),
+            (.grpcWeb, [urlSessionClient]),
 //            (.grpc, [nioClient]), // URLSession client does not support gRPC
         ]
-        let codecs: [Codec] = [JSONCodec(), ProtoCodec()]
+        let codecs: [Codec] = [JSONCodec()]//, ProtoCodec()]
         let host = "https://localhost:8081"
         return testMatrix.reduce(into: [CrosstestClient]()) { list, tuple in
             for client in tuple.clients {

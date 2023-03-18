@@ -28,7 +28,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
     private var receivedHead: NIOHTTP1.HTTPResponseHead?
-    private var receivedBytes: NIOCore.ByteBuffer?
+    private var receivedData: Data?
     private var receivedEnd: NIOHTTP1.HTTPHeaders?
 
     init(
@@ -75,7 +75,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
         return HTTPResponse(
             code: self.receivedHead.map { .fromNIOStatus($0.status) } ?? .unknown,
             headers: self.receivedHead.map { .fromNIOHeaders($0.headers) } ?? [:],
-            message: self.receivedBytes.map { Data(buffer: $0) },
+            message: self.receivedData,
             trailers: self.receivedEnd.map { .fromNIOHeaders($0) } ?? [:],
             error: error,
             tracingInfo: self.receivedHead.map { .init(httpStatus: Int($0.status.code)) }
@@ -107,7 +107,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
         )
         context.write(self.wrapOutboundOut(.head(nioRequestHead))).cascade(to: nil)
         if let message = self.request.message {
-            context.write(self.wrapOutboundOut(.body(.byteBuffer(.init(bytes: message)))))
+            context.write(self.wrapOutboundOut(.body(.byteBuffer(.init(data: message)))))
                 .cascade(to: nil)
         }
         if let trailers = self.request.trailers {
@@ -132,10 +132,11 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
             self.receivedHead = head
             context.fireChannelRead(data)
         case .body(let byteBuffer):
-            self.receivedBytes = byteBuffer
-            print("0**\(Data(buffer: byteBuffer).count)")
-            print("1**\(String(data: Data(buffer: byteBuffer), encoding: .utf8))")
-            print("2**\(String(buffer: byteBuffer))")
+            if self.receivedData == nil {
+                self.receivedData = Data(buffer: byteBuffer)
+            } else {
+                self.receivedData?.append(Data(buffer: byteBuffer))
+            }
             context.fireChannelRead(data)
         case .end(let trailers):
             self.receivedEnd = trailers

@@ -41,6 +41,7 @@ actor UnaryAsyncWrapper<Output: SwiftProtobuf.Message> {
     ///
     /// - returns: The response/result of the request.
     func send() async -> ResponseMessage<Output> {
+        print("**Send called")
         return await withTaskCancellationHandler(operation: {
             return await withCheckedContinuation { continuation in
                 if Task.isCancelled {

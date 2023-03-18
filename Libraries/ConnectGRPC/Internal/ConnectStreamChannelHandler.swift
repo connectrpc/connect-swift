@@ -89,7 +89,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler {
     }
 
     private func sendPendingData(_ data: Data, using context: NIOCore.ChannelHandlerContext) {
-        context.writeAndFlush(self.wrapOutboundOut(.body(.byteBuffer(.init(bytes: data)))))
+        context.writeAndFlush(self.wrapOutboundOut(.body(.byteBuffer(.init(data: data)))))
             .cascade(to: nil)
     }
 

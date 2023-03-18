@@ -403,14 +403,19 @@ final class AsyncAwaitCrosstests: XCTestCase {
     func testCancelingUnaryAsyncBeforeTaskStarts() async {
         await self.executeTestWithClients { client in
             let expectation = self.expectation(description: "Receives canceled response")
+            print("**Called in loop")
             let task = Task {
+                print("**Creating task")
                 let response = await client.emptyCall(request: Grpc_Testing_Empty())
+                print("**Awaited")
                 XCTAssertEqual(response.code, .canceled)
                 XCTAssertEqual(response.error?.code, .canceled)
                 expectation.fulfill()
             }
 
+            print("**Canceling")
             task.cancel()
+            print("**Called cancel")
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
             XCTAssertTrue(task.isCancelled)
