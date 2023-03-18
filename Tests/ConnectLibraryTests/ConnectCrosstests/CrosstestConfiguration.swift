@@ -34,6 +34,7 @@ final class CrosstestConfiguration {
     /// - returns: A list of configurations to use for crosstests.
     static func all(timeout: TimeInterval) -> [CrosstestConfiguration] {
         let nioClient = CrosstestNIOHTTPClient(
+            // swiftlint:disable:next number_separator
             host: "https://localhost", port: 8081, timeout: timeout
         )
         let urlSessionClient = CrosstestURLSessionHTTPClient(timeout: timeout)
@@ -46,7 +47,7 @@ final class CrosstestConfiguration {
         return matrix.reduce(into: []) { configurations, tuple in
             for httpClient in tuple.httpClients {
                 for codec in codecs {
-                    configurations.append(CrosstestConfiguration(
+                    configurations.append(.init(
                         description: """
                         \(tuple.networkProtocol) + \(type(of: codec)) via \(type(of: httpClient))
                         """,

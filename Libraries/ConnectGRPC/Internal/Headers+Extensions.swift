@@ -14,18 +14,21 @@
 
 import Connect
 import Foundation
-import NIOCore
 import NIOHTTP1
 
+// MARK: - NIO type extensions
+
 extension NIOHTTP1.HTTPHeaders {
-    mutating func addConnectHeaders(_ headers: Connect.Headers) {
+    mutating func addNIOHeadersFromConnect(_ headers: Connect.Headers) {
         for (name, value) in headers {
             self.add(name: name, value: value.joined(separator: ","))
         }
     }
 }
 
-extension Connect.Headers {
+// MARK: - Connect type extensions
+
+extension Headers {
     static func fromNIOHeaders(_ nioHeaders: NIOHTTP1.HTTPHeaders) -> Self {
         return nioHeaders.reduce(into: Headers()) { headers, current in
             headers[current.name.lowercased()] = current.value.components(separatedBy: ",")
@@ -33,7 +36,7 @@ extension Connect.Headers {
     }
 }
 
-extension Connect.Code {
+extension Code {
     static func fromNIOStatus(_ nioStatus: NIOHTTP1.HTTPResponseStatus) -> Self {
         return .fromHTTPStatus(Int(nioStatus.code))
     }

@@ -97,7 +97,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
         nioHeaders.add(name: "Content-Type", value: self.request.contentType)
         nioHeaders.add(name: "Content-Length", value: "\(self.request.message?.count ?? 0)")
         nioHeaders.add(name: "Host", value: self.request.url.host!)
-        nioHeaders.addConnectHeaders(self.request.headers)
+        nioHeaders.addNIOHeadersFromConnect(self.request.headers)
 
         let nioRequestHead = HTTPRequestHead(
             version: .http1_1,
@@ -112,7 +112,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
         }
         if let trailers = self.request.trailers {
             var nioTrailers = NIOHTTP1.HTTPHeaders()
-            nioTrailers.addConnectHeaders(trailers)
+            nioTrailers.addNIOHeadersFromConnect(trailers)
             context.writeAndFlush(self.wrapOutboundOut(.end(nioTrailers))).cascade(to: nil)
         } else {
             context.writeAndFlush(self.wrapOutboundOut(.end(nil))).cascade(to: nil)

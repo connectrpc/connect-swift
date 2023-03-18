@@ -28,7 +28,7 @@ extension Headers {
         headers[HeaderConstants.grpcContentEncoding] = config.requestCompression
             .map { [$0.pool.name()] }
         headers[HeaderConstants.grpcTE] = ["trailers"]
-        
+
         // Note that we do not comply with the recommended structure for user-agent:
         // https://github.com/grpc/grpc/blob/v1.51.1/doc/PROTOCOL-HTTP2.md#user-agents
         // But this behavior matches connect-web:

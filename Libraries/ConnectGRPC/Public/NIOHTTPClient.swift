@@ -16,9 +16,9 @@ import Connect
 import Foundation
 import NIOConcurrencyHelpers
 import NIOCore
-import NIOPosix
 import NIOHTTP1
 import NIOHTTP2
+import NIOPosix
 import NIOSSL
 import os.log
 
@@ -189,7 +189,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
             .whenComplete { [weak self] result in
                 switch result {
                 case .success((let channel, let multiplexer)):
-                    channel.closeFuture.whenComplete { result in
+                    channel.closeFuture.whenComplete { _ in
                         self?.lock.withLock { self?.state = .disconnected }
                     }
                     self?.lock.withLock {

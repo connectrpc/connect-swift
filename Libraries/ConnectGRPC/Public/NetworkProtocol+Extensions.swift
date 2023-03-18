@@ -14,7 +14,7 @@
 
 import Connect
 
-extension Connect.NetworkProtocol {
+extension NetworkProtocol {
     /// The gRPC protocol:
     /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
     ///
