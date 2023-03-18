@@ -30,7 +30,7 @@ extension NIOHTTP1.HTTPHeaders {
 
 extension Headers {
     static func fromNIOHeaders(_ nioHeaders: NIOHTTP1.HTTPHeaders) -> Self {
-        return nioHeaders.reduce(into: Headers()) { headers, current in
+        return nioHeaders.reduce(into: [:]) { headers, current in
             headers[current.name.lowercased()] = current.value.components(separatedBy: ",")
         }
     }

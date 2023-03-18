@@ -49,7 +49,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler {
             }
 
             if let context = self.context {
-                self.sendPendingData(data, using: context)
+                self.sendData(data, using: context)
             } else {
                 self.pendingData.append(contentsOf: data)
             }
@@ -89,7 +89,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler {
         }
     }
 
-    private func sendPendingData(_ data: Data, using context: NIOCore.ChannelHandlerContext) {
+    private func sendData(_ data: Data, using context: NIOCore.ChannelHandlerContext) {
         context.writeAndFlush(self.wrapOutboundOut(.body(.byteBuffer(.init(data: data)))))
             .cascade(to: nil)
     }
@@ -128,7 +128,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler {
             context.writeAndFlush(self.wrapOutboundOut(.head(nioRequestHead))).cascade(to: nil)
         } else {
             context.write(self.wrapOutboundOut(.head(nioRequestHead))).cascade(to: nil)
-            self.sendPendingData(self.pendingData, using: context)
+            self.sendData(self.pendingData, using: context)
             self.pendingData = Data()
         }
         context.fireChannelActive()
@@ -139,8 +139,8 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler {
             return
         }
 
-        let clientResponse = self.unwrapInboundIn(data)
-        switch clientResponse {
+        let response = self.unwrapInboundIn(data)
+        switch response {
         case .head(let head):
             self.receivedStatus = head.status
             self.responseCallbacks.receiveResponseHeaders(.fromNIOHeaders(head.headers))

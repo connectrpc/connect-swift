@@ -28,7 +28,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
     private var receivedHead: NIOHTTP1.HTTPResponseHead?
-    private var receivedData: Data?
+    private var receivedData: Foundation.Data?
     private var receivedEnd: NIOHTTP1.HTTPHeaders?
 
     init(
@@ -126,16 +126,16 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
             return
         }
 
-        let clientResponse = self.unwrapInboundIn(data)
-        switch clientResponse {
+        let response = self.unwrapInboundIn(data)
+        switch response {
         case .head(let head):
             self.receivedHead = head
             context.fireChannelRead(data)
         case .body(let byteBuffer):
-            if self.receivedData == nil {
-                self.receivedData = Data(buffer: byteBuffer)
-            } else {
+            if self.receivedData != nil {
                 self.receivedData?.append(Data(buffer: byteBuffer))
+            } else {
+                self.receivedData = Data(buffer: byteBuffer)
             }
             context.fireChannelRead(data)
         case .end(let trailers):

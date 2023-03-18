@@ -22,7 +22,7 @@ import NIOPosix
 import NIOSSL
 import os.log
 
-/// HTTP client powered by Swift NIO and also supports trailers (unlike URLSession).
+/// HTTP client powered by Swift NIO which supports trailers (unlike URLSession).
 open class NIOHTTPClient: Connect.HTTPClientInterface {
     private lazy var bootstrap = self.createBootstrap()
     private let host: String
@@ -48,10 +48,10 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
     /// Designated initializer for the client.
     ///
     /// - parameter host: Target host (e.g., `https://buf.build`).
-    /// - parameter port: Port to use for the connection. Default is provided based on whether a
+    /// - parameter port: Port to use for the connection. A default is provided based on whether a
     ///                   secure connection is being established to the host via HTTPS.
     /// - parameter timeout: Optional timeout after which to terminate requests/streams if no
-    ///                      activity has been performed.
+    ///                      activity has occurred in the request or response path.
     public init(host: String, port: Int? = nil, timeout: TimeInterval? = nil) {
         let baseURL = URL(string: host)!
         let useSSL = baseURL.scheme?.lowercased() == "https"
@@ -61,8 +61,8 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
         self.useSSL = useSSL
     }
 
-    /// Called before the first request/stream is initialized, and is used to create new
-    /// connections. The bootstrap instance is stored for reuse thereafter.
+    /// Called before the first request/stream is initialized, and is stored for reuse when creating
+    /// new connections thereafter.
     /// This function may be used as an external customization point.
     ///
     /// - returns: The bootstrap that should be used for creating new connections.
@@ -130,7 +130,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
         )
         self.sendOrQueueRequest { [weak self] multiplexer in
             if let multiplexer = multiplexer {
-                self?.startChannel(
+                self?.startMultiplexChannel(
                     for: request.url, on: eventLoop, using: multiplexer, with: handler
                 )
             } else {
@@ -159,7 +159,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
         )
         self.sendOrQueueRequest { [weak self] multiplexer in
             if let multiplexer = multiplexer {
-                self?.startChannel(
+                self?.startMultiplexChannel(
                     for: request.url, on: eventLoop, using: multiplexer, with: handler
                 )
             } else {
@@ -173,6 +173,18 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
     }
 
     // MARK: - Private
+
+    private func sendOrQueueRequest(send: @escaping (NIOHTTP2.HTTP2StreamMultiplexer?) -> Void) {
+        self.lock.withLock {
+            switch self.state {
+            case .connected(_, let multiplexer):
+                send(multiplexer)
+            case .connecting, .disconnected:
+                self.pendingRequests.append(send)
+                self.connectChannelAndMultiplexerIfNeeded()
+            }
+        }
+    }
 
     private func connectChannelAndMultiplexerIfNeeded() {
         guard case .disconnected = self.state else {
@@ -206,18 +218,6 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
             }
     }
 
-    private func sendOrQueueRequest(send: @escaping (NIOHTTP2.HTTP2StreamMultiplexer?) -> Void) {
-        self.lock.withLock {
-            switch self.state {
-            case .connected(_, let multiplexer):
-                send(multiplexer)
-            case .connecting, .disconnected:
-                self.pendingRequests.append(send)
-                self.connectChannelAndMultiplexerIfNeeded()
-            }
-        }
-    }
-
     private func flushOrFailPendingRequests(using multiplexer: NIOHTTP2.HTTP2StreamMultiplexer?) {
         for request in self.pendingRequests {
             request(multiplexer)
@@ -225,7 +225,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
         self.pendingRequests = []
     }
 
-    private func startChannel(
+    private func startMultiplexChannel(
         for url: URL,
         on eventLoop: NIOCore.EventLoop,
         using multiplexer: NIOHTTP2.HTTP2StreamMultiplexer,
