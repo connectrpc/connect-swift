@@ -16,40 +16,44 @@ import Connect
 import ConnectGRPC
 import Foundation
 
-final class CrosstestClient {
+/// Represents a specific configuration with which to run a set of crosstests.
+final class CrosstestConfiguration {
     let description: String
     let protocolClient: ProtocolClient
 
-    init(description: String, protocolClient: ProtocolClient) {
+    private init(description: String, protocolClient: ProtocolClient) {
         self.description = description
         self.protocolClient = protocolClient
     }
 
-    static func all(timeout: TimeInterval, responseDelay: TimeInterval?) -> [CrosstestClient] {
+    /// Configures a list of configurations that can be used to run a comprehensive
+    /// set of crosstests.
+    ///
+    /// - parameter timeout: Timeout to apply to the client.
+    ///
+    /// - returns: A list of configurations to use for crosstests.
+    static func all(timeout: TimeInterval) -> [CrosstestConfiguration] {
         let nioClient = CrosstestNIOHTTPClient(
-            host: "https://localhost", port: 8081, timeout: timeout, responseDelay: responseDelay
+            host: "https://localhost", port: 8081, timeout: timeout
         )
-        let urlSessionClient = CrosstestURLSessionHTTPClient(
-            timeout: timeout, delayAfterChallenge: responseDelay
-        )
-        let testMatrix: [(networkProtocol: NetworkProtocol, clients: [HTTPClientInterface])] = [
-//            (.connect, [nioClient]),
-            (.grpcWeb, [urlSessionClient]),
-//            (.grpc, [nioClient]), // URLSession client does not support gRPC
+        let urlSessionClient = CrosstestURLSessionHTTPClient(timeout: timeout)
+        let matrix: [(networkProtocol: NetworkProtocol, httpClients: [HTTPClientInterface])] = [
+            (.connect, [urlSessionClient, nioClient]),
+            (.grpcWeb, [urlSessionClient, nioClient]),
+            (.grpc, [nioClient]), // URLSession client does not support gRPC
         ]
-        let codecs: [Codec] = [JSONCodec()]//, ProtoCodec()]
-        let host = "https://localhost:8081"
-        return testMatrix.reduce(into: [CrosstestClient]()) { list, tuple in
-            for client in tuple.clients {
+        let codecs: [Codec] = [JSONCodec(), ProtoCodec()]
+        return matrix.reduce(into: []) { configurations, tuple in
+            for httpClient in tuple.httpClients {
                 for codec in codecs {
-                    list.append(CrosstestClient(
+                    configurations.append(CrosstestConfiguration(
                         description: """
-                        \(tuple.networkProtocol) + \(type(of: codec)) via \(type(of: client))
+                        \(tuple.networkProtocol) + \(type(of: codec)) via \(type(of: httpClient))
                         """,
                         protocolClient: ProtocolClient(
-                            httpClient: client,
+                            httpClient: httpClient,
                             config: ProtocolClientConfig(
-                                host: host,
+                                host: "https://localhost:8081",
                                 networkProtocol: tuple.networkProtocol,
                                 codec: codec,
                                 requestCompression: .init(minBytes: 10, pool: GzipCompressionPool())

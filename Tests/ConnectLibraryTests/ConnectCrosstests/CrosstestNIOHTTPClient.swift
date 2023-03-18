@@ -14,17 +14,13 @@
 
 import Connect
 import ConnectGRPC
-import Dispatch
 import Foundation
 import NIOSSL
 
 /// HTTP client backed by NIO and used by crosstests in order to handle SSL challenges
 /// with the crosstest server.
 final class CrosstestNIOHTTPClient: ConnectGRPC.NIOHTTPClient {
-    private let responseDelay: TimeInterval?
-
-    init(host: String, port: Int, timeout: TimeInterval, responseDelay: TimeInterval?) {
-        self.responseDelay = responseDelay
+    init(host: String, port: Int, timeout: TimeInterval) {
         super.init(host: host, port: port, timeout: timeout)
     }
 
@@ -33,33 +29,4 @@ final class CrosstestNIOHTTPClient: ConnectGRPC.NIOHTTPClient {
         configuration.certificateVerification = .none
         return configuration
     }
-
-    override func unary(
-        request: HTTPRequest,
-        onMetrics: @Sendable @escaping (HTTPMetrics) -> Void,
-        onResponse: @Sendable @escaping (HTTPResponse) -> Void
-    ) -> Cancelable {
-        if let delayMS = self.responseDelay.map({ Int($0 * 1_000.0) }) {
-            return super.unary(request: request, onMetrics: onMetrics, onResponse: { response in
-                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(delayMS)) {
-                    onResponse(response)
-                }
-            })
-        } else {
-            return super.unary(request: request, onMetrics: onMetrics, onResponse: onResponse)
-        }
-    }
-
-//    override func stream(
-//        request: HTTPRequest,
-//        responseCallbacks: ResponseCallbacks
-//    ) -> RequestCallbacks {
-//        if let delayMS = self.responseDelay.map({ Int($0 * 1_000.0) }) {
-//            return super.stream(request: request, responseCallbacks: .init(
-//                receiveResponseHeaders: responseCallbacks.receiveResponseHeaders,
-// receiveResponseData: <#T##(Data) -> Void#>, receiveClose: <#T##(Code, Headers, Error?) -> Void#>))
-//        } else {
-//            return super.stream(request: request, responseCallbacks: responseCallbacks)
-//        }
-//    }
 }

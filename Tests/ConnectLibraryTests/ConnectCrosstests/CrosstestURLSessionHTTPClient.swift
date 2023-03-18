@@ -18,13 +18,10 @@ import Foundation
 /// HTTP client backed by URLSession and used by crosstests in order to handle SSL challenges
 /// with the crosstest server.
 final class CrosstestURLSessionHTTPClient: URLSessionHTTPClient {
-    private let delayAfterChallenge: TimeInterval?
-
-    init(timeout: TimeInterval, delayAfterChallenge: TimeInterval?) {
+    init(timeout: TimeInterval) {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = timeout
         configuration.timeoutIntervalForResource = timeout
-        self.delayAfterChallenge = delayAfterChallenge
         super.init(configuration: configuration)
     }
 
@@ -32,25 +29,14 @@ final class CrosstestURLSessionHTTPClient: URLSessionHTTPClient {
         _ session: URLSession, didReceive challenge: URLAuthenticationChallenge,
         completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
     ) {
-        let finishRequest = {
-            // This codepath is executed when using HTTPS with the crosstest server.
-            let protectionSpace = challenge.protectionSpace
-            if protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
-               let serverTrust = protectionSpace.serverTrust
-            {
-                completionHandler(.useCredential, URLCredential(trust: serverTrust))
-            } else {
-                completionHandler(.performDefaultHandling, nil)
-            }
-        }
-
-        if let delayAfterChallenge = self.delayAfterChallenge {
-            DispatchQueue.main.asyncAfter(
-                deadline: .now() + .milliseconds(Int(delayAfterChallenge * 1_000)),
-                execute: finishRequest
-            )
+        // This codepath is executed when using HTTPS with the crosstest server.
+        let protectionSpace = challenge.protectionSpace
+        if protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
+           let serverTrust = protectionSpace.serverTrust
+        {
+            completionHandler(.useCredential, URLCredential(trust: serverTrust))
         } else {
-            finishRequest()
+            completionHandler(.performDefaultHandling, nil)
         }
     }
 }

@@ -66,7 +66,7 @@ public struct ProtocolClientConfig {
             self.interceptors = interceptors + [ConnectInterceptor.init]
         case .grpcWeb:
             self.interceptors = interceptors + [GRPCWebInterceptor.init]
-        case .custom(let protocolInterceptor):
+        case .custom(_, let protocolInterceptor):
             self.interceptors = interceptors + [protocolInterceptor]
         }
     }

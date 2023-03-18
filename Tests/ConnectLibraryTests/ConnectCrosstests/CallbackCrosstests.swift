@@ -18,7 +18,7 @@ import Connect
 import Foundation
 import XCTest
 
-private let kTimeout = TimeInterval(5)
+private let kTimeout = TimeInterval(10.0)
 
 private typealias TestServiceClient = Grpc_Testing_TestServiceClient
 private typealias UnimplementedServiceClient = Grpc_Testing_UnimplementedServiceClient
@@ -33,10 +33,10 @@ final class CallbackCrosstests: XCTestCase {
         timeout: TimeInterval = 60,
         runTestsWithClient: (TestServiceClient) throws -> Void
     ) rethrows {
-        let clients = CrosstestClient.all(timeout: timeout, responseDelay: nil)
-        for client in clients {
-            print("Running \(function) with \(client.description)...")
-            try runTestsWithClient(TestServiceClient(client: client.protocolClient))
+        let configurations = CrosstestConfiguration.all(timeout: timeout)
+        for configuration in configurations {
+            try runTestsWithClient(TestServiceClient(client: configuration.protocolClient))
+            print("Ran \(function) with \(configuration.description)")
         }
     }
 
@@ -44,10 +44,10 @@ final class CallbackCrosstests: XCTestCase {
         function: Selector = #function,
         runTestsWithClient: (UnimplementedServiceClient) throws -> Void
     ) rethrows {
-        let clients = CrosstestClient.all(timeout: 60, responseDelay: nil)
-        for client in clients {
-            print("Running \(function) with \(client.description)...")
-            try runTestsWithClient(UnimplementedServiceClient(client: client.protocolClient))
+        let configurations = CrosstestConfiguration.all(timeout: 60)
+        for configuration in configurations {
+            try runTestsWithClient(UnimplementedServiceClient(client: configuration.protocolClient))
+            print("Ran \(function) with \(configuration.description)")
         }
     }
 

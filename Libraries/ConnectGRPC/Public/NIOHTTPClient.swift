@@ -144,10 +144,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
                 ))
             }
         }
-        return .init(cancel: {
-            print("Canceling")
-            handler.cancel()
-        })
+        return .init(cancel: handler.cancel)
     }
 
     open func stream(
