@@ -149,18 +149,19 @@ We're much more likely to approve your changes if you:
 Releases should be tagged in `x.y.z` SemVer format.
 
 1. Create a new GitHub release.
-2. Update both [`Connect-Swift.podspec`](../Connect-Swift.podspec) and
-   [`Connect-Swift-Mocks.podspec`](../Connect-Swift-Mocks.podspec) to reflect
+2. Update all `.podspec` files in the root of the repo to reflect
    the newly tagged version.
-3. Push both specs to CocoaPods:
+3. Push all podspecs to CocoaPods:
 
 ```sh
 pod trunk push Connect-Swift.podspec
 pod repo update
+pod trunk push Connect-Swift-GRPC.podspec
 pod trunk push Connect-Swift-Mocks.podspec
 ```
 
-Note: If pushing the mocks podspec fails because CocoaPods cannot find the new
+Note: If pushing the gRPC or mocks podspec fails because CocoaPods
+cannot find the new
 `Connect-Swift` podspec in the specs repo, you may have to wait ~30 min
 for it to populate before trying again.
 
