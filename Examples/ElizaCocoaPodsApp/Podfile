@@ -6,8 +6,4 @@ target 'ElizaCocoaPodsApp' do
   # For real projects, use a version instead of a path:
   # pod 'Connect-Swift', '~> x.y.z'
   pod 'Connect-Swift', :path => '../..'
-
-  # This dependency is only required if using gRPC.
-  # It is not needed for the Connect or gRPC-Web protocols.
-  pod 'Connect-Swift-GRPC', :path => '../..'
 end
