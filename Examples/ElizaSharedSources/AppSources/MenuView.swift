@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import Connect
-import ConnectGRPC
+import ConnectGRPC // Only necessary if using gRPC, not for Connect or gRPC-Web
 import SwiftUI
 
 private enum MessagingConnectionType: Int, CaseIterable {

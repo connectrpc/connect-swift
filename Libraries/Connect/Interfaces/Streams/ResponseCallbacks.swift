@@ -20,14 +20,14 @@ public final class ResponseCallbacks {
     public let receiveResponseHeaders: (Headers) -> Void
     /// Closure to call when response data is available.
     public let receiveResponseData: (Data) -> Void
-    /// Closure to call when a stream is closed.
+    /// Closure to call when the stream is closed.
     /// Includes the status code, trailers, and potentially an error.
-    public let receiveClose: (Code, Headers, Swift.Error?) -> Void
+    public let receiveClose: (Code, Trailers, Swift.Error?) -> Void
 
     public init(
         receiveResponseHeaders: @escaping (Headers) -> Void,
         receiveResponseData: @escaping (Data) -> Void,
-        receiveClose: @escaping (Code, Headers, Swift.Error?) -> Void
+        receiveClose: @escaping (Code, Trailers, Swift.Error?) -> Void
     ) {
         self.receiveResponseHeaders = receiveResponseHeaders
         self.receiveResponseData = receiveResponseData

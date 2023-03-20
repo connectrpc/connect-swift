@@ -61,8 +61,8 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
         self.useSSL = useSSL
     }
 
-    /// Called before the first request/stream is initialized, and is stored for reuse when creating
-    /// new connections thereafter.
+    /// Called before the first request/stream is initialized, and the result is stored for reuse
+    /// when creating new connections thereafter.
     /// This function may be used as an external customization point.
     ///
     /// - returns: The bootstrap that should be used for creating new connections.
@@ -191,6 +191,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
             return
         }
 
+        self.state = .connecting
         self.bootstrap
             .connect(host: self.host, port: self.port)
             .flatMap { channel -> EventLoopFuture<(Channel, HTTP2StreamMultiplexer)> in

@@ -26,7 +26,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler {
 
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
-    private var pendingData = Data()
+    private var pendingData = Foundation.Data()
     private var receivedStatus: NIOHTTP1.HTTPResponseStatus?
 
     init(

@@ -26,7 +26,7 @@ extension ConnectError {
             return nil
         }
 
-        return ConnectError(
+        return .init(
             code: code,
             message: trailers.grpcMessage(),
             exception: nil,

@@ -106,7 +106,7 @@ extension ConnectError {
         })
 
         guard let source = source else {
-            return ConnectError(
+            return .init(
                 code: code, message: "empty error message from source", exception: nil,
                 details: [], metadata: headers
             )
@@ -117,7 +117,7 @@ extension ConnectError {
             connectError.metadata = headers
             return connectError
         } catch let error {
-            return ConnectError(
+            return .init(
                 code: code, message: String(data: source, encoding: .utf8),
                 exception: error, details: [], metadata: headers
             )

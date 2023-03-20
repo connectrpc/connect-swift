@@ -16,7 +16,7 @@ import Connect
 import ConnectGRPC
 import Foundation
 
-/// Represents a specific configuration with which to run a set of crosstests.
+/// Represents a specific configuration with which to run a suite of crosstests.
 final class CrosstestConfiguration {
     let description: String
     let protocolClient: ProtocolClient
@@ -27,17 +27,17 @@ final class CrosstestConfiguration {
     }
 
     /// Configures a list of configurations that can be used to run a comprehensive
-    /// set of crosstests.
+    /// suite of crosstests.
     ///
     /// - parameter timeout: Timeout to apply to the client.
     ///
     /// - returns: A list of configurations to use for crosstests.
     static func all(timeout: TimeInterval) -> [CrosstestConfiguration] {
+        let urlSessionClient = CrosstestURLSessionHTTPClient(timeout: timeout)
         let nioClient = CrosstestNIOHTTPClient(
             // swiftlint:disable:next number_separator
             host: "https://localhost", port: 8081, timeout: timeout
         )
-        let urlSessionClient = CrosstestURLSessionHTTPClient(timeout: timeout)
         let matrix: [(networkProtocol: NetworkProtocol, httpClients: [HTTPClientInterface])] = [
             (.connect, [urlSessionClient, nioClient]),
             (.grpcWeb, [urlSessionClient, nioClient]),
