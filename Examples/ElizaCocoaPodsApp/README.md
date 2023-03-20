@@ -12,6 +12,9 @@ the Connect library:
 - [gRPC-Web](https://grpc.io) + unary
 - [gRPC-Web](https://grpc.io) + streaming
 
+**Note that vanilla gRPC support is not available in this example because
+[SwiftNIO does not support CocoaPods](https://github.com/apple/swift-nio/issues/2393).**
+
 ## Try it out
 
 1. Ensure you have CocoaPods installed (`brew install cocoapods`)

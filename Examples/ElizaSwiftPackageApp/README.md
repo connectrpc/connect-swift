@@ -9,6 +9,8 @@ the Connect library:
 
 - [Connect](https://connect.build) + unary
 - [Connect](https://connect.build) + streaming
+- [gRPC](https://grpc.io) + unary (using `ConnectGRPC` + `SwiftNIO`)
+- [gRPC](https://grpc.io) + streaming (using `ConnectGRPC` + `SwiftNIO`)
 - [gRPC-Web](https://grpc.io) + unary
 - [gRPC-Web](https://grpc.io) + streaming
 

@@ -13,7 +13,11 @@
 // limitations under the License.
 
 import Connect
-import ConnectGRPC // Only necessary if using gRPC, not for Connect or gRPC-Web
+#if !COCOAPODS
+// gRPC support is not available via CocoaPods, only through Swift PM.
+// This import is only necessary if using gRPC, not for Connect or gRPC-Web.
+import ConnectGRPC
+#endif
 import SwiftUI
 
 private enum MessagingConnectionType: Int, CaseIterable {
@@ -38,14 +42,25 @@ struct MenuView: View {
         -> Buf_Connect_Demo_Eliza_V1_ElizaServiceClient
     {
         let host = "https://demo.connect.build"
+        #if COCOAPODS
         let protocolClient = ProtocolClient(
-            httpClient: NIOHTTPClient(host: host), // Or URLSessionHTTPClient() for non-gRPC
+            httpClient: URLSessionHTTPClient(),
             config: ProtocolClientConfig(
                 host: host,
                 networkProtocol: networkProtocol,
                 codec: ProtoCodec() // Protobuf binary, or JSONCodec() for JSON
             )
         )
+        #else
+        let protocolClient = ProtocolClient(
+            httpClient: NIOHTTPClient(host: host), // Or URLSessionHTTPClient()
+            config: ProtocolClientConfig(
+                host: host,
+                networkProtocol: networkProtocol,
+                codec: ProtoCodec() // Protobuf binary, or JSONCodec() for JSON
+            )
+        )
+        #endif
         return Buf_Connect_Demo_Eliza_V1_ElizaServiceClient(client: protocolClient)
     }
 
@@ -90,6 +105,7 @@ struct MenuView: View {
                         )
 
                     case .grpcUnary:
+                        #if !COCOAPODS
                         NavigationLink(
                             "gRPC (Unary)",
                             destination: LazyNavigationView {
@@ -101,6 +117,7 @@ struct MenuView: View {
                             }
                             .navigationTitle("Eliza Chat (gRPC Unary)")
                         )
+                        #endif
 
                     case .grpcWebUnary:
                         NavigationLink(
@@ -116,6 +133,7 @@ struct MenuView: View {
                         )
 
                     case .grpcStreaming:
+                        #if !COCOAPODS
                         NavigationLink(
                             "gRPC (Streaming)",
                             destination: LazyNavigationView {
@@ -127,6 +145,7 @@ struct MenuView: View {
                             }
                             .navigationTitle("Eliza Chat (gRPC Streaming)")
                         )
+                        #endif
 
                     case .grpcWebStreaming:
                         NavigationLink(
