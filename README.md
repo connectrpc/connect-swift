@@ -136,6 +136,7 @@ directory and can be opened and built using Xcode. They demonstrate:
 - Integrating with Swift Package Manager
 - Integrating with CocoaPods
 - Using the [Connect protocol][connect-protocol]
+- Using the [gRPC protocol][grpc-protocol]
 - Using the [gRPC-Web protocol][grpc-web-protocol]
 
 ## Contributing
@@ -174,6 +175,7 @@ Offered under the [Apache 2 license](./LICENSE).
 [connect-web]: https://www.npmjs.com/package/@bufbuild/connect-web
 [error-handling]: https://connect.build/docs/swift/errors
 [getting-started]: https://connect.build/docs/swift/getting-started
+[grpc-protocol]: https://grpc.io
 [grpc-web-protocol]: https://github.com/grpc/grpc-web
 [interceptors]: https://connect.build/docs/swift/interceptors
 [protobuf]: https://developers.google.com/protocol-buffers

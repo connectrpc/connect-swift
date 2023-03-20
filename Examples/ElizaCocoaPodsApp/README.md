@@ -9,8 +9,8 @@ the Connect library:
 
 - [Connect](https://connect.build) + unary
 - [Connect](https://connect.build) + streaming
-- [gRPC-Web](https://grpc.io) + unary
-- [gRPC-Web](https://grpc.io) + streaming
+- [gRPC-Web](https://github.com/grpc/grpc-web) + unary
+- [gRPC-Web](https://github.com/grpc/grpc-web) + streaming
 
 **Note that vanilla gRPC support is not available in this example because
 [SwiftNIO does not support CocoaPods](https://github.com/apple/swift-nio/issues/2393).**
