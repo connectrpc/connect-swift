@@ -14,9 +14,9 @@
 
 import Connect
 #if !COCOAPODS
-// gRPC support is not available via CocoaPods, only through Swift PM.
+// SwiftNIO (and gRPC) support is not available via CocoaPods since SwiftNIO does not support it.
 // This import is only necessary if using gRPC, not for Connect or gRPC-Web.
-import ConnectGRPC
+import ConnectNIO
 #endif
 import SwiftUI
 

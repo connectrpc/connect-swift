@@ -29,12 +29,12 @@ let package = Package(
             targets: ["Connect"]
         ),
         .library(
-            name: "ConnectGRPC",
-            targets: ["ConnectGRPC"]
-        ),
-        .library(
             name: "ConnectMocks",
             targets: ["ConnectMocks"]
+        ),
+        .library(
+            name: "ConnectNIO",
+            targets: ["ConnectNIO"]
         ),
         .executable(
             name: "protoc-gen-connect-swift",
@@ -76,26 +76,12 @@ let package = Package(
                 "proto",
             ]
         ),
-        .target(
-            name: "ConnectGRPC",
-            dependencies: [
-                "Connect",
-                .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
-                .product(name: "NIOCore", package: "swift-nio"),
-                .product(name: "NIOFoundationCompat", package: "swift-nio"),
-                .product(name: "NIOHTTP1", package: "swift-nio"),
-                .product(name: "NIOHTTP2", package: "swift-nio-http2"),
-                .product(name: "NIOPosix", package: "swift-nio"),
-                .product(name: "NIOSSL", package: "swift-nio-ssl"),
-            ],
-            path: "Libraries/ConnectGRPC"
-        ),
         .testTarget(
             name: "ConnectLibraryTests",
             dependencies: [
                 "Connect",
-                "ConnectGRPC",
                 "ConnectMocks",
+                "ConnectNIO",
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
@@ -127,6 +113,20 @@ let package = Package(
                 .product(name: "SwiftProtobufPluginLibrary", package: "swift-protobuf"),
             ],
             path: "Plugins/ConnectMocksPlugin"
+        ),
+        .target(
+            name: "ConnectNIO",
+            dependencies: [
+                "Connect",
+                .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOFoundationCompat", package: "swift-nio"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+                .product(name: "NIOHTTP2", package: "swift-nio-http2"),
+                .product(name: "NIOPosix", package: "swift-nio"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+            ],
+            path: "Libraries/ConnectNIO"
         ),
         .target(
             name: "ConnectPluginUtilities",

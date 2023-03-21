@@ -13,13 +13,13 @@
 // limitations under the License.
 
 import Connect
-import ConnectGRPC
+import ConnectNIO
 import Foundation
 import NIOSSL
 
 /// HTTP client backed by NIO and used by crosstests in order to handle SSL challenges
 /// with the crosstest server.
-final class CrosstestNIOHTTPClient: ConnectGRPC.NIOHTTPClient {
+final class CrosstestNIOHTTPClient: ConnectNIO.NIOHTTPClient {
     init(host: String, port: Int, timeout: TimeInterval) {
         super.init(host: host, port: port, timeout: timeout)
     }

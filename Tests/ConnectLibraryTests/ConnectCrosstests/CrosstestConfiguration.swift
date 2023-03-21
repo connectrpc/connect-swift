@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import Connect
-import ConnectGRPC
+import ConnectNIO
 import Foundation
 
 /// Represents a specific configuration with which to run a suite of crosstests.
