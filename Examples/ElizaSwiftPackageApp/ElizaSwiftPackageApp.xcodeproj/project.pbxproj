@@ -17,6 +17,7 @@
 		B216FC1129723F65003AB294 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B216FC0929723F65003AB294 /* README.md */; };
 		B236EE8C295F564900DDCDA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B236EE8B295F564900DDCDA9 /* Assets.xcassets */; };
 		B236EEA4295F569700DDCDA9 /* Connect in Frameworks */ = {isa = PBXBuildFile; productRef = B236EEA3295F569700DDCDA9 /* Connect */; };
+		B2C1986529CA282B00C3D327 /* ConnectNIO in Frameworks */ = {isa = PBXBuildFile; productRef = B2C1986429CA282B00C3D327 /* ConnectNIO */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2C1986529CA282B00C3D327 /* ConnectNIO in Frameworks */,
 				B236EEA4295F569700DDCDA9 /* Connect in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -139,6 +141,7 @@
 			name = ElizaSwiftPackageApp;
 			packageProductDependencies = (
 				B236EEA3295F569700DDCDA9 /* Connect */,
+				B2C1986429CA282B00C3D327 /* ConnectNIO */,
 			);
 			productName = ElizaSwiftPackageApp;
 			productReference = B236EE84295F564800DDCDA9 /* ElizaSwiftPackageApp.app */;
@@ -414,6 +417,10 @@
 		B236EEA3295F569700DDCDA9 /* Connect */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Connect;
+		};
+		B2C1986429CA282B00C3D327 /* ConnectNIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ConnectNIO;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

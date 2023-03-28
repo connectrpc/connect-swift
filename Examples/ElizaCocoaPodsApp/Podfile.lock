@@ -15,7 +15,7 @@ EXTERNAL SOURCES:
     :path: "../.."
 
 SPEC CHECKSUMS:
-  Connect-Swift: 2d7a0c3315232381dcb94edf57a594d66bf8ebba
+  Connect-Swift: 73d976064e788c49ef8112b9c4a37d807bed593f
   SwiftProtobuf: afced68785854575756db965e9da52bbf3dc45e7
 
 PODFILE CHECKSUM: b598f373a6ab5add976b09c2ac79029bf2200d48

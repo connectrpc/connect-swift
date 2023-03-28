@@ -13,11 +13,18 @@
 // limitations under the License.
 
 import Connect
+#if !COCOAPODS
+// SwiftNIO (and gRPC) support is not available via CocoaPods since SwiftNIO does not support it.
+// This import is only necessary if using gRPC, not for Connect or gRPC-Web.
+import ConnectNIO
+#endif
 import SwiftUI
 
 private enum MessagingConnectionType: Int, CaseIterable {
     case connectUnary
     case connectStreaming
+    case grpcUnary
+    case grpcStreaming
     case grpcWebUnary
     case grpcWebStreaming
 }
@@ -34,14 +41,26 @@ struct MenuView: View {
     private func createClient(withProtocol networkProtocol: NetworkProtocol)
         -> Buf_Connect_Demo_Eliza_V1_ElizaServiceClient
     {
+        let host = "https://demo.connect.build"
+        #if COCOAPODS
         let protocolClient = ProtocolClient(
             httpClient: URLSessionHTTPClient(),
             config: ProtocolClientConfig(
-                host: "https://demo.connect.build",
+                host: host,
                 networkProtocol: networkProtocol,
                 codec: ProtoCodec() // Protobuf binary, or JSONCodec() for JSON
             )
         )
+        #else
+        let protocolClient = ProtocolClient(
+            httpClient: NIOHTTPClient(host: host), // Or URLSessionHTTPClient()
+            config: ProtocolClientConfig(
+                host: host,
+                networkProtocol: networkProtocol,
+                codec: ProtoCodec() // Protobuf binary, or JSONCodec() for JSON
+            )
+        )
+        #endif
         return Buf_Connect_Demo_Eliza_V1_ElizaServiceClient(client: protocolClient)
     }
 
@@ -85,6 +104,21 @@ struct MenuView: View {
                             .navigationTitle("Eliza Chat (Streaming)")
                         )
 
+                    case .grpcUnary:
+                        #if !COCOAPODS
+                        NavigationLink(
+                            "gRPC (Unary)",
+                            destination: LazyNavigationView {
+                                MessagingView(
+                                    viewModel: UnaryMessagingViewModel(
+                                        client: self.createClient(withProtocol: .grpc)
+                                    )
+                                )
+                            }
+                            .navigationTitle("Eliza Chat (gRPC Unary)")
+                        )
+                        #endif
+
                     case .grpcWebUnary:
                         NavigationLink(
                             "gRPC Web (Unary)",
@@ -97,6 +131,21 @@ struct MenuView: View {
                             }
                             .navigationTitle("Eliza Chat (gRPC-W Unary)")
                         )
+
+                    case .grpcStreaming:
+                        #if !COCOAPODS
+                        NavigationLink(
+                            "gRPC (Streaming)",
+                            destination: LazyNavigationView {
+                                MessagingView(
+                                    viewModel: BidirectionalStreamingMessagingViewModel(
+                                        client: self.createClient(withProtocol: .grpc)
+                                    )
+                                )
+                            }
+                            .navigationTitle("Eliza Chat (gRPC Streaming)")
+                        )
+                        #endif
 
                     case .grpcWebStreaming:
                         NavigationLink(

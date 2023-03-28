@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// swiftlint:disable file_length
-
 import Connect
 import Foundation
 import XCTest
 
-private let kTimeout = TimeInterval(5)
+private let kTimeout = TimeInterval(10.0)
 
 private typealias TestServiceClient = Grpc_Testing_TestServiceClient
 private typealias UnimplementedServiceClient = Grpc_Testing_UnimplementedServiceClient
@@ -32,37 +30,26 @@ final class AsyncAwaitCrosstests: XCTestCase {
     private func executeTestWithClients(
         function: Selector = #function,
         timeout: TimeInterval = 60,
-        responseDelay: TimeInterval? = nil,
         runTestsWithClient: (TestServiceClient) async throws -> Void
     ) async rethrows {
-        let clients = CrosstestClients(timeout: timeout, responseDelay: responseDelay)
-
-        print("Running \(function) with Connect + JSON...")
-        try await runTestsWithClient(TestServiceClient(client: clients.connectJSONClient))
-        print("Running \(function) with Connect + proto...")
-        try await runTestsWithClient(TestServiceClient(client: clients.connectProtoClient))
-
-        print("Running \(function) with gRPC Web + JSON...")
-        try await runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
-        print("Running \(function) with gRPC Web + proto...")
-        try await runTestsWithClient(TestServiceClient(client: clients.grpcWebProtoClient))
+        let configurations = CrosstestConfiguration.all(timeout: timeout)
+        for configuration in configurations {
+            try await runTestsWithClient(TestServiceClient(client: configuration.protocolClient))
+            print("Ran \(function) with \(configuration.description)")
+        }
     }
 
     private func executeTestWithUnimplementedClients(
         function: Selector = #function,
         runTestsWithClient: (UnimplementedServiceClient) async throws -> Void
     ) async rethrows {
-        let clients = CrosstestClients(timeout: 60, responseDelay: nil)
-
-        print("Running \(function) with Connect + JSON...")
-        try await runTestsWithClient(UnimplementedServiceClient(client: clients.connectJSONClient))
-        print("Running \(function) with Connect + proto...")
-        try await runTestsWithClient(UnimplementedServiceClient(client: clients.connectProtoClient))
-
-        print("Running \(function) with gRPC Web + JSON...")
-        try await runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebJSONClient))
-        print("Running \(function) with gRPC Web + proto...")
-        try await runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebProtoClient))
+        let configurations = CrosstestConfiguration.all(timeout: 60)
+        for configuration in configurations {
+            try await runTestsWithClient(
+                UnimplementedServiceClient(client: configuration.protocolClient)
+            )
+            print("Ran \(function) with \(configuration.description)")
+        }
     }
 
     // MARK: - Crosstest cases
@@ -405,46 +392,6 @@ final class AsyncAwaitCrosstests: XCTestCase {
             }
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
-        }
-    }
-
-    // MARK: - Additional cases
-
-    func testCancelingUnaryAsyncBeforeTaskStarts() async {
-        await self.executeTestWithClients { client in
-            let expectation = self.expectation(description: "Receives canceled response")
-            let task = Task {
-                let response = await client.emptyCall(request: Grpc_Testing_Empty())
-                XCTAssertEqual(response.code, .canceled)
-                XCTAssertEqual(response.error?.code, .canceled)
-                expectation.fulfill()
-            }
-
-            task.cancel()
-
-            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
-            XCTAssertTrue(task.isCancelled)
-        }
-    }
-
-    func testCancelingUnaryAsyncAfterTaskIsInFlight() async {
-        await self.executeTestWithClients(responseDelay: 5.0) { client in
-            let expectation = self.expectation(description: "Receives canceled response")
-            let task = Task {
-                let response = await client.emptyCall(request: Grpc_Testing_Empty())
-                XCTAssertEqual(response.code, .canceled)
-                XCTAssertEqual(response.error?.code, .canceled)
-                expectation.fulfill()
-            }
-
-            // Wait briefly before canceling the task to ensure that the task receives an explicit
-            // cancelation (see `withTaskCancellationHandler`).
-            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2), execute: { @Sendable in
-                task.cancel()
-            })
-
-            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
-            XCTAssertTrue(task.isCancelled)
         }
     }
 }

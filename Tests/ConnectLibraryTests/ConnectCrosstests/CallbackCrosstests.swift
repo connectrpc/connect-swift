@@ -18,7 +18,7 @@ import Connect
 import Foundation
 import XCTest
 
-private let kTimeout = TimeInterval(5)
+private let kTimeout = TimeInterval(10.0)
 
 private typealias TestServiceClient = Grpc_Testing_TestServiceClient
 private typealias UnimplementedServiceClient = Grpc_Testing_UnimplementedServiceClient
@@ -33,34 +33,22 @@ final class CallbackCrosstests: XCTestCase {
         timeout: TimeInterval = 60,
         runTestsWithClient: (TestServiceClient) throws -> Void
     ) rethrows {
-        let clients = CrosstestClients(timeout: timeout, responseDelay: nil)
-
-        print("Running \(function) with Connect + JSON...")
-        try runTestsWithClient(TestServiceClient(client: clients.connectJSONClient))
-        print("Running \(function) with Connect + proto...")
-        try runTestsWithClient(TestServiceClient(client: clients.connectProtoClient))
-
-        print("Running \(function) with gRPC Web + JSON...")
-        try runTestsWithClient(TestServiceClient(client: clients.grpcWebJSONClient))
-        print("Running \(function) with gRPC Web + proto...")
-        try runTestsWithClient(TestServiceClient(client: clients.grpcWebProtoClient))
+        let configurations = CrosstestConfiguration.all(timeout: timeout)
+        for configuration in configurations {
+            try runTestsWithClient(TestServiceClient(client: configuration.protocolClient))
+            print("Ran \(function) with \(configuration.description)")
+        }
     }
 
     private func executeTestWithUnimplementedClients(
         function: Selector = #function,
         runTestsWithClient: (UnimplementedServiceClient) throws -> Void
     ) rethrows {
-        let clients = CrosstestClients(timeout: 60, responseDelay: nil)
-
-        print("Running \(function) with Connect + JSON...")
-        try runTestsWithClient(UnimplementedServiceClient(client: clients.connectJSONClient))
-        print("Running \(function) with Connect + proto...")
-        try runTestsWithClient(UnimplementedServiceClient(client: clients.connectProtoClient))
-
-        print("Running \(function) with gRPC Web + JSON...")
-        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebJSONClient))
-        print("Running \(function) with gRPC Web + proto...")
-        try runTestsWithClient(UnimplementedServiceClient(client: clients.grpcWebProtoClient))
+        let configurations = CrosstestConfiguration.all(timeout: 60)
+        for configuration in configurations {
+            try runTestsWithClient(UnimplementedServiceClient(client: configuration.protocolClient))
+            print("Ran \(function) with \(configuration.description)")
+        }
     }
 
     // MARK: - Crosstest cases

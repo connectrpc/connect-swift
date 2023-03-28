@@ -92,7 +92,7 @@ final class URLSessionStream: NSObject {
         self.responseCallbacks.receiveResponseHeaders(response.formattedLowercasedHeaders())
         if code != .ok {
             self.closedByServer = true
-            self.responseCallbacks.receiveClose(code, nil)
+            self.responseCallbacks.receiveClose(code, [:], nil)
         }
     }
 
@@ -110,10 +110,12 @@ final class URLSessionStream: NSObject {
         self.closedByServer = true
         if let error = error {
             self.responseCallbacks.receiveClose(
-                Code.fromURLSessionCode((error as NSError).code), error
+                Code.fromURLSessionCode((error as NSError).code),
+                [:],
+                error
             )
         } else {
-            self.responseCallbacks.receiveClose(.ok, nil)
+            self.responseCallbacks.receiveClose(.ok, [:], nil)
         }
     }
 }

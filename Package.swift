@@ -32,6 +32,10 @@ let package = Package(
             name: "ConnectMocks",
             targets: ["ConnectMocks"]
         ),
+        .library(
+            name: "ConnectNIO",
+            targets: ["ConnectNIO"]
+        ),
         .executable(
             name: "protoc-gen-connect-swift",
             targets: ["ConnectSwiftPlugin"]
@@ -42,6 +46,18 @@ let package = Package(
         ),
     ],
     dependencies: [
+        .package(
+            url: "https://github.com/apple/swift-nio.git",
+            from: "2.48.0"
+        ),
+        .package(
+            url: "https://github.com/apple/swift-nio-http2.git",
+            from: "1.25.0"
+        ),
+        .package(
+            url: "https://github.com/apple/swift-nio-ssl.git",
+            from: "2.23.0"
+        ),
         .package(
             url: "https://github.com/apple/swift-protobuf.git",
             from: "1.21.0"
@@ -65,6 +81,8 @@ let package = Package(
             dependencies: [
                 "Connect",
                 "ConnectMocks",
+                "ConnectNIO",
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
             path: "Tests/ConnectLibraryTests",
@@ -95,6 +113,20 @@ let package = Package(
                 .product(name: "SwiftProtobufPluginLibrary", package: "swift-protobuf"),
             ],
             path: "Plugins/ConnectMocksPlugin"
+        ),
+        .target(
+            name: "ConnectNIO",
+            dependencies: [
+                "Connect",
+                .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOFoundationCompat", package: "swift-nio"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+                .product(name: "NIOHTTP2", package: "swift-nio-http2"),
+                .product(name: "NIOPosix", package: "swift-nio"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+            ],
+            path: "Libraries/ConnectNIO"
         ),
         .target(
             name: "ConnectPluginUtilities",

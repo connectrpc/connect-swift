@@ -31,7 +31,8 @@ private struct MockUnaryInterceptor: Interceptor {
                     url: request.url,
                     contentType: request.contentType,
                     headers: headers,
-                    message: request.message
+                    message: request.message,
+                    trailers: request.trailers
                 )
             },
             responseFunction: { response in
@@ -81,7 +82,8 @@ private struct MockStreamInterceptor: Interceptor {
                     url: request.url,
                     contentType: request.contentType,
                     headers: headers,
-                    message: request.message
+                    message: request.message,
+                    trailers: Trailers()
                 )
             },
             requestDataFunction: { _ in
@@ -145,7 +147,8 @@ final class InterceptorChainTests: XCTestCase {
             url: try XCTUnwrap(URL(string: "https://buf.build/mock")),
             contentType: "application/json",
             headers: Headers(),
-            message: nil
+            message: nil,
+            trailers: Trailers()
         ))
         XCTAssertEqual(interceptedRequest.headers["filter-chain"], ["filter-a", "filter-b"])
 
@@ -214,7 +217,8 @@ final class InterceptorChainTests: XCTestCase {
             url: try XCTUnwrap(URL(string: "https://buf.build/mock")),
             contentType: "application/json",
             headers: Headers(),
-            message: nil
+            message: nil,
+            trailers: Trailers()
         ))
         XCTAssertEqual(interceptedRequest.headers["filter-chain"], ["filter-a", "filter-b"])
         XCTAssertNil(interceptedRequest.message)

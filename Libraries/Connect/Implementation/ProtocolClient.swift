@@ -67,7 +67,8 @@ extension ProtocolClient: ProtocolClientInterface {
             url: url,
             contentType: "application/\(codec.name())",
             headers: headers,
-            message: data
+            message: data,
+            trailers: nil
         ))
         return self.httpClient.unary(
             request: request,
@@ -239,12 +240,17 @@ extension ProtocolClient: ProtocolClientInterface {
             url: url,
             contentType: "application/connect+\(codec.name())",
             headers: headers,
-            message: nil
+            message: nil,
+            trailers: nil
         ))
 
+        var hasCompleted = false
         let interceptAndHandleResult: (StreamResult<Data>) -> Void = { streamResult in
             do {
                 let interceptedResult = chain.streamResultFunction(streamResult)
+                if case .complete = interceptedResult {
+                    hasCompleted = true
+                }
                 onResult(try interceptedResult.toTypedResult(using: codec))
             } catch let error {
                 // TODO: Should we terminate the stream here?
@@ -276,17 +282,12 @@ extension ProtocolClient: ProtocolClientInterface {
                     responseBuffer = Data(responseBuffer.suffix(from: prefixedMessageLength))
                 }
             },
-            receiveClose: { code, error in
-                if code != .ok || error != nil {
-                    // Only pass the result through as completion if there is an error.
-                    // Examples of this codepath would be the client disconnecting mid-stream
-                    // or receiving a non-2xx response.
-                    // The happy path is usually determined by "end stream" flags in the
-                    // response body.
+            receiveClose: { code, trailers, error in
+                if !hasCompleted {
                     interceptAndHandleResult(.complete(
                         code: code,
                         error: error,
-                        trailers: nil
+                        trailers: trailers
                     ))
                 }
             }
