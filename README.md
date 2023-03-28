@@ -9,7 +9,10 @@ Connect-Swift
 Connect-Swift is a small library (<200KB!) that provides support for using
 generated,
 type-safe, and idiomatic Swift APIs to communicate with your app's servers
-using [Protocol Buffers (Protobuf)][protobuf].
+using [Protocol Buffers (Protobuf)][protobuf]. It works with the
+[Connect][connect-protocol], [gRPC][grpc-protocol], and
+[gRPC-Web][grpc-web-protocol] protocols.
+
 Imagine a world where
 you don't have to handwrite `Codable` models for REST/JSON endpoints
 and you can instead get right to building features by calling a generated
