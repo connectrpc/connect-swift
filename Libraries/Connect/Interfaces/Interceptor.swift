@@ -22,8 +22,10 @@ public protocol Interceptor {
     /// Invoked when a unary call is started. Provides a set of closures that will be called
     /// as the request progresses, allowing the interceptor to alter request/response data.
     ///
+    /// - parameter next: <#UnaryFunction#>
+    ///
     /// - returns: A new set of closures which can be used to read/alter request/response data.
-    func unaryFunction() -> UnaryFunction
+    func unaryFunction(next: UnaryFunction) -> UnaryFunction
 
     /// Invoked when a streaming call is started. Provides a set of closures that will be called
     /// as the stream progresses, allowing the interceptor to alter request/response data.
@@ -33,19 +35,21 @@ public protocol Interceptor {
     /// will contain 1 full message (for Connect and gRPC, this includes the prefix and message
     /// length bytes, followed by the actual message data).
     ///
+    /// - parameter next: <#StreamResult#>
+    ///
     /// - returns: A new set of closures which can be used to read/alter request/response data.
-    func streamFunction() -> StreamFunction
+    func streamFunction(next: StreamFunction) -> StreamFunction
 }
 
 public struct UnaryFunction {
-    public let requestFunction: (HTTPRequest) -> HTTPRequest
-    public let responseFunction: (HTTPResponse) -> HTTPResponse
-    public let responseMetricsFunction: (HTTPMetrics) -> HTTPMetrics
+    public let requestFunction: (HTTPRequest) -> Void
+    public let responseFunction: (HTTPResponse) -> Void
+    public let responseMetricsFunction: (HTTPMetrics) -> Void
 
     public init(
-        requestFunction: @escaping (HTTPRequest) -> HTTPRequest,
-        responseFunction: @escaping (HTTPResponse) -> HTTPResponse,
-        responseMetricsFunction: @escaping (HTTPMetrics) -> HTTPMetrics = { $0 }
+        requestFunction: @escaping (HTTPRequest) -> Void,
+        responseFunction: @escaping (HTTPResponse) -> Void,
+        responseMetricsFunction: @escaping (HTTPMetrics) -> Void
     ) {
         self.requestFunction = requestFunction
         self.responseFunction = responseFunction
@@ -54,14 +58,14 @@ public struct UnaryFunction {
 }
 
 public struct StreamFunction {
-    public let requestFunction: (HTTPRequest) -> HTTPRequest
-    public let requestDataFunction: (Data) -> Data
-    public let streamResultFunction: (StreamResult<Data>) -> StreamResult<Data>
+    public let requestFunction: (HTTPRequest) -> Void
+    public let requestDataFunction: (Data) -> Void
+    public let streamResultFunction: (StreamResult<Data>) -> Void
 
     public init(
-        requestFunction: @escaping (HTTPRequest) -> HTTPRequest,
-        requestDataFunction: @escaping (Data) -> Data,
-        streamResultFunction: @escaping (StreamResult<Data>) -> StreamResult<Data>
+        requestFunction: @escaping (HTTPRequest) -> Void,
+        requestDataFunction: @escaping (Data) -> Void,
+        streamResultFunction: @escaping (StreamResult<Data>) -> Void
     ) {
         self.requestFunction = requestFunction
         self.requestDataFunction = requestDataFunction

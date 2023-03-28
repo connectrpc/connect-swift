@@ -175,8 +175,8 @@ Offered under the [Apache 2 license](./LICENSE).
 [connect-web]: https://www.npmjs.com/package/@bufbuild/connect-web
 [error-handling]: https://connect.build/docs/swift/errors
 [getting-started]: https://connect.build/docs/swift/getting-started
-[grpc-protocol]: https://grpc.io
-[grpc-web-protocol]: https://github.com/grpc/grpc-web
+[grpc-protocol]: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
+[grpc-web-protocol]: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
 [interceptors]: https://connect.build/docs/swift/interceptors
 [protobuf]: https://developers.google.com/protocol-buffers
 [slack]: https://buf.build/links/slack

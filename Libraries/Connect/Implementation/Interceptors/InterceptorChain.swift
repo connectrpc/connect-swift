@@ -36,8 +36,14 @@ struct InterceptorChain {
     /// `caller -> a -> b -> c -> server`
     /// `caller <- c <- b <- a <- server`
     ///
+    /// - parameter send: <#UnaryFunction#>
+    ///
     /// - returns: A set of closures that each invoke the chain of interceptors in the above order.
-    func unaryFunction() -> UnaryFunction {
+    func unaryFunction(send: UnaryFunction) -> UnaryFunction {
+        var next = send
+        for interceptor in self.interceptors {
+            next = UnaryFunction(requestFunction: <#T##(HTTPRequest) -> Void#>, responseFunction: <#T##(HTTPResponse) -> Void#>, responseMetricsFunction: <#T##(HTTPMetrics) -> Void#>)
+        }
         let interceptors = self.interceptors.map { $0.unaryFunction() }
         return UnaryFunction(
             requestFunction: { request in
@@ -83,12 +89,4 @@ struct InterceptorChain {
             }
         )
     }
-}
-
-private func executeInterceptors<T>(_ interceptors: [(T) -> T], initial: T) -> T {
-    var next = initial
-    for interceptor in interceptors {
-        next = interceptor(next)
-    }
-    return next
 }
