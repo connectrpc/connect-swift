@@ -23,6 +23,7 @@ import SwiftProtobuf
 /// or by subclassing the type and overriding functions such as `send()`.
 ///
 /// To return data over the stream, outputs can be specified using `init(outputs: ...)`.
+@available(iOS 13.0, *)
 open class MockBidirectionalStream<
     Input: SwiftProtobuf.Message,
     Output: SwiftProtobuf.Message
