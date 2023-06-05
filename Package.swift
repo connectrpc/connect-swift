@@ -74,6 +74,7 @@ let package = Package(
                 "buf.gen.yaml",
                 "buf.work.yaml",
                 "proto",
+                "README.md",
             ]
         ),
         .testTarget(
@@ -126,7 +127,10 @@ let package = Package(
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
             ],
-            path: "Libraries/ConnectNIO"
+            path: "Libraries/ConnectNIO",
+            exclude: [
+                "README.md",
+            ]
         ),
         .target(
             name: "ConnectPluginUtilities",
