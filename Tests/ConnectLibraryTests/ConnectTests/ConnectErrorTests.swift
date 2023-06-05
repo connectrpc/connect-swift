@@ -93,7 +93,7 @@ final class ConnectErrorTests: XCTestCase {
                     "type": type(of: detail).protoMessageName,
                     "value": try detail.serializedData().base64EncodedString(),
                     "debug": ["retryDelay": "30s"],
-                ]
+                ] as [String: Any]
             },
         ]
         return try JSONSerialization.data(withJSONObject: dictionary)
