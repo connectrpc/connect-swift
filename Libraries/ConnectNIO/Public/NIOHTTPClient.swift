@@ -49,14 +49,16 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
     ///
     /// - parameter host: Target host (e.g., `https://buf.build`).
     /// - parameter port: Port to use for the connection. A default is provided based on whether a
-    ///                   secure connection is being established to the host via HTTPS.
+    ///                   secure connection is being established to the host via HTTPS. If this
+    ///                   parameter is omitted and the `host` parameter includes a port
+    ///                   (e.g., `https://buf.build:8080`), the host's port will be used.
     /// - parameter timeout: Optional timeout after which to terminate requests/streams if no
     ///                      activity has occurred in the request or response path.
     public init(host: String, port: Int? = nil, timeout: TimeInterval? = nil) {
         let baseURL = URL(string: host)!
         let useSSL = baseURL.scheme?.lowercased() == "https"
         self.host = baseURL.host!
-        self.port = port ?? (useSSL ? 443 : 80)
+        self.port = port ?? baseURL.port ?? (useSSL ? 443 : 80)
         self.timeout = timeout
         self.useSSL = useSSL
     }
