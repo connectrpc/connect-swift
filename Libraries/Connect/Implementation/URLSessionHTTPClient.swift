@@ -45,6 +45,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
         onMetrics: @Sendable @escaping (HTTPMetrics) -> Void,
         onResponse: @Sendable @escaping (HTTPResponse) -> Void
     ) -> Cancelable {
+        assert(!request.isGRPC, "URLSessionHTTPClient does not support gRPC, use NIOHTTPClient")
         let urlRequest = URLRequest(httpRequest: request)
         let task = self.session.dataTask(with: urlRequest) { data, urlResponse, error in
             if let httpURLResponse = urlResponse as? HTTPURLResponse {
@@ -93,6 +94,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
     open func stream(
         request: HTTPRequest, responseCallbacks: ResponseCallbacks
     ) -> RequestCallbacks {
+        assert(!request.isGRPC, "URLSessionHTTPClient does not support gRPC, use NIOHTTPClient")
         let urlSessionStream = URLSessionStream(
             request: URLRequest(httpRequest: request),
             session: self.session,
@@ -193,6 +195,15 @@ extension Code {
         default:
             return Code.fromHTTPStatus(code)
         }
+    }
+}
+
+private extension HTTPRequest {
+    var isGRPC: Bool {
+        return self.headers[HeaderConstants.contentType]?.first.map { contentType in
+            return contentType.hasPrefix("application/grpc")
+                && !contentType.hasPrefix("application/grpc-web")
+        } ?? false
     }
 }
 
