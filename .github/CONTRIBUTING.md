@@ -144,6 +144,17 @@ We're much more likely to approve your changes if you:
 * Write a [good commit message][commit-message].
 * Maintain backward compatibility.
 
+## Updating Dependencies
+
+To update dependencies such as `SwiftProtobuf` in this repository:
+
+1. Update the main [library's `Package.swift` file](../Package.swift).
+2. Open the project to ensure the [`Package.resolved` file](../Package.resolved) gets updated by Xcode.
+3. Update the dependencies in both the [`Connect-Swift.podspec`](../Connect-Swift.podspec) and
+   [`Connect-Swift-Mocks.podspec`](../Connect-Swift-Mocks.podspec) files.
+4. Open the [Swift package example app](../Examples/ElizaSwiftPackageApp) to ensure its `Package.resolved` file gets updated.
+5. Run `pod update` in the [CocoaPods example app's directory](../Examples/ElizaCocoaPodsApp).
+
 ## Releasing
 
 Releases should be tagged in `x.y.z` SemVer format.
