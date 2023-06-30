@@ -306,9 +306,7 @@ extension ProtocolClient: ProtocolClientInterface {
 }
 
 private extension StreamResult<Data> {
-    func toTypedResult<Output: SwiftProtobuf.Message>(using codec: Codec)
-        throws -> StreamResult<Output>
-    {
+    func toTypedResult<M: SwiftProtobuf.Message>(using codec: Codec) throws -> StreamResult<M> {
         switch self {
         case .complete(let code, let error, let trailers):
             return .complete(code: code, error: error, trailers: trailers)
