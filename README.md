@@ -170,7 +170,7 @@ from early adopters. Join us on [Slack][slack]!
 Offered under the [Apache 2 license](./LICENSE).
 
 [blog]: https://buf.build/blog/announcing-connect-swift
-[buf-studio]: https://studio.buf.build
+[buf-studio]: https://buf.build/studio
 [connect-crosstest]: https://github.com/bufbuild/connect-crosstest
 [connect-go]: https://github.com/bufbuild/connect-go
 [connect-kotlin]: https://github.com/bufbuild/connect-kotlin
