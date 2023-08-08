@@ -15,7 +15,7 @@
 import Foundation
 
 /// Implementation of the Connect protocol as an interceptor.
-/// https://connect.build/docs/protocol
+/// https://connectrpc.com/docs/protocol
 struct ConnectInterceptor {
     private let config: ProtocolClientConfig
 
@@ -138,7 +138,7 @@ extension ConnectInterceptor: Interceptor {
                         let isEndStream = 0b00000010 & headerByte != 0
                         if isEndStream {
                             // Expect a valid Connect end stream response, which can simply be {}.
-                            // https://connect.build/docs/protocol#error-end-stream
+                            // https://connectrpc.com/docs/protocol#error-end-stream
                             let response = try JSONDecoder().decode(
                                 ConnectEndStreamResponse.self, from: message
                             )

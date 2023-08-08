@@ -47,11 +47,11 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
 
     /// Designated initializer for the client.
     ///
-    /// - parameter host: Target host (e.g., `https://buf.build`).
+    /// - parameter host: Target host (e.g., `https://connectrpc.com`).
     /// - parameter port: Port to use for the connection. A default is provided based on whether a
     ///                   secure connection is being established to the host via HTTPS. If this
     ///                   parameter is omitted and the `host` parameter includes a port
-    ///                   (e.g., `https://buf.build:8080`), the host's port will be used.
+    ///                   (e.g., `https://connectrpc.com:8080`), the host's port will be used.
     /// - parameter timeout: Optional timeout after which to terminate requests/streams if no
     ///                      activity has occurred in the request or response path.
     public init(host: String, port: Int? = nil, timeout: TimeInterval? = nil) {

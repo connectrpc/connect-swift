@@ -8,4 +8,4 @@ each supported protocol using either unary or streaming APIs:
   **Swift Package Manager**.
 - [`ElizaCocoaPodsApp`](./ElizaCocoaPodsApp): Uses **CocoaPods**.
 
-[eliza-demo]: https://connect.build/demo
+[eliza-demo]: https://connectrpc.com/demo

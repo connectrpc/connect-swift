@@ -128,7 +128,7 @@ a working SwiftUI chat app that uses Connect-Swift!
 Comprehensive documentation for everything, including
 [interceptors][interceptors], [mocking/testing][testing],
 [streaming][streaming], and [error handling][error-handling]
-is available on the [connect.build website][getting-started].
+is available on the [connectrpc.com website][getting-started].
 
 ## Example Apps
 
@@ -174,15 +174,15 @@ Offered under the [Apache 2 license](./LICENSE).
 [connect-crosstest]: https://github.com/bufbuild/connect-crosstest
 [connect-go]: https://github.com/bufbuild/connect-go
 [connect-kotlin]: https://github.com/bufbuild/connect-kotlin
-[connect-protocol]: https://connect.build/docs/protocol
+[connect-protocol]: https://connectrpc.com/docs/protocol
 [connect-web]: https://www.npmjs.com/package/@bufbuild/connect-web
-[error-handling]: https://connect.build/docs/swift/errors
-[getting-started]: https://connect.build/docs/swift/getting-started
+[error-handling]: https://connectrpc.com/docs/swift/errors
+[getting-started]: https://connectrpc.com/docs/swift/getting-started
 [grpc-protocol]: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
 [grpc-web-protocol]: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
-[interceptors]: https://connect.build/docs/swift/interceptors
+[interceptors]: https://connectrpc.com/docs/swift/interceptors
 [protobuf]: https://developers.google.com/protocol-buffers
 [slack]: https://buf.build/links/slack
-[streaming]: https://connect.build/docs/swift/using-clients#using-generated-clients
-[swift-pm-integration]: https://connect.build/docs/swift/getting-started#add-the-connect-swift-package
-[testing]: https://connect.build/docs/swift/testing
+[streaming]: https://connectrpc.com/docs/swift/using-clients#using-generated-clients
+[swift-pm-integration]: https://connectrpc.com/docs/swift/getting-started#add-the-connect-swift-package
+[testing]: https://connectrpc.com/docs/swift/testing

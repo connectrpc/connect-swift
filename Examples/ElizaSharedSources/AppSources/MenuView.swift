@@ -41,7 +41,7 @@ struct MenuView: View {
     private func createClient(withProtocol networkProtocol: NetworkProtocol)
         -> Buf_Connect_Demo_Eliza_V1_ElizaServiceClient
     {
-        let host = "https://demo.connect.build"
+        let host = "https://demo.connectrpc.com"
         #if COCOAPODS
         let protocolClient = ProtocolClient(
             httpClient: URLSessionHTTPClient(),

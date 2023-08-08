@@ -2,13 +2,13 @@
 
 This example app imports the `Connect` library using Swift Package Manager,
 and provides an interface for
-[chatting with Eliza](https://buf.build/bufbuild/eliza).
+[chatting with Eliza](https://connectrpc.com/bufbuild/eliza).
 
 The app has support for chatting using a variety of protocols supported by
 the Connect library:
 
-- [Connect](https://connect.build) + unary
-- [Connect](https://connect.build) + streaming
+- [Connect](https://connectrpc.com) + unary
+- [Connect](https://connectrpc.com) + streaming
 - [gRPC](https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md) + unary (using `ConnectGRPC` + `SwiftNIO`)
 - [gRPC](https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md) + streaming (using `ConnectGRPC` + `SwiftNIO`)
 - [gRPC-Web](https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md) + unary

@@ -112,7 +112,7 @@ private struct MockStreamInterceptor: Interceptor {
 }
 
 final class InterceptorChainTests: XCTestCase {
-    private let config = ProtocolClientConfig(host: "https://buf.build")
+    private let config = ProtocolClientConfig(host: "https://connectrpc.com")
 
     func testUnary() throws {
         let aRequestExpectation = self.expectation(description: "Filter A called with request")
@@ -144,7 +144,7 @@ final class InterceptorChainTests: XCTestCase {
         ).unaryFunction()
 
         let interceptedRequest = chain.requestFunction(HTTPRequest(
-            url: try XCTUnwrap(URL(string: "https://buf.build/mock")),
+            url: try XCTUnwrap(URL(string: "https://connectrpc.com/mock")),
             contentType: "application/json",
             headers: Headers(),
             message: nil,
@@ -214,7 +214,7 @@ final class InterceptorChainTests: XCTestCase {
         ).streamFunction()
 
         let interceptedRequest = chain.requestFunction(HTTPRequest(
-            url: try XCTUnwrap(URL(string: "https://buf.build/mock")),
+            url: try XCTUnwrap(URL(string: "https://connectrpc.com/mock")),
             contentType: "application/json",
             headers: Headers(),
             message: nil,
