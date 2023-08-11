@@ -171,9 +171,9 @@ Offered under the [Apache 2 license](./LICENSE).
 
 [blog]: https://buf.build/blog/announcing-connect-swift
 [buf-studio]: https://buf.build/studio
-[connect-crosstest]: https://github.com/bufbuild/connect-crosstest
-[connect-go]: https://github.com/bufbuild/connect-go
-[connect-kotlin]: https://github.com/bufbuild/connect-kotlin
+[connect-crosstest]: https://github.com/connectrpc/connect-crosstest
+[connect-go]: https://github.com/connectrpc/connect-go
+[connect-kotlin]: https://github.com/connectrpc/connect-kotlin
 [connect-protocol]: https://connectrpc.com/docs/protocol
 [connect-web]: https://www.npmjs.com/package/@bufbuild/connect-web
 [error-handling]: https://connectrpc.com/docs/swift/errors
