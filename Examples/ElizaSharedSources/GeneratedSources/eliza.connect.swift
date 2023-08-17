@@ -32,7 +32,7 @@ internal protocol Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
 }
 
 /// Concrete implementation of `Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface`.
-internal final class Buf_Connect_Demo_Eliza_V1_ElizaServiceClient: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
+internal final class Buf_Connect_Demo_Eliza_V1_ElizaServiceClient: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {

@@ -64,7 +64,9 @@ final class ConnectClientGenerator: Generator {
 
         let className = service.implementationName(using: self.namer)
         self.printLine("/// Concrete implementation of `\(protocolName)`.")
-        self.printLine("\(self.visibility) final class \(className): \(protocolName) {")
+        self.printLine(
+            "\(self.visibility) final class \(className): \(protocolName), Sendable {"
+        )
         self.indent {
             self.printLine("private let client: Connect.ProtocolClientInterface")
             self.printLine()

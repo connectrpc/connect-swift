@@ -117,7 +117,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
 }
 
 /// Concrete implementation of `Grpc_Testing_TestServiceClientInterface`.
-internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceClientInterface {
+internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {
@@ -266,7 +266,7 @@ internal protocol Grpc_Testing_UnimplementedServiceClientInterface {
 }
 
 /// Concrete implementation of `Grpc_Testing_UnimplementedServiceClientInterface`.
-internal final class Grpc_Testing_UnimplementedServiceClient: Grpc_Testing_UnimplementedServiceClientInterface {
+internal final class Grpc_Testing_UnimplementedServiceClient: Grpc_Testing_UnimplementedServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {
@@ -317,7 +317,7 @@ internal protocol Grpc_Testing_ReconnectServiceClientInterface {
 }
 
 /// Concrete implementation of `Grpc_Testing_ReconnectServiceClientInterface`.
-internal final class Grpc_Testing_ReconnectServiceClient: Grpc_Testing_ReconnectServiceClientInterface {
+internal final class Grpc_Testing_ReconnectServiceClient: Grpc_Testing_ReconnectServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {
@@ -373,7 +373,7 @@ internal protocol Grpc_Testing_LoadBalancerStatsServiceClientInterface {
 }
 
 /// Concrete implementation of `Grpc_Testing_LoadBalancerStatsServiceClientInterface`.
-internal final class Grpc_Testing_LoadBalancerStatsServiceClient: Grpc_Testing_LoadBalancerStatsServiceClientInterface {
+internal final class Grpc_Testing_LoadBalancerStatsServiceClient: Grpc_Testing_LoadBalancerStatsServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {
@@ -425,7 +425,7 @@ internal protocol Grpc_Testing_XdsUpdateHealthServiceClientInterface {
 }
 
 /// Concrete implementation of `Grpc_Testing_XdsUpdateHealthServiceClientInterface`.
-internal final class Grpc_Testing_XdsUpdateHealthServiceClient: Grpc_Testing_XdsUpdateHealthServiceClientInterface {
+internal final class Grpc_Testing_XdsUpdateHealthServiceClient: Grpc_Testing_XdsUpdateHealthServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {
@@ -473,7 +473,7 @@ internal protocol Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface {
 }
 
 /// Concrete implementation of `Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface`.
-internal final class Grpc_Testing_XdsUpdateClientConfigureServiceClient: Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface {
+internal final class Grpc_Testing_XdsUpdateClientConfigureServiceClient: Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {
