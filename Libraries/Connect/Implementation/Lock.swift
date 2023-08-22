@@ -24,6 +24,11 @@ final class Lock: Sendable {
         self.underlyingLock.initialize(to: os_unfair_lock())
     }
 
+    /// Perform an action within the context of the lock.
+    ///
+    /// - parameter action: Closure to be executed in the context of the lock.
+    ///
+    /// - returns: The result of the closure.
     func perform<T>(action: @escaping () -> T) -> T {
         os_unfair_lock_lock(self.underlyingLock)
         defer { os_unfair_lock_unlock(self.underlyingLock) }

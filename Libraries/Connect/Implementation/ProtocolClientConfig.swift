@@ -63,9 +63,9 @@ public struct ProtocolClientConfig: Sendable {
 
         switch networkProtocol {
         case .connect:
-            self.interceptors = interceptors + [{ ConnectInterceptor.init(config: $0) }]
+            self.interceptors = interceptors + [{ ConnectInterceptor(config: $0) }]
         case .grpcWeb:
-            self.interceptors = interceptors + [{ GRPCWebInterceptor.init(config: $0) }]
+            self.interceptors = interceptors + [{ GRPCWebInterceptor(config: $0) }]
         case .custom(_, let protocolInterceptor):
             self.interceptors = interceptors + [protocolInterceptor]
         }
