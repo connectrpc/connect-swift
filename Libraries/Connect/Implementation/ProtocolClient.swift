@@ -17,7 +17,7 @@ import os.log
 import SwiftProtobuf
 
 /// Concrete implementation of the `ProtocolClientInterface`.
-public final class ProtocolClient {
+public final class ProtocolClient: Sendable {
     private let config: ProtocolClientConfig
     private let httpClient: HTTPClientInterface
 
@@ -191,7 +191,7 @@ extension ProtocolClient: ProtocolClientInterface {
     ) -> any BidirectionalAsyncStreamInterface<Input, Output> {
         let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
         let callbacks = self.createRequestCallbacks(
-            path: path, headers: headers, onResult: bidirectionalAsync.receive
+            path: path, headers: headers, onResult: { bidirectionalAsync.receive($0) }
         )
         return bidirectionalAsync.configureForSending(with: callbacks)
     }
@@ -205,7 +205,7 @@ extension ProtocolClient: ProtocolClientInterface {
     ) -> any ClientOnlyAsyncStreamInterface<Input, Output> {
         let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
         let callbacks = self.createRequestCallbacks(
-            path: path, headers: headers, onResult: bidirectionalAsync.receive
+            path: path, headers: headers, onResult: { bidirectionalAsync.receive($0) }
         )
         return bidirectionalAsync.configureForSending(with: callbacks)
     }
@@ -219,7 +219,7 @@ extension ProtocolClient: ProtocolClientInterface {
     ) -> any ServerOnlyAsyncStreamInterface<Input, Output> {
         let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
         let callbacks = self.createRequestCallbacks(
-            path: path, headers: headers, onResult: bidirectionalAsync.receive
+            path: path, headers: headers, onResult: { bidirectionalAsync.receive($0) }
         )
         return ServerOnlyAsyncStream(
             bidirectionalStream: bidirectionalAsync.configureForSending(with: callbacks)
@@ -231,7 +231,7 @@ extension ProtocolClient: ProtocolClientInterface {
     private func createRequestCallbacks<Output: ProtobufMessage>(
         path: String,
         headers: Headers,
-        onResult: @escaping (StreamResult<Output>) -> Void
+        onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> RequestCallbacks {
         let codec = self.config.codec
         let chain = self.config.createInterceptorChain().streamFunction()
@@ -244,12 +244,12 @@ extension ProtocolClient: ProtocolClientInterface {
             trailers: nil
         ))
 
-        var hasCompleted = false
-        let interceptAndHandleResult: (StreamResult<Data>) -> Void = { streamResult in
+        let hasCompleted = Locked(false)
+        let interceptAndHandleResult: @Sendable (StreamResult<Data>) -> Void = { streamResult in
             do {
                 let interceptedResult = chain.streamResultFunction(streamResult)
                 if case .complete = interceptedResult {
-                    hasCompleted = true
+                    hasCompleted.value = true
                 }
                 onResult(try interceptedResult.toTypedResult(using: codec))
             } catch let error {
@@ -287,7 +287,7 @@ extension ProtocolClient: ProtocolClientInterface {
                 }
             },
             receiveClose: { code, trailers, error in
-                if !hasCompleted {
+                if !hasCompleted.value {
                     interceptAndHandleResult(.complete(
                         code: code,
                         error: error,

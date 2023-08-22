@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /// Interface for a client that performs underlying HTTP requests and streams with primitive types.
-public protocol HTTPClientInterface {
+public protocol HTTPClientInterface: Sendable {
     /// Perform a unary HTTP request.
     ///
     /// - parameter request: The outbound request headers and data.

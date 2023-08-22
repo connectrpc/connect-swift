@@ -17,11 +17,11 @@ import Foundation
 import os.log
 
 /// Concrete implementation of `HTTPClientInterface` backed by `URLSession`.
-open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
+open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Sendable {
     /// Lock used for safely accessing stream storage.
     private let lock = Lock()
     /// Closures stored for notifying when metrics are available.
-    private var metricsClosures = [Int: (HTTPMetrics) -> Void]()
+    private var metricsClosures = [Int: @Sendable (HTTPMetrics) -> Void]()
     /// Force unwrapped to allow using `self` as the delegate.
     private var session: URLSession!
     /// List of active streams.
@@ -114,7 +114,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
                     urlSessionStream.close()
                 }
             },
-            sendClose: urlSessionStream.close
+            sendClose: { urlSessionStream.close() }
         )
     }
 }
