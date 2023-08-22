@@ -13,23 +13,23 @@
 // limitations under the License.
 
 import Foundation
-import SwiftProtobuf
 
-/// Codec providing functionality for serializing to/from Protobuf binary.
-public struct ProtoCodec {
-    public init() {}
-}
+final class Locked<T>: @unchecked Sendable {
+    private let lock = Lock()
+    private var _value: T
 
-extension ProtoCodec: Codec {
-    public func name() -> String {
-        return "proto"
+    var value: T {
+        get { self.lock.perform { self._value } }
+        set { self.lock.perform { self._value = newValue } }
     }
 
-    public func serialize<Input: ProtobufMessage>(message: Input) throws -> Data {
-        return try message.serializedData()
+    func perform(action: @escaping (inout T) -> Void) {
+        self.lock.perform {
+            action(&self._value)
+        }
     }
 
-    public func deserialize<Output: ProtobufMessage>(source: Data) throws -> Output {
-        return try Output(serializedData: source)
+    init(_ value: T) {
+        self._value = value
     }
 }

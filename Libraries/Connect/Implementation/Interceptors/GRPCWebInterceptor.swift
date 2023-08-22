@@ -111,7 +111,7 @@ extension GRPCWebInterceptor: Interceptor {
     }
 
     func streamFunction() -> StreamFunction {
-        var responseHeaders: Headers?
+        let responseHeaders = Locked<Headers?>(nil)
         return StreamFunction(
             requestFunction: { request in
                 return HTTPRequest(
@@ -137,13 +137,13 @@ extension GRPCWebInterceptor: Interceptor {
                             trailers: headers
                         )
                     } else {
-                        responseHeaders = headers
+                        responseHeaders.value = headers
                         return result
                     }
 
                 case .message(let data):
                     do {
-                        let responseCompressionPool = responseHeaders?[
+                        let responseCompressionPool = responseHeaders.value?[
                             HeaderConstants.grpcContentEncoding
                         ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
                         let (headerByte, unpackedData) = try Envelope.unpackMessage(

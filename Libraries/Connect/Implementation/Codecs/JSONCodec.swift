@@ -13,10 +13,11 @@
 // limitations under the License.
 
 import Foundation
-import SwiftProtobuf
+// TODO: Remove @preconcurrency once JSON(Encoding|Decoding)Options are Sendable
+@preconcurrency import SwiftProtobuf
 
 /// Codec providing functionality for serializing to/from JSON.
-public struct JSONCodec {
+public struct JSONCodec: Sendable {
     private let encodingOptions: JSONEncodingOptions
     private let decodingOptions: JSONDecodingOptions = {
         var options = JSONDecodingOptions()
@@ -43,11 +44,11 @@ extension JSONCodec: Codec {
         return "json"
     }
 
-    public func serialize<Input: SwiftProtobuf.Message>(message: Input) throws -> Data {
+    public func serialize<Input: ProtobufMessage>(message: Input) throws -> Data {
         return try message.jsonUTF8Data(options: self.encodingOptions)
     }
 
-    public func deserialize<Output: SwiftProtobuf.Message>(source: Data) throws -> Output {
+    public func deserialize<Output: ProtobufMessage>(source: Data) throws -> Output {
         return try Output(jsonUTF8Data: source, options: self.decodingOptions)
     }
 }

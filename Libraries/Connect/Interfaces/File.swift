@@ -12,24 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Foundation
 import SwiftProtobuf
 
-/// Codec providing functionality for serializing to/from Protobuf binary.
-public struct ProtoCodec {
-    public init() {}
-}
-
-extension ProtoCodec: Codec {
-    public func name() -> String {
-        return "proto"
-    }
-
-    public func serialize<Input: ProtobufMessage>(message: Input) throws -> Data {
-        return try message.serializedData()
-    }
-
-    public func deserialize<Output: ProtobufMessage>(source: Data) throws -> Output {
-        return try Output(serializedData: source)
-    }
-}
+public protocol ProtobufMessage: SwiftProtobuf.Message, Sendable {}

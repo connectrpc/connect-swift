@@ -26,8 +26,8 @@ import SwiftProtobuf
 /// subclassing and overriding `results()`.
 @available(iOS 13, *)
 open class MockServerOnlyAsyncStream<
-    Input: SwiftProtobuf.Message,
-    Output: SwiftProtobuf.Message
+    Input: ProtobufMessage,
+    Output: ProtobufMessage
 >: ServerOnlyAsyncStreamInterface {
     private var cancellables = [AnyCancellable]()
 

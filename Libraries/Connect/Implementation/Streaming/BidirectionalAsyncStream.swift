@@ -18,7 +18,9 @@ import SwiftProtobuf
 /// Provides the necessary wiring to bridge from closures/callbacks to Swift's `AsyncStream`
 /// to work with async/await.
 @available(iOS 13, *)
-final class BidirectionalAsyncStream<Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message> {
+final class BidirectionalAsyncStream<
+    Input: ProtobufMessage, Output: ProtobufMessage
+>: @unchecked Sendable {
     /// The underlying async stream that will be exposed to the consumer.
     /// Force unwrapped because it captures `self` on `init`.
     private var asyncStream: AsyncStream<StreamResult<Output>>!

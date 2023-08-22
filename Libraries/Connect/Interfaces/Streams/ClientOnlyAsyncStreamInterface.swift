@@ -19,10 +19,10 @@ import SwiftProtobuf
 @available(iOS 13, *)
 public protocol ClientOnlyAsyncStreamInterface<Input, Output> {
     /// The input (request) message type.
-    associatedtype Input: SwiftProtobuf.Message
+    associatedtype Input: ProtobufMessage
 
     /// The output (response) message type.
-    associatedtype Output: SwiftProtobuf.Message
+    associatedtype Output: ProtobufMessage
 
     /// Send a request to the server over the stream.
     ///

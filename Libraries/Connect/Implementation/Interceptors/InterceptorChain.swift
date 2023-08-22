@@ -14,7 +14,7 @@
 
 /// Represents a chain of interceptors that is used for a single request/stream,
 /// and orchestrates invoking each of them in the proper order.
-struct InterceptorChain {
+struct InterceptorChain: Sendable {
     private let interceptors: [Interceptor]
 
     /// Initialize the interceptor chain.

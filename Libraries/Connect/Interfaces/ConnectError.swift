@@ -37,7 +37,7 @@ public struct ConnectError: Swift.Error, Sendable {
     /// `let unpackedError: MyError? = error.unpackedDetails().first`
     ///
     /// - returns: The matching unpacked typed error details.
-    public func unpackedDetails<Output: SwiftProtobuf.Message>() -> [Output] {
+    public func unpackedDetails<Output: ProtobufMessage>() -> [Output] {
         return self.details.compactMap { detail -> Output? in
             guard detail.type == Output.protoMessageName else {
                 return nil

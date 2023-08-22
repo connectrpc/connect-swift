@@ -15,13 +15,15 @@
 import Foundation
 
 /// Set of closures that are used for wiring outbound request data through to HTTP clients.
-public final class RequestCallbacks {
+public final class RequestCallbacks: Sendable {
     /// Closure to send data through to the server.
-    public let sendData: (Data) -> Void
+    public let sendData: @Sendable (Data) -> Void
     /// Closure to initiate a close for a stream.
-    public let sendClose: () -> Void
+    public let sendClose: @Sendable () -> Void
 
-    public init(sendData: @escaping (Data) -> Void, sendClose: @escaping () -> Void) {
+    public init(
+        sendData: @escaping @Sendable (Data) -> Void, sendClose: @escaping @Sendable () -> Void
+    ) {
         self.sendData = sendData
         self.sendClose = sendClose
     }

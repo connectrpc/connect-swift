@@ -39,12 +39,12 @@ extension ProtocolClient: ProtocolClientInterface {
 
     @discardableResult
     public func unary<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         request: Input,
         headers: Headers,
-        completion: @escaping (ResponseMessage<Output>) -> Void
+        completion: @escaping @Sendable (ResponseMessage<Output>) -> Void
     ) -> Cancelable {
         let codec = self.config.codec
         let data: Data
@@ -123,11 +123,11 @@ extension ProtocolClient: ProtocolClientInterface {
     }
 
     public func bidirectionalStream<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         headers: Headers,
-        onResult: @escaping (StreamResult<Output>) -> Void
+        onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> any BidirectionalStreamInterface<Input> {
         return BidirectionalStream(
             requestCallbacks: self.createRequestCallbacks(
@@ -138,11 +138,11 @@ extension ProtocolClient: ProtocolClientInterface {
     }
 
     public func clientOnlyStream<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         headers: Headers,
-        onResult: @escaping (StreamResult<Output>) -> Void
+        onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> any ClientOnlyStreamInterface<Input> {
         return BidirectionalStream(
             requestCallbacks: self.createRequestCallbacks(
@@ -153,11 +153,11 @@ extension ProtocolClient: ProtocolClientInterface {
     }
 
     public func serverOnlyStream<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         headers: Headers,
-        onResult: @escaping (StreamResult<Output>) -> Void
+        onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> any ServerOnlyStreamInterface<Input> {
         return ServerOnlyStream(bidirectionalStream: BidirectionalStream(
             requestCallbacks: self.createRequestCallbacks(
@@ -171,7 +171,7 @@ extension ProtocolClient: ProtocolClientInterface {
 
     @available(iOS 13, *)
     public func unary<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         request: Input,
@@ -184,7 +184,7 @@ extension ProtocolClient: ProtocolClientInterface {
 
     @available(iOS 13, *)
     public func bidirectionalStream<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         headers: Headers
@@ -198,7 +198,7 @@ extension ProtocolClient: ProtocolClientInterface {
 
     @available(iOS 13, *)
     public func clientOnlyStream<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         headers: Headers
@@ -212,7 +212,7 @@ extension ProtocolClient: ProtocolClientInterface {
 
     @available(iOS 13, *)
     public func serverOnlyStream<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         headers: Headers
@@ -228,7 +228,7 @@ extension ProtocolClient: ProtocolClientInterface {
 
     // MARK: - Private
 
-    private func createRequestCallbacks<Output: SwiftProtobuf.Message>(
+    private func createRequestCallbacks<Output: ProtobufMessage>(
         path: String,
         headers: Headers,
         onResult: @escaping (StreamResult<Output>) -> Void
@@ -261,25 +261,29 @@ extension ProtocolClient: ProtocolClientInterface {
                 )
             }
         }
-        var responseBuffer = Data()
+        let responseBuffer = Locked(Data())
         let responseCallbacks = ResponseCallbacks(
             receiveResponseHeaders: { interceptAndHandleResult(.headers($0)) },
             receiveResponseData: { responseChunk in
                 // Repeating handles cases where multiple messages are received in a single chunk.
-                responseBuffer += responseChunk
-                while true {
-                    let messageLength = Envelope.messageLength(forPackedData: responseBuffer)
-                    if messageLength < 0 {
-                        return
-                    }
+                responseBuffer.perform { responseBuffer in
+                    responseBuffer += responseChunk
+                    while true {
+                        let messageLength = Envelope.messageLength(forPackedData: responseBuffer)
+                        if messageLength < 0 {
+                            return
+                        }
 
-                    let prefixedMessageLength = Envelope.prefixLength + messageLength
-                    guard responseBuffer.count >= prefixedMessageLength else {
-                        return
-                    }
+                        let prefixedMessageLength = Envelope.prefixLength + messageLength
+                        guard responseBuffer.count >= prefixedMessageLength else {
+                            return
+                        }
 
-                    interceptAndHandleResult(.message(responseBuffer.prefix(prefixedMessageLength)))
-                    responseBuffer = Data(responseBuffer.suffix(from: prefixedMessageLength))
+                        interceptAndHandleResult(
+                            .message(responseBuffer.prefix(prefixedMessageLength))
+                        )
+                        responseBuffer = Data(responseBuffer.suffix(from: prefixedMessageLength))
+                    }
                 }
             },
             receiveClose: { code, trailers, error in
@@ -306,7 +310,7 @@ extension ProtocolClient: ProtocolClientInterface {
 }
 
 private extension StreamResult<Data> {
-    func toTypedResult<M: SwiftProtobuf.Message>(using codec: Codec) throws -> StreamResult<M> {
+    func toTypedResult<M: ProtobufMessage>(using codec: Codec) throws -> StreamResult<M> {
         switch self {
         case .complete(let code, let error, let trailers):
             return .complete(code: code, error: error, trailers: trailers)

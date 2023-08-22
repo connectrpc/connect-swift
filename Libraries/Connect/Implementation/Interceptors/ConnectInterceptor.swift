@@ -101,7 +101,7 @@ extension ConnectInterceptor: Interceptor {
     }
 
     func streamFunction() -> StreamFunction {
-        var responseHeaders: Headers?
+        let responseHeaders = Locked<Headers?>(nil)
         return StreamFunction(
             requestFunction: { request in
                 var headers = request.headers
@@ -124,12 +124,12 @@ extension ConnectInterceptor: Interceptor {
             streamResultFunction: { result in
                 switch result {
                 case .headers(let headers):
-                    responseHeaders = headers
+                    responseHeaders.value = headers
                     return result
 
                 case .message(let data):
                     do {
-                        let responseCompressionPool = responseHeaders?[
+                        let responseCompressionPool = responseHeaders.value?[
                             HeaderConstants.connectStreamingContentEncoding
                         ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
                         let (headerByte, message) = try Envelope.unpackMessage(
@@ -161,7 +161,7 @@ extension ConnectInterceptor: Interceptor {
                             code: code,
                             error: ConnectError.from(
                                 code: code,
-                                headers: responseHeaders ?? [:],
+                                headers: responseHeaders.value ?? [:],
                                 source: nil
                             ),
                             trailers: trailers

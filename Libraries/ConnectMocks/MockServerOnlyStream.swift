@@ -25,8 +25,8 @@ import SwiftProtobuf
 /// To return data over the stream, outputs can be specified using `init(outputs: ...)`.
 @available(iOS 13.0, *)
 open class MockServerOnlyStream<
-    Input: SwiftProtobuf.Message,
-    Output: SwiftProtobuf.Message
+    Input: ProtobufMessage,
+    Output: ProtobufMessage
 >: ServerOnlyStreamInterface {
     /// Closure that is called when `send()` is invoked.
     public var onSend: ((Input) -> Void)?

@@ -21,14 +21,14 @@ import SwiftProtobuf
 /// https://forums.swift.org/t/how-to-use-withtaskcancellationhandler-properly/54341/37
 /// https://stackoverflow.com/q/71898080
 @available(iOS 13, *)
-actor UnaryAsyncWrapper<Output: SwiftProtobuf.Message> {
+actor UnaryAsyncWrapper<Output: ProtobufMessage>: Sendable {
     private var cancelable: Cancelable?
     private let sendUnary: PerformClosure
 
     /// Accepts a closure to be called upon completion of a request and returns a cancelable which,
     /// when invoked, will cancel the underlying request.
-    typealias PerformClosure = (
-        @escaping (ResponseMessage<Output>) -> Void
+    typealias PerformClosure = @Sendable (
+        @escaping @Sendable (ResponseMessage<Output>) -> Void
     ) -> Cancelable
 
     init(sendUnary: @escaping PerformClosure) {

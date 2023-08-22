@@ -15,7 +15,7 @@
 import SwiftProtobuf
 
 /// Concrete implementation of `ServerOnlyStreamInterface`.
-final class ServerOnlyStream<Message: SwiftProtobuf.Message> {
+final class ServerOnlyStream<Message: ProtobufMessage>: Sendable {
     private let bidirectionalStream: BidirectionalStream<Message>
 
     init(bidirectionalStream: BidirectionalStream<Message>) {

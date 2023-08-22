@@ -31,12 +31,12 @@ public protocol ProtocolClientInterface {
     /// - returns: A `Cancelable` which provides the ability to cancel the outbound request.
     @discardableResult
     func unary<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         request: Input,
         headers: Headers,
-        completion: @escaping (ResponseMessage<Output>) -> Void
+        completion: @escaping @Sendable (ResponseMessage<Output>) -> Void
     ) -> Cancelable
 
     /// Start a new bidirectional stream.
@@ -54,11 +54,11 @@ public protocol ProtocolClientInterface {
     ///
     /// - returns: An interface for interacting with and sending data over the bidirectional stream.
     func bidirectionalStream<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         headers: Headers,
-        onResult: @escaping (StreamResult<Output>) -> Void
+        onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> any BidirectionalStreamInterface<Input>
 
     /// Start a new client-only stream.
@@ -76,11 +76,11 @@ public protocol ProtocolClientInterface {
     ///
     /// - returns: An interface for interacting with and sending data over the client-only stream.
     func clientOnlyStream<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         headers: Headers,
-        onResult: @escaping (StreamResult<Output>) -> Void
+        onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> any ClientOnlyStreamInterface<Input>
 
     /// Start a new server-only stream.
@@ -98,11 +98,11 @@ public protocol ProtocolClientInterface {
     ///
     /// - returns: An interface for interacting with and sending data over the server-only stream.
     func serverOnlyStream<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         headers: Headers,
-        onResult: @escaping (StreamResult<Output>) -> Void
+        onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> any ServerOnlyStreamInterface<Input>
 
     // MARK: - Async/await
@@ -116,7 +116,7 @@ public protocol ProtocolClientInterface {
     /// - returns: The response which is returned asynchronously.
     @available(iOS 13, *)
     func unary<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         request: Input,
@@ -137,7 +137,7 @@ public protocol ProtocolClientInterface {
     /// - returns: An interface for sending and receiving data over the stream using async/await.
     @available(iOS 13, *)
     func bidirectionalStream<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         headers: Headers
@@ -157,7 +157,7 @@ public protocol ProtocolClientInterface {
     /// - returns: An interface for sending and receiving data over the stream using async/await.
     @available(iOS 13, *)
     func clientOnlyStream<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         headers: Headers
@@ -177,7 +177,7 @@ public protocol ProtocolClientInterface {
     /// - returns: An interface for sending and receiving data over the stream using async/await.
     @available(iOS 13, *)
     func serverOnlyStream<
-        Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message
+        Input: ProtobufMessage, Output: ProtobufMessage
     >(
         path: String,
         headers: Headers

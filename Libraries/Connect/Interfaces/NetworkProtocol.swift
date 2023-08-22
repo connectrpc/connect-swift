@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /// Protocols that are supported by the library.
-public enum NetworkProtocol {
+public enum NetworkProtocol: Sendable {
     /// The Connect protocol:
     /// https://connect.build/docs/protocol
     case connect
@@ -21,7 +21,7 @@ public enum NetworkProtocol {
     /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
     case grpcWeb
     /// A custom protocol that is implemented via an interceptor.
-    case custom(name: String, protocolInterceptor: (ProtocolClientConfig) -> Interceptor)
+    case custom(name: String, protocolInterceptor: @Sendable (ProtocolClientConfig) -> Interceptor)
 }
 
 extension NetworkProtocol: CustomStringConvertible {

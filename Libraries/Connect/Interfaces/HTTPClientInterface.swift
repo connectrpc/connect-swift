@@ -25,8 +25,8 @@ public protocol HTTPClientInterface {
     @discardableResult
     func unary(
         request: HTTPRequest,
-        onMetrics: @Sendable @escaping (HTTPMetrics) -> Void,
-        onResponse: @Sendable @escaping (HTTPResponse) -> Void
+        onMetrics: @escaping @Sendable (HTTPMetrics) -> Void,
+        onResponse: @escaping @Sendable (HTTPResponse) -> Void
     ) -> Cancelable
 
     /// Initialize a new HTTP stream.

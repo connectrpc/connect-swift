@@ -15,7 +15,7 @@
 import Foundation
 
 /// Configuration used to set up `ProtocolClientInterface` implementations.
-public struct ProtocolClientConfig {
+public struct ProtocolClientConfig: Sendable {
     /// Target host (e.g., `https://buf.build`).
     public let host: String
     /// Protocol to use for requests and streams.
@@ -28,10 +28,10 @@ public struct ProtocolClientConfig {
     /// response headers like `content-encoding`.
     public let responseCompressionPools: [CompressionPool]
     /// List of interceptors that should be invoked with requests/responses.
-    public let interceptors: [(ProtocolClientConfig) -> Interceptor]
+    public let interceptors: [@Sendable (ProtocolClientConfig) -> Interceptor]
 
     /// Configuration used to specify if/how requests should be compressed.
-    public struct RequestCompression {
+    public struct RequestCompression: Sendable {
         /// The minimum number of bytes that a request message should be for compression to be used.
         public let minBytes: Int
         /// The compression pool that should be used for compressing outbound requests.
@@ -53,7 +53,7 @@ public struct ProtocolClientConfig {
         codec: Codec = JSONCodec(),
         requestCompression: RequestCompression? = nil,
         responseCompressionPools: [CompressionPool] = [GzipCompressionPool()],
-        interceptors: [(ProtocolClientConfig) -> Interceptor] = []
+        interceptors: [@Sendable (ProtocolClientConfig) -> Interceptor] = []
     ) {
         self.host = host
         self.networkProtocol = networkProtocol
@@ -63,9 +63,9 @@ public struct ProtocolClientConfig {
 
         switch networkProtocol {
         case .connect:
-            self.interceptors = interceptors + [ConnectInterceptor.init]
+            self.interceptors = interceptors + [{ ConnectInterceptor.init(config: $0) }]
         case .grpcWeb:
-            self.interceptors = interceptors + [GRPCWebInterceptor.init]
+            self.interceptors = interceptors + [{ GRPCWebInterceptor.init(config: $0) }]
         case .custom(_, let protocolInterceptor):
             self.interceptors = interceptors + [protocolInterceptor]
         }

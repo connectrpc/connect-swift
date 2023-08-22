@@ -42,8 +42,8 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
     @discardableResult
     open func unary(
         request: HTTPRequest,
-        onMetrics: @Sendable @escaping (HTTPMetrics) -> Void,
-        onResponse: @Sendable @escaping (HTTPResponse) -> Void
+        onMetrics: @escaping @Sendable (HTTPMetrics) -> Void,
+        onResponse: @escaping @Sendable (HTTPResponse) -> Void
     ) -> Cancelable {
         assert(!request.isGRPC, "URLSessionHTTPClient does not support gRPC, use NIOHTTPClient")
         let urlRequest = URLRequest(httpRequest: request)
@@ -88,7 +88,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
         }
         self.lock.perform { self.metricsClosures[task.taskIdentifier] = onMetrics }
         task.resume()
-        return Cancelable(cancel: task.cancel)
+        return Cancelable { task.cancel() }
     }
 
     open func stream(

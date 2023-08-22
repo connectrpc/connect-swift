@@ -26,8 +26,8 @@ import SwiftProtobuf
 /// subclassing and overriding `results()`.
 @available(iOS 13, *)
 open class MockBidirectionalAsyncStream<
-    Input: SwiftProtobuf.Message,
-    Output: SwiftProtobuf.Message
+    Input: ProtobufMessage,
+    Output: ProtobufMessage
 >: BidirectionalAsyncStreamInterface {
     private var cancellables = [AnyCancellable]()
 

@@ -25,8 +25,8 @@ import SwiftProtobuf
 /// To return data over the stream, outputs can be specified using `init(outputs: ...)`.
 @available(iOS 13.0, *)
 open class MockBidirectionalStream<
-    Input: SwiftProtobuf.Message,
-    Output: SwiftProtobuf.Message
+    Input: ProtobufMessage,
+    Output: ProtobufMessage
 >: BidirectionalStreamInterface {
     /// Closure that is called when `close()` is invoked.
     public var onClose: (() -> Void)?

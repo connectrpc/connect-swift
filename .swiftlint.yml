@@ -114,6 +114,9 @@ custom_rules:
   newline_before_brace:
     name: "Closing braces shouldn't have empty lines before them"
     regex: '\n\n\}'
+  sendable_order:
+    name: "Use @escaping before @Sendable"
+    regex: '@Sendable\s+@escaping'
   space_before_comma:
     name: "Commas should never have a space before them"
     regex: '\s+,'
