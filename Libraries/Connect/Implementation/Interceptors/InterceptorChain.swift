@@ -24,7 +24,8 @@ struct InterceptorChain: Sendable {
     /// - parameter interceptors: Closures that should be called to create interceptors.
     /// - parameter config: Config to use for setting up interceptors.
     init(
-        interceptors: [(ProtocolClientConfig) -> Interceptor], config: ProtocolClientConfig
+        interceptors: [@Sendable (ProtocolClientConfig) -> Interceptor],
+        config: ProtocolClientConfig
     ) {
         self.interceptors = interceptors.map { initialize in initialize(config) }
     }
@@ -85,7 +86,7 @@ struct InterceptorChain: Sendable {
     }
 }
 
-private func executeInterceptors<T>(_ interceptors: [(T) -> T], initial: T) -> T {
+private func executeInterceptors<T>(_ interceptors: [@Sendable (T) -> T], initial: T) -> T {
     var next = initial
     for interceptor in interceptors {
         next = interceptor(next)
