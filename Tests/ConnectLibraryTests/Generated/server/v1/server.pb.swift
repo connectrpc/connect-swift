@@ -80,7 +80,7 @@ extension Server_V1_Protocol: CaseIterable {
 
 /// ServerMetadata is the metadata returned from the server started by the server binary.
 struct Server_V1_ServerMetadata {
-  // ProtobufMessage conformance is added in an extension below. See the
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
@@ -94,7 +94,7 @@ struct Server_V1_ServerMetadata {
 }
 
 struct Server_V1_ProtocolSupport {
-  // ProtobufMessage conformance is added in an extension below. See the
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
@@ -110,7 +110,7 @@ struct Server_V1_ProtocolSupport {
 }
 
 struct Server_V1_HTTPVersion {
-  // ProtobufMessage conformance is added in an extension below. See the
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
@@ -142,7 +142,7 @@ extension Server_V1_Protocol: SwiftProtobuf._ProtoNameProviding {
   ]
 }
 
-extension Server_V1_ServerMetadata: ProtobufMessage, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Server_V1_ServerMetadata: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ServerMetadata"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "host"),
@@ -180,7 +180,7 @@ extension Server_V1_ServerMetadata: ProtobufMessage, SwiftProtobuf._MessageImple
   }
 }
 
-extension Server_V1_ProtocolSupport: ProtobufMessage, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Server_V1_ProtocolSupport: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ProtocolSupport"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "protocol"),
@@ -224,7 +224,7 @@ extension Server_V1_ProtocolSupport: ProtobufMessage, SwiftProtobuf._MessageImpl
   }
 }
 
-extension Server_V1_HTTPVersion: ProtobufMessage, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Server_V1_HTTPVersion: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".HTTPVersion"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "major"),

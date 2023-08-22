@@ -75,8 +75,7 @@ let package = Package(
                 "buf.work.yaml",
                 "proto",
                 "README.md",
-            ],
-            swiftSettings: [.unsafeFlags(["-Xfrontend", "-strict-concurrency=complete"])]
+            ]
         ),
         .testTarget(
             name: "ConnectLibraryTests",

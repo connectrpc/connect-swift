@@ -44,7 +44,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 ///     rpc Bar (grpc.testing.Empty) returns (grpc.testing.Empty) { };
 ///   };
 struct Grpc_Testing_Empty {
-  // ProtobufMessage conformance is added in an extension below. See the
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
@@ -61,7 +61,7 @@ extension Grpc_Testing_Empty: @unchecked Sendable {}
 
 fileprivate let _protobuf_package = "grpc.testing"
 
-extension Grpc_Testing_Empty: ProtobufMessage, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Grpc_Testing_Empty: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Empty"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
