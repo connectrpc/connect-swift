@@ -34,8 +34,8 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-/// SayRequest describes the sentence said to the ELIZA program.
-struct Buf_Connect_Demo_Eliza_V1_SayRequest {
+/// SayRequest is a single-sentence request.
+struct Connectrpc_Eliza_V1_SayRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -47,8 +47,8 @@ struct Buf_Connect_Demo_Eliza_V1_SayRequest {
   init() {}
 }
 
-/// SayResponse describes the sentence responded by the ELIZA program.
-struct Buf_Connect_Demo_Eliza_V1_SayResponse {
+/// SayResponse is a single-sentence response.
+struct Connectrpc_Eliza_V1_SayResponse {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -60,8 +60,9 @@ struct Buf_Connect_Demo_Eliza_V1_SayResponse {
   init() {}
 }
 
-/// ConverseRequest describes the sentence said to the ELIZA program.
-struct Buf_Connect_Demo_Eliza_V1_ConverseRequest {
+/// ConverseRequest is a single sentence request sent as part of a
+/// back-and-forth conversation.
+struct Connectrpc_Eliza_V1_ConverseRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -73,8 +74,9 @@ struct Buf_Connect_Demo_Eliza_V1_ConverseRequest {
   init() {}
 }
 
-/// ConverseResponse describes the sentence responded by the ELIZA program.
-struct Buf_Connect_Demo_Eliza_V1_ConverseResponse {
+/// ConverseResponse is a single sentence response sent in answer to a
+/// ConverseRequest.
+struct Connectrpc_Eliza_V1_ConverseResponse {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -86,8 +88,8 @@ struct Buf_Connect_Demo_Eliza_V1_ConverseResponse {
   init() {}
 }
 
-/// IntroduceRequest describes a request for details from the ELIZA program.
-struct Buf_Connect_Demo_Eliza_V1_IntroduceRequest {
+/// IntroduceRequest asks Eliza to introduce itself to the named user.
+struct Connectrpc_Eliza_V1_IntroduceRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -99,8 +101,8 @@ struct Buf_Connect_Demo_Eliza_V1_IntroduceRequest {
   init() {}
 }
 
-/// IntroduceResponse describes the sentence responded by the ELIZA program.
-struct Buf_Connect_Demo_Eliza_V1_IntroduceResponse {
+/// IntroduceResponse is one sentence of Eliza's introductory monologue.
+struct Connectrpc_Eliza_V1_IntroduceResponse {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -113,19 +115,19 @@ struct Buf_Connect_Demo_Eliza_V1_IntroduceResponse {
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
-extension Buf_Connect_Demo_Eliza_V1_SayRequest: @unchecked Sendable {}
-extension Buf_Connect_Demo_Eliza_V1_SayResponse: @unchecked Sendable {}
-extension Buf_Connect_Demo_Eliza_V1_ConverseRequest: @unchecked Sendable {}
-extension Buf_Connect_Demo_Eliza_V1_ConverseResponse: @unchecked Sendable {}
-extension Buf_Connect_Demo_Eliza_V1_IntroduceRequest: @unchecked Sendable {}
-extension Buf_Connect_Demo_Eliza_V1_IntroduceResponse: @unchecked Sendable {}
+extension Connectrpc_Eliza_V1_SayRequest: @unchecked Sendable {}
+extension Connectrpc_Eliza_V1_SayResponse: @unchecked Sendable {}
+extension Connectrpc_Eliza_V1_ConverseRequest: @unchecked Sendable {}
+extension Connectrpc_Eliza_V1_ConverseResponse: @unchecked Sendable {}
+extension Connectrpc_Eliza_V1_IntroduceRequest: @unchecked Sendable {}
+extension Connectrpc_Eliza_V1_IntroduceResponse: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-fileprivate let _protobuf_package = "buf.connect.demo.eliza.v1"
+fileprivate let _protobuf_package = "connectrpc.eliza.v1"
 
-extension Buf_Connect_Demo_Eliza_V1_SayRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Connectrpc_Eliza_V1_SayRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".SayRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "sentence"),
@@ -150,14 +152,14 @@ extension Buf_Connect_Demo_Eliza_V1_SayRequest: SwiftProtobuf.Message, SwiftProt
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Buf_Connect_Demo_Eliza_V1_SayRequest, rhs: Buf_Connect_Demo_Eliza_V1_SayRequest) -> Bool {
+  static func ==(lhs: Connectrpc_Eliza_V1_SayRequest, rhs: Connectrpc_Eliza_V1_SayRequest) -> Bool {
     if lhs.sentence != rhs.sentence {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Buf_Connect_Demo_Eliza_V1_SayResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Connectrpc_Eliza_V1_SayResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".SayResponse"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "sentence"),
@@ -182,14 +184,14 @@ extension Buf_Connect_Demo_Eliza_V1_SayResponse: SwiftProtobuf.Message, SwiftPro
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Buf_Connect_Demo_Eliza_V1_SayResponse, rhs: Buf_Connect_Demo_Eliza_V1_SayResponse) -> Bool {
+  static func ==(lhs: Connectrpc_Eliza_V1_SayResponse, rhs: Connectrpc_Eliza_V1_SayResponse) -> Bool {
     if lhs.sentence != rhs.sentence {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Buf_Connect_Demo_Eliza_V1_ConverseRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Connectrpc_Eliza_V1_ConverseRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ConverseRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "sentence"),
@@ -214,14 +216,14 @@ extension Buf_Connect_Demo_Eliza_V1_ConverseRequest: SwiftProtobuf.Message, Swif
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Buf_Connect_Demo_Eliza_V1_ConverseRequest, rhs: Buf_Connect_Demo_Eliza_V1_ConverseRequest) -> Bool {
+  static func ==(lhs: Connectrpc_Eliza_V1_ConverseRequest, rhs: Connectrpc_Eliza_V1_ConverseRequest) -> Bool {
     if lhs.sentence != rhs.sentence {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Buf_Connect_Demo_Eliza_V1_ConverseResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Connectrpc_Eliza_V1_ConverseResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ConverseResponse"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "sentence"),
@@ -246,14 +248,14 @@ extension Buf_Connect_Demo_Eliza_V1_ConverseResponse: SwiftProtobuf.Message, Swi
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Buf_Connect_Demo_Eliza_V1_ConverseResponse, rhs: Buf_Connect_Demo_Eliza_V1_ConverseResponse) -> Bool {
+  static func ==(lhs: Connectrpc_Eliza_V1_ConverseResponse, rhs: Connectrpc_Eliza_V1_ConverseResponse) -> Bool {
     if lhs.sentence != rhs.sentence {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Buf_Connect_Demo_Eliza_V1_IntroduceRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Connectrpc_Eliza_V1_IntroduceRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".IntroduceRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "name"),
@@ -278,14 +280,14 @@ extension Buf_Connect_Demo_Eliza_V1_IntroduceRequest: SwiftProtobuf.Message, Swi
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Buf_Connect_Demo_Eliza_V1_IntroduceRequest, rhs: Buf_Connect_Demo_Eliza_V1_IntroduceRequest) -> Bool {
+  static func ==(lhs: Connectrpc_Eliza_V1_IntroduceRequest, rhs: Connectrpc_Eliza_V1_IntroduceRequest) -> Bool {
     if lhs.name != rhs.name {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Buf_Connect_Demo_Eliza_V1_IntroduceResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Connectrpc_Eliza_V1_IntroduceResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".IntroduceResponse"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "sentence"),
@@ -310,7 +312,7 @@ extension Buf_Connect_Demo_Eliza_V1_IntroduceResponse: SwiftProtobuf.Message, Sw
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Buf_Connect_Demo_Eliza_V1_IntroduceResponse, rhs: Buf_Connect_Demo_Eliza_V1_IntroduceResponse) -> Bool {
+  static func ==(lhs: Connectrpc_Eliza_V1_IntroduceResponse, rhs: Connectrpc_Eliza_V1_IntroduceResponse) -> Bool {
     if lhs.sentence != rhs.sentence {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

@@ -17,11 +17,11 @@ import Connect
 import Dispatch
 import os.log
 
-private typealias ConverseRequest = Buf_Connect_Demo_Eliza_V1_ConverseRequest
-private typealias ConverseResponse = Buf_Connect_Demo_Eliza_V1_ConverseResponse
+private typealias ConverseRequest = Connectrpc_Eliza_V1_ConverseRequest
+private typealias ConverseResponse = Connectrpc_Eliza_V1_ConverseResponse
 
-private typealias SayRequest = Buf_Connect_Demo_Eliza_V1_SayRequest
-private typealias SayResponse = Buf_Connect_Demo_Eliza_V1_SayResponse
+private typealias SayRequest = Connectrpc_Eliza_V1_SayRequest
+private typealias SayResponse = Connectrpc_Eliza_V1_SayResponse
 
 /// View model that can be injected into a `MessagingView`.
 protocol MessagingViewModel: ObservableObject {
@@ -41,11 +41,11 @@ protocol MessagingViewModel: ObservableObject {
 /// View model that uses unary requests for messaging.
 @MainActor
 final class UnaryMessagingViewModel: MessagingViewModel {
-    private let client: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface
+    private let client: Connectrpc_Eliza_V1_ElizaServiceClientInterface
 
     @Published private(set) var messages = [Message]()
 
-    init(client: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface) {
+    init(client: Connectrpc_Eliza_V1_ElizaServiceClientInterface) {
         self.client = client
     }
 
@@ -70,12 +70,12 @@ final class UnaryMessagingViewModel: MessagingViewModel {
 /// View model that uses bidirectional streaming for messaging.
 @MainActor
 final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
-    private let client: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface
+    private let client: Connectrpc_Eliza_V1_ElizaServiceClientInterface
     private lazy var elizaStream = self.client.converse(headers: [:])
 
     @Published private(set) var messages = [Message]()
 
-    init(client: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface) {
+    init(client: Connectrpc_Eliza_V1_ElizaServiceClientInterface) {
         self.client = client
         self.observeResponses()
     }
