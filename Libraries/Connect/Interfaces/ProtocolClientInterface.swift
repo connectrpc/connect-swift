@@ -23,7 +23,7 @@ public protocol ProtocolClientInterface {
 
     /// Perform a unary (non-streaming) request.
     ///
-    /// - parameter path: The RPC path, e.g., "buf.connect.demo.eliza.v1.ElizaService/Say".
+    /// - parameter path: The RPC path, e.g., "connectrpc.eliza.v1.ElizaService/Say".
     /// - parameter request: The outbound request message.
     /// - parameter headers: The outbound request headers to include.
     /// - parameter completion: Closure called when a response or error is received.
@@ -47,7 +47,7 @@ public protocol ProtocolClientInterface {
     /// data indicates that the message is longer, the implementation must wait until the remaining
     /// bytes are received to pass the data down to its interceptors (and finally the caller).
     ///
-    /// - parameter path: The RPC path, e.g., "buf.connect.demo.eliza.v1.ElizaService/Converse".
+    /// - parameter path: The RPC path, e.g., "connectrpc.eliza.v1.ElizaService/Converse".
     /// - parameter headers: The outbound request headers to include.
     /// - parameter onResult: Closure called whenever new results are received on the stream
     ///                       (response headers, messages, trailers, etc.).
@@ -69,7 +69,7 @@ public protocol ProtocolClientInterface {
     /// data indicates that the message is longer, the implementation must wait until the remaining
     /// bytes are received to pass the data down to its interceptors (and finally the caller).
     ///
-    /// - parameter path: The RPC path, e.g., "buf.connect.demo.eliza.v1.ElizaService/Converse".
+    /// - parameter path: The RPC path, e.g., "connectrpc.eliza.v1.ElizaService/Converse".
     /// - parameter headers: The outbound request headers to include.
     /// - parameter onResult: Closure called whenever new results are received on the stream
     ///                       (response headers, messages, trailers, etc.).
@@ -91,7 +91,7 @@ public protocol ProtocolClientInterface {
     /// data indicates that the message is longer, the implementation must wait until the remaining
     /// bytes are received to pass the data down to its interceptors (and finally the caller).
     ///
-    /// - parameter path: The RPC path, e.g., "buf.connect.demo.eliza.v1.ElizaService/Introduce".
+    /// - parameter path: The RPC path, e.g., "connectrpc.eliza.v1.ElizaService/Introduce".
     /// - parameter headers: The outbound request headers to include.
     /// - parameter onResult: Closure called whenever new results are received on the stream
     ///                       (response headers, messages, trailers, etc.).
@@ -109,7 +109,7 @@ public protocol ProtocolClientInterface {
 
     /// Perform a unary (non-streaming) request.
     ///
-    /// - parameter path: The RPC path, e.g., "buf.connect.demo.eliza.v1.ElizaService/Say".
+    /// - parameter path: The RPC path, e.g., "connectrpc.eliza.v1.ElizaService/Say".
     /// - parameter request: The outbound request message.
     /// - parameter headers: The outbound request headers to include.
     ///
@@ -131,7 +131,7 @@ public protocol ProtocolClientInterface {
     /// data indicates that the message is longer, the implementation must wait until the remaining
     /// bytes are received to pass the data down to its interceptors (and finally the caller).
     ///
-    /// - parameter path: The RPC path, e.g., "buf.connect.demo.eliza.v1.ElizaService/Converse".
+    /// - parameter path: The RPC path, e.g., "connectrpc.eliza.v1.ElizaService/Converse".
     /// - parameter headers: The outbound request headers to include.
     ///
     /// - returns: An interface for sending and receiving data over the stream using async/await.
@@ -151,7 +151,7 @@ public protocol ProtocolClientInterface {
     /// data indicates that the message is longer, the implementation must wait until the remaining
     /// bytes are received to pass the data down to its interceptors (and finally the caller).
     ///
-    /// - parameter path: The RPC path, e.g., "buf.connect.demo.eliza.v1.ElizaService/Converse".
+    /// - parameter path: The RPC path, e.g., "connectrpc.eliza.v1.ElizaService/Converse".
     /// - parameter headers: The outbound request headers to include.
     ///
     /// - returns: An interface for sending and receiving data over the stream using async/await.
@@ -171,7 +171,7 @@ public protocol ProtocolClientInterface {
     /// data indicates that the message is longer, the implementation must wait until the remaining
     /// bytes are received to pass the data down to its interceptors (and finally the caller).
     ///
-    /// - parameter path: The RPC path, e.g., "buf.connect.demo.eliza.v1.ElizaService/Introduce".
+    /// - parameter path: The RPC path, e.g., "connectrpc.eliza.v1.ElizaService/Introduce".
     /// - parameter headers: The outbound request headers to include.
     ///
     /// - returns: An interface for sending and receiving data over the stream using async/await.

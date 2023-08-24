@@ -29,7 +29,7 @@ public enum Envelope {
     /// Computes the length of the message contained by a packed chunk of data.
     /// A packed chunk in this context refers to prefixed message data.
     ///
-    /// Compliant with Connect streams: https://connect.build/docs/protocol/#streaming-request
+    /// Compliant with Connect streams: https://connectrpc.com/docs/protocol/#streaming-request
     /// And gRPC: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md#responses
     ///
     /// - parameter data: The packed data from which to determine the enveloped message's size.
@@ -52,7 +52,7 @@ public enum Envelope {
     /// Packs a message into an "envelope", adding required header bytes and optionally
     /// applying compression.
     ///
-    /// Compliant with Connect streams: https://connect.build/docs/protocol/#streaming-request
+    /// Compliant with Connect streams: https://connectrpc.com/docs/protocol/#streaming-request
     /// And gRPC: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md#requests
     ///
     /// - parameter source: The input message data.
@@ -83,7 +83,7 @@ public enum Envelope {
     ///
     /// **Expects a fully framed envelope, not a partial message.**
     ///
-    /// Compliant with Connect streams: https://connect.build/docs/protocol/#streaming-response
+    /// Compliant with Connect streams: https://connectrpc.com/docs/protocol/#streaming-response
     /// And gRPC: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md#responses
     ///
     /// - parameter source: The full envelope's data (header bytes + message bytes).

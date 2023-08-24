@@ -73,7 +73,7 @@ public enum Code: Int, CaseIterable, Equatable, Sendable {
     }
 
     public static func fromHTTPStatus(_ status: Int) -> Self {
-        // https://connect.build/docs/protocol#http-to-error-code
+        // https://connectrpc.com/docs/protocol#http-to-error-code
         switch status {
         case 200:
             return .ok
