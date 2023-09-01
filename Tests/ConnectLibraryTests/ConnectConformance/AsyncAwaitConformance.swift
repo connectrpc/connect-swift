@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// swiftlint:disable file_length
-
 import Connect
 import Foundation
 import XCTest
@@ -24,73 +22,77 @@ private typealias TestServiceClient = Grpc_Testing_TestServiceClient
 private typealias UnimplementedServiceClient = Grpc_Testing_UnimplementedServiceClient
 
 /// This test suite runs against multiple protocols and serialization formats.
-/// Tests are based on https://github.com/bufbuild/connect-crosstest
+/// Tests are based on https://github.com/connectrpc/conformance
 ///
-/// Tests are written using callback APIs.
-final class CallbackCrosstests: XCTestCase {
+/// Tests are written using async/await APIs.
+@available(iOS 13, *)
+final class AsyncAwaitConformance: XCTestCase {
     private func executeTestWithClients(
         function: Selector = #function,
         timeout: TimeInterval = 60,
-        runTestsWithClient: (TestServiceClient) throws -> Void
-    ) rethrows {
-        let configurations = CrosstestConfiguration.all(timeout: timeout)
+        runTestsWithClient: (TestServiceClient) async throws -> Void
+    ) async rethrows {
+        let configurations = ConformanceConfiguration.all(timeout: timeout)
         for configuration in configurations {
-            try runTestsWithClient(TestServiceClient(client: configuration.protocolClient))
+            try await runTestsWithClient(TestServiceClient(client: configuration.protocolClient))
             print("Ran \(function) with \(configuration.description)")
         }
     }
 
     private func executeTestWithUnimplementedClients(
         function: Selector = #function,
-        runTestsWithClient: (UnimplementedServiceClient) throws -> Void
-    ) rethrows {
-        let configurations = CrosstestConfiguration.all(timeout: 60)
+        runTestsWithClient: (UnimplementedServiceClient) async throws -> Void
+    ) async rethrows {
+        let configurations = ConformanceConfiguration.all(timeout: 60)
         for configuration in configurations {
-            try runTestsWithClient(UnimplementedServiceClient(client: configuration.protocolClient))
+            try await runTestsWithClient(
+                UnimplementedServiceClient(client: configuration.protocolClient)
+            )
             print("Ran \(function) with \(configuration.description)")
         }
     }
 
-    // MARK: - Crosstest cases
+    // MARK: - Conformance cases
 
-    func testEmptyUnary() {
-        self.executeTestWithClients { client in
-            let expectation = self.expectation(description: "Receives successful response")
-            client.emptyCall(request: Grpc_Testing_Empty()) { response in
-                XCTAssertNil(response.error)
-                XCTAssertEqual(response.message, Grpc_Testing_Empty())
-                expectation.fulfill()
-            }
-            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+    func testEmptyUnary() async {
+        await self.executeTestWithClients { client in
+            let response = await client.emptyCall(request: Grpc_Testing_Empty())
+            XCTAssertEqual(response.message, Grpc_Testing_Empty())
         }
     }
 
-    func testLargeUnary() {
-        self.executeTestWithClients { client in
+    func testLargeUnary() async {
+        await self.executeTestWithClients { client in
             let size = 314_159
             let message = Grpc_Testing_SimpleRequest.with { proto in
                 proto.responseSize = Int32(size)
                 proto.payload = .with { $0.body = Data(repeating: 0, count: size) }
             }
-            let expectation = self.expectation(description: "Receives successful response")
-            client.unaryCall(request: message) { response in
-                XCTAssertNil(response.error)
-                XCTAssertEqual(response.message?.payload.body.count, size)
-                expectation.fulfill()
-            }
-            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+            let response = await client.unaryCall(request: message)
+            XCTAssertNil(response.error)
+            XCTAssertEqual(response.message?.payload.body.count, size)
         }
     }
 
-    func testServerStreaming() throws {
-        try self.executeTestWithClients { client in
+    func testServerStreaming() async throws {
+        try await self.executeTestWithClients { client in
             let sizes = [31_415, 9, 2_653, 58_979]
+            let stream = client.streamingOutputCall()
+            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
+                proto.responseParameters = sizes.enumerated().map { index, size in
+                    return .with { parameters in
+                        parameters.size = Int32(size)
+                        parameters.intervalUs = Int32(index * 10)
+                    }
+                }
+            })
+
             let expectation = self.expectation(description: "Stream completes")
             var responseCount = 0
-            let stream = client.streamingOutputCall { result in
+            for await result in stream.results() {
                 switch result {
                 case .headers:
-                    break
+                    continue
 
                 case .message(let output):
                     XCTAssertEqual(output.payload.body.count, sizes[responseCount])
@@ -102,27 +104,23 @@ final class CallbackCrosstests: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
-                proto.responseParameters = sizes.enumerated().map { index, size in
-                    return .with { parameters in
-                        parameters.size = Int32(size)
-                        parameters.intervalUs = Int32(index * 10)
-                    }
-                }
-            })
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
             XCTAssertEqual(responseCount, 4)
         }
     }
 
-    func testEmptyStream() throws {
-        try self.executeTestWithClients { client in
+    func testEmptyStream() async throws {
+        try await self.executeTestWithClients { client in
             let closeExpectation = self.expectation(description: "Stream completes")
-            let stream = client.streamingOutputCall { result in
+            let stream = client.streamingOutputCall()
+            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
+                proto.responseParameters = []
+            })
+            for await result in stream.results() {
                 switch result {
                 case .headers:
-                    break
+                    continue
 
                 case .message:
                     XCTFail("Unexpectedly received message")
@@ -133,16 +131,13 @@ final class CallbackCrosstests: XCTestCase {
                     closeExpectation.fulfill()
                 }
             }
-            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
-                proto.responseParameters = []
-            })
 
             XCTAssertEqual(XCTWaiter().wait(for: [closeExpectation], timeout: kTimeout), .completed)
         }
     }
 
-    func testCustomMetadata() {
-        self.executeTestWithClients { client in
+    func testCustomMetadata() async {
+        await self.executeTestWithClients { client in
             let size = 314_159
             let leadingKey = "x-grpc-test-echo-initial"
             let leadingValue = "test_initial_metadata_value"
@@ -157,23 +152,18 @@ final class CallbackCrosstests: XCTestCase {
                 proto.payload = .with { $0.body = Data(repeating: 0, count: size) }
             }
 
-            let expectation = self.expectation(description: "Receives response")
-            client.unaryCall(request: message, headers: headers) { response in
-                XCTAssertEqual(response.code, .ok)
-                XCTAssertNil(response.error)
-                XCTAssertEqual(response.headers[leadingKey], [leadingValue])
-                XCTAssertEqual(
-                    response.trailers[trailingKey], [trailingValue.base64EncodedString()]
-                )
-                XCTAssertEqual(response.message?.payload.body.count, size)
-                expectation.fulfill()
-            }
-
-            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+            let response = await client.unaryCall(request: message, headers: headers)
+            XCTAssertEqual(response.code, .ok)
+            XCTAssertNil(response.error)
+            XCTAssertEqual(response.headers[leadingKey], [leadingValue])
+            XCTAssertEqual(
+                response.trailers[trailingKey], [trailingValue.base64EncodedString()]
+            )
+            XCTAssertEqual(response.message?.payload.body.count, size)
         }
     }
 
-    func testCustomMetadataServerStreaming() throws {
+    func testCustomMetadataServerStreaming() async throws {
         let size = 314_159
         let leadingKey = "x-grpc-test-echo-initial"
         let leadingValue = "test_initial_metadata_value"
@@ -184,11 +174,15 @@ final class CallbackCrosstests: XCTestCase {
             trailingKey: [trailingValue.base64EncodedString()],
         ]
 
-        try self.executeTestWithClients { client in
+        try await self.executeTestWithClients { client in
             let headersExpectation = self.expectation(description: "Receives headers")
             let messageExpectation = self.expectation(description: "Receives message")
             let trailersExpectation = self.expectation(description: "Receives trailers")
-            let stream = client.streamingOutputCall(headers: headers) { result in
+            let stream = client.streamingOutputCall(headers: headers)
+            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
+                proto.responseParameters = [.with { $0.size = Int32(size) }]
+            })
+            for await result in stream.results() {
                 switch result {
                 case .headers(let headers):
                     XCTAssertEqual(headers[leadingKey], [leadingValue])
@@ -205,9 +199,6 @@ final class CallbackCrosstests: XCTestCase {
                     trailersExpectation.fulfill()
                 }
             }
-            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
-                proto.responseParameters = [.with { $0.size = Int32(size) }]
-            })
 
             XCTAssertEqual(XCTWaiter().wait(for: [
                 headersExpectation, messageExpectation, trailersExpectation,
@@ -215,7 +206,7 @@ final class CallbackCrosstests: XCTestCase {
         }
     }
 
-    func testStatusCodeAndMessage() {
+    func testStatusCodeAndMessage() async {
         let message = Grpc_Testing_SimpleRequest.with { proto in
             proto.responseStatus = .with { status in
                 status.code = Int32(Code.unknown.rawValue)
@@ -223,25 +214,16 @@ final class CallbackCrosstests: XCTestCase {
             }
         }
 
-        self.executeTestWithClients { client in
-            let expectation = self.expectation(description: "Receives response")
-            client.unaryCall(request: message) { response in
-                guard let error = response.error else {
-                    XCTFail("Expected error response")
-                    return
-                }
-                XCTAssertEqual(error.code, .unknown)
-                XCTAssertEqual(error.message, "test status message")
-                expectation.fulfill()
-            }
-
-            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+        await self.executeTestWithClients { client in
+            let response = await client.unaryCall(request: message)
+            XCTAssertEqual(response.error?.code, .unknown)
+            XCTAssertEqual(response.error?.message, "test status message")
         }
     }
 
-    func testSpecialStatus() {
+    func testSpecialStatus() async {
         let statusMessage =
-            "\\t\\ntest with whitespace\\r\\nand Unicode BMP ☺ and non-BMP \\uD83D\\uDE08\\t\\n"
+        "\\t\\ntest with whitespace\\r\\nand Unicode BMP ☺ and non-BMP \\uD83D\\uDE08\\t\\n"
         let message = Grpc_Testing_SimpleRequest.with { proto in
             proto.responseStatus = .with { status in
                 status.code = 2
@@ -249,24 +231,15 @@ final class CallbackCrosstests: XCTestCase {
             }
         }
 
-        self.executeTestWithClients { client in
-            let expectation = self.expectation(description: "Receives response")
-            client.unaryCall(request: message) { response in
-                guard let error = response.error else {
-                    XCTFail("Expected error response")
-                    return
-                }
-                XCTAssertEqual(error.code, .unknown)
-                XCTAssertEqual(error.message, statusMessage)
-                expectation.fulfill()
-            }
-
-            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+        await self.executeTestWithClients { client in
+            let response = await client.unaryCall(request: message)
+            XCTAssertEqual(response.error?.code, .unknown)
+            XCTAssertEqual(response.error?.message, statusMessage)
         }
     }
 
-    func testTimeoutOnSleepingServer() throws {
-        try self.executeTestWithClients(timeout: 0.01) { client in
+    func testTimeoutOnSleepingServer() async throws {
+        try await self.executeTestWithClients(timeout: 0.01) { client in
             let expectation = self.expectation(description: "Stream times out")
             let message = Grpc_Testing_StreamingOutputCallRequest.with { proto in
                 proto.payload = .with { $0.body = Data(count: 271_828) }
@@ -277,13 +250,15 @@ final class CallbackCrosstests: XCTestCase {
                     },
                 ]
             }
-            let stream = client.streamingOutputCall { result in
+            let stream = client.streamingOutputCall()
+            try stream.send(message)
+            for await result in stream.results() {
                 switch result {
                 case .headers:
-                    break
+                    continue
 
                 case .message:
-                    break
+                    continue
 
                 case .complete(let code, let error, _):
                     XCTAssertEqual(code, .deadlineExceeded)
@@ -291,35 +266,31 @@ final class CallbackCrosstests: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(message)
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
     }
 
-    func testUnimplementedMethod() {
-        self.executeTestWithClients { client in
-            let expectation = self.expectation(description: "Request completes")
-            client.unimplementedCall(request: Grpc_Testing_Empty()) { response in
-                XCTAssertEqual(response.code, .unimplemented)
-                XCTAssertEqual(
-                    response.error?.message,
-                    "grpc.testing.TestService.UnimplementedCall is not implemented"
-                )
-                expectation.fulfill()
-            }
-
-            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+    func testUnimplementedMethod() async {
+        await self.executeTestWithClients { client in
+            let response = await client.unimplementedCall(request: Grpc_Testing_Empty())
+            XCTAssertEqual(response.code, .unimplemented)
+            XCTAssertEqual(
+                response.error?.message,
+                "grpc.testing.TestService.UnimplementedCall is not implemented"
+            )
         }
     }
 
-    func testUnimplementedServerStreamingMethod() throws {
-        try self.executeTestWithClients { client in
+    func testUnimplementedServerStreamingMethod() async throws {
+        try await self.executeTestWithClients { client in
             let expectation = self.expectation(description: "Stream completes")
-            let stream = client.unimplementedStreamingOutputCall { result in
+            let stream = client.unimplementedStreamingOutputCall()
+            try stream.send(Grpc_Testing_Empty())
+            for await result in stream.results() {
                 switch result {
                 case .headers, .message:
-                    break
+                    continue
 
                 case .complete(let code, let error, _):
                     XCTAssertEqual(code, .unimplemented)
@@ -332,32 +303,28 @@ final class CallbackCrosstests: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(Grpc_Testing_Empty())
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
     }
 
-    func testUnimplementedService() {
-        self.executeTestWithUnimplementedClients { client in
-            let expectation = self.expectation(description: "Request completes")
-            client.unimplementedCall(request: Grpc_Testing_Empty()) { response in
-                XCTAssertEqual(response.code, .unimplemented)
-                XCTAssertNotNil(response.error)
-                expectation.fulfill()
-            }
-
-            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+    func testUnimplementedService() async {
+        await self.executeTestWithUnimplementedClients { client in
+            let response = await client.unimplementedCall(request: Grpc_Testing_Empty())
+            XCTAssertEqual(response.code, .unimplemented)
+            XCTAssertNotNil(response.error)
         }
     }
 
-    func testUnimplementedServerStreamingService() throws {
-        try self.executeTestWithUnimplementedClients { client in
+    func testUnimplementedServerStreamingService() async throws {
+        try await self.executeTestWithUnimplementedClients { client in
             let expectation = self.expectation(description: "Stream completes")
-            let stream = client.unimplementedStreamingOutputCall { result in
+            let stream = client.unimplementedStreamingOutputCall()
+            try stream.send(Grpc_Testing_Empty())
+            for await result in stream.results() {
                 switch result {
                 case .headers:
-                    break
+                    continue
 
                 case .message:
                     XCTFail("Unexpectedly received message")
@@ -367,41 +334,46 @@ final class CallbackCrosstests: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(Grpc_Testing_Empty())
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
     }
 
-    func testFailUnary() {
-        self.executeTestWithClients { client in
+    func testFailUnary() async {
+        await self.executeTestWithClients { client in
             let expectedErrorDetail = Grpc_Testing_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
-                proto.domain = "connect-crosstest"
+                proto.domain = "connect-conformance"
             }
-            let expectation = self.expectation(description: "Request completes")
-            client.failUnaryCall(request: Grpc_Testing_SimpleRequest()) { response in
-                XCTAssertEqual(response.error?.code, .resourceExhausted)
-                XCTAssertEqual(response.error?.message, "soirée 🎉")
-                XCTAssertEqual(response.error?.unpackedDetails(), [expectedErrorDetail])
-                expectation.fulfill()
-            }
-
-            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+            let response = await client.failUnaryCall(request: Grpc_Testing_SimpleRequest())
+            XCTAssertEqual(response.error?.code, .resourceExhausted)
+            XCTAssertEqual(response.error?.message, "soirée 🎉")
+            XCTAssertEqual(response.error?.unpackedDetails(), [expectedErrorDetail])
         }
     }
 
-    func testFailServerStreaming() throws {
-        try self.executeTestWithClients { client in
+    func testFailServerStreaming() async throws {
+        try await self.executeTestWithClients { client in
             let expectedErrorDetail = Grpc_Testing_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
-                proto.domain = "connect-crosstest"
+                proto.domain = "connect-conformance"
             }
             let expectation = self.expectation(description: "Stream completes")
-            let stream = client.failStreamingOutputCall { result in
+            let stream = client.failStreamingOutputCall()
+            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
+                proto.responseParameters = [31_415, 9, 2_653, 58_979]
+                    .enumerated()
+                    .map { index, value in
+                        return Grpc_Testing_ResponseParameters.with { parameters in
+                            parameters.size = Int32(value)
+                            parameters.intervalUs = Int32(index * 10)
+                        }
+                    }
+            })
+            for await result in stream.results() {
                 switch result {
                 case .headers:
-                    break
+                    continue
 
                 case .message:
                     XCTFail("Unexpectedly received message")
@@ -418,32 +390,7 @@ final class CallbackCrosstests: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
-                proto.responseParameters = [31_415, 9, 2_653, 58_979]
-                    .enumerated()
-                    .map { index, value in
-                        return Grpc_Testing_ResponseParameters.with { parameters in
-                            parameters.size = Int32(value)
-                            parameters.intervalUs = Int32(index * 10)
-                        }
-                    }
-            })
 
-            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
-        }
-    }
-
-    // MARK: - Additional cases
-
-    func testCancelingUnary() {
-        self.executeTestWithClients { client in
-            let expectation = self.expectation(description: "Receives canceled response")
-            let cancelable = client.emptyCall(request: Grpc_Testing_Empty()) { response in
-                XCTAssertEqual(response.code, .canceled)
-                XCTAssertEqual(response.error?.code, .canceled)
-                expectation.fulfill()
-            }
-            cancelable.cancel()
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
     }

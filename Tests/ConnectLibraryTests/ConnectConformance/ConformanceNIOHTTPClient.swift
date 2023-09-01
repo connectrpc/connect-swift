@@ -17,9 +17,9 @@ import ConnectNIO
 import Foundation
 import NIOSSL
 
-/// HTTP client backed by NIO and used by crosstests in order to handle SSL challenges
-/// with the crosstest server.
-final class CrosstestNIOHTTPClient: ConnectNIO.NIOHTTPClient {
+/// HTTP client backed by NIO and used by conformance tests in order to handle SSL challenges
+/// with the conformance server.
+final class ConformanceNIOHTTPClient: ConnectNIO.NIOHTTPClient {
     init(host: String, port: Int, timeout: TimeInterval) {
         super.init(host: host, port: port, timeout: timeout)
     }
