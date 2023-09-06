@@ -105,7 +105,6 @@ final class AsyncAwaitConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
             XCTAssertEqual(responseCount, 4)
         }
@@ -306,7 +305,6 @@ final class AsyncAwaitConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
     }
@@ -339,7 +337,6 @@ final class AsyncAwaitConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
     }
@@ -397,7 +394,6 @@ final class AsyncAwaitConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
     }
