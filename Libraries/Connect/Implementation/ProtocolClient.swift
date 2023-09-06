@@ -38,9 +38,7 @@ extension ProtocolClient: ProtocolClientInterface {
     // MARK: - Callbacks
 
     @discardableResult
-    public func unary<
-        Input: ProtobufMessage, Output: ProtobufMessage
-    >(
+    public func unary<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         request: Input,
         headers: Headers,
@@ -170,9 +168,7 @@ extension ProtocolClient: ProtocolClientInterface {
     // MARK: - Async/await
 
     @available(iOS 13, *)
-    public func unary<
-        Input: ProtobufMessage, Output: ProtobufMessage
-    >(
+    public func unary<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         request: Input,
         headers: Headers
@@ -183,9 +179,7 @@ extension ProtocolClient: ProtocolClientInterface {
     }
 
     @available(iOS 13, *)
-    public func bidirectionalStream<
-        Input: ProtobufMessage, Output: ProtobufMessage
-    >(
+    public func bidirectionalStream<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         headers: Headers
     ) -> any BidirectionalAsyncStreamInterface<Input, Output> {
@@ -197,9 +191,7 @@ extension ProtocolClient: ProtocolClientInterface {
     }
 
     @available(iOS 13, *)
-    public func clientOnlyStream<
-        Input: ProtobufMessage, Output: ProtobufMessage
-    >(
+    public func clientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         headers: Headers
     ) -> any ClientOnlyAsyncStreamInterface<Input, Output> {
@@ -211,9 +203,7 @@ extension ProtocolClient: ProtocolClientInterface {
     }
 
     @available(iOS 13, *)
-    public func serverOnlyStream<
-        Input: ProtobufMessage, Output: ProtobufMessage
-    >(
+    public func serverOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         headers: Headers
     ) -> any ServerOnlyAsyncStreamInterface<Input, Output> {

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import Foundation
-// TODO: Remove @preconcurrency once JSON(Encoding|Decoding)Options are Sendable
+// TODO: Remove @preconcurrency once SwiftProtobuf's JSON(Encoding|Decoding)Options are Sendable
 @preconcurrency import SwiftProtobuf
 
 /// Codec providing functionality for serializing to/from JSON.

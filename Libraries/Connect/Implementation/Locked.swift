@@ -18,12 +18,12 @@ import Foundation
 /// underlying value. Conforms to `Sendable`, making it accessible from `@Sendable` closures.
 public final class Locked<T>: @unchecked Sendable {
     private let lock = Lock()
-    private var _value: T
+    private var wrappedValue: T
 
     /// Thread-safe access to the underlying value.
     public var value: T {
-        get { self.lock.perform { self._value } }
-        set { self.lock.perform { self._value = newValue } }
+        get { self.lock.perform { self.wrappedValue } }
+        set { self.lock.perform { self.wrappedValue = newValue } }
     }
 
     /// Perform an action with the underlying value, potentially updating that value.
@@ -31,11 +31,11 @@ public final class Locked<T>: @unchecked Sendable {
     /// - parameter action: Closure to perform with the underlying value.
     public func perform(action: @escaping (inout T) -> Void) {
         self.lock.perform {
-            action(&self._value)
+            action(&self.wrappedValue)
         }
     }
 
     public init(_ value: T) {
-        self._value = value
+        self.wrappedValue = value
     }
 }

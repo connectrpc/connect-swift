@@ -15,7 +15,7 @@
 import SwiftProtobuf
 
 /// Typed unary response from an RPC.
-public struct ResponseMessage<Output: ProtobufMessage & Sendable>: Sendable {
+public struct ResponseMessage<Output: ProtobufMessage>: Sendable {
     /// The status code of the response.
     public let code: Code
     /// Response headers specified by the server.
