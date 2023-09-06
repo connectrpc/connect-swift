@@ -274,11 +274,13 @@ final class AsyncAwaitConformance: XCTestCase {
 
     func testUnimplementedMethod() async {
         await self.executeTestWithClients { client in
-            let response = await client.unimplementedCall(request: SwiftProtobuf.Google_Protobuf_Empty())
+            let response = await client.unimplementedCall(
+                request: SwiftProtobuf.Google_Protobuf_Empty()
+            )
             XCTAssertEqual(response.code, .unimplemented)
             XCTAssertEqual(
                 response.error?.message,
-                "grpc.testing.TestService.UnimplementedCall is not implemented"
+                "connectrpc.conformance.v1.TestService.UnimplementedCall is not implemented"
             )
         }
     }
@@ -298,7 +300,7 @@ final class AsyncAwaitConformance: XCTestCase {
                     XCTAssertEqual(
                         (error as? ConnectError)?.message,
                         """
-                        grpc.testing.TestService.UnimplementedStreamingOutputCall is not implemented
+                        connectrpc.conformance.v1.TestService.UnimplementedStreamingOutputCall is not implemented
                         """
                     )
                     expectation.fulfill()
@@ -311,7 +313,9 @@ final class AsyncAwaitConformance: XCTestCase {
 
     func testUnimplementedService() async {
         await self.executeTestWithUnimplementedClients { client in
-            let response = await client.unimplementedCall(request: SwiftProtobuf.Google_Protobuf_Empty())
+            let response = await client.unimplementedCall(
+                request: SwiftProtobuf.Google_Protobuf_Empty()
+            )
             XCTAssertEqual(response.code, .unimplemented)
             XCTAssertNotNil(response.error)
         }
@@ -346,7 +350,9 @@ final class AsyncAwaitConformance: XCTestCase {
                 proto.reason = "soirée 🎉"
                 proto.domain = "connect-conformance"
             }
-            let response = await client.failUnaryCall(request: Connectrpc_Conformance_V1_SimpleRequest())
+            let response = await client.failUnaryCall(
+                request: Connectrpc_Conformance_V1_SimpleRequest()
+            )
             XCTAssertEqual(response.error?.code, .resourceExhausted)
             XCTAssertEqual(response.error?.message, "soirée 🎉")
             XCTAssertEqual(response.error?.unpackedDetails(), [expectedErrorDetail])

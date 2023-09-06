@@ -305,7 +305,7 @@ final class CallbackConformance: XCTestCase {
                 XCTAssertEqual(response.code, .unimplemented)
                 XCTAssertEqual(
                     response.error?.message,
-                    "grpc.testing.TestService.UnimplementedCall is not implemented"
+                    "connectrpc.conformance.v1.TestService.UnimplementedCall is not implemented"
                 )
                 expectation.fulfill()
             }
@@ -327,7 +327,7 @@ final class CallbackConformance: XCTestCase {
                     XCTAssertEqual(
                         (error as? ConnectError)?.message,
                         """
-                        grpc.testing.TestService.UnimplementedStreamingOutputCall is not implemented
+                        connectrpc.conformance.v1.TestService.UnimplementedStreamingOutputCall is not implemented
                         """
                     )
                     expectation.fulfill()
@@ -439,10 +439,11 @@ final class CallbackConformance: XCTestCase {
     func testCancelingUnary() {
         self.executeTestWithClients { client in
             let expectation = self.expectation(description: "Receives canceled response")
-            let cancelable = client.emptyCall(request: SwiftProtobuf.Google_Protobuf_Empty()) { response in
-                XCTAssertEqual(response.code, .canceled)
-                XCTAssertEqual(response.error?.code, .canceled)
-                expectation.fulfill()
+            let cancelable = client.emptyCall(
+                request: SwiftProtobuf.Google_Protobuf_Empty()) { response in
+                    XCTAssertEqual(response.code, .canceled)
+                    XCTAssertEqual(response.error?.code, .canceled)
+                    expectation.fulfill()
             }
             cancelable.cancel()
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
