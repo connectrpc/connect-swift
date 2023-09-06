@@ -18,7 +18,7 @@ import SwiftProtobuf
 /// Primary interface consumed by generated RPCs to perform requests and streams.
 /// The client itself is protocol-agnostic, but can be configured during initialization
 /// (see `ProtocolClientConfig` and `ProtocolClientOption`).
-public protocol ProtocolClientInterface {
+public protocol ProtocolClientInterface: Sendable {
     // MARK: - Callbacks
 
     /// Perform a unary (non-streaming) request.
