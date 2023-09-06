@@ -7,7 +7,7 @@
 // For information on using the generated types, please see the documentation:
 //   https://github.com/apple/swift-protobuf/
 
-// Copyright 2022-2023 Buf Technologies, Inc.
+// Copyright 2022 Buf Technologies, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ enum Server_V1_Protocol: SwiftProtobuf.Enum {
 
 extension Server_V1_Protocol: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Server_V1_Protocol] = [
+  static let allCases: [Server_V1_Protocol] = [
     .unspecified,
     .grpc,
     .grpcWeb,

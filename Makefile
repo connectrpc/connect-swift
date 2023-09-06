@@ -8,7 +8,7 @@ MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-print-directory
 BIN := .tmp/bin
 LICENSE_HEADER_YEAR_RANGE := 2022-2023
-CONFORMANCE_VERSION := 4f4e96d8fea3ed9473b90a964a5ba429e7ea5649
+CONFORMANCE_VERSION := 0b07f579cb61ad89de24524d62f804a2b03b1acf
 LICENSE_HEADER_VERSION := v1.12.0
 LICENSE_IGNORE := -e Package.swift \
     -e $(BIN)\/ \
@@ -57,7 +57,7 @@ conformanceserverrun: conformanceserverstop ## Start the conformance server
 generate: cleangenerated ## Regenerate outputs for all .proto files
 	cd Examples; buf generate
 	cd Libraries/Connect; buf generate
-	cd Tests/ConnectLibraryTests; buf generate
+	cd Tests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_VERSION),subdir=proto
 
 .PHONY: help
 help: ## Describe useful make targets
