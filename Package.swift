@@ -89,8 +89,6 @@ let package = Package(
             path: "Tests/ConnectLibraryTests",
             exclude: [
                 "buf.gen.yaml",
-                "buf.work.yaml",
-                "proto",
             ],
             resources: [
                 .copy("TestResources"),
