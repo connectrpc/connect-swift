@@ -84,7 +84,7 @@ final class ConnectErrorTests: XCTestCase {
     // MARK: - Private
 
     private func errorData(expectedDetails: [ProtobufMessage]) throws -> Data {
-        // Example error from https://connect.build/docs/protocol/#error-end-stream
+        // Example error from https://connectrpc.com/docs/protocol/#error-end-stream
         let dictionary: [String: Any] = [
             "code": "unavailable",
             "message": "overloaded: back off and retry",

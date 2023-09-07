@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /// Structure modeling the final JSON message that is returned by Connect streams:
-/// https://connect.build/docs/protocol#error-end-stream
+/// https://connectrpc.com/docs/protocol#error-end-stream
 struct ConnectEndStreamResponse: Sendable {
     /// Connect error that was returned with the response.
     let error: ConnectError?

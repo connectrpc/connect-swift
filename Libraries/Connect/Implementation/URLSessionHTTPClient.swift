@@ -140,6 +140,15 @@ extension URLSessionHTTPClient: URLSessionDataDelegate {
         let stream = self.lock.perform { self.streams[dataTask.taskIdentifier] }
         stream?.handleResponseData(data)
     }
+
+    open func urlSession(
+        _ session: URLSession, task: URLSessionTask,
+        needNewBodyStream completionHandler: @escaping (InputStream?) -> Void
+    ) {
+        completionHandler(
+            self.lock.perform { self.streams[task.taskIdentifier]?.requestBodyStream }
+        )
+    }
 }
 
 extension URLSessionHTTPClient: URLSessionTaskDelegate {

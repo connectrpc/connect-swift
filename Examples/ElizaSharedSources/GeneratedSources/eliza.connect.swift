@@ -7,32 +7,32 @@ import Connect
 import Foundation
 import SwiftProtobuf
 
-/// ElizaService provides a way to talk to the ELIZA, which is a port of
-/// the DOCTOR script for Joseph Weizenbaum's original ELIZA program.
-/// Created in the mid-1960s at the MIT Artificial Intelligence Laboratory,
-/// ELIZA demonstrates the superficiality of human-computer communication.
-/// DOCTOR simulates a psychotherapist, and is commonly found as an Easter
-/// egg in emacs distributions.
-internal protocol Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface {
+/// ElizaService provides a way to talk to Eliza, a port of the DOCTOR script
+/// for Joseph Weizenbaum's original ELIZA program. Created in the mid-1960s at
+/// the MIT Artificial Intelligence Laboratory, ELIZA demonstrates the
+/// superficiality of human-computer communication. DOCTOR simulates a
+/// psychotherapist, and is commonly found as an Easter egg in emacs
+/// distributions.
+internal protocol Connectrpc_Eliza_V1_ElizaServiceClientInterface {
 
-    /// Say is a unary request demo. This method should allow for a one sentence
-    /// response given a one sentence request.
+    /// Say is a unary RPC. Eliza responds to the prompt with a single sentence.
     @available(iOS 13, *)
-    func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers) async -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse>
+    func `say`(request: Connectrpc_Eliza_V1_SayRequest, headers: Connect.Headers) async -> ResponseMessage<Connectrpc_Eliza_V1_SayResponse>
 
-    /// Converse is a bi-directional streaming request demo. This method should allow for
-    /// many requests and many responses.
+    /// Converse is a bidirectional RPC. The caller may exchange multiple
+    /// back-and-forth messages with Eliza over a long-lived connection. Eliza
+    /// responds to each ConverseRequest with a ConverseResponse.
     @available(iOS 13, *)
-    func `converse`(headers: Connect.Headers) -> any Connect.BidirectionalAsyncStreamInterface<Buf_Connect_Demo_Eliza_V1_ConverseRequest, Buf_Connect_Demo_Eliza_V1_ConverseResponse>
+    func `converse`(headers: Connect.Headers) -> any Connect.BidirectionalAsyncStreamInterface<Connectrpc_Eliza_V1_ConverseRequest, Connectrpc_Eliza_V1_ConverseResponse>
 
-    /// Introduce is a server-streaming request demo.  This method allows for a single request that will return a series
-    /// of responses
+    /// Introduce is a server streaming RPC. Given the caller's name, Eliza
+    /// returns a stream of sentences to introduce itself.
     @available(iOS 13, *)
-    func `introduce`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest, Buf_Connect_Demo_Eliza_V1_IntroduceResponse>
+    func `introduce`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<Connectrpc_Eliza_V1_IntroduceRequest, Connectrpc_Eliza_V1_IntroduceResponse>
 }
 
-/// Concrete implementation of `Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface`.
-internal final class Buf_Connect_Demo_Eliza_V1_ElizaServiceClient: Buf_Connect_Demo_Eliza_V1_ElizaServiceClientInterface, Sendable {
+/// Concrete implementation of `Connectrpc_Eliza_V1_ElizaServiceClientInterface`.
+internal final class Connectrpc_Eliza_V1_ElizaServiceClient: Connectrpc_Eliza_V1_ElizaServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {
@@ -40,17 +40,17 @@ internal final class Buf_Connect_Demo_Eliza_V1_ElizaServiceClient: Buf_Connect_D
     }
 
     @available(iOS 13, *)
-    internal func `say`(request: Buf_Connect_Demo_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Buf_Connect_Demo_Eliza_V1_SayResponse> {
-        return await self.client.unary(path: "buf.connect.demo.eliza.v1.ElizaService/Say", request: request, headers: headers)
+    internal func `say`(request: Connectrpc_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Eliza_V1_SayResponse> {
+        return await self.client.unary(path: "connectrpc.eliza.v1.ElizaService/Say", request: request, headers: headers)
     }
 
     @available(iOS 13, *)
-    internal func `converse`(headers: Connect.Headers = [:]) -> any Connect.BidirectionalAsyncStreamInterface<Buf_Connect_Demo_Eliza_V1_ConverseRequest, Buf_Connect_Demo_Eliza_V1_ConverseResponse> {
-        return self.client.bidirectionalStream(path: "buf.connect.demo.eliza.v1.ElizaService/Converse", headers: headers)
+    internal func `converse`(headers: Connect.Headers = [:]) -> any Connect.BidirectionalAsyncStreamInterface<Connectrpc_Eliza_V1_ConverseRequest, Connectrpc_Eliza_V1_ConverseResponse> {
+        return self.client.bidirectionalStream(path: "connectrpc.eliza.v1.ElizaService/Converse", headers: headers)
     }
 
     @available(iOS 13, *)
-    internal func `introduce`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Buf_Connect_Demo_Eliza_V1_IntroduceRequest, Buf_Connect_Demo_Eliza_V1_IntroduceResponse> {
-        return self.client.serverOnlyStream(path: "buf.connect.demo.eliza.v1.ElizaService/Introduce", headers: headers)
+    internal func `introduce`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Connectrpc_Eliza_V1_IntroduceRequest, Connectrpc_Eliza_V1_IntroduceResponse> {
+        return self.client.serverOnlyStream(path: "connectrpc.eliza.v1.ElizaService/Introduce", headers: headers)
     }
 }

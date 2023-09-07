@@ -2,13 +2,13 @@
 
 This example app imports the `Connect` library using CocoaPods,
 and provides an interface for
-[chatting with Eliza](https://connect.build/demo).
+[chatting with Eliza](https://connectrpc.com/demo).
 
 The app has support for chatting using a variety of protocols supported by
 the Connect library:
 
-- [Connect](https://connect.build) + unary
-- [Connect](https://connect.build) + streaming
+- [Connect](https://connectrpc.com) + unary
+- [Connect](https://connectrpc.com) + streaming
 - [gRPC-Web](https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md) + unary
 - [gRPC-Web](https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md) + streaming
 

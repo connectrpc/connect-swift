@@ -15,7 +15,7 @@
 /// Protocols that are supported by the library.
 public enum NetworkProtocol: Sendable {
     /// The Connect protocol:
-    /// https://connect.build/docs/protocol
+    /// https://connectrpc.com/docs/protocol
     case connect
     /// The gRPC-Web protocol:
     /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md

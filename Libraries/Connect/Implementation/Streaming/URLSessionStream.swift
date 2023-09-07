@@ -17,6 +17,8 @@ import Foundation
 /// Stream implementation that wraps a `URLSession` stream.
 final class URLSessionStream: NSObject, @unchecked Sendable {
     private let closedByServer = Locked(false)
+    /// Foundation.InputStream does not conform to Sendable, hence @unchecked on the above class.
+    private let readStream: Foundation.InputStream
     private let responseCallbacks: ResponseCallbacks
     private let task: URLSessionUploadTask
     /// Foundation.OutputStream does not conform to Sendable, hence @unchecked on the above class.
@@ -25,6 +27,10 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
     enum Error: Swift.Error {
         case unableToFindBaseAddress
         case unableToWriteData
+    }
+
+    var requestBodyStream: Foundation.InputStream {
+        return self.readStream
     }
 
     var taskID: Int {
@@ -45,11 +51,8 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
         )
 
         self.responseCallbacks = responseCallbacks
+        self.readStream = readStream
         self.writeStream = writeStream
-
-        var request = request
-        request.httpBodyStream = readStream
-
         self.task = session.uploadTask(withStreamedRequest: request)
         super.init()
 
