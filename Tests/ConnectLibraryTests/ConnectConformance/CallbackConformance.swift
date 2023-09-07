@@ -327,7 +327,7 @@ final class CallbackConformance: XCTestCase {
                     XCTAssertEqual(
                         (error as? ConnectError)?.message,
                         """
-                        connectrpc.conformance.v1.TestService.UnimplementedStreamingOutputCall is
+                        connectrpc.conformance.v1.TestService.UnimplementedStreamingOutputCall is \
                         not implemented
                         """
                     )

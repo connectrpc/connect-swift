@@ -299,7 +299,8 @@ final class AsyncAwaitConformance: XCTestCase {
                     XCTAssertEqual(
                         (error as? ConnectError)?.message,
                         """
-                        connectrpc.conformance.v1.TestService.UnimplementedStreamingOutputCall is not implemented
+                        connectrpc.conformance.v1.TestService.UnimplementedStreamingOutputCall is \
+                        not implemented
                         """
                     )
                     expectation.fulfill()
@@ -341,20 +342,20 @@ final class AsyncAwaitConformance: XCTestCase {
         }
     }
 
-    func testFailUnary() async {
-        await self.executeTestWithClients { client in
-            let expectedErrorDetail = Connectrpc_Conformance_V1_ErrorDetail.with { proto in
-                proto.reason = "soirée 🎉"
-                proto.domain = "connect-conformance"
-            }
-            let response = await client.failUnaryCall(
-                request: Connectrpc_Conformance_V1_SimpleRequest()
-            )
-            XCTAssertEqual(response.error?.code, .resourceExhausted)
-            XCTAssertEqual(response.error?.message, "soirée 🎉")
-            XCTAssertEqual(response.error?.unpackedDetails(), [expectedErrorDetail])
-        }
-    }
+     func testFailUnary() async {
+         await self.executeTestWithClients { client in
+             let expectedErrorDetail = Connectrpc_Conformance_V1_ErrorDetail.with { proto in
+                 proto.reason = "soirée 🎉"
+                 proto.domain = "connect-conformance"
+             }
+             let response = await client.failUnaryCall(
+                 request: Connectrpc_Conformance_V1_SimpleRequest()
+             )
+             XCTAssertEqual(response.error?.code, .resourceExhausted)
+             XCTAssertEqual(response.error?.message, "soirée 🎉")
+             XCTAssertEqual(response.error?.unpackedDetails(), [expectedErrorDetail])
+         }
+     }
 
     func testFailServerStreaming() async throws {
         try await self.executeTestWithClients { client in

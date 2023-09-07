@@ -78,7 +78,7 @@ $(BIN)/license-headers: Makefile
 	GOBIN=$(abspath $(BIN)) go install github.com/bufbuild/buf/private/pkg/licenseheader/cmd/license-header@$(LICENSE_HEADER_VERSION)
 
 .PHONY: test
-test:
+test: conformanceserverrun ## Run all tests
 	$(MAKE) conformanceserverrun
 	swift test
 	$(MAKE) conformanceserverstop
