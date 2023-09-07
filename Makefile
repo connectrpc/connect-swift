@@ -79,6 +79,5 @@ $(BIN)/license-headers: Makefile
 
 .PHONY: test
 test: conformanceserverrun ## Run all tests
-	$(MAKE) conformanceserverrun
 	swift test
 	$(MAKE) conformanceserverstop

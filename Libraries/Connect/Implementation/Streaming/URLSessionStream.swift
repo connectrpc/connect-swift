@@ -17,6 +17,7 @@ import Foundation
 /// Stream implementation that wraps a `URLSession` stream.
 final class URLSessionStream: NSObject {
     private var closedByServer = false
+    private let readStream: Foundation.InputStream
     private let responseCallbacks: ResponseCallbacks
     private let task: URLSessionUploadTask
     private let writeStream: Foundation.OutputStream
@@ -24,6 +25,10 @@ final class URLSessionStream: NSObject {
     enum Error: Swift.Error {
         case unableToFindBaseAddress
         case unableToWriteData
+    }
+
+    var requestBodyStream: Foundation.InputStream {
+        return self.readStream
     }
 
     var taskID: Int {
@@ -44,11 +49,8 @@ final class URLSessionStream: NSObject {
         )
 
         self.responseCallbacks = responseCallbacks
+        self.readStream = readStream
         self.writeStream = writeStream
-
-        var request = request
-        request.httpBodyStream = readStream
-
         self.task = session.uploadTask(withStreamedRequest: request)
         super.init()
 
