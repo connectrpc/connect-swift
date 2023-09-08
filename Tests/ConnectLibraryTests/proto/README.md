@@ -1,2 +1,2 @@
 This directory contains `.proto` files that are used to communicate
-with the crosstest server when running tests.
+with the conformance server when running tests.

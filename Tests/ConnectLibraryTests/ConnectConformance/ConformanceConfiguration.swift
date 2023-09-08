@@ -16,8 +16,8 @@ import Connect
 import ConnectNIO
 import Foundation
 
-/// Represents a specific configuration with which to run a suite of crosstests.
-final class CrosstestConfiguration {
+/// Represents a specific configuration with which to run a suite of conformance tests.
+final class ConformanceConfiguration {
     let description: String
     let protocolClient: ProtocolClient
 
@@ -27,14 +27,14 @@ final class CrosstestConfiguration {
     }
 
     /// Configures a list of configurations that can be used to run a comprehensive
-    /// suite of crosstests.
+    /// suite of conformance tests.
     ///
     /// - parameter timeout: Timeout to apply to the client.
     ///
-    /// - returns: A list of configurations to use for crosstests.
-    static func all(timeout: TimeInterval) -> [CrosstestConfiguration] {
-        let urlSessionClient = CrosstestURLSessionHTTPClient(timeout: timeout)
-        let nioClient = CrosstestNIOHTTPClient(
+    /// - returns: A list of configurations to use for conformance tests.
+    static func all(timeout: TimeInterval) -> [ConformanceConfiguration] {
+        let urlSessionClient = ConformanceURLSessionHTTPClient(timeout: timeout)
+        let nioClient = ConformanceNIOHTTPClient(
             // swiftlint:disable:next number_separator
             host: "https://localhost", port: 8081, timeout: timeout
         )

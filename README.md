@@ -155,9 +155,9 @@ for details.
 
 - [connect-kotlin][connect-kotlin]: Idiomatic gRPC & Connect RPCs for Kotlin
 - [connect-go][connect-go]: Go service stubs for servers
-- [connect-web][connect-web]: TypeScript clients for web browsers
+- [connect-es][connect-es]: Type-safe APIs with Protobuf and TypeScript
 - [Buf Studio][buf-studio]: Web UI for ad-hoc RPCs
-- [connect-crosstest][connect-crosstest]: Connect, gRPC, and gRPC-Web
+- [connect-conformance][connect-conformance]: Connect, gRPC, and gRPC-Web
   interoperability tests
 
 ## Status
@@ -171,11 +171,11 @@ Offered under the [Apache 2 license](./LICENSE).
 
 [blog]: https://buf.build/blog/announcing-connect-swift
 [buf-studio]: https://buf.build/studio
-[connect-crosstest]: https://github.com/bufbuild/connect-crosstest
+[connect-conformance]: https://github.com/connectrpc/conformance
 [connect-go]: https://github.com/bufbuild/connect-go
 [connect-kotlin]: https://github.com/bufbuild/connect-kotlin
 [connect-protocol]: https://connectrpc.com/docs/protocol
-[connect-web]: https://www.npmjs.com/package/@bufbuild/connect-web
+[connect-es]: https://github.com/connectrpc/connect-es
 [error-handling]: https://connectrpc.com/docs/swift/errors
 [getting-started]: https://connectrpc.com/docs/swift/getting-started
 [grpc-protocol]: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md

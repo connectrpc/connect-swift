@@ -8,7 +8,7 @@ MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-print-directory
 BIN := .tmp/bin
 LICENSE_HEADER_YEAR_RANGE := 2022-2023
-CROSSTEST_VERSION := 4f4e96d8fea3ed9473b90a964a5ba429e7ea5649
+CONFORMANCE_VERSION := 4f4e96d8fea3ed9473b90a964a5ba429e7ea5649
 LICENSE_HEADER_VERSION := v1.12.0
 LICENSE_IGNORE := -e Package.swift \
     -e $(BIN)\/ \
@@ -40,17 +40,17 @@ cleangenerated: ## Delete all generated outputs
 	rm -rf ./Libraries/Connect/Implementation/Generated/*
 	rm -rf ./Tests/ConnectLibraryTests/Generated/*
 
-.PHONY: crosstestserverstop
-crosstestserverstop: ## Stop the crosstest server
+.PHONY: conformanceserverstop
+conformanceserverstop: ## Stop the conformance server
 	-docker container stop serverconnect servergrpc
 
-.PHONY: crosstestserverrun
-crosstestserverrun: crosstestserverstop ## Start the crosstest server
+.PHONY: conformanceserverrun
+conformanceserverrun: conformanceserverstop ## Start the conformance server
 	docker run --rm --name serverconnect -p 8080:8080 -p 8081:8081 -d \
-		bufbuild/connect-crosstest:$(CROSSTEST_VERSION) \
+		bufbuild/connect-crosstest:$(CONFORMANCE_VERSION) \
 		/usr/local/bin/serverconnect --h1port "8080" --h2port "8081" --cert "cert/localhost.crt" --key "cert/localhost.key"
 	docker run --rm --name servergrpc -p 8083:8083 -d \
-		bufbuild/connect-crosstest:$(CROSSTEST_VERSION) \
+		bufbuild/connect-crosstest:$(CONFORMANCE_VERSION) \
 		/usr/local/bin/servergrpc --port "8083" --cert "cert/localhost.crt" --key "cert/localhost.key"
 
 .PHONY: generate
@@ -78,6 +78,6 @@ $(BIN)/license-headers: Makefile
 	GOBIN=$(abspath $(BIN)) go install github.com/bufbuild/buf/private/pkg/licenseheader/cmd/license-header@$(LICENSE_HEADER_VERSION)
 
 .PHONY: test
-test: crosstestserverrun ## Run all tests
+test: conformanceserverrun ## Run all tests
 	swift test
-	$(MAKE) crosstestserverstop
+	$(MAKE) conformanceserverstop

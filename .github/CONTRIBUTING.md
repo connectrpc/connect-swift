@@ -82,7 +82,7 @@ Outputted code will be available in the `out` directories specified by
 ## Running Tests
 
 A test server is used to run
-[crosstests](../Tests/ConnectLibraryTests/ConnectCrosstests) -
+[conformance](../Tests/ConnectLibraryTests/ConnectConformance) -
 integration tests which validate the behavior of the `Connect` library with
 various protocols. **Starting the server requires Docker,
 so ensure that you have Docker installed before proceeding.**
@@ -96,7 +96,7 @@ make test
 If you prefer to run the tests using Xcode, you can manually start the server:
 
 ```sh
-make crosstestserverrun
+make conformanceserverrun
 ```
 
 ## Linting
