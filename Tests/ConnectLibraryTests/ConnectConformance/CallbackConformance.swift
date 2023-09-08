@@ -377,7 +377,7 @@ final class CallbackConformance: XCTestCase {
         self.executeTestWithClients { client in
             let expectedErrorDetail = Grpc_Testing_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
-                proto.domain = "connect-conformance"
+                proto.domain = "connect-crosstest"
             }
             let expectation = self.expectation(description: "Request completes")
             client.failUnaryCall(request: Grpc_Testing_SimpleRequest()) { response in
@@ -395,7 +395,7 @@ final class CallbackConformance: XCTestCase {
         try self.executeTestWithClients { client in
             let expectedErrorDetail = Grpc_Testing_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
-                proto.domain = "connect-conformance"
+                proto.domain = "connect-crosstest"
             }
             let expectation = self.expectation(description: "Stream completes")
             let stream = client.failStreamingOutputCall { result in

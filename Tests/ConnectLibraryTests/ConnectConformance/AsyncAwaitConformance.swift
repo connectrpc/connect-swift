@@ -343,7 +343,7 @@ final class AsyncAwaitConformance: XCTestCase {
         await self.executeTestWithClients { client in
             let expectedErrorDetail = Grpc_Testing_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
-                proto.domain = "connect-conformance"
+                proto.domain = "connect-crosstest"
             }
             let response = await client.failUnaryCall(request: Grpc_Testing_SimpleRequest())
             XCTAssertEqual(response.error?.code, .resourceExhausted)
@@ -356,7 +356,7 @@ final class AsyncAwaitConformance: XCTestCase {
         try await self.executeTestWithClients { client in
             let expectedErrorDetail = Grpc_Testing_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
-                proto.domain = "connect-conformance"
+                proto.domain = "connect-crosstest"
             }
             let expectation = self.expectation(description: "Stream completes")
             let stream = client.failStreamingOutputCall()
