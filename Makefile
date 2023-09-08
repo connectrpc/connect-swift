@@ -47,10 +47,10 @@ conformanceserverstop: ## Stop the conformance server
 .PHONY: conformanceserverrun
 conformanceserverrun: conformanceserverstop ## Start the conformance server
 	docker run --rm --name serverconnect -p 8080:8080 -p 8081:8081 -d \
-		connectrpc/conformance:$(CONFORMANCE_VERSION) \
+		bufbuild/connect-crosstest:$(CONFORMANCE_VERSION) \
 		/usr/local/bin/serverconnect --h1port "8080" --h2port "8081" --cert "cert/localhost.crt" --key "cert/localhost.key"
 	docker run --rm --name servergrpc -p 8083:8083 -d \
-		connectrpc/conformance:$(CONFORMANCE_VERSION) \
+		bufbuild/connect-crosstest:$(CONFORMANCE_VERSION) \
 		/usr/local/bin/servergrpc --port "8083" --cert "cert/localhost.crt" --key "cert/localhost.key"
 
 .PHONY: generate
