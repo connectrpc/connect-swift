@@ -69,7 +69,7 @@ enum Server_V1_Protocol: SwiftProtobuf.Enum {
 
 extension Server_V1_Protocol: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Server_V1_Protocol] = [
+  static let allCases: [Server_V1_Protocol] = [
     .unspecified,
     .grpc,
     .grpcWeb,

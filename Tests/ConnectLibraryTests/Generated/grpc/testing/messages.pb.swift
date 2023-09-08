@@ -70,7 +70,7 @@ enum Grpc_Testing_PayloadType: SwiftProtobuf.Enum {
 
 extension Grpc_Testing_PayloadType: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Grpc_Testing_PayloadType] = [
+  static let allCases: [Grpc_Testing_PayloadType] = [
     .compressable,
   ]
 }
@@ -124,7 +124,7 @@ enum Grpc_Testing_GrpclbRouteType: SwiftProtobuf.Enum {
 
 extension Grpc_Testing_GrpclbRouteType: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Grpc_Testing_GrpclbRouteType] = [
+  static let allCases: [Grpc_Testing_GrpclbRouteType] = [
     .unknown,
     .fallback,
     .backend,
@@ -654,7 +654,7 @@ struct Grpc_Testing_ClientConfigureRequest {
 
 extension Grpc_Testing_ClientConfigureRequest.RpcType: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
-  static var allCases: [Grpc_Testing_ClientConfigureRequest.RpcType] = [
+  static let allCases: [Grpc_Testing_ClientConfigureRequest.RpcType] = [
     .emptyCall,
     .unaryCall,
   ]
