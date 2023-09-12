@@ -478,7 +478,8 @@ final class CallbackConformance: XCTestCase {
         self.executeTestWithClients { client in
             let expectation = self.expectation(description: "Receives canceled response")
             let cancelable = client.emptyCall(
-                request: SwiftProtobuf.Google_Protobuf_Empty()) { response in
+                request: SwiftProtobuf.Google_Protobuf_Empty()
+            ) { response in
                     XCTAssertEqual(response.code, .canceled)
                     XCTAssertEqual(response.error?.code, .canceled)
                     expectation.fulfill()
