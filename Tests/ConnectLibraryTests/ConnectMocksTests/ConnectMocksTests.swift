@@ -122,19 +122,19 @@ final class ConnectMocksTests: XCTestCase {
 
     func testMockServerOnlyStreamCallbacks() throws {
         let client = Grpc_Testing_TestServiceClientMock()
-        let expectedInput = Grpc_Testing_Empty()
-        let expectedResults: [StreamResult<Grpc_Testing_Empty>] = [
+        let expectedInput = SwiftProtobuf.Google_Protobuf_Empty()
+        let expectedResults: [StreamResult<SwiftProtobuf.Google_Protobuf_Empty>] = [
             .headers(["x-header": ["123"]]),
             .message(.init()),
             .message(.init()),
             .complete(code: .ok, error: nil, trailers: nil),
         ]
 
-        var sentInputs = [Grpc_Testing_Empty]()
+        var sentInputs = [SwiftProtobuf.Google_Protobuf_Empty]()
         client.mockUnimplementedStreamingOutputCall.onSend = { sentInputs.append($0) }
         client.mockUnimplementedStreamingOutputCall.outputs = Array(expectedResults)
 
-        var receivedResults = [StreamResult<Grpc_Testing_Empty>]()
+        var receivedResults = [StreamResult<SwiftProtobuf.Google_Protobuf_Empty>]()
         let stream = client.unimplementedStreamingOutputCall { receivedResults.append($0) }
         try stream.send(expectedInput)
 

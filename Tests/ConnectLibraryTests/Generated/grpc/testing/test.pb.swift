@@ -14,11 +14,11 @@
 // call that always returns a readable non-ASCII error with error details.
 // FailStreamingOutputCall(StreamingOutputCallRequest) returns (stream StreamingOutputCallResponse):
 // this RPC is a server streaming call that always returns a readable non-ASCII error with error details.
-// UnimplementedStreamingOutputCall(grpc.testing.Empty) returns (stream grpc.testing.Empty): this RPC
+// UnimplementedStreamingOutputCall(google.protobuf.Empty) returns (stream google.protobuf.Empty): this RPC
 // is a server streaming call that will not be implemented.
 //
 // The UnimplementedService has been extended to include the following RPCs:
-// UnimplementedStreamingOutputCall(grpc.testing.Empty) returns (stream grpc.testing.Empty): this RPC
+// UnimplementedStreamingOutputCall(google.protobuf.Empty) returns (stream google.protobuf.Empty): this RPC
 // is a server streaming call that will not be implemented.
 
 // Copyright 2015-2016 gRPC authors.
