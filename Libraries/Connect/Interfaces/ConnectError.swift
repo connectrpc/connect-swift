@@ -81,17 +81,16 @@ public struct ConnectError: Swift.Error, Sendable {
             // original string is not, it should be padded with "=" to guard against a
             // corrupted string.
             let encodedPayload = try container.decodeIfPresent(String.self, forKey: .payload) ?? ""
-            let padded = encodedPayload.padding(
-                // Calculate the nearest multiple of 4 that is >= the length of encodedPayload
-                // Then, pad the string to that length
+            let paddedPayload = encodedPayload.padding(
+                // Calculate the nearest multiple of 4 that is >= the length of encodedPayload,
+                // then pad the string to that length.
                 toLength: ((encodedPayload.count + 3) / 4) * 4,
                 withPad: "=",
                 startingAt: 0
             )
-
             self.init(
                 type: try container.decodeIfPresent(String.self, forKey: .type) ?? "",
-                payload: Data(base64Encoded: padded)
+                payload: Data(base64Encoded: paddedPayload)
             )
         }
 
