@@ -157,7 +157,7 @@ for details.
 - [connect-go][connect-go]: Go service stubs for servers
 - [connect-es][connect-es]: Type-safe APIs with Protobuf and TypeScript
 - [Buf Studio][buf-studio]: Web UI for ad-hoc RPCs
-- [connect-conformance][connect-conformance]: Connect, gRPC, and gRPC-Web
+- [conformance][connect-conformance]: Connect, gRPC, and gRPC-Web
   interoperability tests
 
 ## Status

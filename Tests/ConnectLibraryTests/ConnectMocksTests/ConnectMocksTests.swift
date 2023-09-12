@@ -23,13 +23,13 @@ final class ConnectMocksTests: XCTestCase {
     // MARK: - Unary
 
     func testMockUnaryCallbacks() {
-        let client = Grpc_Testing_TestServiceClientMock()
+        let client = Connectrpc_Conformance_V1_TestServiceClientMock()
         client.mockUnaryCall = { request in
             XCTAssertTrue(request.fillUsername)
             return ResponseMessage(result: .success(.with { $0.hostname = "pong" }))
         }
 
-        let receivedMessage = Locked<Grpc_Testing_SimpleResponse?>(nil)
+        let receivedMessage = Locked<Connectrpc_Conformance_V1_SimpleResponse?>(nil)
         client.unaryCall(request: .with { $0.fillUsername = true }) { response in
             receivedMessage.value = response.message
         }
@@ -37,7 +37,7 @@ final class ConnectMocksTests: XCTestCase {
     }
 
     func testMockUnaryAsyncAwait() async {
-        let client = Grpc_Testing_TestServiceClientMock()
+        let client = Connectrpc_Conformance_V1_TestServiceClientMock()
         client.mockAsyncUnaryCall = { request in
             XCTAssertTrue(request.fillUsername)
             return ResponseMessage(result: .success(.with { $0.hostname = "pong" }))
@@ -50,12 +50,13 @@ final class ConnectMocksTests: XCTestCase {
     // MARK: - Bidirectional stream
 
     func testMockBidirectionalStreamCallbacks() throws {
-        let client = Grpc_Testing_TestServiceClientMock()
-        let expectedInputs: [Grpc_Testing_StreamingOutputCallRequest] = [
+        let client = Connectrpc_Conformance_V1_TestServiceClientMock()
+        let expectedInputs: [Connectrpc_Conformance_V1_StreamingOutputCallRequest] = [
             .with { $0.responseParameters = [.with { $0.size = 123 }] },
             .with { $0.responseParameters = [.with { $0.size = 456 }] },
         ]
-        let expectedResults: [StreamResult<Grpc_Testing_StreamingOutputCallResponse>] = [
+        let expectedResults: [StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>] =
+        [
             .headers(["x-header": ["123"]]),
             .message(.with { $0.payload.body = Data(repeating: 0, count: 123) }),
             .message(.with { $0.payload.body = Data(repeating: 0, count: 456) }),
@@ -63,13 +64,15 @@ final class ConnectMocksTests: XCTestCase {
         ]
         XCTAssertFalse(client.mockFullDuplexCall.isClosed)
 
-        var sentInputs = [Grpc_Testing_StreamingOutputCallRequest]()
+        var sentInputs = [Connectrpc_Conformance_V1_StreamingOutputCallRequest]()
         var closeCalled = false
         client.mockFullDuplexCall.onSend = { sentInputs.append($0) }
         client.mockFullDuplexCall.onClose = { closeCalled = true }
         client.mockFullDuplexCall.outputs = Array(expectedResults)
 
-        let receivedResults = Locked([StreamResult<Grpc_Testing_StreamingOutputCallResponse>]())
+        let receivedResults = Locked(
+            [StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>]()
+        )
         let stream = client.fullDuplexCall { result in
             receivedResults.perform { $0.append(result) }
         }
@@ -85,12 +88,13 @@ final class ConnectMocksTests: XCTestCase {
     }
 
     func testMockBidirectionalStreamAsyncAwait() async throws {
-        let client = Grpc_Testing_TestServiceClientMock()
-        let expectedInputs: [Grpc_Testing_StreamingOutputCallRequest] = [
+        let client = Connectrpc_Conformance_V1_TestServiceClientMock()
+        let expectedInputs: [Connectrpc_Conformance_V1_StreamingOutputCallRequest] = [
             .with { $0.responseParameters = [.with { $0.size = 123 }] },
             .with { $0.responseParameters = [.with { $0.size = 456 }] },
         ]
-        var expectedResults: [StreamResult<Grpc_Testing_StreamingOutputCallResponse>] = [
+        var expectedResults: [StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>] =
+        [
             .headers(["x-header": ["123"]]),
             .message(.with { $0.payload.body = Data(repeating: 0, count: 123) }),
             .message(.with { $0.payload.body = Data(repeating: 0, count: 456) }),
@@ -98,7 +102,7 @@ final class ConnectMocksTests: XCTestCase {
         ]
         XCTAssertFalse(client.mockAsyncFullDuplexCall.isClosed)
 
-        var sentInputs = [Grpc_Testing_StreamingOutputCallRequest]()
+        var sentInputs = [Connectrpc_Conformance_V1_StreamingOutputCallRequest]()
         var closeCalled = false
         client.mockAsyncFullDuplexCall.onSend = { sentInputs.append($0) }
         client.mockAsyncFullDuplexCall.onClose = { closeCalled = true }
@@ -123,7 +127,7 @@ final class ConnectMocksTests: XCTestCase {
     // MARK: - Server-only stream
 
     func testMockServerOnlyStreamCallbacks() throws {
-        let client = Grpc_Testing_TestServiceClientMock()
+        let client = Connectrpc_Conformance_V1_TestServiceClientMock()
         let expectedInput = SwiftProtobuf.Google_Protobuf_Empty()
         let expectedResults: [StreamResult<SwiftProtobuf.Google_Protobuf_Empty>] = [
             .headers(["x-header": ["123"]]),
@@ -148,18 +152,19 @@ final class ConnectMocksTests: XCTestCase {
     }
 
     func testMockServerOnlyStreamAsyncAwait() async throws {
-        let client = Grpc_Testing_TestServiceClientMock()
-        let expectedInput = Grpc_Testing_StreamingOutputCallRequest.with { request in
+        let client = Connectrpc_Conformance_V1_TestServiceClientMock()
+        let expectedInput = Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { request in
             request.responseParameters = [.with { $0.size = 123 }]
         }
-        var expectedResults: [StreamResult<Grpc_Testing_StreamingOutputCallResponse>] = [
+        var expectedResults: [StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>] =
+        [
             .headers(["x-header": ["123"]]),
             .message(.with { $0.payload.body = Data(repeating: 0, count: 123) }),
             .message(.with { $0.payload.body = Data(repeating: 0, count: 456) }),
             .complete(code: .ok, error: nil, trailers: nil),
         ]
 
-        var sentInputs = [Grpc_Testing_StreamingOutputCallRequest]()
+        var sentInputs = [Connectrpc_Conformance_V1_StreamingOutputCallRequest]()
         client.mockAsyncStreamingOutputCall.onSend = { sentInputs.append($0) }
         client.mockAsyncStreamingOutputCall.outputs = Array(expectedResults)
 
