@@ -45,8 +45,7 @@ private extension Trailers {
         return self[HeaderConstants.grpcStatusDetails]?
             .first
             .flatMap {
-                let padded = $0.padding(toLength: (($0.count+3)/4)*4, withPad: "=", startingAt: 0)
-                return Data(base64Encoded: padded)
+                return Data(base64Encoded: $0)
             }
             .flatMap { data -> Grpc_Status_V1_Status? in
                 return try? ProtoCodec().deserialize(source: data)
