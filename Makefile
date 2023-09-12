@@ -58,7 +58,6 @@ generate: cleangenerated ## Regenerate outputs for all .proto files
 	cd Examples; buf generate
 	cd Libraries/Connect; buf generate
 	cd Tests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_VERSION),subdir=proto
-	# cd Tests/ConnectLibraryTests; buf generate
 
 .PHONY: help
 help: ## Describe useful make targets
