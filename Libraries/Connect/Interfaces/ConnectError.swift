@@ -76,9 +76,9 @@ public struct ConnectError: Swift.Error, Sendable {
         public init(from decoder: Swift.Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
 
-            // Read the base64-encoded payload and then pad if needed
-            // base64-encoded strings should be a length that is a multiple of four and if the
-            // original string is not, it should be padded with '='. This helps to guard against a
+            // Read the base64-encoded payload and then pad it if needed:
+            // Base64-encoded strings should be a length that is a multiple of four. If the
+            // original string is not, it should be padded with "=" to guard against a
             // corrupted string.
             let encodedPayload = try container.decodeIfPresent(String.self, forKey: .payload) ?? ""
             let padded = encodedPayload.padding(
