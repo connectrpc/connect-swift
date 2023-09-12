@@ -28,12 +28,12 @@ protocol interfaces and client implementations:
 <details><summary>Click to expand <code>eliza.connect.swift</code></summary>
 
 ```swift
-public protocol Eliza_V1_ChatServiceClientInterface {
+public protocol Eliza_V1_ChatServiceClientInterface: Sendable {
     func say(request: Eliza_V1_SayRequest, headers: Headers)
         async -> ResponseMessage<Eliza_V1_SayResponse>
 }
 
-public final class Eliza_V1_ChatServiceClient: Eliza_V1_ChatServiceClientInterface {
+public final class Eliza_V1_ChatServiceClient: Eliza_V1_ChatServiceClientInterface, Sendable {
     private let client: ProtocolClientInterface
 
     public init(client: ProtocolClientInterface) {
@@ -85,10 +85,10 @@ protocol interfaces as the production clients:
 <details><summary>Click to expand <code>eliza.mock.swift</code></summary>
 
 ```swift
-open class Eliza_V1_ChatServiceClientMock: Eliza_V1_ChatServiceClientInterface {
+public final class Eliza_V1_ChatServiceClientMock: Eliza_V1_ChatServiceClientInterface, @unchecked Sendable {
     public var mockAsyncSay = { (_: Eliza_V1_SayRequest) -> ResponseMessage<Eliza_V1_Response> in .init(message: .init()) }
 
-    open func say(request: Eliza_V1_SayRequest, headers: Headers = [:])
+    public func say(request: Eliza_V1_SayRequest, headers: Headers = [:])
         async -> ResponseMessage<Eliza_V1_SayResponse>
     {
         return self.mockAsyncSay(request)

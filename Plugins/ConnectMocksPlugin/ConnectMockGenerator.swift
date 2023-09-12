@@ -46,6 +46,9 @@ final class ConnectMockGenerator: Generator {
         self.printLine("/// class, allowing for mocking RPC calls. Behavior can be customized")
         self.printLine("/// either through the properties on this class or by")
         self.printLine("/// subclassing the class and overriding its methods.")
+        self.printLine("///")
+        self.printLine("/// Note: This class does not handle thread-safe locking, but provides")
+        self.printLine("/// `@unchecked Sendable` conformance to simplify testing and mocking.")
         self.printLine("@available(iOS 13, *)")
         self.printLine(
             """

@@ -15,8 +15,11 @@ import SwiftProtobuf
 /// class, allowing for mocking RPC calls. Behavior can be customized
 /// either through the properties on this class or by
 /// subclassing the class and overriding its methods.
+///
+/// Note: This class does not handle thread-safe locking, but provides
+/// `@unchecked Sendable` conformance to simplify testing and mocking.
 @available(iOS 13, *)
-internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClientInterface, @unchecked Sendable {
+internal final class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `emptyCall()`.
@@ -177,8 +180,11 @@ internal class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServiceClien
 /// class, allowing for mocking RPC calls. Behavior can be customized
 /// either through the properties on this class or by
 /// subclassing the class and overriding its methods.
+///
+/// Note: This class does not handle thread-safe locking, but provides
+/// `@unchecked Sendable` conformance to simplify testing and mocking.
 @available(iOS 13, *)
-internal class Grpc_Testing_UnimplementedServiceClientMock: Grpc_Testing_UnimplementedServiceClientInterface, @unchecked Sendable {
+internal final class Grpc_Testing_UnimplementedServiceClientMock: Grpc_Testing_UnimplementedServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `unimplementedCall()`.
@@ -218,8 +224,11 @@ internal class Grpc_Testing_UnimplementedServiceClientMock: Grpc_Testing_Unimple
 /// class, allowing for mocking RPC calls. Behavior can be customized
 /// either through the properties on this class or by
 /// subclassing the class and overriding its methods.
+///
+/// Note: This class does not handle thread-safe locking, but provides
+/// `@unchecked Sendable` conformance to simplify testing and mocking.
 @available(iOS 13, *)
-internal class Grpc_Testing_ReconnectServiceClientMock: Grpc_Testing_ReconnectServiceClientInterface, @unchecked Sendable {
+internal final class Grpc_Testing_ReconnectServiceClientMock: Grpc_Testing_ReconnectServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `start()`.
@@ -260,8 +269,11 @@ internal class Grpc_Testing_ReconnectServiceClientMock: Grpc_Testing_ReconnectSe
 /// class, allowing for mocking RPC calls. Behavior can be customized
 /// either through the properties on this class or by
 /// subclassing the class and overriding its methods.
+///
+/// Note: This class does not handle thread-safe locking, but provides
+/// `@unchecked Sendable` conformance to simplify testing and mocking.
 @available(iOS 13, *)
-internal class Grpc_Testing_LoadBalancerStatsServiceClientMock: Grpc_Testing_LoadBalancerStatsServiceClientInterface, @unchecked Sendable {
+internal final class Grpc_Testing_LoadBalancerStatsServiceClientMock: Grpc_Testing_LoadBalancerStatsServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `getClientStats()`.
@@ -302,8 +314,11 @@ internal class Grpc_Testing_LoadBalancerStatsServiceClientMock: Grpc_Testing_Loa
 /// class, allowing for mocking RPC calls. Behavior can be customized
 /// either through the properties on this class or by
 /// subclassing the class and overriding its methods.
+///
+/// Note: This class does not handle thread-safe locking, but provides
+/// `@unchecked Sendable` conformance to simplify testing and mocking.
 @available(iOS 13, *)
-internal class Grpc_Testing_XdsUpdateHealthServiceClientMock: Grpc_Testing_XdsUpdateHealthServiceClientInterface, @unchecked Sendable {
+internal final class Grpc_Testing_XdsUpdateHealthServiceClientMock: Grpc_Testing_XdsUpdateHealthServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `setServing()`.
@@ -344,8 +359,11 @@ internal class Grpc_Testing_XdsUpdateHealthServiceClientMock: Grpc_Testing_XdsUp
 /// class, allowing for mocking RPC calls. Behavior can be customized
 /// either through the properties on this class or by
 /// subclassing the class and overriding its methods.
+///
+/// Note: This class does not handle thread-safe locking, but provides
+/// `@unchecked Sendable` conformance to simplify testing and mocking.
 @available(iOS 13, *)
-internal class Grpc_Testing_XdsUpdateClientConfigureServiceClientMock: Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface, @unchecked Sendable {
+internal final class Grpc_Testing_XdsUpdateClientConfigureServiceClientMock: Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `configure()`.
