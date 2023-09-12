@@ -73,6 +73,27 @@ public struct ConnectError: Swift.Error, Sendable {
             case payload = "value"
         }
 
+        public init(from decoder: Swift.Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+
+            // Read the base64-encoded payload and then pad it if needed:
+            // Base64-encoded strings should be a length that is a multiple of four. If the
+            // original string is not, it should be padded with "=" to guard against a
+            // corrupted string.
+            let encodedPayload = try container.decodeIfPresent(String.self, forKey: .payload) ?? ""
+            let paddedPayload = encodedPayload.padding(
+                // Calculate the nearest multiple of 4 that is >= the length of encodedPayload,
+                // then pad the string to that length.
+                toLength: ((encodedPayload.count + 3) / 4) * 4,
+                withPad: "=",
+                startingAt: 0
+            )
+            self.init(
+                type: try container.decodeIfPresent(String.self, forKey: .type) ?? "",
+                payload: Data(base64Encoded: paddedPayload)
+            )
+        }
+
         public init(type: String, payload: Data?) {
             self.type = type
             self.payload = payload
