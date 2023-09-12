@@ -21,7 +21,7 @@ public enum NetworkProtocol: Sendable {
     /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
     case grpcWeb
     /// A custom protocol that is implemented via an interceptor.
-    case custom(name: String, protocolInterceptor: @Sendable (ProtocolClientConfig) -> Interceptor)
+    case custom(name: String, protocolInterceptor: InterceptorInitializer)
 }
 
 extension NetworkProtocol: CustomStringConvertible {

@@ -93,8 +93,10 @@ final class CallbackConformance: XCTestCase {
                     break
 
                 case .message(let output):
-                    XCTAssertEqual(output.payload.body.count, sizes[responseCount.value])
-                    responseCount.perform { $0 += 1 }
+                    responseCount.perform { responseCount in
+                        XCTAssertEqual(output.payload.body.count, sizes[responseCount])
+                        responseCount += 1
+                    }
 
                 case .complete(let code, let error, _):
                     XCTAssertEqual(code, .ok)

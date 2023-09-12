@@ -69,7 +69,7 @@ final class ConnectMocksTests: XCTestCase {
         client.mockFullDuplexCall.onClose = { closeCalled = true }
         client.mockFullDuplexCall.outputs = Array(expectedResults)
 
-        let receivedResults = Locked<[StreamResult<Grpc_Testing_StreamingOutputCallResponse>]>([])
+        let receivedResults = Locked([StreamResult<Grpc_Testing_StreamingOutputCallResponse>]())
         let stream = client.fullDuplexCall { result in
             receivedResults.perform { $0.append(result) }
         }
@@ -136,7 +136,7 @@ final class ConnectMocksTests: XCTestCase {
         client.mockUnimplementedStreamingOutputCall.onSend = { sentInputs.append($0) }
         client.mockUnimplementedStreamingOutputCall.outputs = Array(expectedResults)
 
-        let receivedResults = Locked<[StreamResult<Grpc_Testing_Empty>]>([])
+        let receivedResults = Locked([StreamResult<Grpc_Testing_Empty>]())
         let stream = client.unimplementedStreamingOutputCall { result in
             receivedResults.perform { $0.append(result) }
         }

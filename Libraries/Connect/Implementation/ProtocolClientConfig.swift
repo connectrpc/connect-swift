@@ -28,7 +28,7 @@ public struct ProtocolClientConfig: Sendable {
     /// response headers like `content-encoding`.
     public let responseCompressionPools: [CompressionPool]
     /// List of interceptors that should be invoked with requests/responses.
-    public let interceptors: [@Sendable (ProtocolClientConfig) -> Interceptor]
+    public let interceptors: [InterceptorInitializer]
 
     /// Configuration used to specify if/how requests should be compressed.
     public struct RequestCompression: Sendable {
@@ -53,7 +53,7 @@ public struct ProtocolClientConfig: Sendable {
         codec: Codec = JSONCodec(),
         requestCompression: RequestCompression? = nil,
         responseCompressionPools: [CompressionPool] = [GzipCompressionPool()],
-        interceptors: [@Sendable (ProtocolClientConfig) -> Interceptor] = []
+        interceptors: [InterceptorInitializer] = []
     ) {
         self.host = host
         self.networkProtocol = networkProtocol

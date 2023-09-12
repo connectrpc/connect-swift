@@ -23,10 +23,7 @@ struct InterceptorChain: Sendable {
     ///
     /// - parameter interceptors: Closures that should be called to create interceptors.
     /// - parameter config: Config to use for setting up interceptors.
-    init(
-        interceptors: [@Sendable (ProtocolClientConfig) -> Interceptor],
-        config: ProtocolClientConfig
-    ) {
+    init(interceptors: [InterceptorInitializer], config: ProtocolClientConfig) {
         self.interceptors = interceptors.map { initialize in initialize(config) }
     }
 

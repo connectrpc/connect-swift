@@ -37,6 +37,8 @@ public protocol Interceptor: Sendable {
     func streamFunction() -> StreamFunction
 }
 
+public typealias InterceptorInitializer = @Sendable (ProtocolClientConfig) -> Interceptor
+
 public struct UnaryFunction: Sendable {
     public let requestFunction: @Sendable (HTTPRequest) -> HTTPRequest
     public let responseFunction: @Sendable (HTTPResponse) -> HTTPResponse
