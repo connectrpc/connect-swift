@@ -11,7 +11,7 @@ jobs:
   build-connect-library:
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
@@ -20,7 +20,7 @@ jobs:
   build-eliza-cocoapods-example:
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
@@ -32,7 +32,7 @@ jobs:
   build-eliza-swiftpm-example:
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
@@ -43,8 +43,8 @@ jobs:
   build-plugin-and-generate:
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v3
-      - uses: bufbuild/buf-setup-action@v1.22.0
+      - uses: actions/checkout@v4
+      - uses: bufbuild/buf-setup-action@v1.26.1
         with:
           github_token: ${{ github.token }}
       - name: Build plugins
@@ -58,7 +58,7 @@ jobs:
   run-connect-tests:
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: docker-practice/actions-setup-docker@master
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
@@ -70,13 +70,13 @@ jobs:
     container:
       image: ghcr.io/realm/swiftlint:0.50.3
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run SwiftLint
         run: swiftlint lint --strict
   validate-license-headers:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Validate license headers
         run: |
           make licenseheaders

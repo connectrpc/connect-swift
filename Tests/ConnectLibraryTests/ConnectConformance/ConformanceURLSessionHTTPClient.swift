@@ -15,9 +15,9 @@
 import Connect
 import Foundation
 
-/// HTTP client backed by URLSession and used by crosstests in order to handle SSL challenges
-/// with the crosstest server.
-final class CrosstestURLSessionHTTPClient: URLSessionHTTPClient {
+/// HTTP client backed by URLSession and used by conformance tests in order to handle SSL challenges
+/// with the conformance server.
+final class ConformanceURLSessionHTTPClient: URLSessionHTTPClient {
     init(timeout: TimeInterval) {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = timeout
@@ -29,7 +29,7 @@ final class CrosstestURLSessionHTTPClient: URLSessionHTTPClient {
         _ session: URLSession, didReceive challenge: URLAuthenticationChallenge,
         completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
     ) {
-        // This codepath is executed when using HTTPS with the crosstest server.
+        // This codepath is executed when using HTTPS with the conformance server.
         let protectionSpace = challenge.protectionSpace
         if protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
            let serverTrust = protectionSpace.serverTrust

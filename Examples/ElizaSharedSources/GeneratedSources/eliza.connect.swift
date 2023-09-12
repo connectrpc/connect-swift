@@ -41,16 +41,16 @@ internal final class Connectrpc_Eliza_V1_ElizaServiceClient: Connectrpc_Eliza_V1
 
     @available(iOS 13, *)
     internal func `say`(request: Connectrpc_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Eliza_V1_SayResponse> {
-        return await self.client.unary(path: "connectrpc.eliza.v1.ElizaService/Say", request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.eliza.v1.ElizaService/Say", request: request, headers: headers)
     }
 
     @available(iOS 13, *)
     internal func `converse`(headers: Connect.Headers = [:]) -> any Connect.BidirectionalAsyncStreamInterface<Connectrpc_Eliza_V1_ConverseRequest, Connectrpc_Eliza_V1_ConverseResponse> {
-        return self.client.bidirectionalStream(path: "connectrpc.eliza.v1.ElizaService/Converse", headers: headers)
+        return self.client.bidirectionalStream(path: "/connectrpc.eliza.v1.ElizaService/Converse", headers: headers)
     }
 
     @available(iOS 13, *)
     internal func `introduce`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Connectrpc_Eliza_V1_IntroduceRequest, Connectrpc_Eliza_V1_IntroduceResponse> {
-        return self.client.serverOnlyStream(path: "connectrpc.eliza.v1.ElizaService/Introduce", headers: headers)
+        return self.client.serverOnlyStream(path: "/connectrpc.eliza.v1.ElizaService/Introduce", headers: headers)
     }
 }
