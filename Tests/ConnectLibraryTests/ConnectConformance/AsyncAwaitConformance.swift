@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// swiftlint:disable file_length
+
 import Connect
 import Foundation
+import SwiftProtobuf
 import XCTest
 
 private let kTimeout = TimeInterval(10.0)
@@ -56,8 +59,8 @@ final class AsyncAwaitConformance: XCTestCase {
 
     func testEmptyUnary() async {
         await self.executeTestWithClients { client in
-            let response = await client.emptyCall(request: Grpc_Testing_Empty())
-            XCTAssertEqual(response.message, Grpc_Testing_Empty())
+            let response = await client.emptyCall(request: SwiftProtobuf.Google_Protobuf_Empty())
+            XCTAssertEqual(response.message, SwiftProtobuf.Google_Protobuf_Empty())
         }
     }
 
@@ -273,7 +276,9 @@ final class AsyncAwaitConformance: XCTestCase {
 
     func testUnimplementedMethod() async {
         await self.executeTestWithClients { client in
-            let response = await client.unimplementedCall(request: Grpc_Testing_Empty())
+            let response = await client.unimplementedCall(
+                request: SwiftProtobuf.Google_Protobuf_Empty()
+            )
             XCTAssertEqual(response.code, .unimplemented)
             XCTAssertEqual(
                 response.error?.message,
@@ -286,7 +291,7 @@ final class AsyncAwaitConformance: XCTestCase {
         try await self.executeTestWithClients { client in
             let expectation = self.expectation(description: "Stream completes")
             let stream = client.unimplementedStreamingOutputCall()
-            try stream.send(Grpc_Testing_Empty())
+            try stream.send(SwiftProtobuf.Google_Protobuf_Empty())
             for await result in stream.results() {
                 switch result {
                 case .headers, .message:
@@ -310,7 +315,9 @@ final class AsyncAwaitConformance: XCTestCase {
 
     func testUnimplementedService() async {
         await self.executeTestWithUnimplementedClients { client in
-            let response = await client.unimplementedCall(request: Grpc_Testing_Empty())
+            let response = await client.unimplementedCall(
+                request: SwiftProtobuf.Google_Protobuf_Empty()
+            )
             XCTAssertEqual(response.code, .unimplemented)
             XCTAssertNotNil(response.error)
         }
@@ -320,7 +327,7 @@ final class AsyncAwaitConformance: XCTestCase {
         try await self.executeTestWithUnimplementedClients { client in
             let expectation = self.expectation(description: "Stream completes")
             let stream = client.unimplementedStreamingOutputCall()
-            try stream.send(Grpc_Testing_Empty())
+            try stream.send(SwiftProtobuf.Google_Protobuf_Empty())
             for await result in stream.results() {
                 switch result {
                 case .headers:
@@ -360,16 +367,7 @@ final class AsyncAwaitConformance: XCTestCase {
             }
             let expectation = self.expectation(description: "Stream completes")
             let stream = client.failStreamingOutputCall()
-            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
-                proto.responseParameters = [31_415, 9, 2_653, 58_979]
-                    .enumerated()
-                    .map { index, value in
-                        return Grpc_Testing_ResponseParameters.with { parameters in
-                            parameters.size = Int32(value)
-                            parameters.intervalUs = Int32(index * 10)
-                        }
-                    }
-            })
+            try stream.send(Grpc_Testing_StreamingOutputCallRequest())
             for await result in stream.results() {
                 switch result {
                 case .headers:
@@ -390,8 +388,52 @@ final class AsyncAwaitConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
+            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+        }
+    }
+
+    func testFailServerStreamingAfterResponse() async throws {
+        try await self.executeTestWithClients { client in
+            let expectedErrorDetail = Grpc_Testing_ErrorDetail.with { proto in
+                proto.reason = "soirée 🎉"
+                proto.domain = "connect-crosstest"
+            }
+            let sizes = [31_415, 9, 2_653, 58_979]
+            let stream = client.failStreamingOutputCall()
+            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
+                proto.responseParameters = sizes.enumerated().map { index, size in
+                    return .with { parameters in
+                        parameters.size = Int32(size)
+                        parameters.intervalUs = Int32(index * 10)
+                    }
+                }
+            })
+            let expectation = self.expectation(description: "Stream completes")
+            var responseCount = 0
+            for await result in stream.results() {
+                switch result {
+                case .headers:
+                    continue
+
+                case .message(let output):
+                    XCTAssertEqual(output.payload.body.count, sizes[responseCount])
+                    responseCount += 1
+
+                case .complete(_, let error, _):
+                    guard let connectError = error as? ConnectError else {
+                        XCTFail("Expected ConnectError")
+                        return
+                    }
+
+                    XCTAssertEqual(connectError.code, .resourceExhausted)
+                    XCTAssertEqual(connectError.message, "soirée 🎉")
+                    XCTAssertEqual(connectError.unpackedDetails(), [expectedErrorDetail])
+                    expectation.fulfill()
+                }
+            }
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+            XCTAssertEqual(responseCount, 4)
         }
     }
 }

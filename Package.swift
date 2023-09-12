@@ -90,7 +90,6 @@ let package = Package(
             exclude: [
                 "buf.gen.yaml",
                 "buf.work.yaml",
-                "proto",
             ],
             resources: [
                 .copy("TestResources"),

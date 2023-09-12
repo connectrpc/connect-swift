@@ -23,9 +23,9 @@ internal final class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServic
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `emptyCall()`.
-    internal var mockEmptyCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
+    internal var mockEmptyCall = { (_: SwiftProtobuf.Google_Protobuf_Empty) -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `emptyCall()`.
-    internal var mockAsyncEmptyCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
+    internal var mockAsyncEmptyCall = { (_: SwiftProtobuf.Google_Protobuf_Empty) -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `unaryCall()`.
     internal var mockUnaryCall = { (_: Grpc_Testing_SimpleRequest) -> ResponseMessage<Grpc_Testing_SimpleResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `unaryCall()`.
@@ -59,23 +59,23 @@ internal final class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServic
     /// Mocked for async calls to `halfDuplexCall()`.
     internal var mockAsyncHalfDuplexCall = MockBidirectionalAsyncStream<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>()
     /// Mocked for calls to `unimplementedCall()`.
-    internal var mockUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
+    internal var mockUnimplementedCall = { (_: SwiftProtobuf.Google_Protobuf_Empty) -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `unimplementedCall()`.
-    internal var mockAsyncUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
+    internal var mockAsyncUnimplementedCall = { (_: SwiftProtobuf.Google_Protobuf_Empty) -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `unimplementedStreamingOutputCall()`.
-    internal var mockUnimplementedStreamingOutputCall = MockServerOnlyStream<Grpc_Testing_Empty, Grpc_Testing_Empty>()
+    internal var mockUnimplementedStreamingOutputCall = MockServerOnlyStream<SwiftProtobuf.Google_Protobuf_Empty, SwiftProtobuf.Google_Protobuf_Empty>()
     /// Mocked for async calls to `unimplementedStreamingOutputCall()`.
-    internal var mockAsyncUnimplementedStreamingOutputCall = MockServerOnlyAsyncStream<Grpc_Testing_Empty, Grpc_Testing_Empty>()
+    internal var mockAsyncUnimplementedStreamingOutputCall = MockServerOnlyAsyncStream<SwiftProtobuf.Google_Protobuf_Empty, SwiftProtobuf.Google_Protobuf_Empty>()
 
     internal init() {}
 
     @discardableResult
-    internal func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `emptyCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
         completion(self.mockEmptyCall(request))
         return Connect.Cancelable {}
     }
 
-    internal func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+    internal func `emptyCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
         return self.mockAsyncEmptyCall(request)
     }
 
@@ -155,21 +155,21 @@ internal final class Grpc_Testing_TestServiceClientMock: Grpc_Testing_TestServic
     }
 
     @discardableResult
-    internal func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
         completion(self.mockUnimplementedCall(request))
         return Connect.Cancelable {}
     }
 
-    internal func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+    internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
         return self.mockAsyncUnimplementedCall(request)
     }
 
-    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty> {
+    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<SwiftProtobuf.Google_Protobuf_Empty> {
         self.mockUnimplementedStreamingOutputCall.$inputs.first { !$0.isEmpty }.sink { _ in self.mockUnimplementedStreamingOutputCall.outputs.forEach(onResult) }.store(in: &self.cancellables)
         return self.mockUnimplementedStreamingOutputCall
     }
 
-    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_Empty, Grpc_Testing_Empty> {
+    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<SwiftProtobuf.Google_Protobuf_Empty, SwiftProtobuf.Google_Protobuf_Empty> {
         return self.mockAsyncUnimplementedStreamingOutputCall
     }
 }
@@ -188,32 +188,32 @@ internal final class Grpc_Testing_UnimplementedServiceClientMock: Grpc_Testing_U
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `unimplementedCall()`.
-    internal var mockUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
+    internal var mockUnimplementedCall = { (_: SwiftProtobuf.Google_Protobuf_Empty) -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `unimplementedCall()`.
-    internal var mockAsyncUnimplementedCall = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
+    internal var mockAsyncUnimplementedCall = { (_: SwiftProtobuf.Google_Protobuf_Empty) -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `unimplementedStreamingOutputCall()`.
-    internal var mockUnimplementedStreamingOutputCall = MockServerOnlyStream<Grpc_Testing_Empty, Grpc_Testing_Empty>()
+    internal var mockUnimplementedStreamingOutputCall = MockServerOnlyStream<SwiftProtobuf.Google_Protobuf_Empty, SwiftProtobuf.Google_Protobuf_Empty>()
     /// Mocked for async calls to `unimplementedStreamingOutputCall()`.
-    internal var mockAsyncUnimplementedStreamingOutputCall = MockServerOnlyAsyncStream<Grpc_Testing_Empty, Grpc_Testing_Empty>()
+    internal var mockAsyncUnimplementedStreamingOutputCall = MockServerOnlyAsyncStream<SwiftProtobuf.Google_Protobuf_Empty, SwiftProtobuf.Google_Protobuf_Empty>()
 
     internal init() {}
 
     @discardableResult
-    internal func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
         completion(self.mockUnimplementedCall(request))
         return Connect.Cancelable {}
     }
 
-    internal func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+    internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
         return self.mockAsyncUnimplementedCall(request)
     }
 
-    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty> {
+    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<SwiftProtobuf.Google_Protobuf_Empty> {
         self.mockUnimplementedStreamingOutputCall.$inputs.first { !$0.isEmpty }.sink { _ in self.mockUnimplementedStreamingOutputCall.outputs.forEach(onResult) }.store(in: &self.cancellables)
         return self.mockUnimplementedStreamingOutputCall
     }
 
-    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_Empty, Grpc_Testing_Empty> {
+    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<SwiftProtobuf.Google_Protobuf_Empty, SwiftProtobuf.Google_Protobuf_Empty> {
         return self.mockAsyncUnimplementedStreamingOutputCall
     }
 }
@@ -232,33 +232,33 @@ internal final class Grpc_Testing_ReconnectServiceClientMock: Grpc_Testing_Recon
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `start()`.
-    internal var mockStart = { (_: Grpc_Testing_ReconnectParams) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
+    internal var mockStart = { (_: Grpc_Testing_ReconnectParams) -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `start()`.
-    internal var mockAsyncStart = { (_: Grpc_Testing_ReconnectParams) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
+    internal var mockAsyncStart = { (_: Grpc_Testing_ReconnectParams) -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `stop()`.
-    internal var mockStop = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_ReconnectInfo> in .init(result: .success(.init())) }
+    internal var mockStop = { (_: SwiftProtobuf.Google_Protobuf_Empty) -> ResponseMessage<Grpc_Testing_ReconnectInfo> in .init(result: .success(.init())) }
     /// Mocked for async calls to `stop()`.
-    internal var mockAsyncStop = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_ReconnectInfo> in .init(result: .success(.init())) }
+    internal var mockAsyncStop = { (_: SwiftProtobuf.Google_Protobuf_Empty) -> ResponseMessage<Grpc_Testing_ReconnectInfo> in .init(result: .success(.init())) }
 
     internal init() {}
 
     @discardableResult
-    internal func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
         completion(self.mockStart(request))
         return Connect.Cancelable {}
     }
 
-    internal func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+    internal func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
         return self.mockAsyncStart(request)
     }
 
     @discardableResult
-    internal func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_ReconnectInfo>) -> Void) -> Connect.Cancelable {
+    internal func `stop`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_ReconnectInfo>) -> Void) -> Connect.Cancelable {
         completion(self.mockStop(request))
         return Connect.Cancelable {}
     }
 
-    internal func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_ReconnectInfo> {
+    internal func `stop`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_ReconnectInfo> {
         return self.mockAsyncStop(request)
     }
 }
@@ -322,33 +322,33 @@ internal final class Grpc_Testing_XdsUpdateHealthServiceClientMock: Grpc_Testing
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `setServing()`.
-    internal var mockSetServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
+    internal var mockSetServing = { (_: SwiftProtobuf.Google_Protobuf_Empty) -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `setServing()`.
-    internal var mockAsyncSetServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
+    internal var mockAsyncSetServing = { (_: SwiftProtobuf.Google_Protobuf_Empty) -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> in .init(result: .success(.init())) }
     /// Mocked for calls to `setNotServing()`.
-    internal var mockSetNotServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
+    internal var mockSetNotServing = { (_: SwiftProtobuf.Google_Protobuf_Empty) -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> in .init(result: .success(.init())) }
     /// Mocked for async calls to `setNotServing()`.
-    internal var mockAsyncSetNotServing = { (_: Grpc_Testing_Empty) -> ResponseMessage<Grpc_Testing_Empty> in .init(result: .success(.init())) }
+    internal var mockAsyncSetNotServing = { (_: SwiftProtobuf.Google_Protobuf_Empty) -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> in .init(result: .success(.init())) }
 
     internal init() {}
 
     @discardableResult
-    internal func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `setServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
         completion(self.mockSetServing(request))
         return Connect.Cancelable {}
     }
 
-    internal func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+    internal func `setServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
         return self.mockAsyncSetServing(request)
     }
 
     @discardableResult
-    internal func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `setNotServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
         completion(self.mockSetNotServing(request))
         return Connect.Cancelable {}
     }
 
-    internal func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Grpc_Testing_Empty> {
+    internal func `setNotServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
         return self.mockAsyncSetNotServing(request)
     }
 }
