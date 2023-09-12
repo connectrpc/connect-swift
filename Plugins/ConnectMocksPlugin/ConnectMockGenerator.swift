@@ -49,7 +49,7 @@ final class ConnectMockGenerator: Generator {
         self.printLine("@available(iOS 13, *)")
         self.printLine(
             """
-            \(self.visibility) class \(service.mockName(using: self.namer)): \
+            \(self.visibility) final class \(service.mockName(using: self.namer)): \
             \(protocolName), @unchecked Sendable {
             """
         )
