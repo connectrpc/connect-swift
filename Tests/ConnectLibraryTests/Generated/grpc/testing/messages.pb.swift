@@ -133,22 +133,6 @@ extension Grpc_Testing_GrpclbRouteType: CaseIterable {
 
 #endif  // swift(>=4.2)
 
-/// TODO(dgq): Go back to using well-known types once
-/// https://github.com/grpc/grpc/issues/6980 has been fixed.
-/// import "google/protobuf/wrappers.proto";
-struct Grpc_Testing_BoolValue {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  /// The bool value.
-  var value: Bool = false
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
 /// A block of data, to simply increase gRPC message size.
 struct Grpc_Testing_Payload {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -215,8 +199,8 @@ struct Grpc_Testing_SimpleRequest {
   /// "nullable" in order to interoperate seamlessly with clients not able to
   /// implement the full compression tests by introspecting the call to verify
   /// the response's compression status.
-  var responseCompressed: Grpc_Testing_BoolValue {
-    get {return _responseCompressed ?? Grpc_Testing_BoolValue()}
+  var responseCompressed: SwiftProtobuf.Google_Protobuf_BoolValue {
+    get {return _responseCompressed ?? SwiftProtobuf.Google_Protobuf_BoolValue()}
     set {_responseCompressed = newValue}
   }
   /// Returns true if `responseCompressed` has been explicitly set.
@@ -235,8 +219,8 @@ struct Grpc_Testing_SimpleRequest {
   mutating func clearResponseStatus() {self._responseStatus = nil}
 
   /// Whether the server should expect this request to be compressed.
-  var expectCompressed: Grpc_Testing_BoolValue {
-    get {return _expectCompressed ?? Grpc_Testing_BoolValue()}
+  var expectCompressed: SwiftProtobuf.Google_Protobuf_BoolValue {
+    get {return _expectCompressed ?? SwiftProtobuf.Google_Protobuf_BoolValue()}
     set {_expectCompressed = newValue}
   }
   /// Returns true if `expectCompressed` has been explicitly set.
@@ -255,9 +239,9 @@ struct Grpc_Testing_SimpleRequest {
   init() {}
 
   fileprivate var _payload: Grpc_Testing_Payload? = nil
-  fileprivate var _responseCompressed: Grpc_Testing_BoolValue? = nil
+  fileprivate var _responseCompressed: SwiftProtobuf.Google_Protobuf_BoolValue? = nil
   fileprivate var _responseStatus: Grpc_Testing_EchoStatus? = nil
-  fileprivate var _expectCompressed: Grpc_Testing_BoolValue? = nil
+  fileprivate var _expectCompressed: SwiftProtobuf.Google_Protobuf_BoolValue? = nil
 }
 
 /// Unary response, as configured by the request.
@@ -320,8 +304,8 @@ struct Grpc_Testing_StreamingInputCallRequest {
   /// is "nullable" in order to interoperate seamlessly with servers not able to
   /// implement the full compression tests by introspecting the call to verify
   /// the request's compression status.
-  var expectCompressed: Grpc_Testing_BoolValue {
-    get {return _expectCompressed ?? Grpc_Testing_BoolValue()}
+  var expectCompressed: SwiftProtobuf.Google_Protobuf_BoolValue {
+    get {return _expectCompressed ?? SwiftProtobuf.Google_Protobuf_BoolValue()}
     set {_expectCompressed = newValue}
   }
   /// Returns true if `expectCompressed` has been explicitly set.
@@ -334,7 +318,7 @@ struct Grpc_Testing_StreamingInputCallRequest {
   init() {}
 
   fileprivate var _payload: Grpc_Testing_Payload? = nil
-  fileprivate var _expectCompressed: Grpc_Testing_BoolValue? = nil
+  fileprivate var _expectCompressed: SwiftProtobuf.Google_Protobuf_BoolValue? = nil
 }
 
 /// Client-streaming response.
@@ -368,8 +352,8 @@ struct Grpc_Testing_ResponseParameters {
   /// "nullable" in order to interoperate seamlessly with clients not able to
   /// implement the full compression tests by introspecting the call to verify
   /// the response's compression status.
-  var compressed: Grpc_Testing_BoolValue {
-    get {return _compressed ?? Grpc_Testing_BoolValue()}
+  var compressed: SwiftProtobuf.Google_Protobuf_BoolValue {
+    get {return _compressed ?? SwiftProtobuf.Google_Protobuf_BoolValue()}
     set {_compressed = newValue}
   }
   /// Returns true if `compressed` has been explicitly set.
@@ -381,7 +365,7 @@ struct Grpc_Testing_ResponseParameters {
 
   init() {}
 
-  fileprivate var _compressed: Grpc_Testing_BoolValue? = nil
+  fileprivate var _compressed: SwiftProtobuf.Google_Protobuf_BoolValue? = nil
 }
 
 /// Server-streaming request.
@@ -706,7 +690,6 @@ struct Grpc_Testing_ErrorStatus {
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Grpc_Testing_PayloadType: @unchecked Sendable {}
 extension Grpc_Testing_GrpclbRouteType: @unchecked Sendable {}
-extension Grpc_Testing_BoolValue: @unchecked Sendable {}
 extension Grpc_Testing_Payload: @unchecked Sendable {}
 extension Grpc_Testing_EchoStatus: @unchecked Sendable {}
 extension Grpc_Testing_SimpleRequest: @unchecked Sendable {}
@@ -748,38 +731,6 @@ extension Grpc_Testing_GrpclbRouteType: SwiftProtobuf._ProtoNameProviding {
     1: .same(proto: "GRPCLB_ROUTE_TYPE_FALLBACK"),
     2: .same(proto: "GRPCLB_ROUTE_TYPE_BACKEND"),
   ]
-}
-
-extension Grpc_Testing_BoolValue: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".BoolValue"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "value"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularBoolField(value: &self.value) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.value != false {
-      try visitor.visitSingularBoolField(value: self.value, fieldNumber: 1)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Grpc_Testing_BoolValue, rhs: Grpc_Testing_BoolValue) -> Bool {
-    if lhs.value != rhs.value {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
 }
 
 extension Grpc_Testing_Payload: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
