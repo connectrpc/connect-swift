@@ -367,9 +367,8 @@ final class AsyncAwaitConformance: XCTestCase {
             }
             let expectation = self.expectation(description: "Stream completes")
             let stream = client.failStreamingOutputCall()
-            try stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
-                proto.responseParameters = []
-            })
+
+            try stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest())
             for await result in stream.results() {
                 switch result {
                 case .headers:
