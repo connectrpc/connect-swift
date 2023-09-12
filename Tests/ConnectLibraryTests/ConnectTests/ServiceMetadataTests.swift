@@ -18,52 +18,52 @@ import XCTest
 final class ServiceMetadataTests: XCTestCase {
     func testMethodSpecsAreGeneratedCorrectlyForService() {
         XCTAssertEqual(
-            Connectrpc_Conformance_TestServiceClient.Metadata.Methods.unaryCall,
+            Connectrpc_Conformance_V1_TestServiceClient.Metadata.Methods.unaryCall,
             MethodSpec(
                 name: "UnaryCall",
-                service: "connectrpc.conformance.TestService",
+                service: "connectrpc.conformance.v1.TestService",
                 type: .unary
             )
         )
         XCTAssertEqual(
-            Connectrpc_Conformance_TestServiceClient.Metadata.Methods.unaryCall.path,
-            "connectrpc.conformance.TestService/UnaryCall"
+            Connectrpc_Conformance_V1_TestServiceClient.Metadata.Methods.unaryCall.path,
+            "connectrpc.conformance.v1.TestService/UnaryCall"
         )
         XCTAssertEqual(
-            Connectrpc_Conformance_TestServiceClient.Metadata.Methods.streamingOutputCall,
+            Connectrpc_Conformance_V1_TestServiceClient.Metadata.Methods.streamingOutputCall,
             MethodSpec(
                 name: "StreamingOutputCall",
-                service: "connectrpc.conformance.TestService",
+                service: "connectrpc.conformance.v1.TestService",
                 type: .serverStream
             )
         )
         XCTAssertEqual(
-            Connectrpc_Conformance_TestServiceClient.Metadata.Methods.streamingOutputCall.path,
-            "connectrpc.conformance.TestService/StreamingOutputCall"
+            Connectrpc_Conformance_V1_TestServiceClient.Metadata.Methods.streamingOutputCall.path,
+            "connectrpc.conformance.v1.TestService/StreamingOutputCall"
         )
         XCTAssertEqual(
-            Connectrpc_Conformance_TestServiceClient.Metadata.Methods.streamingInputCall,
+            Connectrpc_Conformance_V1_TestServiceClient.Metadata.Methods.streamingInputCall,
             MethodSpec(
                 name: "StreamingInputCall",
-                service: "connectrpc.conformance.TestService",
+                service: "connectrpc.conformance.v1.TestService",
                 type: .clientStream
             )
         )
         XCTAssertEqual(
-            Connectrpc_Conformance_TestServiceClient.Metadata.Methods.streamingInputCall.path,
-            "connectrpc.conformance.TestService/StreamingInputCall"
+            Connectrpc_Conformance_V1_TestServiceClient.Metadata.Methods.streamingInputCall.path,
+            "connectrpc.conformance.v1.TestService/StreamingInputCall"
         )
         XCTAssertEqual(
-            Connectrpc_Conformance_TestServiceClient.Metadata.Methods.fullDuplexCall,
+            Connectrpc_Conformance_V1_TestServiceClient.Metadata.Methods.fullDuplexCall,
             MethodSpec(
                 name: "FullDuplexCall",
-                service: "connectrpc.conformance.TestService",
+                service: "connectrpc.conformance.v1.TestService",
                 type: .bidirectionalStream
             )
         )
         XCTAssertEqual(
-            Connectrpc_Conformance_TestServiceClient.Metadata.Methods.fullDuplexCall.path,
-            "connectrpc.conformance.TestService/FullDuplexCall"
+            Connectrpc_Conformance_V1_TestServiceClient.Metadata.Methods.fullDuplexCall.path,
+            "connectrpc.conformance.v1.TestService/FullDuplexCall"
         )
     }
 }

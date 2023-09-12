@@ -21,8 +21,8 @@ import XCTest
 
 private let kTimeout = TimeInterval(10.0)
 
-private typealias TestServiceClient = Connectrpc_Conformance_TestServiceClient
-private typealias UnimplementedServiceClient = Connectrpc_Conformance_UnimplementedServiceClient
+private typealias TestServiceClient = Connectrpc_Conformance_V1_TestServiceClient
+private typealias UnimplementedServiceClient = Connectrpc_Conformance_V1_UnimplementedServiceClient
 
 /// This test suite runs against multiple protocols and serialization formats.
 /// Tests are based on https://github.com/connectrpc/conformance
@@ -69,7 +69,7 @@ final class CallbackConformance: XCTestCase {
     func testLargeUnary() {
         self.executeTestWithClients { client in
             let size = 314_159
-            let message = Connectrpc_Conformance_SimpleRequest.with { proto in
+            let message = Connectrpc_Conformance_V1_SimpleRequest.with { proto in
                 proto.responseSize = Int32(size)
                 proto.payload = .with { $0.body = Data(repeating: 0, count: size) }
             }
@@ -103,7 +103,7 @@ final class CallbackConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(Connectrpc_Conformance_StreamingOutputCallRequest.with { proto in
+            try stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
                 proto.responseParameters = sizes.enumerated().map { index, size in
                     return .with { parameters in
                         parameters.size = Int32(size)
@@ -134,7 +134,7 @@ final class CallbackConformance: XCTestCase {
                     closeExpectation.fulfill()
                 }
             }
-            try stream.send(Connectrpc_Conformance_StreamingOutputCallRequest.with { proto in
+            try stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
                 proto.responseParameters = []
             })
 
@@ -153,7 +153,7 @@ final class CallbackConformance: XCTestCase {
                 leadingKey: [leadingValue],
                 trailingKey: [trailingValue.base64EncodedString()],
             ]
-            let message = Connectrpc_Conformance_SimpleRequest.with { proto in
+            let message = Connectrpc_Conformance_V1_SimpleRequest.with { proto in
                 proto.responseSize = Int32(size)
                 proto.payload = .with { $0.body = Data(repeating: 0, count: size) }
             }
@@ -206,7 +206,7 @@ final class CallbackConformance: XCTestCase {
                     trailersExpectation.fulfill()
                 }
             }
-            try stream.send(Connectrpc_Conformance_StreamingOutputCallRequest.with { proto in
+            try stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
                 proto.responseParameters = [.with { $0.size = Int32(size) }]
             })
 
@@ -217,7 +217,7 @@ final class CallbackConformance: XCTestCase {
     }
 
     func testStatusCodeAndMessage() {
-        let message = Connectrpc_Conformance_SimpleRequest.with { proto in
+        let message = Connectrpc_Conformance_V1_SimpleRequest.with { proto in
             proto.responseStatus = .with { status in
                 status.code = Int32(Code.unknown.rawValue)
                 status.message = "test status message"
@@ -243,7 +243,7 @@ final class CallbackConformance: XCTestCase {
     func testSpecialStatus() {
         let statusMessage =
             "\\t\\ntest with whitespace\\r\\nand Unicode BMP ☺ and non-BMP \\uD83D\\uDE08\\t\\n"
-        let message = Connectrpc_Conformance_SimpleRequest.with { proto in
+        let message = Connectrpc_Conformance_V1_SimpleRequest.with { proto in
             proto.responseStatus = .with { status in
                 status.code = 2
                 status.message = statusMessage
@@ -269,7 +269,7 @@ final class CallbackConformance: XCTestCase {
     func testTimeoutOnSleepingServer() throws {
         try self.executeTestWithClients(timeout: 0.01) { client in
             let expectation = self.expectation(description: "Stream times out")
-            let message = Connectrpc_Conformance_StreamingOutputCallRequest.with { proto in
+            let message = Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
                 proto.payload = .with { $0.body = Data(count: 271_828) }
                 proto.responseParameters = [
                     .with { parameters in
@@ -305,7 +305,7 @@ final class CallbackConformance: XCTestCase {
                 XCTAssertEqual(response.code, .unimplemented)
                 XCTAssertEqual(
                     response.error?.message,
-                    "connectrpc.conformance.TestService.UnimplementedCall is not implemented"
+                    "connectrpc.conformance.v1.TestService.UnimplementedCall is not implemented"
                 )
                 expectation.fulfill()
             }
@@ -327,7 +327,7 @@ final class CallbackConformance: XCTestCase {
                     XCTAssertEqual(
                         (error as? ConnectError)?.message,
                         """
-                        connectrpc.conformance.TestService.UnimplementedStreamingOutputCall is \
+                        connectrpc.conformance.v1.TestService.UnimplementedStreamingOutputCall is \
                         not implemented
                         """
                     )
@@ -377,12 +377,12 @@ final class CallbackConformance: XCTestCase {
 
     func testFailUnary() {
         self.executeTestWithClients { client in
-            let expectedErrorDetail = Connectrpc_Conformance_ErrorDetail.with { proto in
+            let expectedErrorDetail = Connectrpc_Conformance_V1_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
                 proto.domain = "connect-crosstest"
             }
             let expectation = self.expectation(description: "Request completes")
-            client.failUnaryCall(request: Connectrpc_Conformance_SimpleRequest()) { response in
+            client.failUnaryCall(request: Connectrpc_Conformance_V1_SimpleRequest()) { response in
                 XCTAssertEqual(response.error?.code, .resourceExhausted)
                 XCTAssertEqual(response.error?.message, "soirée 🎉")
                 XCTAssertEqual(response.error?.unpackedDetails(), [expectedErrorDetail])
@@ -395,7 +395,7 @@ final class CallbackConformance: XCTestCase {
 
     func testFailServerStreaming() throws {
         try self.executeTestWithClients { client in
-            let expectedErrorDetail = Connectrpc_Conformance_ErrorDetail.with { proto in
+            let expectedErrorDetail = Connectrpc_Conformance_V1_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
                 proto.domain = "connect-crosstest"
             }
@@ -420,7 +420,7 @@ final class CallbackConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(Connectrpc_Conformance_StreamingOutputCallRequest.with { proto in
+            try stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
                 proto.responseParameters = []
             })
 
@@ -430,7 +430,7 @@ final class CallbackConformance: XCTestCase {
 
     func testFailServerStreamingAfterResponse() throws {
         try self.executeTestWithClients { client in
-            let expectedErrorDetail = Connectrpc_Conformance_ErrorDetail.with { proto in
+            let expectedErrorDetail = Connectrpc_Conformance_V1_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
                 proto.domain = "connect-crosstest"
             }
@@ -458,7 +458,7 @@ final class CallbackConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(Connectrpc_Conformance_StreamingOutputCallRequest.with { proto in
+            try stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
                 proto.responseParameters = sizes.enumerated().map { index, size in
                     return .with { parameters in
                         parameters.size = Int32(size)
