@@ -75,8 +75,14 @@ public struct ConnectError: Swift.Error, Sendable {
 
         public init(from decoder: Swift.Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
+
+            // Read the base64-encoded payload and then pad if needed
             let encodedPayload = try container.decode(String.self, forKey: .payload)
-            let padded = encodedPayload.padding(toLength: ((encodedPayload.count+3)/4)*4, withPad: "=", startingAt: 0)
+            let padded = encodedPayload.padding(
+                toLength: ((encodedPayload.count+3)/4)*4,
+                withPad: "=",
+                startingAt: 0
+            )
 
             self.init(
                 type: try container.decodeIfPresent(String.self, forKey: .type) ?? "",
