@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// swiftlint:disable file_length
+
 import Connect
 import Foundation
 import SwiftProtobuf
@@ -274,7 +276,9 @@ final class AsyncAwaitConformance: XCTestCase {
 
     func testUnimplementedMethod() async {
         await self.executeTestWithClients { client in
-            let response = await client.unimplementedCall(request: SwiftProtobuf.Google_Protobuf_Empty())
+            let response = await client.unimplementedCall(
+                request: SwiftProtobuf.Google_Protobuf_Empty()
+            )
             XCTAssertEqual(response.code, .unimplemented)
             XCTAssertEqual(
                 response.error?.message,
@@ -311,7 +315,9 @@ final class AsyncAwaitConformance: XCTestCase {
 
     func testUnimplementedService() async {
         await self.executeTestWithUnimplementedClients { client in
-            let response = await client.unimplementedCall(request: SwiftProtobuf.Google_Protobuf_Empty())
+            let response = await client.unimplementedCall(
+                request: SwiftProtobuf.Google_Protobuf_Empty()
+            )
             XCTAssertEqual(response.code, .unimplemented)
             XCTAssertNotNil(response.error)
         }
