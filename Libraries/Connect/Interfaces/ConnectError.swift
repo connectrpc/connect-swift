@@ -79,7 +79,7 @@ public struct ConnectError: Swift.Error, Sendable {
             // Read the base64-encoded payload and then pad if needed
             let encodedPayload = try container.decode(String.self, forKey: .payload)
             let padded = encodedPayload.padding(
-                toLength: ((encodedPayload.count+3)/4)*4,
+                toLength: ((encodedPayload.count + 3) / 4) * 4,
                 withPad: "=",
                 startingAt: 0
             )
