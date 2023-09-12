@@ -420,9 +420,7 @@ final class CallbackConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(Grpc_Testing_StreamingOutputCallRequest.with { proto in
-                proto.responseParameters = []
-            })
+            try stream.send(Grpc_Testing_StreamingOutputCallRequest())
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
