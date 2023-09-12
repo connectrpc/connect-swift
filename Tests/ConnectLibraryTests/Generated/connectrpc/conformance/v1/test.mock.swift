@@ -12,9 +12,8 @@ import SwiftProtobuf
 /// Mock implementation of `Connectrpc_Conformance_V1_TestServiceClientInterface`.
 ///
 /// Production implementations can be substituted with instances of this
-/// class, allowing for mocking RPC calls. Behavior can be customized
-/// either through the properties on this class or by
-/// subclassing the class and overriding its methods.
+/// class to allow for mocking RPC calls, and behavior can be customized
+/// using its properties.
 ///
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
@@ -177,9 +176,8 @@ internal final class Connectrpc_Conformance_V1_TestServiceClientMock: Connectrpc
 /// Mock implementation of `Connectrpc_Conformance_V1_UnimplementedServiceClientInterface`.
 ///
 /// Production implementations can be substituted with instances of this
-/// class, allowing for mocking RPC calls. Behavior can be customized
-/// either through the properties on this class or by
-/// subclassing the class and overriding its methods.
+/// class to allow for mocking RPC calls, and behavior can be customized
+/// using its properties.
 ///
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
@@ -221,9 +219,8 @@ internal final class Connectrpc_Conformance_V1_UnimplementedServiceClientMock: C
 /// Mock implementation of `Connectrpc_Conformance_V1_ReconnectServiceClientInterface`.
 ///
 /// Production implementations can be substituted with instances of this
-/// class, allowing for mocking RPC calls. Behavior can be customized
-/// either through the properties on this class or by
-/// subclassing the class and overriding its methods.
+/// class to allow for mocking RPC calls, and behavior can be customized
+/// using its properties.
 ///
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
@@ -266,9 +263,8 @@ internal final class Connectrpc_Conformance_V1_ReconnectServiceClientMock: Conne
 /// Mock implementation of `Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientInterface`.
 ///
 /// Production implementations can be substituted with instances of this
-/// class, allowing for mocking RPC calls. Behavior can be customized
-/// either through the properties on this class or by
-/// subclassing the class and overriding its methods.
+/// class to allow for mocking RPC calls, and behavior can be customized
+/// using its properties.
 ///
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
@@ -311,9 +307,8 @@ internal final class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientMoc
 /// Mock implementation of `Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientInterface`.
 ///
 /// Production implementations can be substituted with instances of this
-/// class, allowing for mocking RPC calls. Behavior can be customized
-/// either through the properties on this class or by
-/// subclassing the class and overriding its methods.
+/// class to allow for mocking RPC calls, and behavior can be customized
+/// using its properties.
 ///
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
@@ -356,9 +351,8 @@ internal final class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientMock:
 /// Mock implementation of `Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClientInterface`.
 ///
 /// Production implementations can be substituted with instances of this
-/// class, allowing for mocking RPC calls. Behavior can be customized
-/// either through the properties on this class or by
-/// subclassing the class and overriding its methods.
+/// class to allow for mocking RPC calls, and behavior can be customized
+/// using its properties.
 ///
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
