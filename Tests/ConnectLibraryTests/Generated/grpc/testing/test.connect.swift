@@ -9,11 +9,11 @@ import SwiftProtobuf
 
 /// A simple service to test the various types of RPCs and experiment with
 /// performance with various types of payload.
-internal protocol Grpc_Testing_TestServiceClientInterface {
+internal protocol Grpc_Testing_TestServiceClientInterface: Sendable {
 
     /// One empty request followed by one empty response.
     @discardableResult
-    func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
+    func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
 
     /// One empty request followed by one empty response.
     @available(iOS 13, *)
@@ -21,7 +21,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
 
     /// One request followed by one response.
     @discardableResult
-    func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable
+    func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable
 
     /// One request followed by one response.
     @available(iOS 13, *)
@@ -29,7 +29,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
 
     /// One request followed by one response. This RPC always fails.
     @discardableResult
-    func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable
+    func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable
 
     /// One request followed by one response. This RPC always fails.
     @available(iOS 13, *)
@@ -39,7 +39,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
     /// headers set such that a caching HTTP proxy (such as GFE) can
     /// satisfy subsequent requests.
     @discardableResult
-    func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable
+    func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable
 
     /// One request followed by one response. Response has cache control
     /// headers set such that a caching HTTP proxy (such as GFE) can
@@ -49,7 +49,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
 
     /// One request followed by a sequence of responses (streamed download).
     /// The server returns the payload with client desired type and sizes.
-    func `streamingOutputCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_StreamingOutputCallRequest>
+    func `streamingOutputCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_StreamingOutputCallRequest>
 
     /// One request followed by a sequence of responses (streamed download).
     /// The server returns the payload with client desired type and sizes.
@@ -57,7 +57,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
     func `streamingOutputCall`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<Grpc_Testing_StreamingOutputCallRequest, Grpc_Testing_StreamingOutputCallResponse>
 
     /// One request followed by a sequence of responses (streamed download). This RPC always fails.
-    func `failStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_StreamingOutputCallRequest>
+    func `failStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_StreamingOutputCallRequest>
 
     /// One request followed by a sequence of responses (streamed download). This RPC always fails.
     @available(iOS 13, *)
@@ -65,7 +65,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
 
     /// A sequence of requests followed by one response (streamed upload).
     /// The server returns the aggregated size of client payload as the result.
-    func `streamingInputCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingInputCallResponse>) -> Void) -> any Connect.ClientOnlyStreamInterface<Grpc_Testing_StreamingInputCallRequest>
+    func `streamingInputCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_StreamingInputCallResponse>) -> Void) -> any Connect.ClientOnlyStreamInterface<Grpc_Testing_StreamingInputCallRequest>
 
     /// A sequence of requests followed by one response (streamed upload).
     /// The server returns the aggregated size of client payload as the result.
@@ -75,7 +75,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
     /// A sequence of requests with each request served by the server immediately.
     /// As one request could lead to multiple responses, this interface
     /// demonstrates the idea of full duplexing.
-    func `fullDuplexCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Grpc_Testing_StreamingOutputCallRequest>
+    func `fullDuplexCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Grpc_Testing_StreamingOutputCallRequest>
 
     /// A sequence of requests with each request served by the server immediately.
     /// As one request could lead to multiple responses, this interface
@@ -87,7 +87,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
     /// The server buffers all the client requests and then serves them in order. A
     /// stream of responses are returned to the client when the server starts with
     /// first request.
-    func `halfDuplexCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Grpc_Testing_StreamingOutputCallRequest>
+    func `halfDuplexCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Grpc_Testing_StreamingOutputCallRequest>
 
     /// A sequence of requests followed by a sequence of responses.
     /// The server buffers all the client requests and then serves them in order. A
@@ -99,7 +99,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented methods.
     @discardableResult
-    func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
+    func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
 
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented methods.
@@ -108,7 +108,7 @@ internal protocol Grpc_Testing_TestServiceClientInterface {
 
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented streaming output methods.
-    func `unimplementedStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty>
+    func `unimplementedStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty>
 
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented streaming output methods.
@@ -125,7 +125,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
     }
 
     @discardableResult
-    internal func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `emptyCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/grpc.testing.TestService/EmptyCall", request: request, headers: headers, completion: completion)
     }
 
@@ -135,7 +135,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
     }
 
     @discardableResult
-    internal func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable {
+    internal func `unaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/grpc.testing.TestService/UnaryCall", request: request, headers: headers, completion: completion)
     }
 
@@ -145,7 +145,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
     }
 
     @discardableResult
-    internal func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable {
+    internal func `failUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/grpc.testing.TestService/FailUnaryCall", request: request, headers: headers, completion: completion)
     }
 
@@ -155,7 +155,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
     }
 
     @discardableResult
-    internal func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable {
+    internal func `cacheableUnaryCall`(request: Grpc_Testing_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_SimpleResponse>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/grpc.testing.TestService/CacheableUnaryCall", request: request, headers: headers, completion: completion)
     }
 
@@ -164,7 +164,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return await self.client.unary(path: "/grpc.testing.TestService/CacheableUnaryCall", request: request, headers: headers)
     }
 
-    internal func `streamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_StreamingOutputCallRequest> {
+    internal func `streamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_StreamingOutputCallRequest> {
         return self.client.serverOnlyStream(path: "/grpc.testing.TestService/StreamingOutputCall", headers: headers, onResult: onResult)
     }
 
@@ -173,7 +173,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.serverOnlyStream(path: "/grpc.testing.TestService/StreamingOutputCall", headers: headers)
     }
 
-    internal func `failStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_StreamingOutputCallRequest> {
+    internal func `failStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_StreamingOutputCallRequest> {
         return self.client.serverOnlyStream(path: "/grpc.testing.TestService/FailStreamingOutputCall", headers: headers, onResult: onResult)
     }
 
@@ -182,7 +182,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.serverOnlyStream(path: "/grpc.testing.TestService/FailStreamingOutputCall", headers: headers)
     }
 
-    internal func `streamingInputCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingInputCallResponse>) -> Void) -> any Connect.ClientOnlyStreamInterface<Grpc_Testing_StreamingInputCallRequest> {
+    internal func `streamingInputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_StreamingInputCallResponse>) -> Void) -> any Connect.ClientOnlyStreamInterface<Grpc_Testing_StreamingInputCallRequest> {
         return self.client.clientOnlyStream(path: "/grpc.testing.TestService/StreamingInputCall", headers: headers, onResult: onResult)
     }
 
@@ -191,7 +191,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.clientOnlyStream(path: "/grpc.testing.TestService/StreamingInputCall", headers: headers)
     }
 
-    internal func `fullDuplexCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Grpc_Testing_StreamingOutputCallRequest> {
+    internal func `fullDuplexCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Grpc_Testing_StreamingOutputCallRequest> {
         return self.client.bidirectionalStream(path: "/grpc.testing.TestService/FullDuplexCall", headers: headers, onResult: onResult)
     }
 
@@ -200,7 +200,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return self.client.bidirectionalStream(path: "/grpc.testing.TestService/FullDuplexCall", headers: headers)
     }
 
-    internal func `halfDuplexCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Grpc_Testing_StreamingOutputCallRequest> {
+    internal func `halfDuplexCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Grpc_Testing_StreamingOutputCallRequest> {
         return self.client.bidirectionalStream(path: "/grpc.testing.TestService/HalfDuplexCall", headers: headers, onResult: onResult)
     }
 
@@ -210,7 +210,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
     }
 
     @discardableResult
-    internal func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/grpc.testing.TestService/UnimplementedCall", request: request, headers: headers, completion: completion)
     }
 
@@ -219,7 +219,7 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
         return await self.client.unary(path: "/grpc.testing.TestService/UnimplementedCall", request: request, headers: headers)
     }
 
-    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty> {
+    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty> {
         return self.client.serverOnlyStream(path: "/grpc.testing.TestService/UnimplementedStreamingOutputCall", headers: headers, onResult: onResult)
     }
 
@@ -247,18 +247,18 @@ internal final class Grpc_Testing_TestServiceClient: Grpc_Testing_TestServiceCli
 
 /// A simple service NOT implemented at servers so clients can test for
 /// that case.
-internal protocol Grpc_Testing_UnimplementedServiceClientInterface {
+internal protocol Grpc_Testing_UnimplementedServiceClientInterface: Sendable {
 
     /// A call that no server should implement
     @discardableResult
-    func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
+    func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
 
     /// A call that no server should implement
     @available(iOS 13, *)
     func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
 
     /// A call that no server should implement
-    func `unimplementedStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty>
+    func `unimplementedStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty>
 
     /// A call that no server should implement
     @available(iOS 13, *)
@@ -274,7 +274,7 @@ internal final class Grpc_Testing_UnimplementedServiceClient: Grpc_Testing_Unimp
     }
 
     @discardableResult
-    internal func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `unimplementedCall`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/grpc.testing.UnimplementedService/UnimplementedCall", request: request, headers: headers, completion: completion)
     }
 
@@ -283,7 +283,7 @@ internal final class Grpc_Testing_UnimplementedServiceClient: Grpc_Testing_Unimp
         return await self.client.unary(path: "/grpc.testing.UnimplementedService/UnimplementedCall", request: request, headers: headers)
     }
 
-    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty> {
+    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Grpc_Testing_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<Grpc_Testing_Empty> {
         return self.client.serverOnlyStream(path: "/grpc.testing.UnimplementedService/UnimplementedStreamingOutputCall", headers: headers, onResult: onResult)
     }
 
@@ -301,16 +301,16 @@ internal final class Grpc_Testing_UnimplementedServiceClient: Grpc_Testing_Unimp
 }
 
 /// A service used to control reconnect server.
-internal protocol Grpc_Testing_ReconnectServiceClientInterface {
+internal protocol Grpc_Testing_ReconnectServiceClientInterface: Sendable {
 
     @discardableResult
-    func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
+    func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
 
     @available(iOS 13, *)
     func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
 
     @discardableResult
-    func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_ReconnectInfo>) -> Void) -> Connect.Cancelable
+    func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_ReconnectInfo>) -> Void) -> Connect.Cancelable
 
     @available(iOS 13, *)
     func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_ReconnectInfo>
@@ -325,7 +325,7 @@ internal final class Grpc_Testing_ReconnectServiceClient: Grpc_Testing_Reconnect
     }
 
     @discardableResult
-    internal func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `start`(request: Grpc_Testing_ReconnectParams, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/grpc.testing.ReconnectService/Start", request: request, headers: headers, completion: completion)
     }
 
@@ -335,7 +335,7 @@ internal final class Grpc_Testing_ReconnectServiceClient: Grpc_Testing_Reconnect
     }
 
     @discardableResult
-    internal func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_ReconnectInfo>) -> Void) -> Connect.Cancelable {
+    internal func `stop`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_ReconnectInfo>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/grpc.testing.ReconnectService/Stop", request: request, headers: headers, completion: completion)
     }
 
@@ -353,11 +353,11 @@ internal final class Grpc_Testing_ReconnectServiceClient: Grpc_Testing_Reconnect
 }
 
 /// A service used to obtain stats for verifying LB behavior.
-internal protocol Grpc_Testing_LoadBalancerStatsServiceClientInterface {
+internal protocol Grpc_Testing_LoadBalancerStatsServiceClientInterface: Sendable {
 
     /// Gets the backend distribution for RPCs sent by a test client.
     @discardableResult
-    func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>) -> Void) -> Connect.Cancelable
+    func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>) -> Void) -> Connect.Cancelable
 
     /// Gets the backend distribution for RPCs sent by a test client.
     @available(iOS 13, *)
@@ -365,7 +365,7 @@ internal protocol Grpc_Testing_LoadBalancerStatsServiceClientInterface {
 
     /// Gets the accumulated stats for RPCs sent by a test client.
     @discardableResult
-    func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>) -> Void) -> Connect.Cancelable
+    func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>) -> Void) -> Connect.Cancelable
 
     /// Gets the accumulated stats for RPCs sent by a test client.
     @available(iOS 13, *)
@@ -381,7 +381,7 @@ internal final class Grpc_Testing_LoadBalancerStatsServiceClient: Grpc_Testing_L
     }
 
     @discardableResult
-    internal func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>) -> Void) -> Connect.Cancelable {
+    internal func `getClientStats`(request: Grpc_Testing_LoadBalancerStatsRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_LoadBalancerStatsResponse>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/grpc.testing.LoadBalancerStatsService/GetClientStats", request: request, headers: headers, completion: completion)
     }
 
@@ -391,7 +391,7 @@ internal final class Grpc_Testing_LoadBalancerStatsServiceClient: Grpc_Testing_L
     }
 
     @discardableResult
-    internal func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>) -> Void) -> Connect.Cancelable {
+    internal func `getClientAccumulatedStats`(request: Grpc_Testing_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_LoadBalancerAccumulatedStatsResponse>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/grpc.testing.LoadBalancerStatsService/GetClientAccumulatedStats", request: request, headers: headers, completion: completion)
     }
 
@@ -409,16 +409,16 @@ internal final class Grpc_Testing_LoadBalancerStatsServiceClient: Grpc_Testing_L
 }
 
 /// A service to remotely control health status of an xDS test server.
-internal protocol Grpc_Testing_XdsUpdateHealthServiceClientInterface {
+internal protocol Grpc_Testing_XdsUpdateHealthServiceClientInterface: Sendable {
 
     @discardableResult
-    func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
+    func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
 
     @available(iOS 13, *)
     func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
 
     @discardableResult
-    func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
+    func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable
 
     @available(iOS 13, *)
     func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers) async -> ResponseMessage<Grpc_Testing_Empty>
@@ -433,7 +433,7 @@ internal final class Grpc_Testing_XdsUpdateHealthServiceClient: Grpc_Testing_Xds
     }
 
     @discardableResult
-    internal func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `setServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/grpc.testing.XdsUpdateHealthService/SetServing", request: request, headers: headers, completion: completion)
     }
 
@@ -443,7 +443,7 @@ internal final class Grpc_Testing_XdsUpdateHealthServiceClient: Grpc_Testing_Xds
     }
 
     @discardableResult
-    internal func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `setNotServing`(request: Grpc_Testing_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_Empty>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/grpc.testing.XdsUpdateHealthService/SetNotServing", request: request, headers: headers, completion: completion)
     }
 
@@ -461,11 +461,11 @@ internal final class Grpc_Testing_XdsUpdateHealthServiceClient: Grpc_Testing_Xds
 }
 
 /// A service to dynamically update the configuration of an xDS test client.
-internal protocol Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface {
+internal protocol Grpc_Testing_XdsUpdateClientConfigureServiceClientInterface: Sendable {
 
     /// Update the tes client's configuration.
     @discardableResult
-    func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Grpc_Testing_ClientConfigureResponse>) -> Void) -> Connect.Cancelable
+    func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_ClientConfigureResponse>) -> Void) -> Connect.Cancelable
 
     /// Update the tes client's configuration.
     @available(iOS 13, *)
@@ -481,7 +481,7 @@ internal final class Grpc_Testing_XdsUpdateClientConfigureServiceClient: Grpc_Te
     }
 
     @discardableResult
-    internal func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Grpc_Testing_ClientConfigureResponse>) -> Void) -> Connect.Cancelable {
+    internal func `configure`(request: Grpc_Testing_ClientConfigureRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Grpc_Testing_ClientConfigureResponse>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/grpc.testing.XdsUpdateClientConfigureService/Configure", request: request, headers: headers, completion: completion)
     }
 

@@ -18,17 +18,8 @@ import SwiftProtobufPluginLibrary
 
 /// Responsible for generating services and RPCs that are compatible with the Connect library.
 final class ConnectClientGenerator: Generator {
-    private let visibility: String
-
     required init(_ descriptor: FileDescriptor, options: GeneratorOptions) {
-        switch options.visibility {
-        case .internal:
-            self.visibility = "internal"
-        case .public:
-            self.visibility = "public"
-        }
         super.init(descriptor, options: options)
-
         self.printContent()
     }
 
@@ -47,7 +38,7 @@ final class ConnectClientGenerator: Generator {
         self.printCommentsIfNeeded(for: service)
 
         let protocolName = service.protocolName(using: self.namer)
-        self.printLine("\(self.visibility) protocol \(protocolName) {")
+        self.printLine("\(self.visibility) protocol \(protocolName): Sendable {")
         self.indent {
             for method in service.methods {
                 if self.options.generateCallbackMethods {

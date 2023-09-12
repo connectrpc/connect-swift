@@ -37,28 +37,28 @@ extension MethodDescriptor {
             return """
             func `\(methodName)`\
             (headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
-            onResult: @escaping (Connect.StreamResult<\(outputName)>) -> Void) \
+            onResult: @escaping @Sendable (Connect.StreamResult<\(outputName)>) -> Void) \
             -> any Connect.BidirectionalStreamInterface<\(inputName)>
             """
         } else if self.serverStreaming {
             return """
             func `\(methodName)`\
             (headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
-            onResult: @escaping (Connect.StreamResult<\(outputName)>) -> Void) \
+            onResult: @escaping @Sendable (Connect.StreamResult<\(outputName)>) -> Void) \
             -> any Connect.ServerOnlyStreamInterface<\(inputName)>
             """
         } else if self.clientStreaming {
             return """
             func `\(methodName)`\
             (headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
-            onResult: @escaping (Connect.StreamResult<\(outputName)>) -> Void) \
+            onResult: @escaping @Sendable (Connect.StreamResult<\(outputName)>) -> Void) \
             -> any Connect.ClientOnlyStreamInterface<\(inputName)>
             """
         } else {
             return """
             func `\(methodName)`\
             (request: \(inputName), headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
-            completion: @escaping (ResponseMessage<\(outputName)>) -> Void) \
+            completion: @escaping @Sendable (ResponseMessage<\(outputName)>) -> Void) \
             -> Connect.Cancelable
             """
         }

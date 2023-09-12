@@ -86,15 +86,15 @@ final class CallbackConformance: XCTestCase {
         try self.executeTestWithClients { client in
             let sizes = [31_415, 9, 2_653, 58_979]
             let expectation = self.expectation(description: "Stream completes")
-            var responseCount = 0
+            let responseCount = Locked(0)
             let stream = client.streamingOutputCall { result in
                 switch result {
                 case .headers:
                     break
 
                 case .message(let output):
-                    XCTAssertEqual(output.payload.body.count, sizes[responseCount])
-                    responseCount += 1
+                    XCTAssertEqual(output.payload.body.count, sizes[responseCount.value])
+                    responseCount.perform { $0 += 1 }
 
                 case .complete(let code, let error, _):
                     XCTAssertEqual(code, .ok)
@@ -112,7 +112,7 @@ final class CallbackConformance: XCTestCase {
             })
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
-            XCTAssertEqual(responseCount, 4)
+            XCTAssertEqual(responseCount.value, 4)
         }
     }
 
