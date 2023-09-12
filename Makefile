@@ -8,7 +8,7 @@ MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-print-directory
 BIN := .tmp/bin
 LICENSE_HEADER_YEAR_RANGE := 2022-2023
-CONFORMANCE_VERSION := 3d74b3c470b0e98995cc67644d14ecb4f32db790
+CONFORMANCE_VERSION := 8e6893a4b801c282eb6cf9ad03d38b993b66ca66
 LICENSE_HEADER_VERSION := v1.12.0
 LICENSE_IGNORE := -e Package.swift \
     -e $(BIN)\/ \
@@ -47,10 +47,10 @@ conformanceserverstop: ## Stop the conformance server
 .PHONY: conformanceserverrun
 conformanceserverrun: conformanceserverstop ## Start the conformance server
 	docker run --rm --name serverconnect -p 8080:8080 -p 8081:8081 -d \
-		bufbuild/connect-crosstest:$(CONFORMANCE_VERSION) \
+		connectrpc/conformance:$(CONFORMANCE_VERSION) \
 		/usr/local/bin/serverconnect --h1port "8080" --h2port "8081" --cert "cert/localhost.crt" --key "cert/localhost.key"
 	docker run --rm --name servergrpc -p 8083:8083 -d \
-		bufbuild/connect-crosstest:$(CONFORMANCE_VERSION) \
+		connectrpc/conformance:$(CONFORMANCE_VERSION) \
 		/usr/local/bin/servergrpc --port "8083" --cert "cert/localhost.crt" --key "cert/localhost.key"
 
 .PHONY: generate

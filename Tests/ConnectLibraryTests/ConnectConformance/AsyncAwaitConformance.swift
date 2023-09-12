@@ -344,7 +344,7 @@ final class AsyncAwaitConformance: XCTestCase {
         await self.executeTestWithClients { client in
             let expectedErrorDetail = Connectrpc_Conformance_V1_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
-                proto.domain = "connect-crosstest"
+                proto.domain = "connect-conformance"
             }
             let response = await client.failUnaryCall(request: Connectrpc_Conformance_V1_SimpleRequest())
             XCTAssertEqual(response.error?.code, .resourceExhausted)
@@ -357,7 +357,7 @@ final class AsyncAwaitConformance: XCTestCase {
         try await self.executeTestWithClients { client in
             let expectedErrorDetail = Connectrpc_Conformance_V1_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
-                proto.domain = "connect-crosstest"
+                proto.domain = "connect-conformance"
             }
             let expectation = self.expectation(description: "Stream completes")
             let stream = client.failStreamingOutputCall()
@@ -392,7 +392,7 @@ final class AsyncAwaitConformance: XCTestCase {
         try await self.executeTestWithClients { client in
             let expectedErrorDetail = Connectrpc_Conformance_V1_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
-                proto.domain = "connect-crosstest"
+                proto.domain = "connect-conformance"
             }
             let sizes = [31_415, 9, 2_653, 58_979]
             let stream = client.failStreamingOutputCall()

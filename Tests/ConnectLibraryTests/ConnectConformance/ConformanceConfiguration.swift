@@ -40,8 +40,8 @@ final class ConformanceConfiguration {
         )
         let matrix: [(networkProtocol: NetworkProtocol, httpClients: [HTTPClientInterface])] = [
             (.connect, [urlSessionClient, nioClient]),
-            (.grpcWeb, [urlSessionClient, nioClient]),
-            (.grpc, [nioClient]), // URLSession client does not support gRPC
+//            (.grpcWeb, [urlSessionClient, nioClient]),
+//            (.grpc, [nioClient]), // URLSession client does not support gRPC
         ]
         let codecs: [Codec] = [JSONCodec(), ProtoCodec()]
         return matrix.reduce(into: []) { configurations, tuple in

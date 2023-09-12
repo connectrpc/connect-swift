@@ -379,7 +379,7 @@ final class CallbackConformance: XCTestCase {
         self.executeTestWithClients { client in
             let expectedErrorDetail = Connectrpc_Conformance_V1_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
-                proto.domain = "connect-crosstest"
+                proto.domain = "connect-conformance"
             }
             let expectation = self.expectation(description: "Request completes")
             client.failUnaryCall(request: Connectrpc_Conformance_V1_SimpleRequest()) { response in
@@ -397,7 +397,7 @@ final class CallbackConformance: XCTestCase {
         try self.executeTestWithClients { client in
             let expectedErrorDetail = Connectrpc_Conformance_V1_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
-                proto.domain = "connect-crosstest"
+                proto.domain = "connect-conformance"
             }
             let expectation = self.expectation(description: "Stream completes")
             let stream = client.failStreamingOutputCall { result in
@@ -432,7 +432,7 @@ final class CallbackConformance: XCTestCase {
         try self.executeTestWithClients { client in
             let expectedErrorDetail = Connectrpc_Conformance_V1_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
-                proto.domain = "connect-crosstest"
+                proto.domain = "connect-conformance"
             }
             let expectation = self.expectation(description: "Stream completes")
             var responseCount = 0
