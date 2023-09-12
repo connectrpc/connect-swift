@@ -19,7 +19,7 @@ import XCTest
 
 final class ConnectErrorTests: XCTestCase {
     func testDeserializingFullErrorAndUnpackingDetails() throws {
-        let expectedDetails = Grpc_Testing_SimpleResponse.with { $0.hostname = "foobar" }
+        let expectedDetails = Connectrpc_Conformance_SimpleResponse.with { $0.hostname = "foobar" }
         let errorData = try self.errorData(expectedDetails: [expectedDetails])
         let error = try JSONDecoder().decode(ConnectError.self, from: errorData)
         XCTAssertEqual(error.code, .unavailable)
@@ -31,8 +31,8 @@ final class ConnectErrorTests: XCTestCase {
     }
 
     func testDeserializingFullErrorAndUnpackingMultipleDetails() throws {
-        let expectedDetails1 = Grpc_Testing_SimpleResponse.with { $0.hostname = "foo" }
-        let expectedDetails2 = Grpc_Testing_SimpleResponse.with { $0.hostname = "bar" }
+        let expectedDetails1 = Connectrpc_Conformance_SimpleResponse.with { $0.hostname = "foo" }
+        let expectedDetails2 = Connectrpc_Conformance_SimpleResponse.with { $0.hostname = "bar" }
         let errorData = try self.errorData(expectedDetails: [expectedDetails1, expectedDetails2])
         let error = try JSONDecoder().decode(ConnectError.self, from: errorData)
         XCTAssertEqual(error.code, .unavailable)
@@ -44,7 +44,7 @@ final class ConnectErrorTests: XCTestCase {
     }
 
     func testDeserializingErrorUsingHelperFunctionLowercasesHeaderKeys() throws {
-        let expectedDetails = Grpc_Testing_SimpleResponse.with { $0.hostname = "foobar" }
+        let expectedDetails = Connectrpc_Conformance_SimpleResponse.with { $0.hostname = "foobar" }
         let errorData = try self.errorData(expectedDetails: [expectedDetails])
         let error = ConnectError.from(
             code: .aborted,
@@ -72,7 +72,7 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertNil(error.message)
         XCTAssertNil(error.exception)
         XCTAssertTrue(error.details.isEmpty)
-        XCTAssertEqual(error.unpackedDetails(), [Grpc_Testing_SimpleResponse]())
+        XCTAssertEqual(error.unpackedDetails(), [Connectrpc_Conformance_SimpleResponse]())
         XCTAssertTrue(error.metadata.isEmpty)
     }
 

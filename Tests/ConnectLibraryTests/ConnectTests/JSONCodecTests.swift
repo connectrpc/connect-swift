@@ -18,7 +18,7 @@ import SwiftProtobuf
 import XCTest
 
 final class JSONCodecTests: XCTestCase {
-    private let message: Grpc_Testing_SimpleResponse = .with { proto in
+    private let message: Connectrpc_Conformance_SimpleResponse = .with { proto in
         proto.grpclbRouteType = .backend
         proto.payload = .with { payload in payload.body = Data([0x0, 0x1, 0x2, 0x3]) }
         proto.serverID = "12345"

@@ -44,7 +44,10 @@ private extension Trailers {
     func connectErrorDetailsFromGRPC() -> [ConnectError.Detail] {
         return self[HeaderConstants.grpcStatusDetails]?
             .first
-            .flatMap { Data(base64Encoded: $0) }
+            .flatMap {
+                let padded = $0.padding(toLength: (($0.count+3)/4)*4, withPad: "=", startingAt: 0)
+                return Data(base64Encoded: padded)
+            }
             .flatMap { data -> Grpc_Status_V1_Status? in
                 return try? ProtoCodec().deserialize(source: data)
             }?
