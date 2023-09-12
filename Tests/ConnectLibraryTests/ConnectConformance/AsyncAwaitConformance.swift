@@ -302,7 +302,8 @@ final class AsyncAwaitConformance: XCTestCase {
                     XCTAssertEqual(
                         (error as? ConnectError)?.message,
                         """
-                        connectrpc.conformance.v1.TestService.UnimplementedStreamingOutputCall is not implemented
+                        connectrpc.conformance.v1.TestService.UnimplementedStreamingOutputCall is \
+                        not implemented
                         """
                     )
                     expectation.fulfill()
@@ -352,7 +353,9 @@ final class AsyncAwaitConformance: XCTestCase {
                 proto.reason = "soirée 🎉"
                 proto.domain = "connect-conformance"
             }
-            let response = await client.failUnaryCall(request: Connectrpc_Conformance_V1_SimpleRequest())
+            let response = await client.failUnaryCall(
+                request: Connectrpc_Conformance_V1_SimpleRequest()
+            )
             XCTAssertEqual(response.error?.code, .resourceExhausted)
             XCTAssertEqual(response.error?.message, "soirée 🎉")
             XCTAssertEqual(response.error?.unpackedDetails(), [expectedErrorDetail])

@@ -19,7 +19,9 @@ import XCTest
 
 final class ConnectErrorTests: XCTestCase {
     func testDeserializingFullErrorAndUnpackingDetails() throws {
-        let expectedDetails = Connectrpc_Conformance_V1_SimpleResponse.with { $0.hostname = "foobar" }
+        let expectedDetails = Connectrpc_Conformance_V1_SimpleResponse.with {
+            $0.hostname = "foobar"
+        }
         let errorData = try self.errorData(expectedDetails: [expectedDetails])
         let error = try JSONDecoder().decode(ConnectError.self, from: errorData)
         XCTAssertEqual(error.code, .unavailable)
@@ -44,7 +46,9 @@ final class ConnectErrorTests: XCTestCase {
     }
 
     func testDeserializingErrorUsingHelperFunctionLowercasesHeaderKeys() throws {
-        let expectedDetails = Connectrpc_Conformance_V1_SimpleResponse.with { $0.hostname = "foobar" }
+        let expectedDetails = Connectrpc_Conformance_V1_SimpleResponse.with {
+            $0.hostname = "foobar"
+        }
         let errorData = try self.errorData(expectedDetails: [expectedDetails])
         let error = ConnectError.from(
             code: .aborted,

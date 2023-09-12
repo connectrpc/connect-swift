@@ -55,7 +55,8 @@ final class ConnectMocksTests: XCTestCase {
             .with { $0.responseParameters = [.with { $0.size = 123 }] },
             .with { $0.responseParameters = [.with { $0.size = 456 }] },
         ]
-        let expectedResults: [StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>] = [
+        let expectedResults: [StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>] =
+        [
             .headers(["x-header": ["123"]]),
             .message(.with { $0.payload.body = Data(repeating: 0, count: 123) }),
             .message(.with { $0.payload.body = Data(repeating: 0, count: 456) }),
@@ -69,7 +70,9 @@ final class ConnectMocksTests: XCTestCase {
         client.mockFullDuplexCall.onClose = { closeCalled = true }
         client.mockFullDuplexCall.outputs = Array(expectedResults)
 
-        var receivedResults = [StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>]()
+        var receivedResults = [
+            StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>
+        ]()
         let stream = client.fullDuplexCall { receivedResults.append($0) }
         try stream.send(expectedInputs[0])
         try stream.send(expectedInputs[1])
@@ -88,7 +91,8 @@ final class ConnectMocksTests: XCTestCase {
             .with { $0.responseParameters = [.with { $0.size = 123 }] },
             .with { $0.responseParameters = [.with { $0.size = 456 }] },
         ]
-        var expectedResults: [StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>] = [
+        var expectedResults: [StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>] =
+        [
             .headers(["x-header": ["123"]]),
             .message(.with { $0.payload.body = Data(repeating: 0, count: 123) }),
             .message(.with { $0.payload.body = Data(repeating: 0, count: 456) }),
@@ -148,7 +152,8 @@ final class ConnectMocksTests: XCTestCase {
         let expectedInput = Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { request in
             request.responseParameters = [.with { $0.size = 123 }]
         }
-        var expectedResults: [StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>] = [
+        var expectedResults: [StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>] =
+        [
             .headers(["x-header": ["123"]]),
             .message(.with { $0.payload.body = Data(repeating: 0, count: 123) }),
             .message(.with { $0.payload.body = Data(repeating: 0, count: 456) }),
