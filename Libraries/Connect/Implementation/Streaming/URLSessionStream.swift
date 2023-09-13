@@ -15,13 +15,14 @@
 import Foundation
 
 /// Stream implementation that wraps a `URLSession` stream.
+///
+/// Note: This class is `@unchecked Sendable` because the `Foundation.{Input|Output}Stream`
+/// types do not conform to `Sendable`.
 final class URLSessionStream: NSObject, @unchecked Sendable {
     private let closedByServer = Locked(false)
-    /// Foundation.InputStream does not conform to Sendable, hence @unchecked on the class.
     private let readStream: Foundation.InputStream
     private let responseCallbacks: ResponseCallbacks
     private let task: URLSessionUploadTask
-    /// Foundation.OutputStream does not conform to Sendable, hence @unchecked on the class.
     private let writeStream: Foundation.OutputStream
 
     enum Error: Swift.Error {
