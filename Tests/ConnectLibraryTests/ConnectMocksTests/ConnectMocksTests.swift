@@ -29,11 +29,11 @@ final class ConnectMocksTests: XCTestCase {
             return ResponseMessage(result: .success(.with { $0.hostname = "pong" }))
         }
 
-        var receivedMessage: Connectrpc_Conformance_V1_SimpleResponse?
+        let receivedMessage = Locked<Connectrpc_Conformance_V1_SimpleResponse?>(nil)
         client.unaryCall(request: .with { $0.fillUsername = true }) { response in
-            receivedMessage = response.message
+            receivedMessage.value = response.message
         }
-        XCTAssertEqual(receivedMessage?.hostname, "pong")
+        XCTAssertEqual(receivedMessage.value?.hostname, "pong")
     }
 
     func testMockUnaryAsyncAwait() async {
@@ -70,17 +70,19 @@ final class ConnectMocksTests: XCTestCase {
         client.mockFullDuplexCall.onClose = { closeCalled = true }
         client.mockFullDuplexCall.outputs = Array(expectedResults)
 
-        var receivedResults = [
-            StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>
-        ]()
-        let stream = client.fullDuplexCall { receivedResults.append($0) }
+        let receivedResults = Locked(
+            [StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>]()
+        )
+        let stream = client.fullDuplexCall { result in
+            receivedResults.perform { $0.append(result) }
+        }
         try stream.send(expectedInputs[0])
         try stream.send(expectedInputs[1])
         stream.close()
 
         XCTAssertEqual(sentInputs, expectedInputs)
         XCTAssertEqual(client.mockFullDuplexCall.inputs, expectedInputs)
-        XCTAssertEqual(receivedResults, expectedResults)
+        XCTAssertEqual(receivedResults.value, expectedResults)
         XCTAssertTrue(closeCalled)
         XCTAssertTrue(client.mockFullDuplexCall.isClosed)
     }
@@ -138,13 +140,15 @@ final class ConnectMocksTests: XCTestCase {
         client.mockUnimplementedStreamingOutputCall.onSend = { sentInputs.append($0) }
         client.mockUnimplementedStreamingOutputCall.outputs = Array(expectedResults)
 
-        var receivedResults = [StreamResult<SwiftProtobuf.Google_Protobuf_Empty>]()
-        let stream = client.unimplementedStreamingOutputCall { receivedResults.append($0) }
+        let receivedResults = Locked([StreamResult<SwiftProtobuf.Google_Protobuf_Empty>]())
+        let stream = client.unimplementedStreamingOutputCall { result in
+            receivedResults.perform { $0.append(result) }
+        }
         try stream.send(expectedInput)
 
         XCTAssertEqual(sentInputs, [expectedInput])
         XCTAssertEqual(client.mockUnimplementedStreamingOutputCall.inputs, [expectedInput])
-        XCTAssertEqual(receivedResults, expectedResults)
+        XCTAssertEqual(receivedResults.value, expectedResults)
     }
 
     func testMockServerOnlyStreamAsyncAwait() async throws {

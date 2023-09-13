@@ -54,12 +54,18 @@ final class ConnectMockGenerator: Generator {
         self.printLine("/// Mock implementation of `\(protocolName)`.")
         self.printLine("///")
         self.printLine("/// Production implementations can be substituted with instances of this")
-        self.printLine("/// class, allowing for mocking RPC calls. Behavior can be customized")
+        self.printLine("/// class to mock RPC calls. Behavior can be customized")
         self.printLine("/// either through the properties on this class or by")
-        self.printLine("/// subclassing the class and overriding its methods.")
+        self.printLine("/// subclassing the mock and overriding its methods.")
+        self.printLine("///")
+        self.printLine("/// Note: This class does not handle thread-safe locking, but provides")
+        self.printLine("/// `@unchecked Sendable` conformance to simplify testing and mocking.")
         self.printLine("@available(iOS 13, *)")
         self.printLine(
-            "\(self.typeVisibility) class \(service.mockName(using: self.namer)): \(protocolName) {"
+            """
+            \(self.typeVisibility) class \(service.mockName(using: self.namer)): \
+            \(protocolName), @unchecked Sendable {
+            """
         )
         self.indent {
             if self.options.generateCallbackMethods {

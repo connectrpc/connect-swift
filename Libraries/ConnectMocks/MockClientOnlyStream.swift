@@ -24,6 +24,6 @@ import SwiftProtobuf
 /// To return data over the stream, outputs can be specified using `init(outputs: ...)`.
 @available(iOS 13.0, *)
 open class MockClientOnlyStream<
-    Input: SwiftProtobuf.Message,
-    Output: SwiftProtobuf.Message
+    Input: ProtobufMessage,
+    Output: ProtobufMessage
 >: MockBidirectionalStream<Input, Output>, ClientOnlyStreamInterface {}

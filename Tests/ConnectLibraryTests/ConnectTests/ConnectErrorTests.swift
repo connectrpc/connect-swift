@@ -87,7 +87,7 @@ final class ConnectErrorTests: XCTestCase {
 
     // MARK: - Private
 
-    private func errorData(expectedDetails: [SwiftProtobuf.Message]) throws -> Data {
+    private func errorData(expectedDetails: [ProtobufMessage]) throws -> Data {
         // Example error from https://connectrpc.com/docs/protocol/#error-end-stream
         let dictionary: [String: Any] = [
             "code": "unavailable",

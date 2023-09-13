@@ -13,11 +13,11 @@
 // limitations under the License.
 
 /// Type that wraps an action that can be canceled.
-public struct Cancelable {
+public struct Cancelable: Sendable {
     /// Cancel the current action.
-    public let cancel: () -> Void
+    public let cancel: @Sendable () -> Void
 
-    public init(cancel: @escaping () -> Void) {
+    public init(cancel: @escaping @Sendable () -> Void) {
         self.cancel = cancel
     }
 }

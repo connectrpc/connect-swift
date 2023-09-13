@@ -25,6 +25,6 @@ import SwiftProtobuf
 /// subclassing and overriding `results()`.
 @available(iOS 13, *)
 open class MockClientOnlyAsyncStream<
-    Input: SwiftProtobuf.Message,
-    Output: SwiftProtobuf.Message
+    Input: ProtobufMessage,
+    Output: ProtobufMessage
 >: MockBidirectionalAsyncStream<Input, Output>, ClientOnlyAsyncStreamInterface {}

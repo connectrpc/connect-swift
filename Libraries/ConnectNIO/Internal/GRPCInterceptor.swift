@@ -99,7 +99,7 @@ extension GRPCInterceptor: Connect.Interceptor {
     }
 
     func streamFunction() -> Connect.StreamFunction {
-        var responseHeaders: Connect.Headers?
+        let responseHeaders = Locked<Headers?>(nil)
         return Connect.StreamFunction(
             requestFunction: { request in
                 return Connect.HTTPRequest(
@@ -117,12 +117,12 @@ extension GRPCInterceptor: Connect.Interceptor {
             streamResultFunction: { result in
                 switch result {
                 case .headers(let headers):
-                    responseHeaders = headers
+                    responseHeaders.value = headers
                     return result
 
                 case .message(let data):
                     do {
-                        let responseCompressionPool = responseHeaders?[
+                        let responseCompressionPool = responseHeaders.value?[
                             Connect.HeaderConstants.grpcContentEncoding
                         ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
                         return .message(try Connect.Envelope.unpackMessage(

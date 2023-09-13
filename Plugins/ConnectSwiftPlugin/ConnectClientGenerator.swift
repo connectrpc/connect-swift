@@ -28,7 +28,6 @@ final class ConnectClientGenerator: Generator {
             self.visibility = "public"
         }
         super.init(descriptor, options: options)
-
         self.printContent()
     }
 
@@ -47,7 +46,7 @@ final class ConnectClientGenerator: Generator {
         self.printCommentsIfNeeded(for: service)
 
         let protocolName = service.protocolName(using: self.namer)
-        self.printLine("\(self.visibility) protocol \(protocolName) {")
+        self.printLine("\(self.visibility) protocol \(protocolName): Sendable {")
         self.indent {
             for method in service.methods {
                 if self.options.generateCallbackMethods {
@@ -64,7 +63,9 @@ final class ConnectClientGenerator: Generator {
 
         let className = service.implementationName(using: self.namer)
         self.printLine("/// Concrete implementation of `\(protocolName)`.")
-        self.printLine("\(self.visibility) final class \(className): \(protocolName) {")
+        self.printLine(
+            "\(self.visibility) final class \(className): \(protocolName), Sendable {"
+        )
         self.indent {
             self.printLine("private let client: Connect.ProtocolClientInterface")
             self.printLine()

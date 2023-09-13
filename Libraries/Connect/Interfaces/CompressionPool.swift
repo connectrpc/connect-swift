@@ -22,7 +22,7 @@ import Foundation
 ///
 /// Outbound request compression can be specified using additional options that specify a
 /// `compressionName` that matches a compression pool's `name()`.
-public protocol CompressionPool {
+public protocol CompressionPool: Sendable {
     /// The name of the compression pool, which corresponds to the `content-encoding` header.
     /// Example: `gzip`.
     ///

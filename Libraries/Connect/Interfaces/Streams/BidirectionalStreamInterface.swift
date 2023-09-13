@@ -17,7 +17,7 @@ import SwiftProtobuf
 /// Represents a bidirectional stream that can send request messages and initiate closes.
 public protocol BidirectionalStreamInterface<Input> {
     /// The input (request) message type.
-    associatedtype Input: SwiftProtobuf.Message
+    associatedtype Input: ProtobufMessage
 
     /// Send a request to the server over the stream.
     ///

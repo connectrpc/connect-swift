@@ -18,7 +18,7 @@ import SwiftProtobuf
 /// eventually receives a response) that can send request messages and initiate closes.
 public protocol ClientOnlyStreamInterface<Input> {
     /// The input (request) message type.
-    associatedtype Input: SwiftProtobuf.Message
+    associatedtype Input: ProtobufMessage
 
     /// Send a request to the server over the stream.
     ///

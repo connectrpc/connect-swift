@@ -17,11 +17,15 @@ import Foundation
 import os.log
 
 /// Concrete implementation of `HTTPClientInterface` backed by `URLSession`.
-open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
+///
+/// This class is thread-safe as-is through the use of an internal lock. It is marked as
+/// `open` and `@unchecked Sendable` so that consumers can subclass it if necessary, but
+/// subclasses must handle their own thread safety for added functionality.
+open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Sendable {
     /// Lock used for safely accessing stream storage.
     private let lock = Lock()
     /// Closures stored for notifying when metrics are available.
-    private var metricsClosures = [Int: (HTTPMetrics) -> Void]()
+    private var metricsClosures = [Int: @Sendable (HTTPMetrics) -> Void]()
     /// Force unwrapped to allow using `self` as the delegate.
     private var session: URLSession!
     /// List of active streams.
@@ -42,8 +46,8 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
     @discardableResult
     open func unary(
         request: HTTPRequest,
-        onMetrics: @Sendable @escaping (HTTPMetrics) -> Void,
-        onResponse: @Sendable @escaping (HTTPResponse) -> Void
+        onMetrics: @escaping @Sendable (HTTPMetrics) -> Void,
+        onResponse: @escaping @Sendable (HTTPResponse) -> Void
     ) -> Cancelable {
         assert(!request.isGRPC, "URLSessionHTTPClient does not support gRPC, use NIOHTTPClient")
         let urlRequest = URLRequest(httpRequest: request)
@@ -88,7 +92,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
         }
         self.lock.perform { self.metricsClosures[task.taskIdentifier] = onMetrics }
         task.resume()
-        return Cancelable(cancel: task.cancel)
+        return Cancelable { task.cancel() }
     }
 
     open func stream(
@@ -114,7 +118,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface {
                     urlSessionStream.close()
                 }
             },
-            sendClose: urlSessionStream.close
+            sendClose: { urlSessionStream.close() }
         )
     }
 }

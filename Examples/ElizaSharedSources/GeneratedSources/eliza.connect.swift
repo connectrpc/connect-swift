@@ -13,7 +13,7 @@ import SwiftProtobuf
 /// superficiality of human-computer communication. DOCTOR simulates a
 /// psychotherapist, and is commonly found as an Easter egg in emacs
 /// distributions.
-internal protocol Connectrpc_Eliza_V1_ElizaServiceClientInterface {
+internal protocol Connectrpc_Eliza_V1_ElizaServiceClientInterface: Sendable {
 
     /// Say is a unary RPC. Eliza responds to the prompt with a single sentence.
     @available(iOS 13, *)
@@ -32,7 +32,7 @@ internal protocol Connectrpc_Eliza_V1_ElizaServiceClientInterface {
 }
 
 /// Concrete implementation of `Connectrpc_Eliza_V1_ElizaServiceClientInterface`.
-internal final class Connectrpc_Eliza_V1_ElizaServiceClient: Connectrpc_Eliza_V1_ElizaServiceClientInterface {
+internal final class Connectrpc_Eliza_V1_ElizaServiceClient: Connectrpc_Eliza_V1_ElizaServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {

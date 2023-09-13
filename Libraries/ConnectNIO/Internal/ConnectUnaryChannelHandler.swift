@@ -19,7 +19,7 @@ import NIOFoundationCompat
 import NIOHTTP1
 
 /// NIO-based channel handler for unary requests made through the Connect library.
-final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
+final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
     private let eventLoop: NIOCore.EventLoop
     private let request: Connect.HTTPRequest
     private let onMetrics: (Connect.HTTPMetrics) -> Void
@@ -63,7 +63,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler {
         }
     }
 
-    private func runOnEventLoop(action: @escaping () -> Void) {
+    private func runOnEventLoop(action: @escaping @Sendable () -> Void) {
         if self.eventLoop.inEventLoop {
             action()
         } else {

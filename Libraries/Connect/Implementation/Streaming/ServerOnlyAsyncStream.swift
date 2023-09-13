@@ -16,7 +16,7 @@ import SwiftProtobuf
 
 /// Concrete implementation of `ServerOnlyAsyncStreamInterface`.
 @available(iOS 13, *)
-final class ServerOnlyAsyncStream<Input: SwiftProtobuf.Message, Output: SwiftProtobuf.Message> {
+final class ServerOnlyAsyncStream<Input: ProtobufMessage, Output: ProtobufMessage>: Sendable {
     private let bidirectionalStream: BidirectionalAsyncStream<Input, Output>
 
     init(bidirectionalStream: BidirectionalAsyncStream<Input, Output>) {

@@ -15,8 +15,11 @@
 import Foundation
 
 /// Stream implementation that wraps a `URLSession` stream.
-final class URLSessionStream: NSObject {
-    private var closedByServer = false
+///
+/// Note: This class is `@unchecked Sendable` because the `Foundation.{Input|Output}Stream`
+/// types do not conform to `Sendable`.
+final class URLSessionStream: NSObject, @unchecked Sendable {
+    private let closedByServer = Locked(false)
     private let readStream: Foundation.InputStream
     private let responseCallbacks: ResponseCallbacks
     private let task: URLSessionUploadTask
@@ -93,23 +96,23 @@ final class URLSessionStream: NSObject {
         let code = Code.fromURLSessionCode(response.statusCode)
         self.responseCallbacks.receiveResponseHeaders(response.formattedLowercasedHeaders())
         if code != .ok {
-            self.closedByServer = true
+            self.closedByServer.value = true
             self.responseCallbacks.receiveClose(code, [:], nil)
         }
     }
 
     func handleResponseData(_ data: Data) {
-        if !self.closedByServer {
+        if !self.closedByServer.value {
             self.responseCallbacks.receiveResponseData(data)
         }
     }
 
     func handleCompletion(error: Swift.Error?) {
-        if self.closedByServer {
+        if self.closedByServer.value {
             return
         }
 
-        self.closedByServer = true
+        self.closedByServer.value = true
         if let error = error {
             self.responseCallbacks.receiveClose(
                 Code.fromURLSessionCode((error as NSError).code),

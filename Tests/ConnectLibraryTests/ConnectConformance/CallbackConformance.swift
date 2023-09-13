@@ -87,15 +87,17 @@ final class CallbackConformance: XCTestCase {
         try self.executeTestWithClients { client in
             let sizes = [31_415, 9, 2_653, 58_979]
             let expectation = self.expectation(description: "Stream completes")
-            var responseCount = 0
+            let responseCount = Locked(0)
             let stream = client.streamingOutputCall { result in
                 switch result {
                 case .headers:
                     break
 
                 case .message(let output):
-                    XCTAssertEqual(output.payload.body.count, sizes[responseCount])
-                    responseCount += 1
+                    responseCount.perform { responseCount in
+                        XCTAssertEqual(output.payload.body.count, sizes[responseCount])
+                        responseCount += 1
+                    }
 
                 case .complete(let code, let error, _):
                     XCTAssertEqual(code, .ok)
@@ -113,7 +115,7 @@ final class CallbackConformance: XCTestCase {
             })
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
-            XCTAssertEqual(responseCount, 4)
+            XCTAssertEqual(responseCount.value, 4)
         }
     }
 
@@ -433,7 +435,7 @@ final class CallbackConformance: XCTestCase {
                 proto.domain = "connect-conformance"
             }
             let expectation = self.expectation(description: "Stream completes")
-            var responseCount = 0
+            let responseCount = Locked(0)
             let sizes = [31_415, 9, 2_653, 58_979]
             let stream = client.failStreamingOutputCall { result in
                 switch result {
@@ -441,8 +443,10 @@ final class CallbackConformance: XCTestCase {
                     break
 
                 case .message(let output):
-                    XCTAssertEqual(output.payload.body.count, sizes[responseCount])
-                    responseCount += 1
+                    responseCount.perform { responseCount in
+                        XCTAssertEqual(output.payload.body.count, sizes[responseCount])
+                        responseCount += 1
+                    }
 
                 case .complete(_, let error, _):
                     guard let connectError = error as? ConnectError else {
@@ -466,7 +470,7 @@ final class CallbackConformance: XCTestCase {
             })
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
-            XCTAssertEqual(responseCount, 4)
+            XCTAssertEqual(responseCount.value, 4)
         }
     }
 
@@ -478,9 +482,9 @@ final class CallbackConformance: XCTestCase {
             let cancelable = client.emptyCall(
                 request: SwiftProtobuf.Google_Protobuf_Empty()
             ) { response in
-                    XCTAssertEqual(response.code, .canceled)
-                    XCTAssertEqual(response.error?.code, .canceled)
-                    expectation.fulfill()
+                XCTAssertEqual(response.code, .canceled)
+                XCTAssertEqual(response.error?.code, .canceled)
+                expectation.fulfill()
             }
             cancelable.cancel()
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)

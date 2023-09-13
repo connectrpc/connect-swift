@@ -15,19 +15,19 @@
 import Foundation
 
 /// Set of closures that are used for wiring inbound response data through from HTTP clients.
-public final class ResponseCallbacks {
+public final class ResponseCallbacks: Sendable {
     /// Closure to call when response headers are available.
-    public let receiveResponseHeaders: (Headers) -> Void
+    public let receiveResponseHeaders: @Sendable (Headers) -> Void
     /// Closure to call when response data is available.
-    public let receiveResponseData: (Data) -> Void
+    public let receiveResponseData: @Sendable (Data) -> Void
     /// Closure to call when the stream is closed.
     /// Includes the status code, trailers, and potentially an error.
-    public let receiveClose: (Code, Trailers, Swift.Error?) -> Void
+    public let receiveClose: @Sendable (Code, Trailers, Swift.Error?) -> Void
 
     public init(
-        receiveResponseHeaders: @escaping (Headers) -> Void,
-        receiveResponseData: @escaping (Data) -> Void,
-        receiveClose: @escaping (Code, Trailers, Swift.Error?) -> Void
+        receiveResponseHeaders: @escaping @Sendable (Headers) -> Void,
+        receiveResponseData: @escaping @Sendable (Data) -> Void,
+        receiveClose: @escaping @Sendable (Code, Trailers, Swift.Error?) -> Void
     ) {
         self.receiveResponseHeaders = receiveResponseHeaders
         self.receiveResponseData = receiveResponseData

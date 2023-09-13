@@ -23,7 +23,7 @@ import NIOSSL
 import os.log
 
 /// HTTP client powered by Swift NIO which supports trailers (unlike URLSession).
-open class NIOHTTPClient: Connect.HTTPClientInterface {
+open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     private lazy var bootstrap = self.createBootstrap()
     private let host: String
     private let lock = NIOConcurrencyHelpers.NIOLock()
@@ -146,7 +146,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
                 ))
             }
         }
-        return .init(cancel: handler.cancel)
+        return .init(cancel: { handler.cancel() })
     }
 
     open func stream(
@@ -169,7 +169,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
             }
         }
         return .init(
-            sendData: handler.sendData,
+            sendData: { handler.sendData($0) },
             sendClose: { handler.close(trailers: nil) }
         )
     }
@@ -204,7 +204,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface {
             .whenComplete { [weak self] result in
                 switch result {
                 case .success((let channel, let multiplexer)):
-                    channel.closeFuture.whenComplete { _ in
+                    channel.closeFuture.whenComplete { [weak self] _ in
                         self?.lock.withLock { self?.state = .disconnected }
                     }
                     self?.lock.withLock {

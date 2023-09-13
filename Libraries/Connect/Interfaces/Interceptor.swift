@@ -18,7 +18,7 @@ import Foundation
 /// and inbound responses.
 ///
 /// Interceptors are expected to be instantiated once per request/stream.
-public protocol Interceptor {
+public protocol Interceptor: Sendable {
     /// Invoked when a unary call is started. Provides a set of closures that will be called
     /// as the request progresses, allowing the interceptor to alter request/response data.
     ///
@@ -37,15 +37,17 @@ public protocol Interceptor {
     func streamFunction() -> StreamFunction
 }
 
-public struct UnaryFunction {
-    public let requestFunction: (HTTPRequest) -> HTTPRequest
-    public let responseFunction: (HTTPResponse) -> HTTPResponse
-    public let responseMetricsFunction: (HTTPMetrics) -> HTTPMetrics
+public typealias InterceptorInitializer = @Sendable (ProtocolClientConfig) -> Interceptor
+
+public struct UnaryFunction: Sendable {
+    public let requestFunction: @Sendable (HTTPRequest) -> HTTPRequest
+    public let responseFunction: @Sendable (HTTPResponse) -> HTTPResponse
+    public let responseMetricsFunction: @Sendable (HTTPMetrics) -> HTTPMetrics
 
     public init(
-        requestFunction: @escaping (HTTPRequest) -> HTTPRequest,
-        responseFunction: @escaping (HTTPResponse) -> HTTPResponse,
-        responseMetricsFunction: @escaping (HTTPMetrics) -> HTTPMetrics = { $0 }
+        requestFunction: @escaping @Sendable (HTTPRequest) -> HTTPRequest,
+        responseFunction: @escaping @Sendable (HTTPResponse) -> HTTPResponse,
+        responseMetricsFunction: @escaping @Sendable (HTTPMetrics) -> HTTPMetrics = { $0 }
     ) {
         self.requestFunction = requestFunction
         self.responseFunction = responseFunction
@@ -53,15 +55,15 @@ public struct UnaryFunction {
     }
 }
 
-public struct StreamFunction {
-    public let requestFunction: (HTTPRequest) -> HTTPRequest
-    public let requestDataFunction: (Data) -> Data
-    public let streamResultFunction: (StreamResult<Data>) -> StreamResult<Data>
+public struct StreamFunction: Sendable {
+    public let requestFunction: @Sendable (HTTPRequest) -> HTTPRequest
+    public let requestDataFunction: @Sendable (Data) -> Data
+    public let streamResultFunction: @Sendable (StreamResult<Data>) -> StreamResult<Data>
 
     public init(
-        requestFunction: @escaping (HTTPRequest) -> HTTPRequest,
-        requestDataFunction: @escaping (Data) -> Data,
-        streamResultFunction: @escaping (StreamResult<Data>) -> StreamResult<Data>
+        requestFunction: @escaping @Sendable (HTTPRequest) -> HTTPRequest,
+        requestDataFunction: @escaping @Sendable (Data) -> Data,
+        streamResultFunction: @escaping @Sendable (StreamResult<Data>) -> StreamResult<Data>
     ) {
         self.requestFunction = requestFunction
         self.requestDataFunction = requestDataFunction

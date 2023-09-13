@@ -61,7 +61,7 @@ final class ProtocolClientConfigTests: XCTestCase {
         let config = ProtocolClientConfig(
             host: "https://buf.build",
             networkProtocol: .connect,
-            interceptors: [NoopInterceptor.init]
+            interceptors: [{ NoopInterceptor(config: $0) }]
         )
         XCTAssertTrue(config.interceptors[0](config) is NoopInterceptor)
         XCTAssertTrue(config.interceptors[1](config) is ConnectInterceptor)
@@ -71,7 +71,7 @@ final class ProtocolClientConfigTests: XCTestCase {
         let config = ProtocolClientConfig(
             host: "https://buf.build",
             networkProtocol: .grpcWeb,
-            interceptors: [NoopInterceptor.init]
+            interceptors: [{ NoopInterceptor(config: $0) }]
         )
         XCTAssertTrue(config.interceptors[0](config) is NoopInterceptor)
         XCTAssertTrue(config.interceptors[1](config) is GRPCWebInterceptor)

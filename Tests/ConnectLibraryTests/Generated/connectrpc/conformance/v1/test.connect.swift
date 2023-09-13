@@ -9,11 +9,11 @@ import SwiftProtobuf
 
 /// A simple service to test the various types of RPCs and experiment with
 /// performance with various types of payload.
-internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface {
+internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface: Sendable {
 
     /// One empty request followed by one empty response.
     @discardableResult
-    func `emptyCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
+    func `emptyCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
 
     /// One empty request followed by one empty response.
     @available(iOS 13, *)
@@ -21,7 +21,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface {
 
     /// One request followed by one response.
     @discardableResult
-    func `unaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable
+    func `unaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable
 
     /// One request followed by one response.
     @available(iOS 13, *)
@@ -29,7 +29,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface {
 
     /// One request followed by one response. This RPC always fails.
     @discardableResult
-    func `failUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable
+    func `failUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable
 
     /// One request followed by one response. This RPC always fails.
     @available(iOS 13, *)
@@ -39,7 +39,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface {
     /// headers set such that a caching HTTP proxy (such as GFE) can
     /// satisfy subsequent requests.
     @discardableResult
-    func `cacheableUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable
+    func `cacheableUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable
 
     /// One request followed by one response. Response has cache control
     /// headers set such that a caching HTTP proxy (such as GFE) can
@@ -49,7 +49,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface {
 
     /// One request followed by a sequence of responses (streamed download).
     /// The server returns the payload with client desired type and sizes.
-    func `streamingOutputCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest>
+    func `streamingOutputCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest>
 
     /// One request followed by a sequence of responses (streamed download).
     /// The server returns the payload with client desired type and sizes.
@@ -59,7 +59,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface {
     /// One request followed by a sequence of responses (streamed download).
     /// The server returns the payload with client desired type and sizes.
     /// This RPC always responds with an error status.
-    func `failStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest>
+    func `failStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest>
 
     /// One request followed by a sequence of responses (streamed download).
     /// The server returns the payload with client desired type and sizes.
@@ -69,7 +69,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface {
 
     /// A sequence of requests followed by one response (streamed upload).
     /// The server returns the aggregated size of client payload as the result.
-    func `streamingInputCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingInputCallResponse>) -> Void) -> any Connect.ClientOnlyStreamInterface<Connectrpc_Conformance_V1_StreamingInputCallRequest>
+    func `streamingInputCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingInputCallResponse>) -> Void) -> any Connect.ClientOnlyStreamInterface<Connectrpc_Conformance_V1_StreamingInputCallRequest>
 
     /// A sequence of requests followed by one response (streamed upload).
     /// The server returns the aggregated size of client payload as the result.
@@ -79,7 +79,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface {
     /// A sequence of requests with each request served by the server immediately.
     /// As one request could lead to multiple responses, this interface
     /// demonstrates the idea of full duplexing.
-    func `fullDuplexCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest>
+    func `fullDuplexCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest>
 
     /// A sequence of requests with each request served by the server immediately.
     /// As one request could lead to multiple responses, this interface
@@ -91,7 +91,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface {
     /// The server buffers all the client requests and then serves them in order. A
     /// stream of responses are returned to the client when the server starts with
     /// first request.
-    func `halfDuplexCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest>
+    func `halfDuplexCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest>
 
     /// A sequence of requests followed by a sequence of responses.
     /// The server buffers all the client requests and then serves them in order. A
@@ -103,7 +103,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface {
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented methods.
     @discardableResult
-    func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
+    func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
 
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented methods.
@@ -112,7 +112,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface {
 
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented streaming output methods.
-    func `unimplementedStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<SwiftProtobuf.Google_Protobuf_Empty>
+    func `unimplementedStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<SwiftProtobuf.Google_Protobuf_Empty>
 
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented streaming output methods.
@@ -121,7 +121,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface {
 }
 
 /// Concrete implementation of `Connectrpc_Conformance_V1_TestServiceClientInterface`.
-internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Conformance_V1_TestServiceClientInterface {
+internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Conformance_V1_TestServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {
@@ -129,7 +129,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
     }
 
     @discardableResult
-    internal func `emptyCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `emptyCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/connectrpc.conformance.v1.TestService/EmptyCall", request: request, headers: headers, completion: completion)
     }
 
@@ -139,7 +139,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
     }
 
     @discardableResult
-    internal func `unaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable {
+    internal func `unaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnaryCall", request: request, headers: headers, completion: completion)
     }
 
@@ -149,7 +149,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
     }
 
     @discardableResult
-    internal func `failUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable {
+    internal func `failUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/connectrpc.conformance.v1.TestService/FailUnaryCall", request: request, headers: headers, completion: completion)
     }
 
@@ -159,7 +159,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
     }
 
     @discardableResult
-    internal func `cacheableUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable {
+    internal func `cacheableUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/connectrpc.conformance.v1.TestService/CacheableUnaryCall", request: request, headers: headers, completion: completion)
     }
 
@@ -168,7 +168,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/CacheableUnaryCall", request: request, headers: headers)
     }
 
-    internal func `streamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest> {
+    internal func `streamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest> {
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.TestService/StreamingOutputCall", headers: headers, onResult: onResult)
     }
 
@@ -177,7 +177,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.TestService/StreamingOutputCall", headers: headers)
     }
 
-    internal func `failStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest> {
+    internal func `failStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest> {
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.TestService/FailStreamingOutputCall", headers: headers, onResult: onResult)
     }
 
@@ -186,7 +186,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.TestService/FailStreamingOutputCall", headers: headers)
     }
 
-    internal func `streamingInputCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingInputCallResponse>) -> Void) -> any Connect.ClientOnlyStreamInterface<Connectrpc_Conformance_V1_StreamingInputCallRequest> {
+    internal func `streamingInputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingInputCallResponse>) -> Void) -> any Connect.ClientOnlyStreamInterface<Connectrpc_Conformance_V1_StreamingInputCallRequest> {
         return self.client.clientOnlyStream(path: "/connectrpc.conformance.v1.TestService/StreamingInputCall", headers: headers, onResult: onResult)
     }
 
@@ -195,7 +195,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.clientOnlyStream(path: "/connectrpc.conformance.v1.TestService/StreamingInputCall", headers: headers)
     }
 
-    internal func `fullDuplexCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest> {
+    internal func `fullDuplexCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest> {
         return self.client.bidirectionalStream(path: "/connectrpc.conformance.v1.TestService/FullDuplexCall", headers: headers, onResult: onResult)
     }
 
@@ -204,7 +204,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.bidirectionalStream(path: "/connectrpc.conformance.v1.TestService/FullDuplexCall", headers: headers)
     }
 
-    internal func `halfDuplexCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest> {
+    internal func `halfDuplexCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.BidirectionalStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest> {
         return self.client.bidirectionalStream(path: "/connectrpc.conformance.v1.TestService/HalfDuplexCall", headers: headers, onResult: onResult)
     }
 
@@ -214,7 +214,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
     }
 
     @discardableResult
-    internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnimplementedCall", request: request, headers: headers, completion: completion)
     }
 
@@ -223,7 +223,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnimplementedCall", request: request, headers: headers)
     }
 
-    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<SwiftProtobuf.Google_Protobuf_Empty> {
+    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<SwiftProtobuf.Google_Protobuf_Empty> {
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.TestService/UnimplementedStreamingOutputCall", headers: headers, onResult: onResult)
     }
 
@@ -251,18 +251,18 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
 
 /// A simple service NOT implemented at servers so clients can test for
 /// that case.
-internal protocol Connectrpc_Conformance_V1_UnimplementedServiceClientInterface {
+internal protocol Connectrpc_Conformance_V1_UnimplementedServiceClientInterface: Sendable {
 
     /// A call that no server should implement
     @discardableResult
-    func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
+    func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
 
     /// A call that no server should implement
     @available(iOS 13, *)
     func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>
 
     /// A call that no server should implement
-    func `unimplementedStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping (Connect.StreamResult<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<SwiftProtobuf.Google_Protobuf_Empty>
+    func `unimplementedStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<SwiftProtobuf.Google_Protobuf_Empty>
 
     /// A call that no server should implement
     @available(iOS 13, *)
@@ -270,7 +270,7 @@ internal protocol Connectrpc_Conformance_V1_UnimplementedServiceClientInterface 
 }
 
 /// Concrete implementation of `Connectrpc_Conformance_V1_UnimplementedServiceClientInterface`.
-internal final class Connectrpc_Conformance_V1_UnimplementedServiceClient: Connectrpc_Conformance_V1_UnimplementedServiceClientInterface {
+internal final class Connectrpc_Conformance_V1_UnimplementedServiceClient: Connectrpc_Conformance_V1_UnimplementedServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {
@@ -278,7 +278,7 @@ internal final class Connectrpc_Conformance_V1_UnimplementedServiceClient: Conne
     }
 
     @discardableResult
-    internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/connectrpc.conformance.v1.UnimplementedService/UnimplementedCall", request: request, headers: headers, completion: completion)
     }
 
@@ -287,7 +287,7 @@ internal final class Connectrpc_Conformance_V1_UnimplementedServiceClient: Conne
         return await self.client.unary(path: "/connectrpc.conformance.v1.UnimplementedService/UnimplementedCall", request: request, headers: headers)
     }
 
-    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping (Connect.StreamResult<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<SwiftProtobuf.Google_Protobuf_Empty> {
+    internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<SwiftProtobuf.Google_Protobuf_Empty> {
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.UnimplementedService/UnimplementedStreamingOutputCall", headers: headers, onResult: onResult)
     }
 
@@ -305,23 +305,23 @@ internal final class Connectrpc_Conformance_V1_UnimplementedServiceClient: Conne
 }
 
 /// A service used to control reconnect server.
-internal protocol Connectrpc_Conformance_V1_ReconnectServiceClientInterface {
+internal protocol Connectrpc_Conformance_V1_ReconnectServiceClientInterface: Sendable {
 
     @discardableResult
-    func `start`(request: Connectrpc_Conformance_V1_ReconnectParams, headers: Connect.Headers, completion: @escaping (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
+    func `start`(request: Connectrpc_Conformance_V1_ReconnectParams, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
 
     @available(iOS 13, *)
     func `start`(request: Connectrpc_Conformance_V1_ReconnectParams, headers: Connect.Headers) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>
 
     @discardableResult
-    func `stop`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_ReconnectInfo>) -> Void) -> Connect.Cancelable
+    func `stop`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_ReconnectInfo>) -> Void) -> Connect.Cancelable
 
     @available(iOS 13, *)
     func `stop`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers) async -> ResponseMessage<Connectrpc_Conformance_V1_ReconnectInfo>
 }
 
 /// Concrete implementation of `Connectrpc_Conformance_V1_ReconnectServiceClientInterface`.
-internal final class Connectrpc_Conformance_V1_ReconnectServiceClient: Connectrpc_Conformance_V1_ReconnectServiceClientInterface {
+internal final class Connectrpc_Conformance_V1_ReconnectServiceClient: Connectrpc_Conformance_V1_ReconnectServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {
@@ -329,7 +329,7 @@ internal final class Connectrpc_Conformance_V1_ReconnectServiceClient: Connectrp
     }
 
     @discardableResult
-    internal func `start`(request: Connectrpc_Conformance_V1_ReconnectParams, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `start`(request: Connectrpc_Conformance_V1_ReconnectParams, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Start", request: request, headers: headers, completion: completion)
     }
 
@@ -339,7 +339,7 @@ internal final class Connectrpc_Conformance_V1_ReconnectServiceClient: Connectrp
     }
 
     @discardableResult
-    internal func `stop`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_ReconnectInfo>) -> Void) -> Connect.Cancelable {
+    internal func `stop`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_ReconnectInfo>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Stop", request: request, headers: headers, completion: completion)
     }
 
@@ -357,11 +357,11 @@ internal final class Connectrpc_Conformance_V1_ReconnectServiceClient: Connectrp
 }
 
 /// A service used to obtain stats for verifying LB behavior.
-internal protocol Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientInterface {
+internal protocol Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientInterface: Sendable {
 
     /// Gets the backend distribution for RPCs sent by a test client.
     @discardableResult
-    func `getClientStats`(request: Connectrpc_Conformance_V1_LoadBalancerStatsRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerStatsResponse>) -> Void) -> Connect.Cancelable
+    func `getClientStats`(request: Connectrpc_Conformance_V1_LoadBalancerStatsRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerStatsResponse>) -> Void) -> Connect.Cancelable
 
     /// Gets the backend distribution for RPCs sent by a test client.
     @available(iOS 13, *)
@@ -369,7 +369,7 @@ internal protocol Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientInterf
 
     /// Gets the accumulated stats for RPCs sent by a test client.
     @discardableResult
-    func `getClientAccumulatedStats`(request: Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsResponse>) -> Void) -> Connect.Cancelable
+    func `getClientAccumulatedStats`(request: Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsResponse>) -> Void) -> Connect.Cancelable
 
     /// Gets the accumulated stats for RPCs sent by a test client.
     @available(iOS 13, *)
@@ -377,7 +377,7 @@ internal protocol Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientInterf
 }
 
 /// Concrete implementation of `Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientInterface`.
-internal final class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClient: Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientInterface {
+internal final class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClient: Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {
@@ -385,7 +385,7 @@ internal final class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClient: C
     }
 
     @discardableResult
-    internal func `getClientStats`(request: Connectrpc_Conformance_V1_LoadBalancerStatsRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerStatsResponse>) -> Void) -> Connect.Cancelable {
+    internal func `getClientStats`(request: Connectrpc_Conformance_V1_LoadBalancerStatsRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerStatsResponse>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientStats", request: request, headers: headers, completion: completion)
     }
 
@@ -395,7 +395,7 @@ internal final class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClient: C
     }
 
     @discardableResult
-    internal func `getClientAccumulatedStats`(request: Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsResponse>) -> Void) -> Connect.Cancelable {
+    internal func `getClientAccumulatedStats`(request: Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsResponse>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientAccumulatedStats", request: request, headers: headers, completion: completion)
     }
 
@@ -413,23 +413,23 @@ internal final class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClient: C
 }
 
 /// A service to remotely control health status of an xDS test server.
-internal protocol Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientInterface {
+internal protocol Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientInterface: Sendable {
 
     @discardableResult
-    func `setServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
+    func `setServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
 
     @available(iOS 13, *)
     func `setServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>
 
     @discardableResult
-    func `setNotServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
+    func `setNotServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
 
     @available(iOS 13, *)
     func `setNotServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>
 }
 
 /// Concrete implementation of `Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientInterface`.
-internal final class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClient: Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientInterface {
+internal final class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClient: Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {
@@ -437,7 +437,7 @@ internal final class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClient: Con
     }
 
     @discardableResult
-    internal func `setServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `setServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetServing", request: request, headers: headers, completion: completion)
     }
 
@@ -447,7 +447,7 @@ internal final class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClient: Con
     }
 
     @discardableResult
-    internal func `setNotServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
+    internal func `setNotServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetNotServing", request: request, headers: headers, completion: completion)
     }
 
@@ -465,11 +465,11 @@ internal final class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClient: Con
 }
 
 /// A service to dynamically update the configuration of an xDS test client.
-internal protocol Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClientInterface {
+internal protocol Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClientInterface: Sendable {
 
     /// Update the tes client's configuration.
     @discardableResult
-    func `configure`(request: Connectrpc_Conformance_V1_ClientConfigureRequest, headers: Connect.Headers, completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_ClientConfigureResponse>) -> Void) -> Connect.Cancelable
+    func `configure`(request: Connectrpc_Conformance_V1_ClientConfigureRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_ClientConfigureResponse>) -> Void) -> Connect.Cancelable
 
     /// Update the tes client's configuration.
     @available(iOS 13, *)
@@ -477,7 +477,7 @@ internal protocol Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClien
 }
 
 /// Concrete implementation of `Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClientInterface`.
-internal final class Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClient: Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClientInterface {
+internal final class Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClient: Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClientInterface, Sendable {
     private let client: Connect.ProtocolClientInterface
 
     internal init(client: Connect.ProtocolClientInterface) {
@@ -485,7 +485,7 @@ internal final class Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceCl
     }
 
     @discardableResult
-    internal func `configure`(request: Connectrpc_Conformance_V1_ClientConfigureRequest, headers: Connect.Headers = [:], completion: @escaping (ResponseMessage<Connectrpc_Conformance_V1_ClientConfigureResponse>) -> Void) -> Connect.Cancelable {
+    internal func `configure`(request: Connectrpc_Conformance_V1_ClientConfigureRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_ClientConfigureResponse>) -> Void) -> Connect.Cancelable {
         return self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateClientConfigureService/Configure", request: request, headers: headers, completion: completion)
     }
 
