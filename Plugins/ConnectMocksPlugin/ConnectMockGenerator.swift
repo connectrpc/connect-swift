@@ -18,7 +18,18 @@ import SwiftProtobufPluginLibrary
 
 /// Responsible for generating services and RPCs that are compatible with the Connect library.
 final class ConnectMockGenerator: Generator {
+    private let propertyVisibility: String
+    private let typeVisibility: String
+
     required init(_ descriptor: FileDescriptor, options: GeneratorOptions) {
+        switch options.visibility {
+        case .internal:
+            self.propertyVisibility = "internal"
+            self.typeVisibility = "internal"
+        case .public:
+            self.propertyVisibility = "public"
+            self.typeVisibility = "open"
+        }
         super.init(descriptor, options: options)
         self.printContent()
     }
@@ -51,7 +62,7 @@ final class ConnectMockGenerator: Generator {
         self.printLine("@available(iOS 13, *)")
         self.printLine(
             """
-            \(self.visibility) final class \(service.mockName(using: self.namer)): \
+            \(self.typeVisibility) class \(service.mockName(using: self.namer)): \
             \(protocolName), @unchecked Sendable {
             """
         )
@@ -68,7 +79,7 @@ final class ConnectMockGenerator: Generator {
                     )
                     self.printLine(
                         """
-                        \(self.visibility) var \(method.callbackMockPropertyName()) = \
+                        \(self.propertyVisibility) var \(method.callbackMockPropertyName()) = \
                         \(method.callbackMockPropertyValue(using: self.namer))
                         """
                     )
@@ -79,7 +90,7 @@ final class ConnectMockGenerator: Generator {
                     )
                     self.printLine(
                         """
-                        \(self.visibility) var \(method.asyncAwaitMockPropertyName()) = \
+                        \(self.propertyVisibility) var \(method.asyncAwaitMockPropertyName()) = \
                         \(method.asyncAwaitMockPropertyValue(using: self.namer))
                         """
                     )
@@ -87,7 +98,7 @@ final class ConnectMockGenerator: Generator {
             }
 
             self.printLine()
-            self.printLine("\(self.visibility) init() {}")
+            self.printLine("\(self.propertyVisibility) init() {}")
 
             for method in service.methods {
                 if self.options.generateCallbackMethods {
@@ -109,7 +120,7 @@ final class ConnectMockGenerator: Generator {
         }
 
         self.printLine(
-            "\(self.visibility) "
+            "\(self.typeVisibility) "
             + method.callbackSignature(
                 using: self.namer, includeDefaults: true, options: self.options
             )
@@ -139,7 +150,7 @@ final class ConnectMockGenerator: Generator {
         self.printLine()
 
         self.printLine(
-            "\(self.visibility) "
+            "\(self.typeVisibility) "
             + method.asyncAwaitSignature(
                 using: self.namer, includeDefaults: true, options: self.options
             )

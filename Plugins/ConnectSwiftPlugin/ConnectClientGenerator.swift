@@ -18,7 +18,15 @@ import SwiftProtobufPluginLibrary
 
 /// Responsible for generating services and RPCs that are compatible with the Connect library.
 final class ConnectClientGenerator: Generator {
+    private let visibility: String
+
     required init(_ descriptor: FileDescriptor, options: GeneratorOptions) {
+        switch options.visibility {
+        case .internal:
+            self.visibility = "internal"
+        case .public:
+            self.visibility = "public"
+        }
         super.init(descriptor, options: options)
         self.printContent()
     }

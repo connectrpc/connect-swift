@@ -21,7 +21,6 @@ open class Generator {
     public let descriptor: FileDescriptor
     public let namer: SwiftProtobufNamer
     public let options: GeneratorOptions
-    public let visibility: String
 
     public var output: String {
         return self.printer.content
@@ -34,12 +33,6 @@ open class Generator {
             currentFile: descriptor,
             protoFileToModuleMappings: options.protoToModuleMappings
         )
-        switch options.visibility {
-        case .internal:
-            self.visibility = "internal"
-        case .public:
-            self.visibility = "public"
-        }
     }
 
     // MARK: - Output helpers

@@ -18,7 +18,7 @@ import SwiftProtobuf
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
 @available(iOS 13, *)
-internal final class Connectrpc_Conformance_V1_TestServiceClientMock: Connectrpc_Conformance_V1_TestServiceClientInterface, @unchecked Sendable {
+internal class Connectrpc_Conformance_V1_TestServiceClientMock: Connectrpc_Conformance_V1_TestServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `emptyCall()`.
@@ -182,7 +182,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClientMock: Connectrpc
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
 @available(iOS 13, *)
-internal final class Connectrpc_Conformance_V1_UnimplementedServiceClientMock: Connectrpc_Conformance_V1_UnimplementedServiceClientInterface, @unchecked Sendable {
+internal class Connectrpc_Conformance_V1_UnimplementedServiceClientMock: Connectrpc_Conformance_V1_UnimplementedServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `unimplementedCall()`.
@@ -225,7 +225,7 @@ internal final class Connectrpc_Conformance_V1_UnimplementedServiceClientMock: C
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
 @available(iOS 13, *)
-internal final class Connectrpc_Conformance_V1_ReconnectServiceClientMock: Connectrpc_Conformance_V1_ReconnectServiceClientInterface, @unchecked Sendable {
+internal class Connectrpc_Conformance_V1_ReconnectServiceClientMock: Connectrpc_Conformance_V1_ReconnectServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `start()`.
@@ -269,7 +269,7 @@ internal final class Connectrpc_Conformance_V1_ReconnectServiceClientMock: Conne
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
 @available(iOS 13, *)
-internal final class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientMock: Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientInterface, @unchecked Sendable {
+internal class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientMock: Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `getClientStats()`.
@@ -313,7 +313,7 @@ internal final class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientMoc
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
 @available(iOS 13, *)
-internal final class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientMock: Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientInterface, @unchecked Sendable {
+internal class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientMock: Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `setServing()`.
@@ -357,7 +357,7 @@ internal final class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientMock:
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
 @available(iOS 13, *)
-internal final class Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClientMock: Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClientInterface, @unchecked Sendable {
+internal class Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClientMock: Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
     /// Mocked for calls to `configure()`.

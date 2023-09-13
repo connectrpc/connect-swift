@@ -17,6 +17,10 @@ import Foundation
 import os.log
 
 /// Concrete implementation of `HTTPClientInterface` backed by `URLSession`.
+///
+/// This class is thread-safe as-is through the use of an internal lock. It is marked as
+/// `open` and `@unchecked Sendable` so that consumers can subclass it if necessary, but
+/// subclasses must handle their own thread safety for added functionality.
 open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Sendable {
     /// Lock used for safely accessing stream storage.
     private let lock = Lock()
