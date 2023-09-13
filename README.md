@@ -85,10 +85,10 @@ protocol interfaces as the production clients:
 <details><summary>Click to expand <code>eliza.mock.swift</code></summary>
 
 ```swift
-public final class Eliza_V1_ChatServiceClientMock: Eliza_V1_ChatServiceClientInterface, @unchecked Sendable {
+open class Eliza_V1_ChatServiceClientMock: Eliza_V1_ChatServiceClientInterface, @unchecked Sendable {
     public var mockAsyncSay = { (_: Eliza_V1_SayRequest) -> ResponseMessage<Eliza_V1_Response> in .init(message: .init()) }
 
-    public func say(request: Eliza_V1_SayRequest, headers: Headers = [:])
+    open func say(request: Eliza_V1_SayRequest, headers: Headers = [:])
         async -> ResponseMessage<Eliza_V1_SayResponse>
     {
         return self.mockAsyncSay(request)
