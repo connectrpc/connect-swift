@@ -20,7 +20,7 @@ you to accept the CLA when you open your pull request.
 ```sh
 git clone git@github.com:your_github_username/connect-swift.git
 cd connect-swift
-git remote add upstream https://github.com/bufbuild/connect-swift.git
+git remote add upstream https://github.com/connectrpc/connect-swift.git
 git fetch upstream
 ```
 
@@ -179,10 +179,10 @@ Note: If pushing the mocks podspec fails because CocoaPods cannot find the new
 `Connect-Swift` podspec in the specs repo, you may have to wait ~30 min
 for it to populate before trying again.
 
-[cla]: https://cla-assistant.io/bufbuild/connect-swift
+[cla]: https://cla-assistant.io/connectrpc/connect-swift
 [commit-message]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
-[fork]: https://github.com/bufbuild/connect-swift/fork
-[open-issue]: https://github.com/bufbuild/connect-swift/issues/new
+[fork]: https://github.com/connectrpc/connect-swift/fork
+[open-issue]: https://github.com/connectrpc/connect-swift/issues/new
 [swiftlint]: https://github.com/realm/SwiftLint
 [swiftlint-install]: https://github.com/realm/SwiftLint#installation
 [swift-plugin-library]: https://github.com/apple/swift-protobuf/tree/main/Sources/SwiftProtobufPluginLibrary
