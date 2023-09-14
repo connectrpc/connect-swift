@@ -70,7 +70,7 @@ licenseheaders: $(BIN)/license-headers ## Add/reformat license headers in source
 		<(git ls-files --deleted | sort -u) | \
 		xargs $(BIN)/license-header \
 			--license-type "apache" \
-			--copyright-holder "The Connect Authorsm" \
+			--copyright-holder "The Connect Authors" \
 			--year-range "$(LICENSE_HEADER_YEAR_RANGE)"
 
 $(BIN)/license-headers: Makefile
