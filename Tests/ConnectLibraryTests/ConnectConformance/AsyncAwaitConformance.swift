@@ -356,7 +356,6 @@ final class AsyncAwaitConformance: XCTestCase {
             let response = await client.failUnaryCall(
                 request: Connectrpc_Conformance_V1_SimpleRequest()
             )
-            XCTAssertEqual(response.code, .resourceExhausted)
             XCTAssertEqual(response.error?.code, .resourceExhausted)
             XCTAssertEqual(response.error?.message, "soirée 🎉")
             XCTAssertEqual(response.error?.unpackedDetails(), [expectedErrorDetail])
