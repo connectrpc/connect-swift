@@ -385,6 +385,7 @@ final class CallbackConformance: XCTestCase {
             }
             let expectation = self.expectation(description: "Request completes")
             client.failUnaryCall(request: Connectrpc_Conformance_V1_SimpleRequest()) { response in
+                XCTAssertEqual(response.code, .resourceExhausted)
                 XCTAssertEqual(response.error?.code, .resourceExhausted)
                 XCTAssertEqual(response.error?.message, "soirée 🎉")
                 XCTAssertEqual(response.error?.unpackedDetails(), [expectedErrorDetail])

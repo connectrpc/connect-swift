@@ -50,14 +50,17 @@ extension GRPCInterceptor: Connect.Interceptor {
                 }
 
                 guard let responseData = response.message, !responseData.isEmpty else {
-                    let code = response.trailers.grpcStatus() ?? response.code
+                    let grpcCode = response.trailers.grpcStatus()
+                    ?? response.headers.grpcStatus() // Trailers-only can be send in headers block
+                    ?? response.code
                     return Connect.HTTPResponse(
-                        code: code,
+                        code: grpcCode,
                         headers: response.headers,
                         message: response.message,
                         trailers: response.trailers,
                         error: response.error ?? ConnectError.fromGRPCTrailers(
-                            response.trailers, code: code
+                            response.trailers.isEmpty ? response.headers : response.trailers,
+                            code: grpcCode
                         ),
                         tracingInfo: response.tracingInfo
                     )
