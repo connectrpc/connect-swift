@@ -4,9 +4,9 @@ Pod::Spec.new do |spec|
   spec.version = '0.7.0'
   spec.license = { :type => 'Apache 2.0', :file => 'LICENSE' }
   spec.summary = 'Mocks for testing with Connect-Swift.'
-  spec.homepage = 'https://github.com/bufbuild/connect-swift'
-  spec.author = 'Buf Technologies, Inc.'
-  spec.source = { :git => 'https://github.com/bufbuild/connect-swift.git', :tag => spec.version }
+  spec.homepage = 'https://github.com/connectrpc/connect-swift'
+  spec.author = 'The Connect Authors'
+  spec.source = { :git => 'https://github.com/connectrpc/connect-swift.git', :tag => spec.version }
 
   spec.ios.deployment_target = '12.0'
   spec.osx.deployment_target = '10.15'
