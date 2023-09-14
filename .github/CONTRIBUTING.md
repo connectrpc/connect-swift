@@ -165,7 +165,9 @@ Releases should be tagged in `x.y.z` SemVer format.
 2. Update both [`Connect-Swift.podspec`](../Connect-Swift.podspec) and
    [`Connect-Swift-Mocks.podspec`](../Connect-Swift-Mocks.podspec) to reflect
    the newly tagged version.
-3. Push both specs to CocoaPods:
+3. Run `cd Examples/ElizaCocoaPodsApp && pod update` to update the example CocoaPods app.
+4. Submit a PR with these changes.
+5. Push both specs to CocoaPods:
 
 ```sh
 pod trunk push Connect-Swift.podspec
