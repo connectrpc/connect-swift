@@ -34,7 +34,7 @@ extension Headers {
         // But this behavior matches connect-web:
         // https://github.com/bufbuild/connect-web/blob/v0.4.0/packages/connect-core/src/grpc-web-create-request-header.ts#L33-L36
         // swiftlint:disable:previous line_length
-        headers[HeaderConstants.xUserAgent] = ["@bufbuild/connect-swift"]
+        headers[HeaderConstants.xUserAgent] = ["@connectrpc/connect-swift"]
         return headers
     }
 }
