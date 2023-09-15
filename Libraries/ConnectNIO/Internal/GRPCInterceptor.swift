@@ -172,7 +172,7 @@ private func grpcResult(
     } else {
         return (.unknown, nil)
     }
-    
+
     let grpcCode = finalTrailers.grpcStatus() ?? .unknown
     return (grpcCode, .fromGRPCTrailers(finalTrailers, code: grpcCode))
 }

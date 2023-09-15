@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// swiftlint:disable number_separator
+
 import Connect
 import ConnectNIO
 import Foundation
@@ -35,13 +37,12 @@ final class ConformanceConfiguration {
     static func all(timeout: TimeInterval) -> [ConformanceConfiguration] {
         let urlSessionClient = ConformanceURLSessionHTTPClient(timeout: timeout)
         let nioClient8081 = ConformanceNIOHTTPClient(
-            // swiftlint:disable:next number_separator
             host: "https://localhost", port: 8081, timeout: timeout
         )
         let nioClient8083 = ConformanceNIOHTTPClient(
-            // swiftlint:disable:next number_separator
             host: "https://localhost", port: 8083, timeout: timeout
         )
+        // swiftlint:disable:next large_tuple
         let matrix: [(
             networkProtocol: NetworkProtocol,
             httpClients: [HTTPClientInterface],
