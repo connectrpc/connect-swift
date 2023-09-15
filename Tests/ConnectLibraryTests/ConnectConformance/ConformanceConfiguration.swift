@@ -48,6 +48,7 @@ final class ConformanceConfiguration {
             codecs: [Codec],
             port: Int
         )] = [
+            // Port 8081 is used to test against connect-go
             (.connect, [urlSessionClient, nioClient8081], [JSONCodec(), ProtoCodec()], 8081),
             (.grpcWeb, [urlSessionClient, nioClient8081], [JSONCodec(), ProtoCodec()], 8081),
             // URLSession does not support gRPC
