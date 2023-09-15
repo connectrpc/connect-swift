@@ -54,7 +54,7 @@ final class ConformanceConfiguration {
             (.grpcWeb, [urlSessionClient, nioClient8081], [JSONCodec(), ProtoCodec()], 8081),
             // URLSession does not support gRPC
             (.grpc, [nioClient8081], [JSONCodec(), ProtoCodec()], 8081),
-            // gRPC should also be tested against grpc-go, which runs on a separate port
+            // gRPC should also be tested against grpc-go, which runs on port 8083
             (.grpc, [nioClient8083], [ProtoCodec()], 8083),
         ]
         return matrix.reduce(into: [ConformanceConfiguration]()) { configurations, tuple in
