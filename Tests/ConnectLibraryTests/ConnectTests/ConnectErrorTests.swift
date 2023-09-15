@@ -105,7 +105,7 @@ final class ConnectErrorTests: XCTestCase {
             "message": "overloaded: back off and retry",
             "details": try expectedDetails.map { detail in
                 var val = try detail.serializedData().base64EncodedString()
-                // If pad is false, then remove all the padding added by the base64EncodedString function
+                // If pad is false, remove all the padding added by the base64EncodedString function
                 if !pad {
                     val = val.replacingOccurrences(of: "=", with: "")
                 }
