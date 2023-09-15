@@ -31,7 +31,19 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertEqual(error.unpackedDetails(), [expectedDetails])
         XCTAssertTrue(error.metadata.isEmpty)
     }
-
+    func testDeserializingFullErrorAndUnpackingDetailsWithUnpaddedBase64() throws {
+        let expectedDetails = Connectrpc_Conformance_V1_SimpleResponse.with {
+            $0.hostname = "foobar"
+        }
+        let errorData = try self.errorData(expectedDetails: [expectedDetails], pad: false)
+        let error = try JSONDecoder().decode(ConnectError.self, from: errorData)
+        XCTAssertEqual(error.code, .unavailable)
+        XCTAssertEqual(error.message, "overloaded: back off and retry")
+        XCTAssertNil(error.exception)
+        XCTAssertEqual(error.details.count, 1)
+        XCTAssertEqual(error.unpackedDetails(), [expectedDetails])
+        XCTAssertTrue(error.metadata.isEmpty)
+    }
     func testDeserializingFullErrorAndUnpackingMultipleDetails() throws {
         let expectedDetails1 = Connectrpc_Conformance_V1_SimpleResponse.with { $0.hostname = "foo" }
         let expectedDetails2 = Connectrpc_Conformance_V1_SimpleResponse.with { $0.hostname = "bar" }
@@ -44,7 +56,6 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertEqual(error.unpackedDetails(), [expectedDetails1, expectedDetails2])
         XCTAssertTrue(error.metadata.isEmpty)
     }
-
     func testDeserializingErrorUsingHelperFunctionLowercasesHeaderKeys() throws {
         let expectedDetails = Connectrpc_Conformance_V1_SimpleResponse.with {
             $0.hostname = "foobar"
@@ -87,17 +98,23 @@ final class ConnectErrorTests: XCTestCase {
 
     // MARK: - Private
 
-    private func errorData(expectedDetails: [ProtobufMessage]) throws -> Data {
+    private func errorData(expectedDetails: [ProtobufMessage], pad: Bool = true) throws -> Data {
         // Example error from https://connectrpc.com/docs/protocol/#error-end-stream
         let dictionary: [String: Any] = [
             "code": "unavailable",
             "message": "overloaded: back off and retry",
             "details": try expectedDetails.map { detail in
-                [
+                var val = try detail.serializedData().base64EncodedString()
+                // If pad is false, then remove all the padding added by the base64EncodedString function
+                if !pad {
+                    val = val.replacingOccurrences(of: "=", with: "")
+                }
+                let errDetail = [
                     "type": type(of: detail).protoMessageName,
-                    "value": try detail.serializedData().base64EncodedString(),
+                    "value": val,
                     "debug": ["retryDelay": "30s"],
                 ] as [String: Any]
+                return errDetail
             },
         ]
         return try JSONSerialization.data(withJSONObject: dictionary)
