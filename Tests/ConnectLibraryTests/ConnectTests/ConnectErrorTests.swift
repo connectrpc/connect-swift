@@ -31,6 +31,7 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertEqual(error.unpackedDetails(), [expectedDetails])
         XCTAssertTrue(error.metadata.isEmpty)
     }
+
     func testDeserializingFullErrorAndUnpackingDetailsWithUnpaddedBase64() throws {
         let expectedDetails = Connectrpc_Conformance_V1_SimpleResponse.with {
             $0.hostname = "foobar"
@@ -44,6 +45,7 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertEqual(error.unpackedDetails(), [expectedDetails])
         XCTAssertTrue(error.metadata.isEmpty)
     }
+
     func testDeserializingFullErrorAndUnpackingMultipleDetails() throws {
         let expectedDetails1 = Connectrpc_Conformance_V1_SimpleResponse.with { $0.hostname = "foo" }
         let expectedDetails2 = Connectrpc_Conformance_V1_SimpleResponse.with { $0.hostname = "bar" }
@@ -104,17 +106,16 @@ final class ConnectErrorTests: XCTestCase {
             "code": "unavailable",
             "message": "overloaded: back off and retry",
             "details": try expectedDetails.map { detail in
-                var val = try detail.serializedData().base64EncodedString()
+                var value = try detail.serializedData().base64EncodedString()
                 // If pad is false, remove all the padding added by the base64EncodedString function
                 if !pad {
-                    val = val.replacingOccurrences(of: "=", with: "")
+                    value = value.replacingOccurrences(of: "=", with: "")
                 }
-                let errDetail = [
+                return [
                     "type": type(of: detail).protoMessageName,
-                    "value": val,
+                    "value": value,
                     "debug": ["retryDelay": "30s"],
                 ] as [String: Any]
-                return errDetail
             },
         ]
         return try JSONSerialization.data(withJSONObject: dictionary)
