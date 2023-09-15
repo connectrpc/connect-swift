@@ -49,19 +49,16 @@ extension GRPCInterceptor: Connect.Interceptor {
                     return response
                 }
 
+                let (grpcCode, connectError) = grpcResult(
+                    fromHeaders: response.headers, trailers: response.trailers
+                )
                 guard let responseData = response.message, !responseData.isEmpty else {
-                    let grpcCode = response.trailers.grpcStatus()
-                    ?? response.headers.grpcStatus() // Trailers-only can be sent in headers block
-                    ?? response.code
                     return Connect.HTTPResponse(
                         code: grpcCode,
                         headers: response.headers,
                         message: response.message,
                         trailers: response.trailers,
-                        error: response.error ?? ConnectError.fromGRPCTrailers(
-                            response.trailers.isEmpty ? response.headers : response.trailers,
-                            code: grpcCode
-                        ),
+                        error: connectError ?? response.error,
                         tracingInfo: response.tracingInfo
                     )
                 }
@@ -75,15 +72,12 @@ extension GRPCInterceptor: Connect.Interceptor {
                         responseData,
                         compressionPool: compressionPool
                     ).unpacked
-                    let grpcCode = response.trailers.grpcStatus() ?? .unknown
                     return Connect.HTTPResponse(
                         code: grpcCode,
                         headers: response.headers,
                         message: messageData,
                         trailers: response.trailers,
-                        error: grpcCode == .ok
-                            ? nil
-                            : ConnectError.fromGRPCTrailers(response.trailers, code: grpcCode),
+                        error: grpcCode == .ok ? nil : connectError,
                         tracingInfo: response.tracingInfo
                     )
                 } catch let error {
@@ -143,7 +137,9 @@ extension GRPCInterceptor: Connect.Interceptor {
                         return .complete(code: code, error: error, trailers: trailers)
                     }
 
-                    let grpcCode = trailers?.grpcStatus() ?? .unknown
+                    let (grpcCode, connectError) = grpcResult(
+                        fromHeaders: responseHeaders.value, trailers: trailers
+                    )
                     if grpcCode == .ok {
                         return .complete(
                             code: .ok,
@@ -153,9 +149,7 @@ extension GRPCInterceptor: Connect.Interceptor {
                     } else {
                         return .complete(
                             code: grpcCode,
-                            error: trailers
-                                .map { ConnectError.fromGRPCTrailers($0, code: grpcCode) }
-                                ?? error,
+                            error: connectError ?? error,
                             trailers: trailers
                         )
                     }
@@ -163,4 +157,22 @@ extension GRPCInterceptor: Connect.Interceptor {
             }
         )
     }
+}
+
+private func grpcResult(
+    fromHeaders headers: Headers?, trailers: Trailers?
+) -> (code: Code, error: ConnectError?) {
+    let finalTrailers: Trailers
+    if let trailers = trailers, !trailers.isEmpty {
+        finalTrailers = trailers
+    } else if let headers = headers {
+        // "Trailers-only" responses can be sent in the headers block.
+        // If no trailers are present, look in the headers for the necessary information.
+        finalTrailers = headers
+    } else {
+        return (.unknown, nil)
+    }
+    
+    let grpcCode = finalTrailers.grpcStatus() ?? .unknown
+    return (grpcCode, .fromGRPCTrailers(finalTrailers, code: grpcCode))
 }

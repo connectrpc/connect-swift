@@ -34,27 +34,39 @@ final class ConformanceConfiguration {
     /// - returns: A list of configurations to use for conformance tests.
     static func all(timeout: TimeInterval) -> [ConformanceConfiguration] {
         let urlSessionClient = ConformanceURLSessionHTTPClient(timeout: timeout)
-        let nioClient = ConformanceNIOHTTPClient(
+        let nioClient8081 = ConformanceNIOHTTPClient(
             // swiftlint:disable:next number_separator
             host: "https://localhost", port: 8081, timeout: timeout
         )
-        let matrix: [(networkProtocol: NetworkProtocol, httpClients: [HTTPClientInterface])] = [
-            (.connect, [urlSessionClient, nioClient]),
-            (.grpcWeb, [urlSessionClient, nioClient]),
-            (.grpc, [nioClient]), // URLSession client does not support gRPC
+        let nioClient8083 = ConformanceNIOHTTPClient(
+            // swiftlint:disable:next number_separator
+            host: "https://localhost", port: 8083, timeout: timeout
+        )
+        let matrix: [(
+            networkProtocol: NetworkProtocol,
+            httpClients: [HTTPClientInterface],
+            codecs: [Codec],
+            port: Int
+        )] = [
+            (.connect, [urlSessionClient, nioClient8081], [JSONCodec(), ProtoCodec()], 8081),
+            (.grpcWeb, [urlSessionClient, nioClient8081], [JSONCodec(), ProtoCodec()], 8081),
+            // URLSession does not support gRPC
+            (.grpc, [nioClient8081], [JSONCodec(), ProtoCodec()], 8081),
+            // gRPC should also be tested against grpc-go, which runs on a separate port
+            (.grpc, [nioClient8083], [ProtoCodec()], 8083),
         ]
-        let codecs: [Codec] = [JSONCodec(), ProtoCodec()]
-        return matrix.reduce(into: []) { configurations, tuple in
+        return matrix.reduce(into: [ConformanceConfiguration]()) { configurations, tuple in
             for httpClient in tuple.httpClients {
-                for codec in codecs {
+                for codec in tuple.codecs {
                     configurations.append(.init(
                         description: """
-                        \(tuple.networkProtocol) + \(type(of: codec)) via \(type(of: httpClient))
+                        \(tuple.networkProtocol) + \(type(of: codec)) via \(type(of: httpClient)) \
+                        on port \(tuple.port)
                         """,
                         protocolClient: ProtocolClient(
                             httpClient: httpClient,
                             config: ProtocolClientConfig(
-                                host: "https://localhost:8081",
+                                host: "https://localhost:\(tuple.port)",
                                 networkProtocol: tuple.networkProtocol,
                                 codec: codec,
                                 requestCompression: .init(minBytes: 10, pool: GzipCompressionPool())
