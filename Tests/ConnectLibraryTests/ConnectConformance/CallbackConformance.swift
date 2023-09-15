@@ -301,14 +301,17 @@ final class CallbackConformance: XCTestCase {
     }
 
     func testUnimplementedMethod() {
+        let validErrorMessages = [
+            // connect-go
+            "connectrpc.conformance.v1.TestService.UnimplementedCall is not implemented",
+            // grpc-go
+            "method UnimplementedCall not implemented",
+        ]
         self.executeTestWithClients { client in
             let expectation = self.expectation(description: "Request completes")
             client.unimplementedCall(request: SwiftProtobuf.Google_Protobuf_Empty()) { response in
                 XCTAssertEqual(response.code, .unimplemented)
-                XCTAssertEqual(
-                    response.error?.message,
-                    "connectrpc.conformance.v1.TestService.UnimplementedCall is not implemented"
-                )
+                XCTAssertTrue(validErrorMessages.contains(response.error?.message ?? ""))
                 expectation.fulfill()
             }
 
@@ -317,6 +320,15 @@ final class CallbackConformance: XCTestCase {
     }
 
     func testUnimplementedServerStreamingMethod() throws {
+        let validErrorMessages = [
+            // connect-go
+            """
+            connectrpc.conformance.v1.TestService.UnimplementedStreamingOutputCall is \
+            not implemented
+            """,
+            // grpc-go
+            "method UnimplementedStreamingOutputCall not implemented",
+        ]
         try self.executeTestWithClients { client in
             let expectation = self.expectation(description: "Stream completes")
             let stream = client.unimplementedStreamingOutputCall { result in
@@ -326,13 +338,9 @@ final class CallbackConformance: XCTestCase {
 
                 case .complete(let code, let error, _):
                     XCTAssertEqual(code, .unimplemented)
-                    XCTAssertEqual(
-                        (error as? ConnectError)?.message,
-                        """
-                        connectrpc.conformance.v1.TestService.UnimplementedStreamingOutputCall is \
-                        not implemented
-                        """
-                    )
+                    XCTAssertTrue(validErrorMessages.contains(
+                        (error as? ConnectError)?.message ?? ""
+                    ))
                     expectation.fulfill()
                 }
             }
