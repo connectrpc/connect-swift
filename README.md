@@ -172,7 +172,7 @@ Offered under the [Apache 2 license](./LICENSE).
 [blog]: https://buf.build/blog/announcing-connect-swift
 [buf-studio]: https://buf.build/studio
 [connect-conformance]: https://github.com/connectrpc/conformance
-[connect-go]: https://github.com/bufbuild/connect-go
+[connect-go]: https://github.com/connectrpc/connect-go
 [connect-kotlin]: https://github.com/connectrpc/connect-kotlin
 [connect-protocol]: https://connectrpc.com/docs/protocol
 [connect-es]: https://github.com/connectrpc/connect-es
