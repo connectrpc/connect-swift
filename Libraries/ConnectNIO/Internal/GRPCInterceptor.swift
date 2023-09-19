@@ -38,7 +38,7 @@ extension GRPCInterceptor: Connect.Interceptor {
                     url: request.url,
                     // Override the content type to be gRPC.
                     contentType: "application/grpc+\(self.config.codec.name())",
-                    headers: request.headers.addingGRPCHeaders(using: self.config),
+                    headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: false),
                     message: envelopedRequestBody,
                     trailers: nil
                 )
@@ -102,7 +102,7 @@ extension GRPCInterceptor: Connect.Interceptor {
                     url: request.url,
                     // Override the content type to be gRPC.
                     contentType: "application/grpc+\(self.config.codec.name())",
-                    headers: request.headers.addingGRPCHeaders(using: self.config),
+                    headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: false),
                     message: request.message,
                     trailers: nil
                 )
