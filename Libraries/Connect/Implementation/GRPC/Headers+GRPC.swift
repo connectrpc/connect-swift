@@ -19,15 +19,18 @@ extension Headers {
     ///
     /// - parameter config: The configuration to use for adding headers (i.e., for compression
     ///                     headers).
+    /// - parameter grpcWeb: Should be true if using gRPC-Web, false if gRPC.
     ///
     /// - returns: A set of updated headers.
-    public func addingGRPCHeaders(using config: ProtocolClientConfig) -> Self {
+    public func addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
         var headers = self
         headers[HeaderConstants.grpcAcceptEncoding] = config
             .acceptCompressionPoolNames()
         headers[HeaderConstants.grpcContentEncoding] = config.requestCompression
             .map { [$0.pool.name()] }
-        headers[HeaderConstants.grpcTE] = ["trailers"]
+        if !grpcWeb {
+            headers[HeaderConstants.grpcTE] = ["trailers"]
+        }
 
         // Note that we do not comply with the recommended structure for user-agent:
         // https://github.com/grpc/grpc/blob/v1.51.1/doc/PROTOCOL-HTTP2.md#user-agents
