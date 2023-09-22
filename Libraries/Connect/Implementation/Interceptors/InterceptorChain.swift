@@ -14,7 +14,7 @@
 
 /// Represents a chain of interceptors that is used for a single request/stream,
 /// and orchestrates invoking each of them in the proper order.
-struct InterceptorChain: Sendable {
+struct InterceptorChain: @unchecked Sendable {
     private let interceptors: [Interceptor]
 
     /// Initialize the interceptor chain.
@@ -83,7 +83,7 @@ struct InterceptorChain: Sendable {
     }
 }
 
-private func executeInterceptors<T>(_ interceptors: [@Sendable (T) -> T], initial: T) -> T {
+private func executeInterceptors<T>(_ interceptors: [(T) -> T], initial: T) -> T {
     var next = initial
     for interceptor in interceptors {
         next = interceptor(next)
