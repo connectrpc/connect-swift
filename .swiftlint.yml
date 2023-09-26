@@ -7,6 +7,7 @@ excluded:
   - Libraries/Connect/Implementation/Generated
   - Tests/ConnectLibraryTests/Generated
 disabled_rules:
+  - attributes_with_arguments_always_on_line_above
   - blanket_disable_command
   - cyclomatic_complexity
   - function_body_length
