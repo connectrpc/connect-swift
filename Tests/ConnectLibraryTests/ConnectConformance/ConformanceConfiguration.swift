@@ -57,7 +57,7 @@ final class ConformanceConfiguration {
             // gRPC should also be tested against grpc-go, which runs on port 8083
             (.grpc, [nioClient8083], [ProtoCodec()], 8083),
         ]
-        return matrix.reduce(into: [ConformanceConfiguration]()) { configurations, tuple in
+        return matrix.reduce(into: [Self]()) { configurations, tuple in
             for httpClient in tuple.httpClients {
                 for codec in tuple.codecs {
                     configurations.append(.init(
