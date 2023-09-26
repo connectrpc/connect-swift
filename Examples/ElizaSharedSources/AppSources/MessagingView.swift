@@ -17,8 +17,10 @@ import SwiftUI
 
 struct MessagingView<ViewModel: MessagingViewModel>: View {
     @State private var currentMessage = ""
-    @Environment(\.presentationMode) private var presentationMode
     @ObservedObject private var viewModel: ViewModel
+
+    @Environment(\.presentationMode)
+    private var presentationMode
 
     init(viewModel: ViewModel) {
         self.viewModel = viewModel
