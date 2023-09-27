@@ -34,26 +34,30 @@ struct InterceptorChain: @unchecked Sendable {
     /// `caller -> a -> b -> c -> server`
     /// `caller <- c <- b <- a <- server`
     ///
-    /// - returns: A set of closures that each invoke the chain of interceptors in the above order.
-    func unaryFunction() -> UnaryFunction {
+    /// - parameter sendFunction: <#UnaryFunction#>
+    ///
+    /// - returns: <#UnaryFunction#>
+    func chainUnary(_ sendFunction: UnaryFunction) -> UnaryFunction {
         let interceptors = self.interceptors.map { $0.unaryFunction() }
-        return UnaryFunction(
-            requestFunction: { request in
-                return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
-            },
-            responseFunction: { response in
-                return executeInterceptors(
-                    interceptors.reversed().map(\.responseFunction),
-                    initial: response
-                )
-            },
-            responseMetricsFunction: { metrics in
-                return executeInterceptors(
-                    interceptors.reversed().map(\.responseMetricsFunction),
-                    initial: metrics
-                )
-            }
-        )
+        return UnaryFunction { request, proceed in
+            executeInterceptors(
+                interceptors.map(\.requestFunction),
+                initial: request,
+                finish: proceed
+            )
+        } responseFunction: { response, proceed in
+            executeInterceptors(
+                interceptors.reversed().map(\.responseFunction),
+                initial: response,
+                finish: proceed
+            )
+        } responseMetricsFunction: { metrics, proceed in
+            executeInterceptors(
+                interceptors.reversed().map(\.responseMetricsFunction),
+                initial: metrics,
+                finish: proceed
+            )
+        }
     }
 
     /// Create a set of closures configured with all interceptors for a stream.
@@ -63,30 +67,41 @@ struct InterceptorChain: @unchecked Sendable {
     /// `caller -> a -> b -> c -> server`
     /// `caller <- c <- b <- a <- server`
     ///
-    /// - returns: A set of closures that each invoke the chain of interceptors in the above order.
-    func streamFunction() -> StreamFunction {
+    /// - parameter sendFunction: <#StreamFunction#>
+    ///
+    /// - returns: <#StreamFunction#>
+    func chainStream(_ sendFunction: StreamFunction) -> StreamFunction {
         let interceptors = self.interceptors.map { $0.streamFunction() }
-        return StreamFunction(
-            requestFunction: { request in
-                return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
-            },
-            requestDataFunction: { data in
-                return executeInterceptors(interceptors.map(\.requestDataFunction), initial: data)
-            },
-            streamResultFunction: { result in
-                return executeInterceptors(
-                    interceptors.reversed().map(\.streamResultFunction),
-                    initial: result
-                )
-            }
-        )
+        return StreamFunction { request, proceed in
+            executeInterceptors(
+                interceptors.map(\.requestFunction),
+                initial: request,
+                finish: proceed
+            )
+        } requestDataFunction: { data, proceed in
+            executeInterceptors(
+                interceptors.reversed().map(\.requestDataFunction),
+                initial: data,
+                finish: proceed
+            )
+        } streamResultFunction: { result, proceed in
+            executeInterceptors(
+                interceptors.reversed().map(\.streamResultFunction),
+                initial: result,
+                finish: proceed
+            )
+        }
     }
 }
 
-private func executeInterceptors<T>(_ interceptors: [(T) -> T], initial: T) -> T {
-    var next = initial
-    for interceptor in interceptors {
-        next = interceptor(next)
+private func executeInterceptors<T>(
+    _ interceptors: [(T, @escaping (T) -> Void) -> Void],
+    initial: T,
+    finish: @escaping (T) -> Void
+) {
+    var next: (T) -> Void = { finish($0) }
+    for interceptor in interceptors.reversed() {
+        next = { [next] interceptedValue in interceptor(interceptedValue, next) }
     }
-    return next
+    next(initial)
 }

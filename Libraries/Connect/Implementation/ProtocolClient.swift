@@ -59,23 +59,10 @@ extension ProtocolClient: ProtocolClientInterface {
             return Cancelable(cancel: {})
         }
 
-        let chain = self.config.createInterceptorChain().unaryFunction()
-        let url = URL(string: path, relativeTo: URL(string: self.config.host))!
-        let request = chain.requestFunction(HTTPRequest(
-            url: url,
-            contentType: "application/\(codec.name())",
-            headers: headers,
-            message: data,
-            trailers: nil
-        ))
-        return self.httpClient.unary(
-            request: request,
-            onMetrics: { metrics in
-                // Response is unused, but metrics are passed to interceptors
-                _ = chain.responseMetricsFunction(metrics)
-            },
-            onResponse: { response in
-                let response = chain.responseFunction(response)
+        let chain = self.config.createInterceptorChain().chainUnary(UnaryFunction(
+            requestFunction: { request, proceed in
+                proceed(request)
+            }, responseFunction: { response, proceed in
                 let responseMessage: ResponseMessage<Output>
                 if response.code != .ok {
                     let error = (response.error as? ConnectError)
@@ -117,7 +104,24 @@ extension ProtocolClient: ProtocolClientInterface {
                 }
                 completion(responseMessage)
             }
+        ))
+
+        let request = HTTPRequest(
+            url: URL(string: path, relativeTo: URL(string: self.config.host))!,
+            contentType: "application/\(codec.name())",
+            headers: headers,
+            message: data,
+            trailers: nil
         )
+        chain.requestFunction(request, { interceptedRequest in
+            self.httpClient.unary(
+                request: interceptedRequest,
+                onMetrics: { chain.responseMetricsFunction($0, { _ in }) },
+                onResponse: { chain.responseFunction($0, { _ in }) }
+            )
+        })
+        #warning("fixme")
+        return Cancelable(cancel: {})
     }
 
     public func bidirectionalStream<
@@ -224,40 +228,15 @@ extension ProtocolClient: ProtocolClientInterface {
         onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> RequestCallbacks {
         let codec = self.config.codec
-        let chain = self.config.createInterceptorChain().streamFunction()
-        let url = URL(string: path, relativeTo: URL(string: self.config.host))!
-        let request = chain.requestFunction(HTTPRequest(
-            url: url,
-            contentType: "application/connect+\(codec.name())",
-            headers: headers,
-            message: nil,
-            trailers: nil
-        ))
-
-        let hasCompleted = Locked(false)
-        let interceptAndHandleResult: @Sendable (StreamResult<Data>) -> Void = { streamResult in
-            do {
-                let interceptedResult = chain.streamResultFunction(streamResult)
-                if case .complete = interceptedResult {
-                    hasCompleted.value = true
-                }
-                onResult(try interceptedResult.toTypedResult(using: codec))
-            } catch let error {
-                // TODO: Should we terminate the stream here?
-                os_log(
-                    .error,
-                    "Failed to deserialize stream result - dropping result: %@",
-                    error.localizedDescription
-                )
-            }
-        }
         let responseBuffer = Locked(Data())
-        let responseCallbacks = ResponseCallbacks(
-            receiveResponseHeaders: { interceptAndHandleResult(.headers($0)) },
-            receiveResponseData: { responseChunk in
+        let hasCompleted = Locked(false)
+        let chain = self.config.createInterceptorChain().chainStream(StreamFunction(
+            requestFunction: { request, proceed in
+                proceed(request)
+            }, requestDataFunction: { data, proceed in
                 // Repeating handles cases where multiple messages are received in a single chunk.
                 responseBuffer.perform { responseBuffer in
-                    responseBuffer += responseChunk
+                    responseBuffer += data
                     while true {
                         let messageLength = Envelope.messageLength(forPackedData: responseBuffer)
                         if messageLength < 0 {
@@ -269,33 +248,91 @@ extension ProtocolClient: ProtocolClientInterface {
                             return
                         }
 
-                        interceptAndHandleResult(
-                            .message(responseBuffer.prefix(prefixedMessageLength))
-                        )
+                        proceed(responseBuffer.prefix(prefixedMessageLength))
                         responseBuffer = Data(responseBuffer.suffix(from: prefixedMessageLength))
                     }
                 }
+            }, streamResultFunction: { result, proceed in
+                do {
+                    if case .complete = result {
+                        hasCompleted.value = true
+                    }
+                    onResult(try result.toTypedResult(using: codec))
+                } catch let error {
+                    // TODO: Should we terminate the stream here?
+                    os_log(
+                        .error,
+                        "Failed to deserialize stream result - dropping result: %@",
+                        error.localizedDescription
+                    )
+                }
+            }
+        ))
+        let request = HTTPRequest(
+            url: URL(string: path, relativeTo: URL(string: self.config.host))!,
+            contentType: "application/connect+\(codec.name())",
+            headers: headers,
+            message: nil,
+            trailers: nil
+        )
+        let responseCallbacks = ResponseCallbacks(
+            receiveResponseHeaders: { responseHeaders in
+                chain.streamResultFunction(.headers(responseHeaders), { _ in })
+            },
+            receiveResponseData: { data in
+                chain.streamResultFunction(.message(data), { _ in })
             },
             receiveClose: { code, trailers, error in
                 if !hasCompleted.value {
-                    interceptAndHandleResult(.complete(
+                    chain.streamResultFunction(.complete(
                         code: code,
                         error: error,
                         trailers: trailers
-                    ))
+                    ), { _ in })
                 }
             }
         )
-        let httpRequestCallbacks = self.httpClient.stream(
-            request: request,
-            responseCallbacks: responseCallbacks
-        )
 
-        // Wrap the request data callback to invoke the interceptor chain.
-        return RequestCallbacks(
-            sendData: { httpRequestCallbacks.sendData(chain.requestDataFunction($0)) },
-            sendClose: httpRequestCallbacks.sendClose
-        )
+        let lock = Lock()
+        var pendingQueue = [(RequestCallbacks) -> Void]()
+        var requestCallbacks: RequestCallbacks?
+        
+        func flushQueue() {
+            if let requestCallbacks = requestCallbacks {
+                pendingQueue.forEach { $0(requestCallbacks) }
+                pendingQueue = []
+            }
+        }
+
+        func executeOrQueue(_ action: @escaping (RequestCallbacks) -> Void) {
+            pendingQueue.append(action)
+            flushQueue()
+        }
+
+        chain.requestFunction(request, { interceptedRequest in
+            lock.perform {
+                requestCallbacks = self.httpClient.stream(
+                    request: interceptedRequest,
+                    responseCallbacks: responseCallbacks
+                )
+                flushQueue()
+            }
+        })
+        return RequestCallbacks { data in
+            lock.perform {
+                executeOrQueue { requestCallbacks in
+                    chain.requestDataFunction(data, { interceptedData in
+                        requestCallbacks.sendData(interceptedData)
+                    })
+                }
+            }
+        } sendClose: {
+            lock.perform {
+                executeOrQueue { requestCallbacks in
+                    requestCallbacks.sendClose()
+                }
+            }
+        }
     }
 }
 
