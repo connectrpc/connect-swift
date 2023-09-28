@@ -14,8 +14,10 @@
 
 /// Represents a chain of interceptors that is used for a single request/stream,
 /// and orchestrates invoking each of them in the proper order.
-struct InterceptorChain: @unchecked Sendable {
+final class InterceptorChain: @unchecked Sendable {
     private let interceptors: [Interceptor]
+    private(set) lazy var stream = self.interceptors.map { $0.streamFunction() }
+    private(set) lazy var unary = self.interceptors.map { $0.unaryFunction() }
 
     /// Initialize the interceptor chain.
     ///
@@ -27,81 +29,20 @@ struct InterceptorChain: @unchecked Sendable {
         self.interceptors = interceptors.map { initialize in initialize(config) }
     }
 
-    /// Create a set of closures configured with all interceptors for a unary API.
+    /// <#execute(_:initial:finish:)#>
     ///
-    /// NOTE: Interceptors are invoked in FIFO order for the request path, and in LIFO order for
-    /// the response path. For example, with interceptors `[a, b, c]`:
-    /// `caller -> a -> b -> c -> server`
-    /// `caller <- c <- b <- a <- server`
-    ///
-    /// - parameter sendFunction: <#UnaryFunction#>
-    ///
-    /// - returns: <#UnaryFunction#>
-    func chainUnary(_ sendFunction: UnaryFunction) -> UnaryFunction {
-        let interceptors = self.interceptors.map { $0.unaryFunction() }
-        return UnaryFunction { request, proceed in
-            executeInterceptors(
-                interceptors.map(\.requestFunction),
-                initial: request,
-                finish: proceed
-            )
-        } responseFunction: { response, proceed in
-            executeInterceptors(
-                interceptors.reversed().map(\.responseFunction),
-                initial: response,
-                finish: proceed
-            )
-        } responseMetricsFunction: { metrics, proceed in
-            executeInterceptors(
-                interceptors.reversed().map(\.responseMetricsFunction),
-                initial: metrics,
-                finish: proceed
-            )
+    /// - parameter interceptors: <#[(T, @escaping (T) -> Void) -> Void]#>
+    /// - parameter initial: <#T#>
+    /// - parameter finish: <#@escaping (T) -> Void#>
+    func execute<T>(
+        _ interceptors: [(T, @escaping (T) -> Void) -> Void],
+        initial: T,
+        finish: @escaping (T) -> Void
+    ) {
+        var next: (T) -> Void = { finish($0) }
+        for interceptor in interceptors.reversed() {
+            next = { [next] interceptedValue in interceptor(interceptedValue, next) }
         }
+        next(initial)
     }
-
-    /// Create a set of closures configured with all interceptors for a stream.
-    ///
-    /// NOTE: Interceptors are invoked in FIFO order for the request path, and in LIFO order for
-    /// the response path. For example, with interceptors `[a, b, c]`:
-    /// `caller -> a -> b -> c -> server`
-    /// `caller <- c <- b <- a <- server`
-    ///
-    /// - parameter sendFunction: <#StreamFunction#>
-    ///
-    /// - returns: <#StreamFunction#>
-    func chainStream(_ sendFunction: StreamFunction) -> StreamFunction {
-        let interceptors = self.interceptors.map { $0.streamFunction() }
-        return StreamFunction { request, proceed in
-            executeInterceptors(
-                interceptors.map(\.requestFunction),
-                initial: request,
-                finish: proceed
-            )
-        } requestDataFunction: { data, proceed in
-            executeInterceptors(
-                interceptors.reversed().map(\.requestDataFunction),
-                initial: data,
-                finish: proceed
-            )
-        } streamResultFunction: { result, proceed in
-            executeInterceptors(
-                interceptors.reversed().map(\.streamResultFunction),
-                initial: result,
-                finish: proceed
-            )
-        }
-    }
-}
-
-private func executeInterceptors<T>(
-    _ interceptors: [(T, @escaping (T) -> Void) -> Void],
-    initial: T,
-    finish: @escaping (T) -> Void
-) {
-    var next: (T) -> Void = { finish($0) }
-    for interceptor in interceptors.reversed() {
-        next = { [next] interceptedValue in interceptor(interceptedValue, next) }
-    }
-    next(initial)
 }
