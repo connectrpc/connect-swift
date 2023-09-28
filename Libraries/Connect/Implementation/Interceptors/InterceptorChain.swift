@@ -21,7 +21,7 @@ final class InterceptorChain: @unchecked Sendable {
 
     /// Initialize the interceptor chain.
     ///
-    /// NOTE: Exactly 1 chain is expected to be instantiated for a single request/stream.
+    /// NOTE: Exactly 1 chain is expected to be instantiated for a single request or stream.
     ///
     /// - parameter interceptors: Closures that should be called to create interceptors.
     /// - parameter config: Config to use for setting up interceptors.
