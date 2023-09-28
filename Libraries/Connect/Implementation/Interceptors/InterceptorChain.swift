@@ -14,33 +14,35 @@
 
 /// Represents a chain of interceptors that is used for a single request/stream,
 /// and orchestrates invoking each of them in the proper order.
-final class InterceptorChain: @unchecked Sendable {
-    private let interceptors: [Interceptor]
-    private(set) lazy var stream = self.interceptors.map { $0.streamFunction() }
-    private(set) lazy var unary = self.interceptors.map { $0.unaryFunction() }
+final class InterceptorChain<T: Sendable>: Sendable {
+    private let interceptors: [T]
 
-    /// Initialize the interceptor chain.
-    ///
-    /// NOTE: Exactly 1 chain is expected to be instantiated for a single request or stream.
-    ///
-    /// - parameter interceptors: Closures that should be called to create interceptors.
-    /// - parameter config: Config to use for setting up interceptors.
-    init(interceptors: [InterceptorInitializer], config: ProtocolClientConfig) {
-        self.interceptors = interceptors.map { initialize in initialize(config) }
+    init(_ interceptors: [T]) {
+        self.interceptors = interceptors
     }
 
-    /// <#execute(_:initial:finish:)#>
+    /// Invoke each of the interceptors, waiting for a given interceptor to complete before passing
+    /// the resulting value to the next interceptor and finally invoking `finish` with the final
+    /// value.
     ///
-    /// - parameter interceptors: <#[(T, @escaping (T) -> Void) -> Void]#>
-    /// - parameter initial: <#T#>
-    /// - parameter finish: <#@escaping (T) -> Void#>
-    func execute<T>(
-        _ interceptors: [(T, @escaping (T) -> Void) -> Void],
-        initial: T,
-        finish: @escaping (T) -> Void
+    /// - parameter functionPath: Key path of the function on the interceptor to invoke.
+    /// - parameter firstInFirstOut: If true, interceptors will be invoked in the order they were
+    ///                              originally registered. If false, the order is reversed.
+    /// - parameter initial: The initial value to pass to the first interceptor.
+    /// - parameter finish: Closure to call with the final value after each interceptor has finished
+    ///                     processing.
+    func executeInterceptors<Value>(
+        _ functionPath: KeyPath<T, @Sendable (Value, @escaping @Sendable (Value) -> Void) -> Void>,
+        firstInFirstOut: Bool,
+        initial: Value,
+        finish: @escaping @Sendable (Value) -> Void
     ) {
-        var next: (T) -> Void = { finish($0) }
-        for interceptor in interceptors.reversed() {
+        var interceptors = self.interceptors.map { $0[keyPath: functionPath] }
+        if firstInFirstOut {
+            interceptors = interceptors.reversed()
+        }
+        var next: @Sendable (Value) -> Void = { finish($0) }
+        for interceptor in interceptors {
             next = { [next] interceptedValue in interceptor(interceptedValue, next) }
         }
         next(initial)

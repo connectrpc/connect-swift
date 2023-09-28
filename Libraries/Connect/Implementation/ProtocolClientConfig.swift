@@ -85,7 +85,15 @@ extension ProtocolClientConfig {
 // MARK: - Internal
 
 extension ProtocolClientConfig {
-    func createInterceptorChain() -> InterceptorChain {
-        return InterceptorChain(interceptors: self.interceptors, config: self)
+    func createStreamInterceptorChain() -> InterceptorChain<StreamFunction> {
+        return .init(
+            self.interceptors.map { initialize in initialize(self).streamFunction() }
+        )
+    }
+
+    func createUnaryInterceptorChain() -> InterceptorChain<UnaryFunction> {
+        return .init(
+            self.interceptors.map { initialize in initialize(self).unaryFunction() }
+        )
     }
 }

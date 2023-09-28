@@ -13,19 +13,19 @@
 // limitations under the License.
 
 /// A set of closures used by an interceptor to inspect or modify unary requests/responses.
-public struct UnaryFunction: @unchecked Sendable {
+public struct UnaryFunction: Sendable {
     public let requestFunction: RequestHandler
     public let responseFunction: ResponseHandler
     public let responseMetricsFunction: ResponseMetricsHandler
 
-    public typealias RequestHandler = (
-        _ request: HTTPRequest, _ proceed: @escaping (HTTPRequest) -> Void
+    public typealias RequestHandler = @Sendable (
+        _ request: HTTPRequest, _ proceed: @escaping @Sendable (HTTPRequest) -> Void
     ) -> Void
-    public typealias ResponseHandler = (
-        _ response: HTTPResponse, _ proceed: @escaping (HTTPResponse) -> Void
+    public typealias ResponseHandler = @Sendable (
+        _ response: HTTPResponse, _ proceed: @escaping @Sendable (HTTPResponse) -> Void
     ) -> Void
-    public typealias ResponseMetricsHandler = (
-        _ metrics: HTTPMetrics, _ proceed: @escaping (HTTPMetrics) -> Void
+    public typealias ResponseMetricsHandler = @Sendable (
+        _ metrics: HTTPMetrics, _ proceed: @escaping @Sendable (HTTPMetrics) -> Void
     ) -> Void
 
     public init(

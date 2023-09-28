@@ -59,7 +59,7 @@ extension ProtocolClient: ProtocolClientInterface {
             return Cancelable(cancel: {})
         }
 
-        let interceptorChain = self.config.createInterceptorChain()
+        let interceptorChain = self.config.createUnaryInterceptorChain()
         let request = HTTPRequest(
             url: URL(string: path, relativeTo: URL(string: self.config.host))!,
             contentType: "application/\(codec.name())",
@@ -67,7 +67,7 @@ extension ProtocolClient: ProtocolClientInterface {
             message: data,
             trailers: nil
         )
-        let cancelable = Locked<Cancelable?>(nil)
+        let cancelation = Locked<(cancelable: Cancelable?, isCancelled: Bool)>((nil, false))
         let finishProcessingResponse: (HTTPResponse) -> Void = { response in
             let responseMessage: ResponseMessage<Output>
             if response.code != .ok {
@@ -112,30 +112,44 @@ extension ProtocolClient: ProtocolClientInterface {
             }
             completion(responseMessage)
         }
-        interceptorChain.execute(
-            interceptorChain.unary.map(\.requestFunction),
+        interceptorChain.executeInterceptors(
+            \.requestFunction,
+            firstInFirstOut: true,
             initial: request,
             finish: { interceptedRequest in
-                cancelable.value = self.httpClient.unary(
-                    request: interceptedRequest,
-                    onMetrics: { metrics in
-                        interceptorChain.execute(
-                            interceptorChain.unary.reversed().map(\.responseMetricsFunction),
-                            initial: metrics, 
-                            finish: { _ in }
-                        )
-                    },
-                    onResponse: { response in
-                        interceptorChain.execute(
-                            interceptorChain.unary.reversed().map(\.responseFunction),
-                            initial: response,
-                            finish: finishProcessingResponse
-                        )
+                cancelation.perform { cancelation in
+                    if cancelation.isCancelled {
+                        return
                     }
-                )
+
+                    cancelation.cancelable = self.httpClient.unary(
+                        request: interceptedRequest,
+                        onMetrics: { metrics in
+                            interceptorChain.executeInterceptors(
+                                \.responseMetricsFunction,
+                                firstInFirstOut: false,
+                                initial: metrics,
+                                finish: { _ in }
+                            )
+                        },
+                        onResponse: { response in
+                            interceptorChain.executeInterceptors(
+                                \.responseFunction,
+                                firstInFirstOut: false,
+                                initial: response,
+                                finish: finishProcessingResponse
+                            )
+                        }
+                    )
+                }
             }
         )
-        return Cancelable(cancel: { cancelable.value?.cancel() })
+        return Cancelable {
+            cancelation.perform { cancelation in
+                cancelation.cancelable?.cancel()
+                cancelation = (cancelable: nil, isCancelled: true)
+            }
+        }
     }
 
     public func bidirectionalStream<
@@ -244,8 +258,7 @@ extension ProtocolClient: ProtocolClientInterface {
         let codec = self.config.codec
         let responseBuffer = Locked(Data())
         let hasCompleted = Locked(false)
-        let interceptorChain = self.config.createInterceptorChain()
-
+        let interceptorChain = self.config.createStreamInterceptorChain()
         let finishHandlingResult: (StreamResult<Data>) -> Void = { result in
             do {
                 if case .complete = result {
@@ -253,18 +266,18 @@ extension ProtocolClient: ProtocolClientInterface {
                 }
                 onResult(try result.toTypedResult(using: codec))
             } catch let error {
-                // TODO: Should we terminate the stream here?
                 os_log(
                     .error,
-                    "Failed to deserialize stream result - dropping result: %@",
+                    "Dropping stream result which failed to deserialize: %@",
                     error.localizedDescription
                 )
             }
         }
         let responseCallbacks = ResponseCallbacks(
             receiveResponseHeaders: { responseHeaders in
-                interceptorChain.execute(
-                    interceptorChain.stream.reversed().map(\.streamResultFunction),
+                interceptorChain.executeInterceptors(
+                    \.streamResultFunction,
+                    firstInFirstOut: false,
                     initial: .headers(responseHeaders),
                     finish: finishHandlingResult
                 )
@@ -284,8 +297,9 @@ extension ProtocolClient: ProtocolClientInterface {
                             return
                         }
 
-                        interceptorChain.execute(
-                            interceptorChain.stream.reversed().map(\.streamResultFunction),
+                        interceptorChain.executeInterceptors(
+                            \.streamResultFunction,
+                            firstInFirstOut: false,
                             initial: .message(responseBuffer.prefix(prefixedMessageLength)),
                             finish: finishHandlingResult
                         )
@@ -294,17 +308,19 @@ extension ProtocolClient: ProtocolClientInterface {
                 }
             },
             receiveClose: { code, trailers, error in
-                if !hasCompleted.value {
-                    interceptorChain.execute(
-                        interceptorChain.stream.reversed().map(\.streamResultFunction),
-                        initial: .complete(
-                            code: code,
-                            error: error,
-                            trailers: trailers
-                        ),
-                        finish: finishHandlingResult
-                    )
+                if hasCompleted.value {
+                    return
                 }
+                interceptorChain.executeInterceptors(
+                    \.streamResultFunction,
+                    firstInFirstOut: false,
+                    initial: .complete(
+                        code: code,
+                        error: error,
+                        trailers: trailers
+                    ),
+                    finish: finishHandlingResult
+                )
             }
         )
 
@@ -316,8 +332,9 @@ extension ProtocolClient: ProtocolClientInterface {
             message: nil,
             trailers: nil
         )
-        interceptorChain.execute(
-            interceptorChain.stream.map(\.requestFunction),
+        interceptorChain.executeInterceptors(
+            \.requestFunction,
+            firstInFirstOut: true,
             initial: request,
             finish: { interceptedRequest in
                 requestCallbacksQueue.setCallbacks(self.httpClient.stream(
@@ -326,11 +343,13 @@ extension ProtocolClient: ProtocolClientInterface {
                 ))
             }
         )
-        return RequestCallbacks { data in
-            interceptorChain.execute(
-                interceptorChain.stream.map(\.requestDataFunction),
-                initial: data,
+        return RequestCallbacks { requestData in
+            interceptorChain.executeInterceptors(
+                \.requestDataFunction,
+                firstInFirstOut: true,
+                initial: requestData,
                 finish: { interceptedData in
+                    // Wait for the stream to be established before sending data
                     requestCallbacksQueue.enqueue { requestCallbacks in
                         requestCallbacks.sendData(interceptedData)
                     }

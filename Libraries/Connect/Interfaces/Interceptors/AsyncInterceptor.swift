@@ -14,28 +14,28 @@
 
 import Foundation
 
-open class AsyncInterceptor: Interceptor {
-    open func handleRequest(_ request: HTTPRequest) async -> HTTPRequest {
+final class AsyncInterceptor: Interceptor, Sendable {
+    func handleRequest(_ request: HTTPRequest) async -> HTTPRequest {
         return request
     }
 
-    open func handleUnaryResponse(_ response: HTTPResponse) async -> HTTPResponse {
+    func handleUnaryResponse(_ response: HTTPResponse) async -> HTTPResponse {
         return response
     }
 
-    open func handleUnaryResponseMetrics(_ metrics: HTTPMetrics) async -> HTTPMetrics {
+    func handleUnaryResponseMetrics(_ metrics: HTTPMetrics) async -> HTTPMetrics {
         return metrics
     }
 
-    open func handleStreamRequestData(_ data: Data) async -> Data {
+    func handleStreamRequestData(_ data: Data) async -> Data {
         return data
     }
 
-    open func handleStreamResult(_ result: StreamResult<Data>) async -> StreamResult<Data> {
+    func handleStreamResult(_ result: StreamResult<Data>) async -> StreamResult<Data> {
         return result
     }
 
-    public final func unaryFunction() -> UnaryFunction {
+    final func unaryFunction() -> UnaryFunction {
         return .init { request, proceed in
             Task {
                 proceed(await self.handleRequest(request))
@@ -51,7 +51,7 @@ open class AsyncInterceptor: Interceptor {
         }
     }
 
-    public final func streamFunction() -> StreamFunction {
+    final func streamFunction() -> StreamFunction {
         return .init { request, proceed in
             Task {
                 proceed(await self.handleRequest(request))

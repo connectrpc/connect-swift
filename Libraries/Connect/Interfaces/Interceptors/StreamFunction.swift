@@ -15,19 +15,19 @@
 import Foundation
 
 /// A set of closures used by an interceptor to inspect or modify streams.
-public struct StreamFunction: @unchecked Sendable {
+public struct StreamFunction: Sendable {
     public let requestFunction: RequestHandler
     public let requestDataFunction: RequestDataHandler
     public let streamResultFunction: StreamResultHandler
 
-    public typealias RequestHandler = (
-        _ request: HTTPRequest, _ proceed: @escaping (HTTPRequest) -> Void
+    public typealias RequestHandler = @Sendable (
+        _ request: HTTPRequest, _ proceed: @escaping @Sendable (HTTPRequest) -> Void
     ) -> Void
-    public typealias RequestDataHandler = (
-        _ data: Data, _ proceed: @escaping (Data) -> Void
+    public typealias RequestDataHandler = @Sendable (
+        _ data: Data, _ proceed: @escaping @Sendable (Data) -> Void
     ) -> Void
-    public typealias StreamResultHandler = (
-        _ result: StreamResult<Data>, _ proceed: @escaping (StreamResult<Data>) -> Void
+    public typealias StreamResultHandler = @Sendable (
+        _ result: StreamResult<Data>, _ proceed: @escaping @Sendable (StreamResult<Data>) -> Void
     ) -> Void
 
     public init(
