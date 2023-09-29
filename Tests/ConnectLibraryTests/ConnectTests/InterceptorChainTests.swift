@@ -21,41 +21,37 @@ private struct MockUnaryInterceptor: Interceptor {
     let responseExpectation: XCTestExpectation
     let responseMetricsExpectation: XCTestExpectation
 
-    func unaryFunction() -> Connect.UnaryFunction {
-        return UnaryFunction(
-            requestFunction: { request in
-                var headers = request.headers
-                headers["filter-chain", default: []].append(self.headerID)
-                self.requestExpectation.fulfill()
-                return HTTPRequest(
-                    url: request.url,
-                    contentType: request.contentType,
-                    headers: headers,
-                    message: request.message,
-                    trailers: request.trailers
-                )
-            },
-            responseFunction: { response in
-                var headers = response.headers
-                headers["filter-chain", default: []].append(self.headerID)
-                self.responseExpectation.fulfill()
-                return HTTPResponse(
-                    code: response.code,
-                    headers: headers,
-                    message: response.message,
-                    trailers: response.trailers,
-                    error: response.error,
-                    tracingInfo: .init(httpStatus: 200)
-                )
-            },
-            responseMetricsFunction: { metrics in
-                self.responseMetricsExpectation.fulfill()
-                return metrics
-            }
-        )
+    func unaryFunction() -> UnaryFunction {
+        return UnaryFunction { request, proceed in
+            var headers = request.headers
+            headers["filter-chain", default: []].append(self.headerID)
+            self.requestExpectation.fulfill()
+            proceed(HTTPRequest(
+                url: request.url,
+                contentType: request.contentType,
+                headers: headers,
+                message: request.message,
+                trailers: request.trailers
+            ))
+        } responseFunction: { response, proceed in
+            var headers = response.headers
+            headers["filter-chain", default: []].append(self.headerID)
+            self.responseExpectation.fulfill()
+            proceed(HTTPResponse(
+                code: response.code,
+                headers: headers,
+                message: response.message,
+                trailers: response.trailers,
+                error: response.error,
+                tracingInfo: .init(httpStatus: 200)
+            ))
+        } responseMetricsFunction: { metrics, proceed in
+            self.responseMetricsExpectation.fulfill()
+            proceed(metrics)
+        }
     }
 
-    func streamFunction() -> Connect.StreamFunction {
+    func streamFunction() -> StreamFunction {
         fatalError("Unexpectedly called with stream")
     }
 }
@@ -73,41 +69,37 @@ private struct MockStreamInterceptor: Interceptor {
     }
 
     func streamFunction() -> StreamFunction {
-        return StreamFunction(
-            requestFunction: { request in
-                var headers = request.headers
+        return StreamFunction { request, proceed in
+            var headers = request.headers
+            headers["filter-chain", default: []].append(self.headerID)
+            self.requestExpectation.fulfill()
+            proceed(HTTPRequest(
+                url: request.url,
+                contentType: request.contentType,
+                headers: headers,
+                message: request.message,
+                trailers: Trailers()
+            ))
+        } requestDataFunction: { data, proceed in
+            self.requestDataExpectation.fulfill()
+            proceed(self.outboundMessageData)
+        } streamResultFunction: { result, proceed in
+            self.resultExpectation.fulfill()
+            switch result {
+            case .headers(let headers):
+                var headers = headers
                 headers["filter-chain", default: []].append(self.headerID)
-                self.requestExpectation.fulfill()
-                return HTTPRequest(
-                    url: request.url,
-                    contentType: request.contentType,
-                    headers: headers,
-                    message: request.message,
-                    trailers: Trailers()
-                )
-            },
-            requestDataFunction: { _ in
-                self.requestDataExpectation.fulfill()
-                return self.outboundMessageData
-            },
-            streamResultFunction: { result in
-                self.resultExpectation.fulfill()
-                switch result {
-                case .headers(let headers):
-                    var headers = headers
-                    headers["filter-chain", default: []].append(self.headerID)
-                    return .headers(headers)
+                proceed(.headers(headers))
 
-                case .message:
-                    return .message(self.inboundMessageData)
+            case .message:
+                proceed(.message(self.inboundMessageData))
 
-                case .complete(let code, let error, let trailers):
-                    var trailers = trailers ?? [:]
-                    trailers["filter-chain", default: []].append(self.headerID)
-                    return .complete(code: code, error: error, trailers: trailers)
-                }
+            case .complete(let code, let error, let trailers):
+                var trailers = trailers ?? [:]
+                trailers["filter-chain", default: []].append(self.headerID)
+                proceed(.complete(code: code, error: error, trailers: trailers))
             }
-        )
+        }
     }
 }
 
@@ -121,49 +113,58 @@ final class InterceptorChainTests: XCTestCase {
         let bResponseExpectation = self.expectation(description: "Filter B called with response")
         let aMetricsExpectation = self.expectation(description: "Filter A called with metrics")
         let bMetricsExpectation = self.expectation(description: "Filter B called with metrics")
-        let chain = InterceptorChain(
-            interceptors: [
-                { _ in
-                    return MockUnaryInterceptor(
-                        headerID: "filter-a",
-                        requestExpectation: aRequestExpectation,
-                        responseExpectation: aResponseExpectation,
-                        responseMetricsExpectation: aMetricsExpectation
-                    )
-                },
-                { _ in
-                    return MockUnaryInterceptor(
-                        headerID: "filter-b",
-                        requestExpectation: bRequestExpectation,
-                        responseExpectation: bResponseExpectation,
-                        responseMetricsExpectation: bMetricsExpectation
-                    )
-                },
-            ],
-            config: self.config
-        ).unaryFunction()
+        let chain = InterceptorChain([
+            MockUnaryInterceptor(
+                headerID: "filter-a",
+                requestExpectation: aRequestExpectation,
+                responseExpectation: aResponseExpectation,
+                responseMetricsExpectation: aMetricsExpectation
+            ).unaryFunction(),
+            MockUnaryInterceptor(
+                headerID: "filter-b",
+                requestExpectation: bRequestExpectation,
+                responseExpectation: bResponseExpectation,
+                responseMetricsExpectation: bMetricsExpectation
+            ).unaryFunction(),
+        ])
 
-        let interceptedRequest = chain.requestFunction(HTTPRequest(
-            url: try XCTUnwrap(URL(string: "https://buf.build/mock")),
-            contentType: "application/json",
-            headers: Headers(),
-            message: nil,
-            trailers: Trailers()
-        ))
-        XCTAssertEqual(interceptedRequest.headers["filter-chain"], ["filter-a", "filter-b"])
+        let interceptedRequest = Locked<HTTPRequest?>(nil)
+        chain.executeInterceptors(
+            \.requestFunction,
+             firstInFirstOut: true,
+             initial: HTTPRequest(
+                url: try XCTUnwrap(URL(string: "https://buf.build/mock")),
+                contentType: "application/json",
+                headers: Headers(),
+                message: nil,
+                trailers: Trailers()
+             ), finish: { interceptedRequest.value = $0 }
+        )
+        XCTAssertEqual(interceptedRequest.value?.headers["filter-chain"], ["filter-a", "filter-b"])
 
-        let interceptedResponse = chain.responseFunction(HTTPResponse(
-            code: .ok,
-            headers: Headers(),
-            message: nil,
-            trailers: Trailers(),
-            error: nil,
-            tracingInfo: .init(httpStatus: 200)
-        ))
-        XCTAssertEqual(interceptedResponse.headers["filter-chain"], ["filter-b", "filter-a"])
+        let interceptedResponse = Locked<HTTPResponse?>(nil)
+        chain.executeInterceptors(
+            \.responseFunction,
+             firstInFirstOut: false,
+             initial: HTTPResponse(
+                code: .ok,
+                headers: Headers(),
+                message: nil,
+                trailers: Trailers(),
+                error: nil,
+                tracingInfo: .init(httpStatus: 200)
+             ), finish: { interceptedResponse.value = $0 }
+        )
+        XCTAssertEqual(interceptedResponse.value?.headers["filter-chain"], ["filter-b", "filter-a"])
 
-        let interceptedMetrics = chain.responseMetricsFunction(HTTPMetrics(taskMetrics: nil))
-        XCTAssertNil(interceptedMetrics.taskMetrics)
+        let interceptedMetrics = Locked<HTTPMetrics?>(nil)
+        chain.executeInterceptors(
+            \.responseMetricsFunction,
+             firstInFirstOut: false,
+             initial: HTTPMetrics(taskMetrics: nil),
+             finish: { interceptedMetrics.value = $0 }
+        )
+        XCTAssertNil(try XCTUnwrap(interceptedMetrics.value).taskMetrics)
 
         XCTAssertEqual(XCTWaiter().wait(for: [
             aRequestExpectation,
@@ -187,63 +188,79 @@ final class InterceptorChainTests: XCTestCase {
 
         let filterAData = try XCTUnwrap("filter a".data(using: .utf8))
         let filterBData = try XCTUnwrap("filter b".data(using: .utf8))
-        let chain = InterceptorChain(
-            interceptors: [
-                { _ in
-                    return MockStreamInterceptor(
-                        headerID: "filter-a",
-                        outboundMessageData: filterAData,
-                        inboundMessageData: filterAData,
-                        requestExpectation: aRequestExpectation,
-                        requestDataExpectation: aRequestDataExpectation,
-                        resultExpectation: aResultExpectation
-                    )
-                },
-                { _ in
-                    return MockStreamInterceptor(
-                        headerID: "filter-b",
-                        outboundMessageData: filterBData,
-                        inboundMessageData: filterBData,
-                        requestExpectation: bRequestExpectation,
-                        requestDataExpectation: bRequestDataExpectation,
-                        resultExpectation: bResultExpectation
-                    )
-                },
-            ],
-            config: self.config
-        ).streamFunction()
+        let chain = InterceptorChain([
+            MockStreamInterceptor(
+                headerID: "filter-a",
+                outboundMessageData: filterAData,
+                inboundMessageData: filterAData,
+                requestExpectation: aRequestExpectation,
+                requestDataExpectation: aRequestDataExpectation,
+                resultExpectation: aResultExpectation
+            ).streamFunction(),
+            MockStreamInterceptor(
+                headerID: "filter-b",
+                outboundMessageData: filterBData,
+                inboundMessageData: filterBData,
+                requestExpectation: bRequestExpectation,
+                requestDataExpectation: bRequestDataExpectation,
+                resultExpectation: bResultExpectation
+            ).streamFunction(),
+        ])
 
-        let interceptedRequest = chain.requestFunction(HTTPRequest(
-            url: try XCTUnwrap(URL(string: "https://buf.build/mock")),
-            contentType: "application/json",
-            headers: Headers(),
-            message: nil,
-            trailers: Trailers()
-        ))
-        XCTAssertEqual(interceptedRequest.headers["filter-chain"], ["filter-a", "filter-b"])
-        XCTAssertNil(interceptedRequest.message)
+        let interceptedRequest = Locked<HTTPRequest?>(nil)
+        chain.executeInterceptors(
+            \.requestFunction,
+             firstInFirstOut: true,
+             initial: HTTPRequest(
+                url: try XCTUnwrap(URL(string: "https://buf.build/mock")),
+                contentType: "application/json",
+                headers: Headers(),
+                message: nil,
+                trailers: Trailers()
+             ),
+             finish: { interceptedRequest.value = $0 }
+        )
+        XCTAssertEqual(interceptedRequest.value?.headers["filter-chain"], ["filter-a", "filter-b"])
+        XCTAssertNil(interceptedRequest.value?.message)
 
-        let interceptedRequestData = chain.requestDataFunction(Data())
-        XCTAssertEqual(interceptedRequestData, filterBData)
+        let interceptedRequestData = Locked<Data?>(nil)
+        chain.executeInterceptors(
+            \.requestDataFunction,
+             firstInFirstOut: true,
+             initial: Data(),
+             finish: { interceptedRequestData.value = $0 }
+        )
+        XCTAssertEqual(interceptedRequestData.value, filterBData)
 
-        switch chain.streamResultFunction(.headers(Headers())) {
-        case .headers(let interceptedResultHeaders):
-            XCTAssertEqual(interceptedResultHeaders["filter-chain"], ["filter-b", "filter-a"])
-        case .message, .complete:
-            XCTFail("Unexpected result")
-        }
+        let interceptedResult = Locked<StreamResult<Data>?>(nil)
+        chain.executeInterceptors(
+            \.streamResultFunction,
+             firstInFirstOut: false,
+             initial: .headers(Headers()),
+             finish: { interceptedResult.value = $0 }
+        )
+        XCTAssertEqual(
+            interceptedResult.value, .headers(["filter-chain": ["filter-b", "filter-a"]])
+        )
 
-        switch chain.streamResultFunction(.message(Data())) {
-        case .message(let interceptedData):
-            XCTAssertEqual(interceptedData, filterAData)
-        case .headers, .complete:
-            XCTFail("Unexpected result")
-        }
+        chain.executeInterceptors(
+            \.streamResultFunction,
+             firstInFirstOut: false,
+             initial: .message(Data()),
+             finish: { interceptedResult.value = $0 }
+        )
+        XCTAssertEqual(interceptedResult.value, .message(filterAData))
 
-        switch chain.streamResultFunction(.complete(code: .ok, error: nil, trailers: nil)) {
+        chain.executeInterceptors(
+            \.streamResultFunction,
+             firstInFirstOut: false,
+             initial: .complete(code: .ok, error: nil, trailers: nil),
+             finish: { interceptedResult.value = $0 }
+        )
+        switch interceptedResult.value {
         case .complete(_, _, let interceptedTrailers):
             XCTAssertEqual(interceptedTrailers?["filter-chain"], ["filter-b", "filter-a"])
-        case .headers, .message:
+        case .headers, .message, .none:
             XCTFail("Unexpected result")
         }
 

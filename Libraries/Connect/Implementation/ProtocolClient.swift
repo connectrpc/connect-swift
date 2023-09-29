@@ -68,7 +68,7 @@ extension ProtocolClient: ProtocolClientInterface {
             trailers: nil
         )
         let cancelation = Locked<(cancelable: Cancelable?, isCancelled: Bool)>((nil, false))
-        let finishProcessingResponse: (HTTPResponse) -> Void = { response in
+        let finishProcessingResponse: @Sendable (HTTPResponse) -> Void = { response in
             let responseMessage: ResponseMessage<Output>
             if response.code != .ok {
                 let error = (response.error as? ConnectError)
@@ -259,7 +259,7 @@ extension ProtocolClient: ProtocolClientInterface {
         let responseBuffer = Locked(Data())
         let hasCompleted = Locked(false)
         let interceptorChain = self.config.createStreamInterceptorChain()
-        let finishHandlingResult: (StreamResult<Data>) -> Void = { result in
+        let finishHandlingResult: @Sendable (StreamResult<Data>) -> Void = { result in
             do {
                 if case .complete = result {
                     hasCompleted.value = true
@@ -376,7 +376,7 @@ private extension StreamResult<Data> {
     }
 }
 
-private final class RequestCallbacksQueue {
+private final class RequestCallbacksQueue: @unchecked Sendable {
     private let lock = Lock()
     private var callbacks: RequestCallbacks?
     private var queue = [(RequestCallbacks) -> Void]()

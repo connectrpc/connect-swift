@@ -16,6 +16,22 @@
 import Foundation
 import XCTest
 
+private struct NoopInterceptor: Interceptor {
+    func unaryFunction() -> UnaryFunction {
+        return UnaryFunction(requestFunction: { $1($0) }, responseFunction: { $1($0) })
+    }
+
+    func streamFunction() -> StreamFunction {
+        return StreamFunction(
+            requestFunction: { $1($0) },
+            requestDataFunction: { $1($0) },
+            streamResultFunction: { $1($0) }
+        )
+    }
+
+    init(config: ProtocolClientConfig) {}
+}
+
 final class ProtocolClientConfigTests: XCTestCase {
     func testDefaultResponseCompressionPoolIncludesGzip() {
         let config = ProtocolClientConfig(host: "https://buf.build")
@@ -43,9 +59,9 @@ final class ProtocolClientConfigTests: XCTestCase {
         let config = ProtocolClientConfig(
             host: "https://buf.build",
             networkProtocol: .connect,
-            interceptors: [{ _ in AsyncInterceptor() }]
+            interceptors: [{ NoopInterceptor(config: $0) }]
         )
-        XCTAssertTrue(config.interceptors[0](config) is AsyncInterceptor)
+        XCTAssertTrue(config.interceptors[0](config) is NoopInterceptor)
         XCTAssertTrue(config.interceptors[1](config) is ConnectInterceptor)
     }
 
@@ -53,9 +69,9 @@ final class ProtocolClientConfigTests: XCTestCase {
         let config = ProtocolClientConfig(
             host: "https://buf.build",
             networkProtocol: .grpcWeb,
-            interceptors: [{ _ in AsyncInterceptor() }]
+            interceptors: [{ NoopInterceptor(config: $0) }]
         )
-        XCTAssertTrue(config.interceptors[0](config) is AsyncInterceptor)
+        XCTAssertTrue(config.interceptors[0](config) is NoopInterceptor)
         XCTAssertTrue(config.interceptors[1](config) is GRPCWebInterceptor)
     }
 }
