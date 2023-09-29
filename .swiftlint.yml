@@ -9,6 +9,7 @@ excluded:
 disabled_rules:
   - blanket_disable_command
   - cyclomatic_complexity
+  - file_length
   - function_body_length
   - function_parameter_count
   - identifier_name

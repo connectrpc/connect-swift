@@ -33,7 +33,7 @@
 ///
 /// Interceptors can also be written using `async/await` by incorporating a `Task`. For example:
 ///
-///```
+/// ```
 /// final class AsyncInterceptor: Interceptor, Sendable {
 ///    func unaryFunction() -> UnaryFunction {
 ///        return .init { request, proceed in

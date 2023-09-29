@@ -80,7 +80,7 @@ private struct MockStreamInterceptor: Interceptor {
                 message: request.message,
                 trailers: Trailers()
             ))
-        } requestDataFunction: { data, proceed in
+        } requestDataFunction: { _, proceed in
             self.requestDataExpectation.fulfill()
             proceed(self.outboundMessageData)
         } streamResultFunction: { result, proceed in
@@ -131,38 +131,38 @@ final class InterceptorChainTests: XCTestCase {
         let interceptedRequest = Locked<HTTPRequest?>(nil)
         chain.executeInterceptors(
             \.requestFunction,
-             firstInFirstOut: true,
-             initial: HTTPRequest(
+            firstInFirstOut: true,
+            initial: HTTPRequest(
                 url: try XCTUnwrap(URL(string: "https://buf.build/mock")),
                 contentType: "application/json",
                 headers: Headers(),
                 message: nil,
                 trailers: Trailers()
-             ), finish: { interceptedRequest.value = $0 }
+            ), finish: { interceptedRequest.value = $0 }
         )
         XCTAssertEqual(interceptedRequest.value?.headers["filter-chain"], ["filter-a", "filter-b"])
 
         let interceptedResponse = Locked<HTTPResponse?>(nil)
         chain.executeInterceptors(
             \.responseFunction,
-             firstInFirstOut: false,
-             initial: HTTPResponse(
+            firstInFirstOut: false,
+            initial: HTTPResponse(
                 code: .ok,
                 headers: Headers(),
                 message: nil,
                 trailers: Trailers(),
                 error: nil,
                 tracingInfo: .init(httpStatus: 200)
-             ), finish: { interceptedResponse.value = $0 }
+            ), finish: { interceptedResponse.value = $0 }
         )
         XCTAssertEqual(interceptedResponse.value?.headers["filter-chain"], ["filter-b", "filter-a"])
 
         let interceptedMetrics = Locked<HTTPMetrics?>(nil)
         chain.executeInterceptors(
             \.responseMetricsFunction,
-             firstInFirstOut: false,
-             initial: HTTPMetrics(taskMetrics: nil),
-             finish: { interceptedMetrics.value = $0 }
+            firstInFirstOut: false,
+            initial: HTTPMetrics(taskMetrics: nil),
+            finish: { interceptedMetrics.value = $0 }
         )
         XCTAssertNil(try XCTUnwrap(interceptedMetrics.value).taskMetrics)
 
@@ -210,15 +210,15 @@ final class InterceptorChainTests: XCTestCase {
         let interceptedRequest = Locked<HTTPRequest?>(nil)
         chain.executeInterceptors(
             \.requestFunction,
-             firstInFirstOut: true,
-             initial: HTTPRequest(
+            firstInFirstOut: true,
+            initial: HTTPRequest(
                 url: try XCTUnwrap(URL(string: "https://buf.build/mock")),
                 contentType: "application/json",
                 headers: Headers(),
                 message: nil,
                 trailers: Trailers()
-             ),
-             finish: { interceptedRequest.value = $0 }
+            ),
+            finish: { interceptedRequest.value = $0 }
         )
         XCTAssertEqual(interceptedRequest.value?.headers["filter-chain"], ["filter-a", "filter-b"])
         XCTAssertNil(interceptedRequest.value?.message)
@@ -226,18 +226,18 @@ final class InterceptorChainTests: XCTestCase {
         let interceptedRequestData = Locked<Data?>(nil)
         chain.executeInterceptors(
             \.requestDataFunction,
-             firstInFirstOut: true,
-             initial: Data(),
-             finish: { interceptedRequestData.value = $0 }
+            firstInFirstOut: true,
+            initial: Data(),
+            finish: { interceptedRequestData.value = $0 }
         )
         XCTAssertEqual(interceptedRequestData.value, filterBData)
 
         let interceptedResult = Locked<StreamResult<Data>?>(nil)
         chain.executeInterceptors(
             \.streamResultFunction,
-             firstInFirstOut: false,
-             initial: .headers(Headers()),
-             finish: { interceptedResult.value = $0 }
+            firstInFirstOut: false,
+            initial: .headers(Headers()),
+            finish: { interceptedResult.value = $0 }
         )
         XCTAssertEqual(
             interceptedResult.value, .headers(["filter-chain": ["filter-b", "filter-a"]])
@@ -245,17 +245,17 @@ final class InterceptorChainTests: XCTestCase {
 
         chain.executeInterceptors(
             \.streamResultFunction,
-             firstInFirstOut: false,
-             initial: .message(Data()),
-             finish: { interceptedResult.value = $0 }
+            firstInFirstOut: false,
+            initial: .message(Data()),
+            finish: { interceptedResult.value = $0 }
         )
         XCTAssertEqual(interceptedResult.value, .message(filterAData))
 
         chain.executeInterceptors(
             \.streamResultFunction,
-             firstInFirstOut: false,
-             initial: .complete(code: .ok, error: nil, trailers: nil),
-             finish: { interceptedResult.value = $0 }
+            firstInFirstOut: false,
+            initial: .complete(code: .ok, error: nil, trailers: nil),
+            finish: { interceptedResult.value = $0 }
         )
         switch interceptedResult.value {
         case .complete(_, _, let interceptedTrailers):
