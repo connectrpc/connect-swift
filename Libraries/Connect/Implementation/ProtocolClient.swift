@@ -68,7 +68,7 @@ extension ProtocolClient: ProtocolClientInterface {
             trailers: nil
         )
         let cancelation = Locked<(cancelable: Cancelable?, isCancelled: Bool)>((nil, false))
-        let finishProcessingResponse: @Sendable (HTTPResponse) -> Void = { response in
+        let finishHandlingResponse: @Sendable (HTTPResponse) -> Void = { response in
             let responseMessage: ResponseMessage<Output>
             if response.code != .ok {
                 let error = (response.error as? ConnectError)
@@ -119,6 +119,8 @@ extension ProtocolClient: ProtocolClientInterface {
             finish: { interceptedRequest in
                 cancelation.perform { cancelation in
                     if cancelation.isCancelled {
+                        // If the caller cancelled the request while it was being processed
+                        // by interceptors, don't send the request.
                         return
                     }
 
@@ -137,7 +139,7 @@ extension ProtocolClient: ProtocolClientInterface {
                                 \.responseFunction,
                                 firstInFirstOut: false,
                                 initial: response,
-                                finish: finishProcessingResponse
+                                finish: finishHandlingResponse
                             )
                         }
                     )
@@ -283,8 +285,8 @@ extension ProtocolClient: ProtocolClientInterface {
                 )
             },
             receiveResponseData: { data in
-                // Repeating handles cases where multiple messages are received in a single chunk.
                 responseBuffer.perform { responseBuffer in
+                    // Handle cases where multiple messages are received in a single chunk.
                     responseBuffer += data
                     while true {
                         let messageLength = Envelope.messageLength(forPackedData: responseBuffer)
@@ -314,17 +316,13 @@ extension ProtocolClient: ProtocolClientInterface {
                 interceptorChain.executeInterceptors(
                     \.streamResultFunction,
                     firstInFirstOut: false,
-                    initial: .complete(
-                        code: code,
-                        error: error,
-                        trailers: trailers
-                    ),
+                    initial: .complete(code: code, error: error, trailers: trailers),
                     finish: finishHandlingResult
                 )
             }
         )
 
-        let requestCallbacksQueue = RequestCallbacksQueue()
+        let pendingRequestCallbacks = PendingRequestCallbacks()
         let request = HTTPRequest(
             url: URL(string: path, relativeTo: URL(string: self.config.host))!,
             contentType: "application/connect+\(codec.name())",
@@ -337,7 +335,7 @@ extension ProtocolClient: ProtocolClientInterface {
             firstInFirstOut: true,
             initial: request,
             finish: { interceptedRequest in
-                requestCallbacksQueue.setCallbacks(self.httpClient.stream(
+                pendingRequestCallbacks.setCallbacks(self.httpClient.stream(
                     request: interceptedRequest,
                     responseCallbacks: responseCallbacks
                 ))
@@ -349,14 +347,14 @@ extension ProtocolClient: ProtocolClientInterface {
                 firstInFirstOut: true,
                 initial: requestData,
                 finish: { interceptedData in
-                    // Wait for the stream to be established before sending data
-                    requestCallbacksQueue.enqueue { requestCallbacks in
+                    // Wait for the stream to be established before sending data.
+                    pendingRequestCallbacks.enqueue { requestCallbacks in
                         requestCallbacks.sendData(interceptedData)
                     }
                 }
             )
         } sendClose: {
-            requestCallbacksQueue.enqueue { requestCallbacks in
+            pendingRequestCallbacks.enqueue { requestCallbacks in
                 requestCallbacks.sendClose()
             }
         }
@@ -376,7 +374,7 @@ private extension StreamResult<Data> {
     }
 }
 
-private final class RequestCallbacksQueue: @unchecked Sendable {
+private final class PendingRequestCallbacks: @unchecked Sendable {
     private let lock = Lock()
     private var callbacks: RequestCallbacks?
     private var queue = [(RequestCallbacks) -> Void]()
