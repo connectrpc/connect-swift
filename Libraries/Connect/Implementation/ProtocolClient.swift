@@ -56,7 +56,7 @@ extension ProtocolClient: ProtocolClientInterface {
                     details: [], metadata: [:]
                 ))
             ))
-            return Cancelable(cancel: {})
+            return Cancelable {}
         }
 
         let interceptorChain = self.config.createUnaryInterceptorChain()
@@ -351,22 +351,21 @@ extension ProtocolClient: ProtocolClientInterface {
                         responseCallbacks: responseCallbacks
                     ))
                 case .failure(let error):
+                    hasCompleted.value = true
                     responseCallbacks.receiveClose(error.code, error.metadata, error)
                 }
             }
         )
         return RequestCallbacks { requestData in
-            interceptorChain.executeInterceptors(
-                \.requestDataFunction,
-                firstInFirstOut: true,
-                initial: requestData,
-                finish: { interceptedData in
-                    // Wait for the stream to be established before sending data.
-                    pendingRequestCallbacks.enqueue { requestCallbacks in
-                        requestCallbacks.sendData(interceptedData)
-                    }
-                }
-            )
+            // Wait for the stream to be established before sending data.
+            pendingRequestCallbacks.enqueue { requestCallbacks in
+                interceptorChain.executeInterceptors(
+                    \.requestDataFunction,
+                    firstInFirstOut: true,
+                    initial: requestData,
+                    finish: requestCallbacks.sendData
+                )
+            }
         } sendClose: {
             pendingRequestCallbacks.enqueue { requestCallbacks in
                 requestCallbacks.sendClose()

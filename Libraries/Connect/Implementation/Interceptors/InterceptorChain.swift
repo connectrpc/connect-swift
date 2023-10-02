@@ -27,7 +27,7 @@ final class InterceptorChain<T: Sendable>: Sendable {
     ///
     /// - parameter functionPath: Key path of the function on the interceptor to invoke.
     /// - parameter firstInFirstOut: If true, interceptors will be invoked in the order they were
-    ///                              originally registered. If false, the order is reversed.
+    ///                              originally registered. If false, the order will be reversed.
     /// - parameter initial: The initial value to pass to the first interceptor.
     /// - parameter finish: Closure to call with the final value after each interceptor has finished
     ///                     processing.
@@ -54,12 +54,13 @@ final class InterceptorChain<T: Sendable>: Sendable {
     /// the resulting value to the next interceptor and finally invoking `finish` with the final
     /// value.
     ///
-    /// **If an interceptor returns a `Result.failure`, the chain will be terminated immediately,
-    /// and the failure result will be returned to the caller.**
+    /// **If an interceptor returns a `Result.failure`, the chain will be terminated immediately
+    /// without invoking additional interceptors, and the failure result will be returned to the
+    /// caller.**
     ///
     /// - parameter functionPath: Key path of the function on the interceptor to invoke.
     /// - parameter firstInFirstOut: If true, interceptors will be invoked in the order they were
-    ///                              originally registered. If false, the order is reversed.
+    ///                              originally registered. If false, the order will be reversed.
     /// - parameter initial: The initial value to pass to the first interceptor.
     /// - parameter finish: Closure to call with the final value either after each interceptor has
     ///                     finished processing or when one returns a `Result.failure`.
@@ -83,7 +84,6 @@ final class InterceptorChain<T: Sendable>: Sendable {
                     interceptor(interceptedValue, next)
                 case .failure:
                     finish(result)
-                    return
                 }
             }
         }

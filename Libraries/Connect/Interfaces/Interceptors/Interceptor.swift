@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// A type that can be registered with clients as a way to observe and/or alter outbound requests
+/// Interceptors can be registered with clients as a way to observe and/or alter outbound requests
 /// and inbound responses.
 ///
 /// Interceptors are expected to be instantiated **once per request or stream**.
@@ -22,17 +22,21 @@
 /// final value is passed to the networking client where it is sent to the server or to the calling
 /// client.
 ///
-/// Interceptors are closure-based, and are passed both the current value and a closure which
-/// should be called to resume the interceptor chain. They must call this closure to continue.
-/// New values may be passed to a given interceptor even though it has not yet resumed the chain,
-/// for example:
+/// Interceptors may also fail outbound requests before they're sent, thus preventing subsequent
+/// interceptors from being invoked and returning a specified error back to the original caller.
+///
+/// Interceptors are closure-based and are passed both the current value and a closure which
+/// should be called to resume the interceptor chain. Propagation will not continue until
+/// this closure is called. Additional values may still be passed to a given interceptor even
+/// though it has not yet continued the chain. For example:
 /// - Request is sent
-/// - Response headers are received, and interceptor pauses the chain while processing
+/// - Response headers are received, and an interceptor pauses the chain while processing
 /// - First chunk of streamed data is received, and the interceptor receives this value immediately
 /// - Interceptor is expected to resume headers first, followed by data
 ///
-/// Interceptors may also fail outbound requests before they're sent, thus preventing subsequent
-/// interceptors from being invoked and returning a specified error back to the original caller.
+/// Implementations should be thread-safe (hence the `Sendable` requirement on interceptor
+/// closures), as closures can be invoked from different threads during the span of a request or
+/// stream due to the asynchronous nature of other interceptors which may be present in the chain.
 ///
 /// Interceptors can also be written using `async/await` by incorporating a `Task`. For example:
 ///
