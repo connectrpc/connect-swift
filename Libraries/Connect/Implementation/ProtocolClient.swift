@@ -112,15 +112,24 @@ extension ProtocolClient: ProtocolClientInterface {
             }
             completion(responseMessage)
         }
-        interceptorChain.executeInterceptors(
+        interceptorChain.executeInterceptorsAndStopOnFailure(
             \.requestFunction,
             firstInFirstOut: true,
             initial: request,
-            finish: { interceptedRequest in
+            finish: { result in
                 cancelation.perform { cancelation in
                     if cancelation.isCancelled {
                         // If the caller cancelled the request while it was being processed
                         // by interceptors, don't send the request.
+                        return
+                    }
+
+                    let interceptedRequest: HTTPRequest
+                    switch result {
+                    case .success(let value):
+                        interceptedRequest = value
+                    case .failure(let error):
+                        completion(.init(result: .failure(error)))
                         return
                     }
 
@@ -330,15 +339,20 @@ extension ProtocolClient: ProtocolClientInterface {
             message: nil,
             trailers: nil
         )
-        interceptorChain.executeInterceptors(
+        interceptorChain.executeInterceptorsAndStopOnFailure(
             \.requestFunction,
             firstInFirstOut: true,
             initial: request,
-            finish: { interceptedRequest in
-                pendingRequestCallbacks.setCallbacks(self.httpClient.stream(
-                    request: interceptedRequest,
-                    responseCallbacks: responseCallbacks
-                ))
+            finish: { result in
+                switch result {
+                case .success(let interceptedRequest):
+                    pendingRequestCallbacks.setCallbacks(self.httpClient.stream(
+                        request: interceptedRequest,
+                        responseCallbacks: responseCallbacks
+                    ))
+                case .failure(let error):
+                    responseCallbacks.receiveClose(error.code, error.metadata, error)
+                }
             }
         )
         return RequestCallbacks { requestData in

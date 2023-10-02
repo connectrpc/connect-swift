@@ -31,14 +31,14 @@ extension GRPCWebInterceptor: Interceptor {
             let envelopedRequestBody = Envelope.packMessage(
                 request.message ?? Data(), using: self.config.requestCompression
             )
-            proceed(HTTPRequest(
+            proceed(.success(HTTPRequest(
                 url: request.url,
                 // Override the content type to be gRPC Web.
                 contentType: "application/grpc-web+\(self.config.codec.name())",
                 headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: true),
                 message: envelopedRequestBody,
                 trailers: nil
-            ))
+            )))
         } responseFunction: { response, proceed in
             guard response.code == .ok else {
                 // Invalid gRPC-Web response - expects HTTP 200. Potentially a network error.
@@ -110,14 +110,14 @@ extension GRPCWebInterceptor: Interceptor {
     func streamFunction() -> StreamFunction {
         let responseHeaders = Locked<Headers?>(nil)
         return StreamFunction { request, proceed in
-            proceed(HTTPRequest(
+            proceed(.success(HTTPRequest(
                 url: request.url,
                 // Override the content type to be gRPC Web.
                 contentType: "application/grpc-web+\(self.config.codec.name())",
                 headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: true),
                 message: request.message,
                 trailers: nil
-            ))
+            )))
         } requestDataFunction: { data, proceed in
             proceed(Envelope.packMessage(data, using: self.config.requestCompression))
         } streamResultFunction: { result, proceed in

@@ -32,7 +32,9 @@ final class InterceptorChain<T: Sendable>: Sendable {
     /// - parameter finish: Closure to call with the final value after each interceptor has finished
     ///                     processing.
     func executeInterceptors<Value>(
-        _ functionPath: KeyPath<T, @Sendable (Value, @escaping @Sendable (Value) -> Void) -> Void>,
+        _ functionPath: KeyPath<T,
+            @Sendable (Value, @escaping @Sendable (Value) -> Void) -> Void
+        >,
         firstInFirstOut: Bool,
         initial: Value,
         finish: @escaping @Sendable (Value) -> Void
@@ -46,5 +48,45 @@ final class InterceptorChain<T: Sendable>: Sendable {
             next = { [next] interceptedValue in interceptor(interceptedValue, next) }
         }
         next(initial)
+    }
+
+    /// Invoke each of the interceptors, waiting for a given interceptor to complete before passing
+    /// the resulting value to the next interceptor and finally invoking `finish` with the final
+    /// value.
+    ///
+    /// **If an interceptor returns a `Result.failure`, the chain will be terminated immediately,
+    /// and the failure result will be returned to the caller.**
+    ///
+    /// - parameter functionPath: Key path of the function on the interceptor to invoke.
+    /// - parameter firstInFirstOut: If true, interceptors will be invoked in the order they were
+    ///                              originally registered. If false, the order is reversed.
+    /// - parameter initial: The initial value to pass to the first interceptor.
+    /// - parameter finish: Closure to call with the final value either after each interceptor has
+    ///                     finished processing or when one returns a `Result.failure`.
+    func executeInterceptorsAndStopOnFailure<Value>(
+        _ functionPath: KeyPath<T,
+            @Sendable (Value, @escaping @Sendable (Result<Value, ConnectError>) -> Void) -> Void
+        >,
+        firstInFirstOut: Bool,
+        initial: Value,
+        finish: @escaping @Sendable (Result<Value, ConnectError>) -> Void
+    ) {
+        var interceptors = self.interceptors.map { $0[keyPath: functionPath] }
+        if firstInFirstOut {
+            interceptors = interceptors.reversed()
+        }
+        var next: @Sendable (Result<Value, ConnectError>) -> Void = { finish($0) }
+        for interceptor in interceptors {
+            next = { [next] result in
+                switch result {
+                case .success(let interceptedValue):
+                    interceptor(interceptedValue, next)
+                case .failure:
+                    finish(result)
+                    return
+                }
+            }
+        }
+        next(.success(initial))
     }
 }

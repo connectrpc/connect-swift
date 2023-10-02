@@ -21,7 +21,8 @@ public struct StreamFunction: Sendable {
     public let streamResultFunction: StreamResultHandler
 
     public typealias RequestHandler = @Sendable (
-        _ request: HTTPRequest, _ proceed: @escaping @Sendable (HTTPRequest) -> Void
+        _ request: HTTPRequest,
+        _ proceed: @escaping @Sendable (Result<HTTPRequest, ConnectError>) -> Void
     ) -> Void
     public typealias RequestDataHandler = @Sendable (
         _ data: Data, _ proceed: @escaping @Sendable (Data) -> Void

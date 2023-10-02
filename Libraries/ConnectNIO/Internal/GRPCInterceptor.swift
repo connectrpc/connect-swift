@@ -33,14 +33,14 @@ extension GRPCInterceptor: Connect.Interceptor {
                 request.message ?? Data(), using: self.config.requestCompression
             )
 
-            proceed(Connect.HTTPRequest(
+            proceed(.success(Connect.HTTPRequest(
                 url: request.url,
                 // Override the content type to be gRPC.
                 contentType: "application/grpc+\(self.config.codec.name())",
                 headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: false),
                 message: envelopedRequestBody,
                 trailers: nil
-            ))
+            )))
         } responseFunction: { response, proceed in
             guard response.code == .ok else {
                 // Invalid gRPC response - expects HTTP 200. Potentially a network error.
@@ -95,14 +95,14 @@ extension GRPCInterceptor: Connect.Interceptor {
     func streamFunction() -> Connect.StreamFunction {
         let responseHeaders = Locked<Headers?>(nil)
         return Connect.StreamFunction { request, proceed in
-            proceed(Connect.HTTPRequest(
+            proceed(.success(Connect.HTTPRequest(
                 url: request.url,
                 // Override the content type to be gRPC.
                 contentType: "application/grpc+\(self.config.codec.name())",
                 headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: false),
                 message: request.message,
                 trailers: nil
-            ))
+            )))
         } requestDataFunction: { data, proceed in
             proceed(Connect.Envelope.packMessage(data, using: self.config.requestCompression))
         } streamResultFunction: { result, proceed in

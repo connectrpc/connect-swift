@@ -48,13 +48,13 @@ extension ConnectInterceptor: Interceptor {
                 finalRequestBody = requestBody
             }
 
-            proceed(HTTPRequest(
+            proceed(.success(HTTPRequest(
                 url: request.url,
                 contentType: request.contentType,
                 headers: headers,
                 message: finalRequestBody,
                 trailers: nil
-            ))
+            )))
         } responseFunction: { response, proceed in
             let trailerPrefix = "trailer-"
             let headers = response.headers.filter { header in
@@ -105,13 +105,13 @@ extension ConnectInterceptor: Interceptor {
                 .requestCompression.map { [$0.pool.name()] }
             headers[HeaderConstants.connectStreamingAcceptEncoding] = self.config
                 .acceptCompressionPoolNames()
-            proceed(HTTPRequest(
+            proceed(.success(HTTPRequest(
                 url: request.url,
                 contentType: request.contentType,
                 headers: headers,
                 message: request.message,
                 trailers: nil
-            ))
+            )))
         } requestDataFunction: { data, proceed in
             proceed(Envelope.packMessage(data, using: self.config.requestCompression))
         } streamResultFunction: { result, proceed in

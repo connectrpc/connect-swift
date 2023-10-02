@@ -18,12 +18,15 @@ import XCTest
 
 private struct NoopInterceptor: Interceptor {
     func unaryFunction() -> UnaryFunction {
-        return UnaryFunction(requestFunction: { $1($0) }, responseFunction: { $1($0) })
+        return UnaryFunction(
+            requestFunction: { $1(.success($0)) },
+            responseFunction: { $1($0) }
+        )
     }
 
     func streamFunction() -> StreamFunction {
         return StreamFunction(
-            requestFunction: { $1($0) },
+            requestFunction: { $1(.success($0)) },
             requestDataFunction: { $1($0) },
             streamResultFunction: { $1($0) }
         )

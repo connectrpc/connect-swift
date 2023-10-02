@@ -31,6 +31,9 @@
 /// - First chunk of streamed data is received, and the interceptor receives this value immediately
 /// - Interceptor is expected to resume headers first, followed by data
 ///
+/// Interceptors may also fail outbound requests before they're sent, thus preventing subsequent
+/// interceptors from being invoked and returning a specified error back to the original caller.
+///
 /// Interceptors can also be written using `async/await` by incorporating a `Task`. For example:
 ///
 /// ```

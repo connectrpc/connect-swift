@@ -19,13 +19,16 @@ public struct UnaryFunction: Sendable {
     public let responseMetricsFunction: ResponseMetricsHandler
 
     public typealias RequestHandler = @Sendable (
-        _ request: HTTPRequest, _ proceed: @escaping @Sendable (HTTPRequest) -> Void
+        _ request: HTTPRequest,
+        _ proceed: @escaping @Sendable (Result<HTTPRequest, ConnectError>) -> Void
     ) -> Void
     public typealias ResponseHandler = @Sendable (
-        _ response: HTTPResponse, _ proceed: @escaping @Sendable (HTTPResponse) -> Void
+        _ response: HTTPResponse,
+        _ proceed: @escaping @Sendable (HTTPResponse) -> Void
     ) -> Void
     public typealias ResponseMetricsHandler = @Sendable (
-        _ metrics: HTTPMetrics, _ proceed: @escaping @Sendable (HTTPMetrics) -> Void
+        _ metrics: HTTPMetrics,
+        _ proceed: @escaping @Sendable (HTTPMetrics) -> Void
     ) -> Void
 
     public init(
