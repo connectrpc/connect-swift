@@ -36,7 +36,7 @@ private struct NoopInterceptor: Interceptor {
 
 final class ProtocolClientConfigTests: XCTestCase {
     func testDefaultResponseCompressionPoolIncludesGzip() {
-        let config = ProtocolClientConfig(host: "https://buf.build")
+        let config = ProtocolClientConfig(host: "https://connectrpc.com")
         XCTAssertTrue(config.responseCompressionPools[0] is GzipCompressionPool)
         XCTAssertEqual(config.acceptCompressionPoolNames(), ["gzip"])
     }
@@ -59,7 +59,7 @@ final class ProtocolClientConfigTests: XCTestCase {
 
     func testAddsConnectInterceptorLastWhenUsingConnectProtocol() {
         let config = ProtocolClientConfig(
-            host: "https://buf.build",
+            host: "https://connectrpc.com",
             networkProtocol: .connect,
             interceptors: [{ NoopInterceptor(config: $0) }]
         )
@@ -69,7 +69,7 @@ final class ProtocolClientConfigTests: XCTestCase {
 
     func testAddsGRPCWebInterceptorLastWhenUsingGRPCWebProtocol() {
         let config = ProtocolClientConfig(
-            host: "https://buf.build",
+            host: "https://connectrpc.com",
             networkProtocol: .grpcWeb,
             interceptors: [{ NoopInterceptor(config: $0) }]
         )
