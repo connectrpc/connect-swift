@@ -155,7 +155,7 @@ To update dependencies such as `SwiftProtobuf` in this repository:
 4. Open the [Swift package example app](../Examples/ElizaSwiftPackageApp) to ensure its `Package.resolved` file gets updated.
 5. Run `pod update` in the [CocoaPods example app's directory](../Examples/ElizaCocoaPodsApp).
 6. Update remote plugin entries (such as `buf.build/apple/swift`) in all `buf.gen.yaml` files to be in sync with their respective runtime libraries.
-7. Run `make generate` to apply any generated diffs from the newly updated plugins.
+7. Run `make buildplugins && make generate` to apply any generated diffs from the newly updated plugins.
 
 ## Releasing
 
