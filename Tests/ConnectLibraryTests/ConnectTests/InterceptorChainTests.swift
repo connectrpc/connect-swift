@@ -282,7 +282,7 @@ final class InterceptorChainTests: XCTestCase {
         let chain = InterceptorChain([
             MockStreamInterceptor(
                 failOutboundRequests: false,
-                headerID: "interceptor-a", 
+                headerID: "interceptor-a",
                 requestDelayMS: 0,
                 requestData: interceptorAData,
                 responseData: interceptorAData,
@@ -460,7 +460,7 @@ final class InterceptorChainTests: XCTestCase {
                     responseExpectation: nil,
                     responseMetricsExpectation: nil
                 )
-            }
+            },
         ])
         let response = await client.emptyCall(request: .init())
         XCTAssertNotNil(response.error) // Interceptor failed the request.
@@ -500,7 +500,7 @@ final class InterceptorChainTests: XCTestCase {
                     requestDataExpectation: nil,
                     resultExpectation: nil
                 )
-            }
+            },
         ])
         for await result in client.streamingOutputCall().results() {
             switch result {
