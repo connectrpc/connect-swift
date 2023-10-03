@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /// Protocols that are supported by the library.
-public enum NetworkProtocol: @unchecked Sendable {
+public enum NetworkProtocol: Sendable {
     /// The Connect protocol:
     /// https://connectrpc.com/docs/protocol
     case connect
