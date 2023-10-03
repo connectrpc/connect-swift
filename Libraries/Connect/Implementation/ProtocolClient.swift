@@ -352,7 +352,7 @@ extension ProtocolClient: ProtocolClientInterface {
                     ))
                 case .failure(let error):
                     hasCompleted.value = true
-                    responseCallbacks.receiveClose(error.code, error.metadata, error)
+                    onResult(.complete(code: error.code, error: error, trailers: error.metadata))
                 }
             }
         )
