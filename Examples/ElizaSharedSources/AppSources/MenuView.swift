@@ -52,7 +52,7 @@ struct MenuView: View {
         if case .custom = networkProtocol {
             return Connectrpc_Eliza_V1_ElizaServiceClient(
                 client: ProtocolClient(
-                    httpClient: NIOHTTPClient(host: host), // Or URLSessionHTTPClient()
+                    httpClient: NIOHTTPClient(host: host),
                     config: config
                 )
             )
