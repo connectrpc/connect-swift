@@ -42,26 +42,28 @@ struct MenuView: View {
         -> Connectrpc_Eliza_V1_ElizaServiceClient
     {
         let host = "https://demo.connectrpc.com"
-        #if COCOAPODS
-        let protocolClient = ProtocolClient(
-            httpClient: URLSessionHTTPClient(),
-            config: ProtocolClientConfig(
-                host: host,
-                networkProtocol: networkProtocol,
-                codec: ProtoCodec() // Protobuf binary, or JSONCodec() for JSON
-            )
+        let config = ProtocolClientConfig(
+            host: host,
+            networkProtocol: networkProtocol,
+            codec: ProtoCodec() // Protobuf binary, or JSONCodec() for JSON
         )
-        #else
-        let protocolClient = ProtocolClient(
-            httpClient: NIOHTTPClient(host: host), // Or URLSessionHTTPClient()
-            config: ProtocolClientConfig(
-                host: host,
-                networkProtocol: networkProtocol,
-                codec: ProtoCodec() // Protobuf binary, or JSONCodec() for JSON
+        #if !COCOAPODS
+        // For gRPC (which is not supported by CocoaPods), use the NIO HTTP client:
+        if case .custom = networkProtocol {
+            return Connectrpc_Eliza_V1_ElizaServiceClient(
+                client: ProtocolClient(
+                    httpClient: NIOHTTPClient(host: host), // Or URLSessionHTTPClient()
+                    config: config
+                )
             )
-        )
+        }
         #endif
-        return Connectrpc_Eliza_V1_ElizaServiceClient(client: protocolClient)
+        return Connectrpc_Eliza_V1_ElizaServiceClient(
+            client: ProtocolClient(
+                httpClient: URLSessionHTTPClient(),
+                config: config
+            )
+        )
     }
 
     var body: some View {

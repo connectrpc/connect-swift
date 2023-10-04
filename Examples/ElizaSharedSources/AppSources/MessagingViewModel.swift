@@ -14,7 +14,6 @@
 
 import Combine
 import Connect
-import Dispatch
 import os.log
 
 private typealias ConverseRequest = Connectrpc_Eliza_V1_ConverseRequest
@@ -24,9 +23,10 @@ private typealias SayRequest = Connectrpc_Eliza_V1_SayRequest
 private typealias SayResponse = Connectrpc_Eliza_V1_SayResponse
 
 /// View model that can be injected into a `MessagingView`.
+@MainActor
 protocol MessagingViewModel: ObservableObject {
     /// The current set of messages. Observable by storing the view model as an `@ObservedObject`.
-    @MainActor var messages: [Message] { get }
+    var messages: [Message] { get }
 
     /// Send a message to the upstream service.
     /// This message and any responses will be appended to `messages`.
@@ -51,20 +51,16 @@ final class UnaryMessagingViewModel: MessagingViewModel {
 
     func send(_ sentence: String) async {
         let request = SayRequest.with { $0.sentence = sentence }
-        self.addMessage(Message(message: sentence, author: .user))
+        self.messages.append(Message(message: sentence, author: .user))
 
         let response = await self.client.say(request: request, headers: [:])
         os_log(.debug, "Eliza unary response: %@", String(describing: response))
-        self.addMessage(Message(
+        self.messages.append(Message(
             message: response.message?.sentence ?? "No response", author: .eliza
         ))
      }
 
     func endChat() async {}
-
-    private func addMessage(_ message: Message) {
-        self.messages.append(message)
-    }
 }
 
 /// View model that uses bidirectional streaming for messaging.
@@ -83,7 +79,7 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
     func send(_ sentence: String) async {
         do {
             let request = ConverseRequest.with { $0.sentence = sentence }
-            self.addMessage(Message(message: sentence, author: .user))
+            self.messages.append(Message(message: sentence, author: .user))
             try self.elizaStream.send(request)
         } catch let error {
             os_log(
@@ -105,7 +101,7 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
 
                 case .message(let message):
                     os_log(.debug, "Eliza message: %@", String(describing: message))
-                    self.addMessage(Message(message: message.sentence, author: .eliza))
+                    self.messages.append(Message(message: message.sentence, author: .eliza))
 
                 case .complete(_, let error, let trailers):
                     os_log(.debug, "Eliza completed with trailers: %@", trailers ?? [:])
@@ -116,14 +112,9 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
                     } else {
                         sentence = "[Conversation ended]"
                     }
-                    self.addMessage(Message(message: sentence, author: .eliza))
+                    self.messages.append(Message(message: sentence, author: .eliza))
                 }
             }
         }
-    }
-
-    private func addMessage(_ message: Message) {
-        self.messages.append(message)
-        print(self.messages)
     }
 }
