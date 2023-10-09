@@ -11,7 +11,7 @@ jobs:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v4
-      - uses: bufbuild/buf-setup-action@v1.26.1
+      - uses: bufbuild/buf-setup-action@v1.27.0
         with:
           github_token: ${{ github.token }}
       - name: Build plugins
