@@ -12,15 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// Interceptors can be registered with clients as a way to observe and/or alter outbound requests
-/// and inbound responses.
+/// Interceptors are a powerful way to observe and mutate outbound and inbound
+/// headers, data, trailers, and errors both for unary APIs and streams.
 ///
-/// Interceptors are expected to be instantiated **once per request or stream**.
+/// Each interceptor is instantiated **once per request or stream** and
+/// provides a set of closures that are invoked by the client during the lifecycle
+/// of that call. Each closure allows the interceptor to observe and store
+/// state, as well as to mutate outbound or inbound content.
 ///
-/// Each interceptor has the opportunity to perform asynchronous work before passing a potentially
+/// Every interceptor has the opportunity to perform asynchronous work before passing a potentially
 /// altered value to the next interceptor in the chain. When the end of the chain is reached, the
-/// final value is passed to the networking client where it is sent to the server or to the calling
-/// client.
+/// final value is passed to the networking client where it is sent to the server (outbound request)
+/// or to the caller (inbound response).
 ///
 /// Interceptors may also fail outbound requests before they're sent, thus preventing subsequent
 /// interceptors from being invoked and returning a specified error back to the original caller.
@@ -28,11 +31,12 @@
 /// Interceptors are closure-based and are passed both the current value and a closure which
 /// should be called to resume the interceptor chain. Propagation will not continue until
 /// this closure is called. Additional values may still be passed to a given interceptor even
-/// though it has not yet continued the chain. For example:
-/// - Request is sent
-/// - Response headers are received, and an interceptor pauses the chain while processing
-/// - First chunk of streamed data is received, and the interceptor receives this value immediately
-/// - Interceptor is expected to resume headers first, followed by data
+/// though it has not yet continued the chain with a previous value. For example:
+///
+/// - A request is sent
+/// - Response headers are received, and an interceptor pauses the chain while processing them
+/// - First chunk of streamed data is received, and the interceptor is invoked with this value
+/// - Interceptor is expected to resume with headers first, and then with data after
 ///
 /// Implementations should be thread-safe (hence the `Sendable` requirement on interceptor
 /// closures), as closures can be invoked from different threads during the span of a request or
