@@ -26,6 +26,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
 
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
+    private var pendingClose: NIOHTTP1.HTTPClientRequestPart?
     private var pendingData = Foundation.Data()
     private var receivedStatus: NIOHTTP1.HTTPResponseStatus?
 
@@ -49,7 +50,8 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             }
 
             if let context = self.context {
-                self.sendData(data, using: context)
+                context.writeAndFlush(self.wrapOutboundOut(.body(.byteBuffer(.init(data: data)))))
+                    .cascade(to: nil)
             } else {
                 self.pendingData.append(contentsOf: data)
             }
@@ -65,13 +67,19 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
                 return
             }
 
+            let end: NIOHTTP1.HTTPClientRequestPart
             if let trailers = trailers {
                 var nioTrailers = NIOHTTP1.HTTPHeaders()
                 nioTrailers.addNIOHeadersFromConnect(trailers)
-                self.context?.writeAndFlush(self.wrapOutboundOut(.end(nioTrailers)))
-                    .cascade(to: nil)
+                end = .end(nioTrailers)
             } else {
-                self.context?.writeAndFlush(self.wrapOutboundOut(.end(nil))).cascade(to: nil)
+                end = .end(nil)
+            }
+
+            if let context = self.context {
+                context.writeAndFlush(self.wrapOutboundOut(end)).cascade(to: nil)
+            } else {
+                self.pendingClose = end
             }
         }
     }
@@ -87,11 +95,6 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             self.context?.close(promise: nil)
             self.responseCallbacks.receiveClose(.canceled, [:], nil)
         }
-    }
-
-    private func sendData(_ data: Data, using context: NIOCore.ChannelHandlerContext) {
-        context.writeAndFlush(self.wrapOutboundOut(.body(.byteBuffer(.init(data: data)))))
-            .cascade(to: nil)
     }
 
     private func runOnEventLoop(action: @escaping @Sendable () -> Void) {
@@ -117,20 +120,26 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
         nioHeaders.add(name: "Content-Type", value: self.request.contentType)
         nioHeaders.add(name: "Host", value: self.request.url.host!)
         nioHeaders.addNIOHeadersFromConnect(self.request.headers)
-
         let nioRequestHead = HTTPRequestHead(
             version: .http1_1,
             method: .POST,
             uri: self.request.url.path,
             headers: nioHeaders
         )
-        if self.pendingData.isEmpty {
-            context.writeAndFlush(self.wrapOutboundOut(.head(nioRequestHead))).cascade(to: nil)
-        } else {
-            context.write(self.wrapOutboundOut(.head(nioRequestHead))).cascade(to: nil)
-            self.sendData(self.pendingData, using: context)
+        context.write(self.wrapOutboundOut(.head(nioRequestHead))).cascade(to: nil)
+
+        if !self.pendingData.isEmpty {
+            context.write(self.wrapOutboundOut(.body(.byteBuffer(.init(data: self.pendingData)))))
+                .cascade(to: nil)
             self.pendingData = Data()
         }
+
+        if let pendingClose = self.pendingClose {
+            context.write(self.wrapOutboundOut(pendingClose)).cascade(to: nil)
+            self.pendingClose = nil
+        }
+
+        context.flush()
         context.fireChannelActive()
     }
 
