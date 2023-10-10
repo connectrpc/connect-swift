@@ -77,6 +77,37 @@ final class AsyncAwaitConformance: XCTestCase {
         }
     }
 
+    func testClientStreaming() async throws {
+        func createPayload(bytes: Int) -> Connectrpc_Conformance_V1_StreamingInputCallRequest {
+            return .with { request in
+                request.payload = .with { $0.body = Data(Array(repeating: 1, count: bytes)) }
+            }
+        }
+
+        try await self.executeTestWithClients { client in
+            let stream = client.streamingInputCall()
+            try stream
+                .send(createPayload(bytes: 250 * 1_024))
+                .send(createPayload(bytes: 8))
+                .send(createPayload(bytes: 1_024))
+                .send(createPayload(bytes: 32 * 1_024))
+                .close()
+
+            var responseCount = 0
+            for await result in stream.results() {
+                switch result {
+                case .headers, .complete:
+                    continue
+
+                case .message(let output):
+                    responseCount += 1
+                    XCTAssertEqual(output.aggregatedPayloadSize, 289_800)
+                }
+            }
+            XCTAssertEqual(responseCount, 1)
+        }
+    }
+
     func testServerStreaming() async throws {
         try await self.executeTestWithClients { client in
             let sizes = [31_415, 9, 2_653, 58_979]
