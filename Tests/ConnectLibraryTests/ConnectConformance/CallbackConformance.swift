@@ -156,7 +156,7 @@ final class CallbackConformance: XCTestCase {
         }
     }
 
-    @available(macOS 13, *) // runtime support for parameterized protocol types requires macOS 13
+    @available(macOS 13, *) // Runtime support for parameterized protocol types requires macOS 13
     func testPingPong() {
         func createPayload(
             requestSize: Int,
