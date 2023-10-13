@@ -81,6 +81,43 @@ final class CallbackConformance: XCTestCase {
         }
     }
 
+    func testClientStreaming() throws {
+        func createPayload(bytes: Int) -> Connectrpc_Conformance_V1_StreamingInputCallRequest {
+            return .with { request in
+                request.payload = .with { $0.body = Data(Array(repeating: 1, count: bytes)) }
+            }
+        }
+
+        try self.executeTestWithClients { client in
+            let responseSize = Locked<Int32>(0)
+            let expectation = self.expectation(description: "Stream completes")
+            let stream = client.streamingInputCall { result in
+                switch result {
+                case .headers:
+                    break
+
+                case .message(let output):
+                    responseSize.value = output.aggregatedPayloadSize
+
+                case .complete(let code, let error, _):
+                    XCTAssertEqual(code, .ok)
+                    XCTAssertNil(error)
+                    expectation.fulfill()
+                }
+            }
+
+            try stream
+                .send(createPayload(bytes: 250 * 1_024))
+                .send(createPayload(bytes: 8))
+                .send(createPayload(bytes: 1_024))
+                .send(createPayload(bytes: 32 * 1_024))
+                .close()
+
+            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+            XCTAssertEqual(responseSize.value, 289_800)
+        }
+    }
+
     func testServerStreaming() throws {
         try self.executeTestWithClients { client in
             let sizes = [31_415, 9, 2_653, 58_979]

@@ -16,7 +16,7 @@ import Foundation
 
 /// Configuration used to set up `ProtocolClientInterface` implementations.
 public struct ProtocolClientConfig: Sendable {
-    /// Target host (e.g., `https://buf.build`).
+    /// Target host (e.g., `https://connectrpc.com`).
     public let host: String
     /// Protocol to use for requests and streams.
     public let networkProtocol: NetworkProtocol
