@@ -32,7 +32,7 @@ final class JSONCodecTests: XCTestCase {
     }
 
     func testSerializingAndDeserializingWithEnumsAsInts() throws {
-        let codec = JSONCodec(alwaysEncodeEnumsAsInts: true, encodeProtoFieldNames: false)
+        let codec = JSONCodec(alwaysEncodeEnumsAsInts: true, preserveProtobufFieldNames: false)
         let serialized = try codec.serialize(message: self.message)
         let dictionary = try XCTUnwrap(
             try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
@@ -42,7 +42,7 @@ final class JSONCodecTests: XCTestCase {
     }
 
     func testSerializingAndDeserializingWithEnumsAsStrings() throws {
-        let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, encodeProtoFieldNames: false)
+        let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: false)
         let serialized = try codec.serialize(message: self.message)
         let dictionary = try XCTUnwrap(
             try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
@@ -51,8 +51,8 @@ final class JSONCodecTests: XCTestCase {
         XCTAssertEqual(try codec.deserialize(source: serialized), self.message)
     }
 
-    func testSerializingAndDeserializingWithProtoFieldNames() throws {
-        let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, encodeProtoFieldNames: true)
+    func testSerializingAndDeserializingWithProtobufFieldNames() throws {
+        let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: true)
         let serialized = try codec.serialize(message: self.message)
         let dictionary = try XCTUnwrap(
             try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
@@ -66,7 +66,7 @@ final class JSONCodecTests: XCTestCase {
     }
 
     func testSerializingAndDeserializingWithCamelCaseFieldNames() throws {
-        let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, encodeProtoFieldNames: false)
+        let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: false)
         let serialized = try codec.serialize(message: self.message)
         let dictionary = try XCTUnwrap(
             try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
