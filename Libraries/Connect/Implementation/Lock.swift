@@ -20,6 +20,7 @@ final class Lock: Sendable {
 
     init() {
         // Reasoning for allocating here: http://www.russbishop.net/the-law
+        // When iOS 15 support is dropped, `OSAllocatedUnfairLock` should be used.
         self.underlyingLock = .allocate(capacity: 1)
         self.underlyingLock.initialize(to: os_unfair_lock())
     }
