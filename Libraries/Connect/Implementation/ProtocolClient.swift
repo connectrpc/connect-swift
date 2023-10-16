@@ -56,68 +56,111 @@ extension ProtocolClient: ProtocolClientInterface {
                     details: [], metadata: [:]
                 ))
             ))
-            return Cancelable(cancel: {})
+            return Cancelable {}
         }
 
-        let chain = self.config.createInterceptorChain().unaryFunction()
-        let url = URL(string: path, relativeTo: URL(string: self.config.host))!
-        let request = chain.requestFunction(HTTPRequest(
-            url: url,
+        let interceptorChain = self.config.createUnaryInterceptorChain()
+        let request = HTTPRequest(
+            url: URL(string: path, relativeTo: URL(string: self.config.host))!,
             contentType: "application/\(codec.name())",
             headers: headers,
             message: data,
             trailers: nil
-        ))
-        return self.httpClient.unary(
-            request: request,
-            onMetrics: { metrics in
-                // Response is unused, but metrics are passed to interceptors
-                _ = chain.responseMetricsFunction(metrics)
-            },
-            onResponse: { response in
-                let response = chain.responseFunction(response)
-                let responseMessage: ResponseMessage<Output>
-                if response.code != .ok {
-                    let error = (response.error as? ConnectError)
-                    ?? ConnectError.from(
-                        code: response.code, headers: response.headers, source: response.message
-                    )
+        )
+        let cancelation = Locked<(cancelable: Cancelable?, isCancelled: Bool)>((nil, false))
+        let finishHandlingResponse: @Sendable (HTTPResponse) -> Void = { response in
+            let responseMessage: ResponseMessage<Output>
+            if response.code != .ok {
+                let error = (response.error as? ConnectError)
+                ?? ConnectError.from(
+                    code: response.code,
+                    headers: response.headers,
+                    source: response.message
+                )
+                responseMessage = ResponseMessage(
+                    code: response.code,
+                    headers: response.headers,
+                    result: .failure(error),
+                    trailers: response.trailers
+                )
+            } else if let message = response.message {
+                do {
                     responseMessage = ResponseMessage(
                         code: response.code,
                         headers: response.headers,
-                        result: .failure(error),
+                        result: .success(try codec.deserialize(source: message)),
                         trailers: response.trailers
                     )
-                } else if let message = response.message {
-                    do {
-                        responseMessage = ResponseMessage(
-                            code: response.code,
-                            headers: response.headers,
-                            result: .success(try codec.deserialize(source: message)),
-                            trailers: response.trailers
-                        )
-                    } catch let error {
-                        responseMessage = ResponseMessage(
-                            code: response.code,
-                            headers: response.headers,
-                            result: .failure(ConnectError(
-                                code: response.code, message: nil, exception: error,
-                                details: [], metadata: response.headers
-                            )),
-                            trailers: response.trailers
-                        )
-                    }
-                } else {
+                } catch let error {
                     responseMessage = ResponseMessage(
                         code: response.code,
                         headers: response.headers,
-                        result: .success(.init()),
+                        result: .failure(ConnectError(
+                            code: response.code, message: nil, exception: error,
+                            details: [], metadata: response.headers
+                        )),
                         trailers: response.trailers
                     )
                 }
-                completion(responseMessage)
+            } else {
+                responseMessage = ResponseMessage(
+                    code: response.code,
+                    headers: response.headers,
+                    result: .success(.init()),
+                    trailers: response.trailers
+                )
+            }
+            completion(responseMessage)
+        }
+        interceptorChain.executeInterceptorsAndStopOnFailure(
+            \.requestFunction,
+            firstInFirstOut: true,
+            initial: request,
+            finish: { result in
+                cancelation.perform { cancelation in
+                    if cancelation.isCancelled {
+                        // If the caller cancelled the request while it was being processed
+                        // by interceptors, don't send the request.
+                        return
+                    }
+
+                    let interceptedRequest: HTTPRequest
+                    switch result {
+                    case .success(let value):
+                        interceptedRequest = value
+                    case .failure(let error):
+                        completion(.init(result: .failure(error)))
+                        return
+                    }
+
+                    cancelation.cancelable = self.httpClient.unary(
+                        request: interceptedRequest,
+                        onMetrics: { metrics in
+                            interceptorChain.executeInterceptors(
+                                \.responseMetricsFunction,
+                                firstInFirstOut: false,
+                                initial: metrics,
+                                finish: { _ in }
+                            )
+                        },
+                        onResponse: { response in
+                            interceptorChain.executeInterceptors(
+                                \.responseFunction,
+                                firstInFirstOut: false,
+                                initial: response,
+                                finish: finishHandlingResponse
+                            )
+                        }
+                    )
+                }
             }
         )
+        return Cancelable {
+            cancelation.perform { cancelation in
+                cancelation.cancelable?.cancel()
+                cancelation = (cancelable: nil, isCancelled: true)
+            }
+        }
     }
 
     public func bidirectionalStream<
@@ -224,40 +267,36 @@ extension ProtocolClient: ProtocolClientInterface {
         onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> RequestCallbacks {
         let codec = self.config.codec
-        let chain = self.config.createInterceptorChain().streamFunction()
-        let url = URL(string: path, relativeTo: URL(string: self.config.host))!
-        let request = chain.requestFunction(HTTPRequest(
-            url: url,
-            contentType: "application/connect+\(codec.name())",
-            headers: headers,
-            message: nil,
-            trailers: nil
-        ))
-
+        let responseBuffer = Locked(Data())
         let hasCompleted = Locked(false)
-        let interceptAndHandleResult: @Sendable (StreamResult<Data>) -> Void = { streamResult in
+        let interceptorChain = self.config.createStreamInterceptorChain()
+        let finishHandlingResult: @Sendable (StreamResult<Data>) -> Void = { result in
             do {
-                let interceptedResult = chain.streamResultFunction(streamResult)
-                if case .complete = interceptedResult {
+                if case .complete = result {
                     hasCompleted.value = true
                 }
-                onResult(try interceptedResult.toTypedResult(using: codec))
+                onResult(try result.toTypedResult(using: codec))
             } catch let error {
-                // TODO: Should we terminate the stream here?
                 os_log(
                     .error,
-                    "Failed to deserialize stream result - dropping result: %@",
+                    "Dropping stream result which failed to deserialize: %@",
                     error.localizedDescription
                 )
             }
         }
-        let responseBuffer = Locked(Data())
         let responseCallbacks = ResponseCallbacks(
-            receiveResponseHeaders: { interceptAndHandleResult(.headers($0)) },
-            receiveResponseData: { responseChunk in
-                // Repeating handles cases where multiple messages are received in a single chunk.
+            receiveResponseHeaders: { responseHeaders in
+                interceptorChain.executeInterceptors(
+                    \.streamResultFunction,
+                    firstInFirstOut: false,
+                    initial: .headers(responseHeaders),
+                    finish: finishHandlingResult
+                )
+            },
+            receiveResponseData: { data in
                 responseBuffer.perform { responseBuffer in
-                    responseBuffer += responseChunk
+                    // Handle cases where multiple messages are received in a single chunk.
+                    responseBuffer += data
                     while true {
                         let messageLength = Envelope.messageLength(forPackedData: responseBuffer)
                         if messageLength < 0 {
@@ -269,33 +308,69 @@ extension ProtocolClient: ProtocolClientInterface {
                             return
                         }
 
-                        interceptAndHandleResult(
-                            .message(responseBuffer.prefix(prefixedMessageLength))
+                        interceptorChain.executeInterceptors(
+                            \.streamResultFunction,
+                            firstInFirstOut: false,
+                            initial: .message(responseBuffer.prefix(prefixedMessageLength)),
+                            finish: finishHandlingResult
                         )
                         responseBuffer = Data(responseBuffer.suffix(from: prefixedMessageLength))
                     }
                 }
             },
             receiveClose: { code, trailers, error in
-                if !hasCompleted.value {
-                    interceptAndHandleResult(.complete(
-                        code: code,
-                        error: error,
-                        trailers: trailers
+                if hasCompleted.value {
+                    return
+                }
+                interceptorChain.executeInterceptors(
+                    \.streamResultFunction,
+                    firstInFirstOut: false,
+                    initial: .complete(code: code, error: error, trailers: trailers),
+                    finish: finishHandlingResult
+                )
+            }
+        )
+
+        let pendingRequestCallbacks = PendingRequestCallbacks()
+        let request = HTTPRequest(
+            url: URL(string: path, relativeTo: URL(string: self.config.host))!,
+            contentType: "application/connect+\(codec.name())",
+            headers: headers,
+            message: nil,
+            trailers: nil
+        )
+        interceptorChain.executeInterceptorsAndStopOnFailure(
+            \.requestFunction,
+            firstInFirstOut: true,
+            initial: request,
+            finish: { result in
+                switch result {
+                case .success(let interceptedRequest):
+                    pendingRequestCallbacks.setCallbacks(self.httpClient.stream(
+                        request: interceptedRequest,
+                        responseCallbacks: responseCallbacks
                     ))
+                case .failure(let error):
+                    hasCompleted.value = true
+                    onResult(.complete(code: error.code, error: error, trailers: error.metadata))
                 }
             }
         )
-        let httpRequestCallbacks = self.httpClient.stream(
-            request: request,
-            responseCallbacks: responseCallbacks
-        )
-
-        // Wrap the request data callback to invoke the interceptor chain.
-        return RequestCallbacks(
-            sendData: { httpRequestCallbacks.sendData(chain.requestDataFunction($0)) },
-            sendClose: httpRequestCallbacks.sendClose
-        )
+        return RequestCallbacks { requestData in
+            // Wait for the stream to be established before sending data.
+            pendingRequestCallbacks.enqueue { requestCallbacks in
+                interceptorChain.executeInterceptors(
+                    \.requestDataFunction,
+                    firstInFirstOut: true,
+                    initial: requestData,
+                    finish: requestCallbacks.sendData
+                )
+            }
+        } sendClose: {
+            pendingRequestCallbacks.enqueue { requestCallbacks in
+                requestCallbacks.sendClose()
+            }
+        }
     }
 }
 
@@ -308,6 +383,32 @@ private extension StreamResult<Data> {
             return .headers(headers)
         case .message(let data):
             return .message(try codec.deserialize(source: data))
+        }
+    }
+}
+
+private final class PendingRequestCallbacks: @unchecked Sendable {
+    private let lock = Lock()
+    private var callbacks: RequestCallbacks?
+    private var queue = [(RequestCallbacks) -> Void]()
+
+    func setCallbacks(_ callbacks: RequestCallbacks) {
+        self.lock.perform {
+            self.callbacks = callbacks
+            for action in self.queue {
+                action(callbacks)
+            }
+            self.queue = []
+        }
+    }
+
+    func enqueue(_ action: @escaping (RequestCallbacks) -> Void) {
+        self.lock.perform {
+            if let callbacks = self.callbacks {
+                action(callbacks)
+            } else {
+                self.queue.append(action)
+            }
         }
     }
 }
