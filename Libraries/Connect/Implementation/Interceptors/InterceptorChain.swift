@@ -32,9 +32,7 @@ final class InterceptorChain<T: Sendable>: Sendable {
     /// - parameter finish: Closure to call with the final value after each interceptor has finished
     ///                     processing.
     func executeInterceptors<Value>(
-        _ functionPath: KeyPath<T,
-            @Sendable (Value, @escaping @Sendable (Value) -> Void) -> Void
-        >,
+        _ functionPath: KeyPath<T, @Sendable (Value, @escaping @Sendable (Value) -> Void) -> Void>,
         firstInFirstOut: Bool,
         initial: Value,
         finish: @escaping @Sendable (Value) -> Void
@@ -65,7 +63,8 @@ final class InterceptorChain<T: Sendable>: Sendable {
     /// - parameter finish: Closure to call with the final value either after each interceptor has
     ///                     finished processing or when one returns a `Result.failure`.
     func executeInterceptorsAndStopOnFailure<Value>(
-        _ functionPath: KeyPath<T,
+        _ functionPath: KeyPath<
+            T,
             @Sendable (Value, @escaping @Sendable (Result<Value, ConnectError>) -> Void) -> Void
         >,
         firstInFirstOut: Bool,

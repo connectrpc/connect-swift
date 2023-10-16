@@ -25,10 +25,12 @@ public struct StreamFunction: Sendable {
         _ proceed: @escaping @Sendable (Result<HTTPRequest, ConnectError>) -> Void
     ) -> Void
     public typealias RequestDataHandler = @Sendable (
-        _ data: Data, _ proceed: @escaping @Sendable (Data) -> Void
+        _ data: Data,
+        _ proceed: @escaping @Sendable (Data) -> Void
     ) -> Void
     public typealias StreamResultHandler = @Sendable (
-        _ result: StreamResult<Data>, _ proceed: @escaping @Sendable (StreamResult<Data>) -> Void
+        _ result: StreamResult<Data>,
+        _ proceed: @escaping @Sendable (StreamResult<Data>) -> Void
     ) -> Void
 
     public init(
