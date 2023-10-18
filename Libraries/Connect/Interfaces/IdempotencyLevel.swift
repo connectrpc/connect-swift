@@ -16,7 +16,7 @@ public enum IdempotencyLevel: Sendable {
     /// The default idempotency level. A procedure with
     /// this idempotency level may not be idempotent. This is appropriate for any kind of procedure.
     case unknown
-    /// IdempotencyNoSideEffects is the idempotency level that specifies that a
+    /// The idempotency level that specifies that a
     /// given call has no side-effects. This is equivalent to [RFC 9110 § 9.2.1]
     /// "safe" methods in terms of semantics. This procedure should not mutate
     /// any state. This idempotency level is appropriate for queries, or anything
@@ -26,7 +26,7 @@ public enum IdempotencyLevel: Sendable {
     ///
     /// [RFC 9110 § 9.2.1]: https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.1
     case noSideEffects
-    /// IdempotencyIdempotent is the idempotency level that specifies that a
+    /// The idempotency level that specifies that a
     /// given call is "idempotent", such that multiple instances of the same
     /// request to this procedure would have the same side-effects as a single
     /// request. This is equivalent to [RFC 9110 § 9.2.2] "idempotent" methods.
