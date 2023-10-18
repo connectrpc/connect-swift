@@ -192,10 +192,14 @@ private extension ProtocolClientConfig {
             return request
         }
 
+        var headers = request.headers
+        headers.removeValue(forKey: HeaderConstants.contentEncoding)
+        headers.removeValue(forKey: HeaderConstants.connectProtocolVersion)
+
         return HTTPRequest(
             url: url,
             contentType: request.contentType,
-            headers: request.headers,
+            headers: headers,
             message: nil,
             method: .get,
             trailers: request.trailers,
