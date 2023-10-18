@@ -51,9 +51,13 @@ public struct ProtocolClientConfig: Sendable {
 
     /// Configuration to use to determine when and how to send GET requests.
     public enum GETConfiguration: Sendable {
+        /// Do not send idempotent requests using HTTP GET.
         case disabled
-        case unlimitedURLBytes
-        case cappedURLBytes(maxBytes: Int)
+        /// Send idempotent requests using HTTP GET, regardless of their payload size.
+        case alwaysEnabled
+        /// Send idempotent requests using HTTP GET, but only if their payload size is less than
+        /// or equal to a specific size.
+        case enabledForLimitedPayloadSizes(maxBytes: Int)
 
         var isDisabled: Bool {
             if case .disabled = self {

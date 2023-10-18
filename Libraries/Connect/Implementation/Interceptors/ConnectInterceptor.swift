@@ -53,7 +53,7 @@ extension ConnectInterceptor: Interceptor {
                 contentType: request.contentType,
                 headers: headers,
                 message: finalRequestBody,
-                method: .post,
+                method: request.method,
                 trailers: nil,
                 idempotencyLevel: request.idempotencyLevel
             ))))
@@ -192,7 +192,6 @@ private extension ProtocolClientConfig {
             return request
         }
 
-        print("**URL: \(url)")
         return HTTPRequest(
             url: url,
             contentType: request.contentType,
@@ -212,9 +211,9 @@ private extension ProtocolClientConfig {
         switch self.getConfiguration {
         case .disabled:
             return false
-        case .unlimitedURLBytes:
+        case .alwaysEnabled:
             return true
-        case .cappedURLBytes(let maxBytes):
+        case .enabledForLimitedPayloadSizes(let maxBytes):
             return (request.message?.count ?? 0) <= maxBytes
         }
     }
