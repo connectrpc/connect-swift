@@ -59,7 +59,6 @@ jobs:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v4
-      - uses: docker-practice/actions-setup-docker@master
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
