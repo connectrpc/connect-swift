@@ -16,7 +16,7 @@ import Foundation
 
 /// Configuration used to set up `ProtocolClientInterface` implementations.
 public struct ProtocolClientConfig: Sendable {
-    /// Configuration to use to determine when and how to send GET requests.
+    /// Configuration used to determine when and how to send GET requests.
     public let getConfiguration: GETConfiguration
     /// Target host (e.g., `https://connectrpc.com`).
     public let host: String
@@ -49,7 +49,12 @@ public struct ProtocolClientConfig: Sendable {
         }
     }
 
-    /// Configuration to use to determine when and how to send GET requests.
+    /// Configuration used to determine when and how to send GET requests.
+    /// HTTP GET requests can be sent in place of unary HTTP POST requests when using
+    /// the Connect protocol with idempotent RPCs that do not have side effects.
+    /// Doing so makes it easier to cache responses.
+    ///
+    /// More info: https://connectrpc.com/docs/protocol#unary-get-request
     public enum GETConfiguration: Sendable {
         /// Do not send idempotent requests using HTTP GET.
         case disabled
