@@ -9,6 +9,7 @@ MAKEFLAGS += --no-print-directory
 BIN := .tmp/bin
 LICENSE_HEADER_YEAR_RANGE := 2022-2023
 CONFORMANCE_VERSION := 8e6893a4b801c282eb6cf9ad03d38b993b66ca66
+EXAMPLES_VERSION := e74547031f662f81a62f5e95ebaa9f7037e0c41b
 LICENSE_HEADER_VERSION := v1.12.0
 LICENSE_IGNORE := -e Package.swift \
     -e $(BIN)\/ \
@@ -55,7 +56,7 @@ conformanceserverrun: conformanceserverstop ## Start the conformance server
 
 .PHONY: generate
 generate: cleangenerated ## Regenerate outputs for all .proto files
-	cd Examples; buf generate
+	cd Examples; buf generate https://github.com/connectrpc/examples-go.git#ref=$(EXAMPLES_VERSION),subdir=proto
 	cd Libraries/Connect; buf generate
 	cd Tests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_VERSION),subdir=proto
 
