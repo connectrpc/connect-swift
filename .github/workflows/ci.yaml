@@ -62,6 +62,8 @@ jobs:
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_14.1.app
+      - name: Install Docker for conformance tests
+        run: brew install docker
       - name: Run tests
         run: make test
   run-swiftlint:
