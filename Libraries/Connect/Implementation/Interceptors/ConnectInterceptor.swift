@@ -19,7 +19,7 @@ import Foundation
 struct ConnectInterceptor {
     private let config: ProtocolClientConfig
 
-    private static let protocolVersion = "1"
+    fileprivate static let protocolVersion = "1"
 
     init(config: ProtocolClientConfig) {
         self.config = config
@@ -184,7 +184,7 @@ private extension ProtocolClientConfig {
                 name: "compression",
                 value: request.headers[HeaderConstants.contentEncoding]?.first
             ),
-            URLQueryItem(name: "connect", value: "v1"),
+            URLQueryItem(name: "connect", value: "v\(ConnectInterceptor.protocolVersion)"),
             URLQueryItem(name: "encoding", value: self.codec.name()),
             URLQueryItem(name: "message", value: request.message?.base64EncodedString()),
         ]

@@ -225,7 +225,12 @@ private extension URLRequest {
         self.init(url: httpRequest.url)
         self.httpMethod = httpRequest.method.rawValue
         self.httpBody = httpRequest.message
-        self.setValue(httpRequest.contentType, forHTTPHeaderField: HeaderConstants.contentType)
+        switch httpRequest.method {
+        case .get:
+            break
+        case .post:
+            self.setValue(httpRequest.contentType, forHTTPHeaderField: HeaderConstants.contentType)
+        }
         for (headerName, headerValues) in httpRequest.headers {
             self.setValue(headerValues.joined(separator: ","), forHTTPHeaderField: headerName)
         }

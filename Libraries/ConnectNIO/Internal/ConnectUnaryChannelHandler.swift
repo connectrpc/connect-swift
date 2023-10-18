@@ -94,14 +94,19 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
         }
 
         var nioHeaders = NIOHTTP1.HTTPHeaders()
-        nioHeaders.add(name: "Content-Type", value: self.request.contentType)
+        switch self.request.method {
+        case .get:
+            break
+        case .post:
+            nioHeaders.add(name: "Content-Type", value: self.request.contentType)
+        }
         nioHeaders.add(name: "Content-Length", value: "\(self.request.message?.count ?? 0)")
         nioHeaders.add(name: "Host", value: self.request.url.host!)
         nioHeaders.addNIOHeadersFromConnect(self.request.headers)
 
         let nioRequestHead = HTTPRequestHead(
             version: .http1_1,
-            method: .init(request.method),
+            method: .fromConnectMethod(self.request.method),
             uri: self.request.url.path,
             headers: nioHeaders
         )
@@ -172,16 +177,5 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
             error: ConnectError.deadlineExceeded(),
             tracingInfo: nil
         ))
-    }
-}
-
-private extension NIOHTTP1.HTTPMethod {
-    init(_ method: Connect.HTTPMethod) {
-        switch method {
-        case .get:
-            self = .GET
-        case .post:
-            self = .POST
-        }
     }
 }

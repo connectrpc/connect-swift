@@ -117,12 +117,17 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
         }
 
         var nioHeaders = NIOHTTP1.HTTPHeaders()
-        nioHeaders.add(name: "Content-Type", value: self.request.contentType)
+        switch self.request.method {
+        case .get:
+            break
+        case .post:
+            nioHeaders.add(name: "Content-Type", value: self.request.contentType)
+        }
         nioHeaders.add(name: "Host", value: self.request.url.host!)
         nioHeaders.addNIOHeadersFromConnect(self.request.headers)
         let nioRequestHead = HTTPRequestHead(
             version: .http1_1,
-            method: .POST,
+            method: .fromConnectMethod(self.request.method),
             uri: self.request.url.path,
             headers: nioHeaders
         )
