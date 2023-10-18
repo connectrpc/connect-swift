@@ -49,6 +49,11 @@ extension JSONCodec: Codec {
         return try message.jsonUTF8Data(options: self.encodingOptions)
     }
 
+    public func serializeDeterministically<Input: ProtobufMessage>(message: Input) throws -> Data {
+        #warning("Replace with deterministic invocation")
+        return try message.jsonUTF8Data(options: self.encodingOptions)
+    }
+
     public func deserialize<Output: ProtobufMessage>(source: Data) throws -> Output {
         return try Output(jsonUTF8Data: source, options: self.decodingOptions)
     }

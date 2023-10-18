@@ -24,6 +24,7 @@ public protocol ProtocolClientInterface: Sendable {
     /// Perform a unary (non-streaming) request.
     ///
     /// - parameter path: The RPC path, e.g., "connectrpc.eliza.v1.ElizaService/Say".
+    /// - parameter idempotencyLevel: The idempotency level of this RPC.
     /// - parameter request: The outbound request message.
     /// - parameter headers: The outbound request headers to include.
     /// - parameter completion: Closure called when a response or error is received.
@@ -32,6 +33,7 @@ public protocol ProtocolClientInterface: Sendable {
     @discardableResult
     func unary<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
+        idempotencyLevel: IdempotencyLevel,
         request: Input,
         headers: Headers,
         completion: @escaping @Sendable (ResponseMessage<Output>) -> Void
@@ -102,6 +104,7 @@ public protocol ProtocolClientInterface: Sendable {
     /// Perform a unary (non-streaming) request.
     ///
     /// - parameter path: The RPC path, e.g., "connectrpc.eliza.v1.ElizaService/Say".
+    /// - parameter idempotencyLevel: The idempotency level of this RPC.
     /// - parameter request: The outbound request message.
     /// - parameter headers: The outbound request headers to include.
     ///
@@ -109,6 +112,7 @@ public protocol ProtocolClientInterface: Sendable {
     @available(iOS 13, *)
     func unary<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
+        idempotencyLevel: IdempotencyLevel,
         request: Input,
         headers: Headers
     ) async -> ResponseMessage<Output>

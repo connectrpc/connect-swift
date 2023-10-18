@@ -37,7 +37,9 @@ extension GRPCWebInterceptor: Interceptor {
                 contentType: "application/grpc-web+\(self.config.codec.name())",
                 headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: true),
                 message: envelopedRequestBody,
-                trailers: nil
+                method: request.method,
+                trailers: nil,
+                idempotencyLevel: request.idempotencyLevel
             )))
         } responseFunction: { response, proceed in
             guard response.code == .ok else {
@@ -116,7 +118,9 @@ extension GRPCWebInterceptor: Interceptor {
                 contentType: "application/grpc-web+\(self.config.codec.name())",
                 headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: true),
                 message: request.message,
-                trailers: nil
+                method: request.method,
+                trailers: nil,
+                idempotencyLevel: request.idempotencyLevel
             )))
         } requestDataFunction: { data, proceed in
             proceed(Envelope.packMessage(data, using: self.config.requestCompression))

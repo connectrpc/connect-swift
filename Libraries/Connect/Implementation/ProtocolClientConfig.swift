@@ -16,6 +16,8 @@ import Foundation
 
 /// Configuration used to set up `ProtocolClientInterface` implementations.
 public struct ProtocolClientConfig: Sendable {
+    /// Configuration to use to determine when and how to send GET requests.
+    public let getConfiguration: GETConfiguration
     /// Target host (e.g., `https://connectrpc.com`).
     public let host: String
     /// Protocol to use for requests and streams.
@@ -47,14 +49,30 @@ public struct ProtocolClientConfig: Sendable {
         }
     }
 
+    /// Configuration to use to determine when and how to send GET requests.
+    public enum GETConfiguration: Sendable {
+        case disabled
+        case unlimitedURLBytes
+        case cappedURLBytes(maxBytes: Int)
+
+        var isDisabled: Bool {
+            if case .disabled = self {
+                return true
+            }
+            return false
+        }
+    }
+
     public init(
         host: String,
         networkProtocol: NetworkProtocol = .connect,
         codec: Codec = JSONCodec(),
+        getConfiguration: GETConfiguration = .disabled,
         requestCompression: RequestCompression? = nil,
         responseCompressionPools: [CompressionPool] = [GzipCompressionPool()],
         interceptors: [InterceptorInitializer] = []
     ) {
+        self.getConfiguration = getConfiguration
         self.host = host
         self.networkProtocol = networkProtocol
         self.codec = codec

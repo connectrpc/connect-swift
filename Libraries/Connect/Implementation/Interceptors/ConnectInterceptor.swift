@@ -48,13 +48,15 @@ extension ConnectInterceptor: Interceptor {
                 finalRequestBody = requestBody
             }
 
-            proceed(.success(HTTPRequest(
+            proceed(.success(self.config.transformToGETIfNeeded(HTTPRequest(
                 url: request.url,
                 contentType: request.contentType,
                 headers: headers,
                 message: finalRequestBody,
-                trailers: nil
-            )))
+                method: .post,
+                trailers: nil,
+                idempotencyLevel: request.idempotencyLevel
+            ))))
         } responseFunction: { response, proceed in
             let trailerPrefix = "trailer-"
             let headers = response.headers.filter { header in
@@ -110,7 +112,9 @@ extension ConnectInterceptor: Interceptor {
                 contentType: request.contentType,
                 headers: headers,
                 message: request.message,
-                trailers: nil
+                method: request.method,
+                trailers: nil,
+                idempotencyLevel: request.idempotencyLevel
             )))
         } requestDataFunction: { data, proceed in
             proceed(Envelope.packMessage(data, using: self.config.requestCompression))
@@ -163,6 +167,55 @@ extension ConnectInterceptor: Interceptor {
                     proceed(result)
                 }
             }
+        }
+    }
+}
+
+private extension ProtocolClientConfig {
+    func transformToGETIfNeeded(_ request: HTTPRequest) -> HTTPRequest {
+        guard self.shouldUseUnaryGET(for: request) else {
+            return request
+        }
+
+        var components = URLComponents(url: request.url, resolvingAgainstBaseURL: true)
+        components?.queryItems = [
+            URLQueryItem(name: "base64", value: "1"),
+            URLQueryItem(
+                name: "compression",
+                value: request.headers[HeaderConstants.contentEncoding]?.first
+            ),
+            URLQueryItem(name: "connect", value: "v1"),
+            URLQueryItem(name: "encoding", value: self.codec.name()),
+            URLQueryItem(name: "message", value: request.message?.base64EncodedString()),
+        ]
+        guard let url = components?.url else {
+            return request
+        }
+
+        print("**URL: \(url)")
+        return HTTPRequest(
+            url: url,
+            contentType: request.contentType,
+            headers: request.headers,
+            message: nil,
+            method: .get,
+            trailers: request.trailers,
+            idempotencyLevel: request.idempotencyLevel
+        )
+    }
+
+    private func shouldUseUnaryGET(for request: HTTPRequest) -> Bool {
+        guard request.idempotencyLevel == .noSideEffects else {
+            return false
+        }
+
+        switch self.getConfiguration {
+        case .disabled:
+            return false
+        case .unlimitedURLBytes:
+            return true
+        case .cappedURLBytes(let maxBytes):
+            return (request.message?.count ?? 0) <= maxBytes
         }
     }
 }

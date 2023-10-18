@@ -28,6 +28,16 @@ public protocol Codec: Sendable {
     /// - returns: Serialized data that can be transmitted.
     func serialize<Input: ProtobufMessage>(message: Input) throws -> Data
 
+    /// Determininstically serializes the input message into the codec's format.
+    /// Invocations of this function using the same version of the library with the same message
+    /// are guranteed to produce identical outputs. Note that this is less efficient than
+    /// nondeterministic serialization, as it may result in performing sorts on map fields.
+    ///
+    /// - parameter message: Typed input message.
+    ///
+    /// - returns: Serialized data that can be transmitted.
+    func serializeDeterministically<Input: ProtobufMessage>(message: Input) throws -> Data
+
     /// Deserializes data in the codec's format into a typed message.
     ///
     /// - parameter source: The source data to deserialize.

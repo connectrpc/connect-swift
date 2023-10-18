@@ -29,6 +29,11 @@ extension ProtoCodec: Codec {
         return try message.serializedData()
     }
 
+    public func serializeDeterministically<Input: ProtobufMessage>(message: Input) throws -> Data {
+        #warning("Replace with deterministic invocation")
+        return try message.serializedData()
+    }
+
     public func deserialize<Output: ProtobufMessage>(source: Data) throws -> Output {
         return try Output(serializedData: source)
     }

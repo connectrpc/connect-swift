@@ -101,7 +101,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
 
         let nioRequestHead = HTTPRequestHead(
             version: .http1_1,
-            method: .POST,
+            method: .init(request.method),
             uri: self.request.url.path,
             headers: nioHeaders
         )
@@ -172,5 +172,16 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
             error: ConnectError.deadlineExceeded(),
             tracingInfo: nil
         ))
+    }
+}
+
+private extension NIOHTTP1.HTTPMethod {
+    init(_ method: Connect.HTTPMethod) {
+        switch method {
+        case .get:
+            self = .GET
+        case .post:
+            self = .POST
+        }
     }
 }

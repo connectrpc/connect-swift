@@ -24,16 +24,24 @@ public struct HTTPRequest: Sendable {
     public let headers: Headers
     /// Body data to send with the request.
     public let message: Data?
+    /// HTTP method to use for the request.
+    public let method: HTTPMethod
     /// Outbound trailers for the request.
     public let trailers: Trailers?
+    /// Idempotency level for this request.
+    public let idempotencyLevel: IdempotencyLevel
 
     public init(
-        url: URL, contentType: String, headers: Headers, message: Data?, trailers: Trailers?
+        url: URL, contentType: String, headers: Headers,
+        message: Data?, method: HTTPMethod, trailers: Trailers?,
+        idempotencyLevel: IdempotencyLevel
     ) {
         self.url = url
         self.contentType = contentType
         self.headers = headers
         self.message = message
+        self.method = method
         self.trailers = trailers
+        self.idempotencyLevel = idempotencyLevel
     }
 }

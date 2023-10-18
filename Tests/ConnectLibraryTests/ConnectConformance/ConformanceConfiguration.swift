@@ -71,6 +71,7 @@ final class ConformanceConfiguration {
                                 host: "https://localhost:\(tuple.port)",
                                 networkProtocol: tuple.networkProtocol,
                                 codec: codec,
+                                getConfiguration: .unlimitedURLBytes,
                                 requestCompression: .init(minBytes: 10, pool: GzipCompressionPool())
                             )
                         )

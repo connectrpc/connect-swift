@@ -40,6 +40,7 @@ extension ProtocolClient: ProtocolClientInterface {
     @discardableResult
     public func unary<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
+        idempotencyLevel: IdempotencyLevel,
         request: Input,
         headers: Headers,
         completion: @escaping @Sendable (ResponseMessage<Output>) -> Void
@@ -47,7 +48,11 @@ extension ProtocolClient: ProtocolClientInterface {
         let codec = self.config.codec
         let data: Data
         do {
-            data = try codec.serialize(message: request)
+            if !self.config.getConfiguration.isDisabled && idempotencyLevel != .unknown {
+                data = try codec.serializeDeterministically(message: request)
+            } else {
+                data = try codec.serialize(message: request)
+            }
         } catch let error {
             completion(ResponseMessage(
                 code: .unknown,
@@ -65,7 +70,9 @@ extension ProtocolClient: ProtocolClientInterface {
             contentType: "application/\(codec.name())",
             headers: headers,
             message: data,
-            trailers: nil
+            method: .post,
+            trailers: nil,
+            idempotencyLevel: idempotencyLevel
         )
         let cancelation = Locked<(cancelable: Cancelable?, isCancelled: Bool)>((nil, false))
         let finishHandlingResponse: @Sendable (HTTPResponse) -> Void = { response in
@@ -213,11 +220,15 @@ extension ProtocolClient: ProtocolClientInterface {
     @available(iOS 13, *)
     public func unary<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
+        idempotencyLevel: IdempotencyLevel,
         request: Input,
         headers: Headers
     ) async -> ResponseMessage<Output> {
         return await UnaryAsyncWrapper { completion in
-            self.unary(path: path, request: request, headers: headers, completion: completion)
+            self.unary(
+                path: path, idempotencyLevel: idempotencyLevel, request: request,
+                headers: headers, completion: completion
+            )
         }.send()
     }
 
@@ -337,7 +348,9 @@ extension ProtocolClient: ProtocolClientInterface {
             contentType: "application/connect+\(codec.name())",
             headers: headers,
             message: nil,
-            trailers: nil
+            method: .post,
+            trailers: nil,
+            idempotencyLevel: .unknown
         )
         interceptorChain.executeInterceptorsAndStopOnFailure(
             \.requestFunction,

@@ -75,6 +75,19 @@ final class AsyncAwaitConformance: XCTestCase {
         }
     }
 
+    func testCacheableUnary() async {
+        await self.executeTestWithClients { client in
+            let size = 123
+            let message = Connectrpc_Conformance_V1_SimpleRequest.with { proto in
+                proto.responseSize = Int32(size)
+                proto.payload = .with { $0.body = Data(repeating: 0, count: size) }
+            }
+            let response = await client.cacheableUnaryCall(request: message)
+            XCTAssertNil(response.error)
+            XCTAssertEqual(response.message?.payload.body.count, size)
+        }
+    }
+
     func testClientStreaming() async throws {
         func createPayload(bytes: Int) -> Connectrpc_Conformance_V1_StreamingInputCallRequest {
             return .with { request in

@@ -81,6 +81,23 @@ final class CallbackConformance: XCTestCase {
         }
     }
 
+    func testCacheableUnary() {
+        self.executeTestWithClients { client in
+            let size = 123
+            let message = Connectrpc_Conformance_V1_SimpleRequest.with { proto in
+                proto.responseSize = Int32(size)
+                proto.payload = .with { $0.body = Data(repeating: 0, count: size) }
+            }
+            let expectation = self.expectation(description: "Receives successful response")
+            client.cacheableUnaryCall(request: message) { response in
+                XCTAssertNil(response.error)
+                XCTAssertEqual(response.message?.payload.body.count, size)
+                expectation.fulfill()
+            }
+            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+        }
+    }
+
     func testClientStreaming() throws {
         func createPayload(bytes: Int) -> Connectrpc_Conformance_V1_StreamingInputCallRequest {
             return .with { request in

@@ -40,8 +40,10 @@ private struct MockUnaryInterceptor: Interceptor {
                 url: request.url,
                 contentType: request.contentType,
                 headers: headers,
-                message: request.message,
-                trailers: request.trailers
+                message: request.message, 
+                method: request.method,
+                trailers: request.trailers,
+                idempotencyLevel: request.idempotencyLevel
             )))
         } responseFunction: { response, proceed in
             var headers = response.headers
@@ -98,8 +100,10 @@ private struct MockStreamInterceptor: Interceptor {
                     url: request.url,
                     contentType: request.contentType,
                     headers: headers,
-                    message: request.message,
-                    trailers: Trailers()
+                    message: request.message, 
+                    method: request.method,
+                    trailers: Trailers(),
+                    idempotencyLevel: request.idempotencyLevel
                 )))
             }
             if self.requestDelayMS > 0 {
@@ -169,7 +173,9 @@ final class InterceptorChainTests: XCTestCase {
                 contentType: "application/json",
                 headers: Headers(),
                 message: nil,
-                trailers: Trailers()
+                method: .post,
+                trailers: Trailers(),
+                idempotencyLevel: .unknown
             ),
             finish: { interceptedRequest.value = try? $0.get() }
         )
@@ -248,7 +254,9 @@ final class InterceptorChainTests: XCTestCase {
                contentType: "application/json",
                headers: Headers(),
                message: nil,
-               trailers: Trailers()
+               method: .post,
+               trailers: Trailers(),
+               idempotencyLevel: .unknown
             ),
             finish: { interceptedResult in
                 switch interceptedResult {
@@ -311,7 +319,9 @@ final class InterceptorChainTests: XCTestCase {
                 contentType: "application/json",
                 headers: Headers(),
                 message: nil,
-                trailers: Trailers()
+                method: .post,
+                trailers: Trailers(),
+                idempotencyLevel: .unknown
             ),
             finish: { interceptedRequest.value = try? $0.get() }
         )
@@ -415,7 +425,9 @@ final class InterceptorChainTests: XCTestCase {
                contentType: "application/json",
                headers: Headers(),
                message: nil,
-               trailers: Trailers()
+               method: .post,
+               trailers: Trailers(),
+               idempotencyLevel: .unknown
             ),
             finish: { interceptedResult in
                 switch interceptedResult {
