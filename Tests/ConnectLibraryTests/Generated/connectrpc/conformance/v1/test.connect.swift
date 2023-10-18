@@ -130,42 +130,42 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
 
     @discardableResult
     internal func `emptyCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
-        return self.client.unary(path: "/connectrpc.conformance.v1.TestService/EmptyCall", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
+        return self.client.unary(path: "/connectrpc.conformance.v1.TestService/EmptyCall", request: request, headers: headers, completion: completion)
     }
 
     @available(iOS 13, *)
     internal func `emptyCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
-        return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/EmptyCall", idempotencyLevel: .unknown, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/EmptyCall", request: request, headers: headers)
     }
 
     @discardableResult
     internal func `unaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable {
-        return self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnaryCall", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
+        return self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnaryCall", request: request, headers: headers, completion: completion)
     }
 
     @available(iOS 13, *)
     internal func `unaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse> {
-        return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnaryCall", idempotencyLevel: .unknown, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnaryCall", request: request, headers: headers)
     }
 
     @discardableResult
     internal func `failUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable {
-        return self.client.unary(path: "/connectrpc.conformance.v1.TestService/FailUnaryCall", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
+        return self.client.unary(path: "/connectrpc.conformance.v1.TestService/FailUnaryCall", request: request, headers: headers, completion: completion)
     }
 
     @available(iOS 13, *)
     internal func `failUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse> {
-        return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/FailUnaryCall", idempotencyLevel: .unknown, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/FailUnaryCall", request: request, headers: headers)
     }
 
     @discardableResult
     internal func `cacheableUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable {
-        return self.client.unary(path: "/connectrpc.conformance.v1.TestService/CacheableUnaryCall", idempotencyLevel: .noSideEffects, request: request, headers: headers, completion: completion)
+        return self.client.unary(path: "/connectrpc.conformance.v1.TestService/CacheableUnaryCall", request: request, headers: headers, completion: completion)
     }
 
     @available(iOS 13, *)
     internal func `cacheableUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse> {
-        return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/CacheableUnaryCall", idempotencyLevel: .noSideEffects, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/CacheableUnaryCall", request: request, headers: headers)
     }
 
     internal func `streamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<Connectrpc_Conformance_V1_StreamingOutputCallResponse>) -> Void) -> any Connect.ServerOnlyStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest> {
@@ -215,12 +215,12 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
 
     @discardableResult
     internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
-        return self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnimplementedCall", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
+        return self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnimplementedCall", request: request, headers: headers, completion: completion)
     }
 
     @available(iOS 13, *)
     internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
-        return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnimplementedCall", idempotencyLevel: .unknown, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnimplementedCall", request: request, headers: headers)
     }
 
     internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<SwiftProtobuf.Google_Protobuf_Empty> {
@@ -279,12 +279,12 @@ internal final class Connectrpc_Conformance_V1_UnimplementedServiceClient: Conne
 
     @discardableResult
     internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
-        return self.client.unary(path: "/connectrpc.conformance.v1.UnimplementedService/UnimplementedCall", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
+        return self.client.unary(path: "/connectrpc.conformance.v1.UnimplementedService/UnimplementedCall", request: request, headers: headers, completion: completion)
     }
 
     @available(iOS 13, *)
     internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
-        return await self.client.unary(path: "/connectrpc.conformance.v1.UnimplementedService/UnimplementedCall", idempotencyLevel: .unknown, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.conformance.v1.UnimplementedService/UnimplementedCall", request: request, headers: headers)
     }
 
     internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:], onResult: @escaping @Sendable (Connect.StreamResult<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<SwiftProtobuf.Google_Protobuf_Empty> {
@@ -330,22 +330,22 @@ internal final class Connectrpc_Conformance_V1_ReconnectServiceClient: Connectrp
 
     @discardableResult
     internal func `start`(request: Connectrpc_Conformance_V1_ReconnectParams, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
-        return self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Start", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
+        return self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Start", request: request, headers: headers, completion: completion)
     }
 
     @available(iOS 13, *)
     internal func `start`(request: Connectrpc_Conformance_V1_ReconnectParams, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
-        return await self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Start", idempotencyLevel: .unknown, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Start", request: request, headers: headers)
     }
 
     @discardableResult
     internal func `stop`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_ReconnectInfo>) -> Void) -> Connect.Cancelable {
-        return self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Stop", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
+        return self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Stop", request: request, headers: headers, completion: completion)
     }
 
     @available(iOS 13, *)
     internal func `stop`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_ReconnectInfo> {
-        return await self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Stop", idempotencyLevel: .unknown, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Stop", request: request, headers: headers)
     }
 
     internal enum Metadata {
@@ -386,22 +386,22 @@ internal final class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClient: C
 
     @discardableResult
     internal func `getClientStats`(request: Connectrpc_Conformance_V1_LoadBalancerStatsRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerStatsResponse>) -> Void) -> Connect.Cancelable {
-        return self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientStats", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
+        return self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientStats", request: request, headers: headers, completion: completion)
     }
 
     @available(iOS 13, *)
     internal func `getClientStats`(request: Connectrpc_Conformance_V1_LoadBalancerStatsRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerStatsResponse> {
-        return await self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientStats", idempotencyLevel: .unknown, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientStats", request: request, headers: headers)
     }
 
     @discardableResult
     internal func `getClientAccumulatedStats`(request: Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsResponse>) -> Void) -> Connect.Cancelable {
-        return self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientAccumulatedStats", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
+        return self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientAccumulatedStats", request: request, headers: headers, completion: completion)
     }
 
     @available(iOS 13, *)
     internal func `getClientAccumulatedStats`(request: Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsResponse> {
-        return await self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientAccumulatedStats", idempotencyLevel: .unknown, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientAccumulatedStats", request: request, headers: headers)
     }
 
     internal enum Metadata {
@@ -438,22 +438,22 @@ internal final class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClient: Con
 
     @discardableResult
     internal func `setServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
-        return self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetServing", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
+        return self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetServing", request: request, headers: headers, completion: completion)
     }
 
     @available(iOS 13, *)
     internal func `setServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
-        return await self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetServing", idempotencyLevel: .unknown, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetServing", request: request, headers: headers)
     }
 
     @discardableResult
     internal func `setNotServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable {
-        return self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetNotServing", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
+        return self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetNotServing", request: request, headers: headers, completion: completion)
     }
 
     @available(iOS 13, *)
     internal func `setNotServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
-        return await self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetNotServing", idempotencyLevel: .unknown, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetNotServing", request: request, headers: headers)
     }
 
     internal enum Metadata {
@@ -486,12 +486,12 @@ internal final class Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceCl
 
     @discardableResult
     internal func `configure`(request: Connectrpc_Conformance_V1_ClientConfigureRequest, headers: Connect.Headers = [:], completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_ClientConfigureResponse>) -> Void) -> Connect.Cancelable {
-        return self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateClientConfigureService/Configure", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
+        return self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateClientConfigureService/Configure", request: request, headers: headers, completion: completion)
     }
 
     @available(iOS 13, *)
     internal func `configure`(request: Connectrpc_Conformance_V1_ClientConfigureRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_ClientConfigureResponse> {
-        return await self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateClientConfigureService/Configure", idempotencyLevel: .unknown, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateClientConfigureService/Configure", request: request, headers: headers)
     }
 
     internal enum Metadata {
