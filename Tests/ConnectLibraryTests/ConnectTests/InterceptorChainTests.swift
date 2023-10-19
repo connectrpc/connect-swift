@@ -40,7 +40,7 @@ private struct MockUnaryInterceptor: Interceptor {
                 url: request.url,
                 contentType: request.contentType,
                 headers: headers,
-                message: request.message, 
+                message: request.message,
                 method: request.method,
                 trailers: request.trailers,
                 idempotencyLevel: request.idempotencyLevel
@@ -100,7 +100,7 @@ private struct MockStreamInterceptor: Interceptor {
                     url: request.url,
                     contentType: request.contentType,
                     headers: headers,
-                    message: request.message, 
+                    message: request.message,
                     method: request.method,
                     trailers: Trailers(),
                     idempotencyLevel: request.idempotencyLevel
