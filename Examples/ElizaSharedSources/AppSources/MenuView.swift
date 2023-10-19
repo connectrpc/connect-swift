@@ -45,7 +45,8 @@ struct MenuView: View {
         let config = ProtocolClientConfig(
             host: host,
             networkProtocol: networkProtocol,
-            codec: ProtoCodec() // Protobuf binary, or JSONCodec() for JSON
+            codec: ProtoCodec(), // Protobuf binary, or JSONCodec() for JSON
+            getConfiguration: .disabled // Can enable to use cacheable unary HTTP GET requests
         )
         #if !COCOAPODS
         // For gRPC (which is not supported by CocoaPods), use the NIO HTTP client:

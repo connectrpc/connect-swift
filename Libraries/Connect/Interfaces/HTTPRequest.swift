@@ -28,7 +28,7 @@ public struct HTTPRequest: Sendable {
     public let method: HTTPMethod
     /// Outbound trailers for the request.
     public let trailers: Trailers?
-    /// Idempotency level for this request.
+    /// Idempotency level of the request.
     public let idempotencyLevel: IdempotencyLevel
 
     public init(

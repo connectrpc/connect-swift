@@ -30,8 +30,15 @@ public protocol Codec: Sendable {
 
     /// Determininstically serializes the input message into the codec's format.
     /// Invocations of this function using the same version of the library with the same message
-    /// are guranteed to produce identical outputs. Note that this is less efficient than
+    /// are guranteed to produce identical outputs. This is less efficient than
     /// nondeterministic serialization, as it may result in performing sorts on map fields.
+    ///
+    /// Note that the deterministic serialization is NOT canonical across languages.
+    /// It is not guaranteed to remain stable over time. It is unstable across
+    /// different builds with schema changes due to unknown fields. Users who need
+    /// canonical serialization (e.g., persistent storage in a canonical form,
+    /// fingerprinting, etc.) should define their own canonicalization specification
+    /// and implement their own serializer rather than relying on this API.
     ///
     /// - parameter message: Typed input message.
     ///
