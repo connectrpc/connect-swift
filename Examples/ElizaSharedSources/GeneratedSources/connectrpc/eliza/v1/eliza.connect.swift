@@ -41,7 +41,7 @@ internal final class Connectrpc_Eliza_V1_ElizaServiceClient: Connectrpc_Eliza_V1
 
     @available(iOS 13, *)
     internal func `say`(request: Connectrpc_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Eliza_V1_SayResponse> {
-        return await self.client.unary(path: "/connectrpc.eliza.v1.ElizaService/Say", idempotencyLevel: .unknown, request: request, headers: headers)
+        return await self.client.unary(path: "/connectrpc.eliza.v1.ElizaService/Say", idempotencyLevel: .noSideEffects, request: request, headers: headers)
     }
 
     @available(iOS 13, *)
