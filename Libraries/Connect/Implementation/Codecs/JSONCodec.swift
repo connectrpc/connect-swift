@@ -50,7 +50,7 @@ extension JSONCodec: Codec {
     }
 
     public func deterministicallySerialize<Input: ProtobufMessage>(message: Input) throws -> Data {
-        #warning("Replace with deterministic invocation")
+        #warning("Use settings from https://github.com/apple/swift-protobuf/pull/1478")
         return try message.jsonUTF8Data(options: self.encodingOptions)
     }
 
