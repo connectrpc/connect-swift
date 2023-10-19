@@ -49,7 +49,7 @@ extension ProtocolClient: ProtocolClientInterface {
         let data: Data
         do {
             if !self.config.getConfiguration.isDisabled && idempotencyLevel != .unknown {
-                data = try codec.serializeDeterministically(message: request)
+                data = try codec.deterministicallySerialize(message: request)
             } else {
                 data = try codec.serialize(message: request)
             }
