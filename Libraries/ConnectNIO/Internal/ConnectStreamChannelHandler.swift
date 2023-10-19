@@ -125,12 +125,8 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
         }
         nioHeaders.add(name: "Host", value: self.request.url.host!)
         nioHeaders.addNIOHeadersFromConnect(self.request.headers)
-        let nioRequestHead = HTTPRequestHead(
-            version: .http1_1,
-            method: .fromConnectMethod(self.request.method),
-            uri: self.request.url.path,
-            headers: nioHeaders
-        )
+
+        let nioRequestHead = HTTPRequestHead.fromConnect(self.request, nioHeaders: nioHeaders)
         context.write(self.wrapOutboundOut(.head(nioRequestHead))).cascade(to: nil)
 
         if !self.pendingData.isEmpty {

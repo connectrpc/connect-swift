@@ -15,13 +15,25 @@
 import Connect
 import NIOHTTP1
 
-extension NIOHTTP1.HTTPMethod {
-    static func fromConnectMethod(_ method: Connect.HTTPMethod) -> Self {
-        switch method {
+extension HTTPRequestHead {
+    static func fromConnect(
+        _ request: Connect.HTTPRequest, nioHeaders: NIOHTTP1.HTTPHeaders
+    ) -> Self {
+        switch request.method {
         case .get:
-            return .GET
+            return HTTPRequestHead(
+                version: .http1_1,
+                method: .GET,
+                uri: "\(request.url.path)?\(request.url.query ?? "")",
+                headers: nioHeaders
+            )
         case .post:
-            return .POST
+            return HTTPRequestHead(
+                version: .http1_1,
+                method: .POST,
+                uri: request.url.path,
+                headers: nioHeaders
+            )
         }
     }
 }
