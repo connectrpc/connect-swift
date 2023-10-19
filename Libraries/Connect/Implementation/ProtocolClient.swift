@@ -48,7 +48,7 @@ extension ProtocolClient: ProtocolClientInterface {
         let codec = self.config.codec
         let data: Data
         do {
-            if !self.config.getConfiguration.isDisabled && idempotencyLevel != .unknown {
+            if self.config.getConfiguration.isEnabled && idempotencyLevel == .noSideEffects {
                 data = try codec.deterministicallySerialize(message: request)
             } else {
                 data = try codec.serialize(message: request)

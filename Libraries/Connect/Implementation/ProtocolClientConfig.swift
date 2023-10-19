@@ -64,11 +64,13 @@ public struct ProtocolClientConfig: Sendable {
         /// or equal to a specific size.
         case enabledForLimitedPayloadSizes(maxBytes: Int)
 
-        var isDisabled: Bool {
-            if case .disabled = self {
+        var isEnabled: Bool {
+            switch self {
+            case .alwaysEnabled, .enabledForLimitedPayloadSizes:
                 return true
+            case .disabled:
+                return false
             }
-            return false
         }
     }
 
