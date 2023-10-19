@@ -91,18 +91,11 @@ final class AsyncAwaitConformance: XCTestCase {
                 .send(createPayload(bytes: 32 * 1_024))
                 .close()
 
-            var responseCount = 0
-            for await result in stream.results() {
-                switch result {
-                case .headers, .complete:
-                    continue
-
-                case .message(let output):
-                    responseCount += 1
-                    XCTAssertEqual(output.aggregatedPayloadSize, 289_800)
-                }
-            }
-            XCTAssertEqual(responseCount, 1)
+            let results = await stream
+                .results()
+                .compactMap(\.messageValue?.aggregatedPayloadSize)
+                .reduce(into: []) { $0.append($1) }
+            XCTAssertEqual(results, [289_800])
         }
     }
 
@@ -284,19 +277,10 @@ final class AsyncAwaitConformance: XCTestCase {
             }
             let stream = client.streamingOutputCall()
             try stream.send(message)
-            for await result in stream.results() {
-                switch result {
-                case .headers:
-                    continue
-
-                case .message:
-                    continue
-
-                case .complete(let code, let error, _):
-                    XCTAssertEqual(code, .deadlineExceeded)
-                    XCTAssertNotNil(error)
-                    expectation.fulfill()
-                }
+            for await case .complete(let code, let error, _) in stream.results() {
+                XCTAssertEqual(code, .deadlineExceeded)
+                XCTAssertNotNil(error)
+                expectation.fulfill()
             }
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
@@ -333,18 +317,12 @@ final class AsyncAwaitConformance: XCTestCase {
             let expectation = self.expectation(description: "Stream completes")
             let stream = client.unimplementedStreamingOutputCall()
             try stream.send(SwiftProtobuf.Google_Protobuf_Empty())
-            for await result in stream.results() {
-                switch result {
-                case .headers, .message:
-                    continue
-
-                case .complete(let code, let error, _):
-                    XCTAssertEqual(code, .unimplemented)
-                    XCTAssertTrue(validErrorMessages.contains(
-                        try XCTUnwrap((error as? ConnectError)?.message)
-                    ))
-                    expectation.fulfill()
-                }
+            for await case .complete(let code, let error, _) in stream.results() {
+                XCTAssertEqual(code, .unimplemented)
+                XCTAssertTrue(validErrorMessages.contains(
+                    try XCTUnwrap((error as? ConnectError)?.message)
+                ))
+                expectation.fulfill()
             }
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
