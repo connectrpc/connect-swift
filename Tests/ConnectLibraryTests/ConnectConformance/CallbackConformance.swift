@@ -28,25 +28,21 @@ private typealias UnimplementedServiceClient = Connectrpc_Conformance_V1_Unimple
 /// Tests are written using callback APIs.
 final class CallbackConformance: XCTestCase {
     private func executeTestWithClients(
-        function: Selector = #function,
         timeout: TimeInterval = 60,
         runTestsWithClient: (TestServiceClient) throws -> Void
     ) rethrows {
         let configurations = ConformanceConfiguration.all(timeout: timeout)
         for configuration in configurations {
             try runTestsWithClient(TestServiceClient(client: configuration.protocolClient))
-            print("Ran \(function) with \(configuration.description)")
         }
     }
 
     private func executeTestWithUnimplementedClients(
-        function: Selector = #function,
         runTestsWithClient: (UnimplementedServiceClient) throws -> Void
     ) rethrows {
         let configurations = ConformanceConfiguration.all(timeout: 60)
         for configuration in configurations {
             try runTestsWithClient(UnimplementedServiceClient(client: configuration.protocolClient))
-            print("Ran \(function) with \(configuration.description)")
         }
     }
 
