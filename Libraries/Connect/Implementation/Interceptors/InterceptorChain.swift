@@ -14,79 +14,78 @@
 
 /// Represents a chain of interceptors that is used for a single request/stream,
 /// and orchestrates invoking each of them in the proper order.
-struct InterceptorChain: @unchecked Sendable {
-    private let interceptors: [Interceptor]
+final class InterceptorChain<T: Sendable>: Sendable {
+    private let interceptors: [T]
 
-    /// Initialize the interceptor chain.
-    ///
-    /// NOTE: Exactly 1 chain is expected to be instantiated for a single request/stream.
-    ///
-    /// - parameter interceptors: Closures that should be called to create interceptors.
-    /// - parameter config: Config to use for setting up interceptors.
-    init(interceptors: [InterceptorInitializer], config: ProtocolClientConfig) {
-        self.interceptors = interceptors.map { initialize in initialize(config) }
+    init(_ interceptors: [T]) {
+        self.interceptors = interceptors
     }
 
-    /// Create a set of closures configured with all interceptors for a unary API.
+    /// Invoke each of the interceptors, waiting for a given interceptor to complete before passing
+    /// the resulting value to the next interceptor and finally invoking `finish` with the final
+    /// value.
     ///
-    /// NOTE: Interceptors are invoked in FIFO order for the request path, and in LIFO order for
-    /// the response path. For example, with interceptors `[a, b, c]`:
-    /// `caller -> a -> b -> c -> server`
-    /// `caller <- c <- b <- a <- server`
+    /// - parameter functionPath: Key path of the function on the interceptor to invoke.
+    /// - parameter firstInFirstOut: If true, interceptors will be invoked in the order they were
+    ///                              originally registered. If false, the order will be reversed.
+    /// - parameter initial: The initial value to pass to the first interceptor.
+    /// - parameter finish: Closure to call with the final value after each interceptor has finished
+    ///                     processing.
+    func executeInterceptors<Value>(
+        _ functionPath: KeyPath<T, @Sendable (Value, @escaping @Sendable (Value) -> Void) -> Void>,
+        firstInFirstOut: Bool,
+        initial: Value,
+        finish: @escaping @Sendable (Value) -> Void
+    ) {
+        var interceptors = self.interceptors.map { $0[keyPath: functionPath] }
+        if firstInFirstOut {
+            interceptors = interceptors.reversed()
+        }
+        var next: @Sendable (Value) -> Void = { finish($0) }
+        for interceptor in interceptors {
+            next = { [next] interceptedValue in interceptor(interceptedValue, next) }
+        }
+        next(initial)
+    }
+
+    /// Invoke each of the interceptors, waiting for a given interceptor to complete before passing
+    /// the resulting value to the next interceptor and finally invoking `finish` with the final
+    /// value.
     ///
-    /// - returns: A set of closures that each invoke the chain of interceptors in the above order.
-    func unaryFunction() -> UnaryFunction {
-        let interceptors = self.interceptors.map { $0.unaryFunction() }
-        return UnaryFunction(
-            requestFunction: { request in
-                return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
-            },
-            responseFunction: { response in
-                return executeInterceptors(
-                    interceptors.reversed().map(\.responseFunction),
-                    initial: response
-                )
-            },
-            responseMetricsFunction: { metrics in
-                return executeInterceptors(
-                    interceptors.reversed().map(\.responseMetricsFunction),
-                    initial: metrics
-                )
+    /// **If an interceptor returns a `Result.failure`, the chain will be terminated immediately
+    /// without invoking additional interceptors, and the failure result will be returned to the
+    /// caller.**
+    ///
+    /// - parameter functionPath: Key path of the function on the interceptor to invoke.
+    /// - parameter firstInFirstOut: If true, interceptors will be invoked in the order they were
+    ///                              originally registered. If false, the order will be reversed.
+    /// - parameter initial: The initial value to pass to the first interceptor.
+    /// - parameter finish: Closure to call with the final value either after each interceptor has
+    ///                     finished processing or when one returns a `Result.failure`.
+    func executeInterceptorsAndStopOnFailure<Value>(
+        _ functionPath: KeyPath<
+            T,
+            @Sendable (Value, @escaping @Sendable (Result<Value, ConnectError>) -> Void) -> Void
+        >,
+        firstInFirstOut: Bool,
+        initial: Value,
+        finish: @escaping @Sendable (Result<Value, ConnectError>) -> Void
+    ) {
+        var interceptors = self.interceptors.map { $0[keyPath: functionPath] }
+        if firstInFirstOut {
+            interceptors = interceptors.reversed()
+        }
+        var next: @Sendable (Result<Value, ConnectError>) -> Void = { finish($0) }
+        for interceptor in interceptors {
+            next = { [next] result in
+                switch result {
+                case .success(let interceptedValue):
+                    interceptor(interceptedValue, next)
+                case .failure:
+                    finish(result)
+                }
             }
-        )
+        }
+        next(.success(initial))
     }
-
-    /// Create a set of closures configured with all interceptors for a stream.
-    ///
-    /// NOTE: Interceptors are invoked in FIFO order for the request path, and in LIFO order for
-    /// the response path. For example, with interceptors `[a, b, c]`:
-    /// `caller -> a -> b -> c -> server`
-    /// `caller <- c <- b <- a <- server`
-    ///
-    /// - returns: A set of closures that each invoke the chain of interceptors in the above order.
-    func streamFunction() -> StreamFunction {
-        let interceptors = self.interceptors.map { $0.streamFunction() }
-        return StreamFunction(
-            requestFunction: { request in
-                return executeInterceptors(interceptors.map(\.requestFunction), initial: request)
-            },
-            requestDataFunction: { data in
-                return executeInterceptors(interceptors.map(\.requestDataFunction), initial: data)
-            },
-            streamResultFunction: { result in
-                return executeInterceptors(
-                    interceptors.reversed().map(\.streamResultFunction),
-                    initial: result
-                )
-            }
-        )
-    }
-}
-
-private func executeInterceptors<T>(_ interceptors: [(T) -> T], initial: T) -> T {
-    var next = initial
-    for interceptor in interceptors {
-        next = interceptor(next)
-    }
-    return next
 }

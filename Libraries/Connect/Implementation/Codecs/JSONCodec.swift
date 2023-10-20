@@ -27,14 +27,15 @@ public struct JSONCodec: Sendable {
 
     /// Designated initializer.
     ///
-    /// - parameter alwaysPrintEnumsAsInts: Always print enums as ints. By default they are printed
-    ///                                     as strings.
-    /// - parameter preserveProtoFieldNames: Whether to preserve proto field names. By default they
-    ///                                      are converted to JSON (lowerCamelCase) names.
-    public init(alwaysEncodeEnumsAsInts: Bool = false, encodeProtoFieldNames: Bool = false) {
+    /// - parameter alwaysEncodeEnumsAsInts: Always encode enums as ints. By default they are
+    ///                                      encoded as strings.
+    /// - parameter preserveProtobufFieldNames: Whether to preserve Protobuf field names as they're
+    ///                                         defined in the `.proto` files. By default they are
+    ///                                         converted to Protobuf's JSON lowerCamelCase format.
+    public init(alwaysEncodeEnumsAsInts: Bool = false, preserveProtobufFieldNames: Bool = false) {
         var encodingOptions = JSONEncodingOptions()
         encodingOptions.alwaysPrintEnumsAsInts = alwaysEncodeEnumsAsInts
-        encodingOptions.preserveProtoFieldNames = encodeProtoFieldNames
+        encodingOptions.preserveProtoFieldNames = preserveProtobufFieldNames
         self.encodingOptions = encodingOptions
     }
 }

@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		00CF4618AA904D5D3AEEDAA4 /* Pods_ElizaCocoaPodsApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97B2C5809ECFFD24F0C87AB2 /* Pods_ElizaCocoaPodsApp.framework */; };
-		B216FBF729723F2A003AB294 /* eliza.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FBEE29723F2A003AB294 /* eliza.pb.swift */; };
-		B216FBF829723F2A003AB294 /* eliza.connect.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FBEF29723F2A003AB294 /* eliza.connect.swift */; };
 		B216FBF929723F2A003AB294 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FBF129723F2A003AB294 /* Message.swift */; };
 		B216FBFA29723F2A003AB294 /* MessagingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FBF229723F2A003AB294 /* MessagingView.swift */; };
 		B216FBFB29723F2A003AB294 /* MessagingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FBF329723F2A003AB294 /* MessagingViewModel.swift */; };
@@ -17,14 +15,14 @@
 		B216FBFD29723F2A003AB294 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FBF529723F2A003AB294 /* MenuView.swift */; };
 		B216FBFE29723F2A003AB294 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B216FBF629723F2A003AB294 /* README.md */; };
 		B236EEB8295F574F00DDCDA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B236EEB7295F574F00DDCDA9 /* Assets.xcassets */; };
+		B23B25BB2AE08974001C64E0 /* eliza.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B23B25B92AE08974001C64E0 /* eliza.pb.swift */; };
+		B23B25BC2AE08974001C64E0 /* eliza.connect.swift in Sources */ = {isa = PBXBuildFile; fileRef = B23B25BA2AE08974001C64E0 /* eliza.connect.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		24421109838104D5D0DBD5C7 /* Pods-ElizaCocoaPodsApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ElizaCocoaPodsApp.debug.xcconfig"; path = "Target Support Files/Pods-ElizaCocoaPodsApp/Pods-ElizaCocoaPodsApp.debug.xcconfig"; sourceTree = "<group>"; };
 		2596F885A0CF999DCDAA7364 /* Pods-ElizaCocoaPodsApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ElizaCocoaPodsApp.release.xcconfig"; path = "Target Support Files/Pods-ElizaCocoaPodsApp/Pods-ElizaCocoaPodsApp.release.xcconfig"; sourceTree = "<group>"; };
 		97B2C5809ECFFD24F0C87AB2 /* Pods_ElizaCocoaPodsApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ElizaCocoaPodsApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		B216FBEE29723F2A003AB294 /* eliza.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = eliza.pb.swift; sourceTree = "<group>"; };
-		B216FBEF29723F2A003AB294 /* eliza.connect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = eliza.connect.swift; sourceTree = "<group>"; };
 		B216FBF129723F2A003AB294 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		B216FBF229723F2A003AB294 /* MessagingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingView.swift; sourceTree = "<group>"; };
 		B216FBF329723F2A003AB294 /* MessagingViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingViewModel.swift; sourceTree = "<group>"; };
@@ -33,6 +31,8 @@
 		B216FBF629723F2A003AB294 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B236EEB0295F574E00DDCDA9 /* ElizaCocoaPodsApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ElizaCocoaPodsApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B236EEB7295F574F00DDCDA9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B23B25B92AE08974001C64E0 /* eliza.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = eliza.pb.swift; sourceTree = "<group>"; };
+		B23B25BA2AE08974001C64E0 /* eliza.connect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = eliza.connect.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,21 +58,12 @@
 		B216FBEC29723F2A003AB294 /* ElizaSharedSources */ = {
 			isa = PBXGroup;
 			children = (
-				B216FBED29723F2A003AB294 /* GeneratedSources */,
 				B216FBF029723F2A003AB294 /* AppSources */,
+				B23B25B52AE08974001C64E0 /* GeneratedSources */,
 				B216FBF629723F2A003AB294 /* README.md */,
 			);
 			name = ElizaSharedSources;
 			path = ../../ElizaSharedSources;
-			sourceTree = "<group>";
-		};
-		B216FBED29723F2A003AB294 /* GeneratedSources */ = {
-			isa = PBXGroup;
-			children = (
-				B216FBEE29723F2A003AB294 /* eliza.pb.swift */,
-				B216FBEF29723F2A003AB294 /* eliza.connect.swift */,
-			);
-			path = GeneratedSources;
 			sourceTree = "<group>";
 		};
 		B216FBF029723F2A003AB294 /* AppSources */ = {
@@ -112,6 +103,39 @@
 				B236EEB7295F574F00DDCDA9 /* Assets.xcassets */,
 			);
 			path = ElizaCocoaPodsApp;
+			sourceTree = "<group>";
+		};
+		B23B25B52AE08974001C64E0 /* GeneratedSources */ = {
+			isa = PBXGroup;
+			children = (
+				B23B25B62AE08974001C64E0 /* connectrpc */,
+			);
+			path = GeneratedSources;
+			sourceTree = "<group>";
+		};
+		B23B25B62AE08974001C64E0 /* connectrpc */ = {
+			isa = PBXGroup;
+			children = (
+				B23B25B72AE08974001C64E0 /* eliza */,
+			);
+			path = connectrpc;
+			sourceTree = "<group>";
+		};
+		B23B25B72AE08974001C64E0 /* eliza */ = {
+			isa = PBXGroup;
+			children = (
+				B23B25B82AE08974001C64E0 /* v1 */,
+			);
+			path = eliza;
+			sourceTree = "<group>";
+		};
+		B23B25B82AE08974001C64E0 /* v1 */ = {
+			isa = PBXGroup;
+			children = (
+				B23B25B92AE08974001C64E0 /* eliza.pb.swift */,
+				B23B25BA2AE08974001C64E0 /* eliza.connect.swift */,
+			);
+			path = v1;
 			sourceTree = "<group>";
 		};
 		E9960EDDFFBFBB99D7DBA860 /* Pods */ = {
@@ -237,13 +261,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B23B25BB2AE08974001C64E0 /* eliza.pb.swift in Sources */,
 				B216FBFB29723F2A003AB294 /* MessagingViewModel.swift in Sources */,
 				B216FBFA29723F2A003AB294 /* MessagingView.swift in Sources */,
 				B216FBFC29723F2A003AB294 /* ElizaApp.swift in Sources */,
 				B216FBF929723F2A003AB294 /* Message.swift in Sources */,
+				B23B25BC2AE08974001C64E0 /* eliza.connect.swift in Sources */,
 				B216FBFD29723F2A003AB294 /* MenuView.swift in Sources */,
-				B216FBF729723F2A003AB294 /* eliza.pb.swift in Sources */,
-				B216FBF829723F2A003AB294 /* eliza.connect.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

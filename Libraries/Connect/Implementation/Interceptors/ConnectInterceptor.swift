@@ -28,149 +28,141 @@ struct ConnectInterceptor {
 
 extension ConnectInterceptor: Interceptor {
     func unaryFunction() -> UnaryFunction {
-        return UnaryFunction(
-            requestFunction: { request in
-                var headers = request.headers
-                headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
-                headers[HeaderConstants.acceptEncoding] = self.config.acceptCompressionPoolNames()
+        return UnaryFunction { request, proceed in
+            var headers = request.headers
+            headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
+            headers[HeaderConstants.acceptEncoding] = self.config.acceptCompressionPoolNames()
 
-                let requestBody = request.message ?? Data()
-                let finalRequestBody: Data
-                if let compression = self.config.requestCompression,
-                    compression.shouldCompress(requestBody)
-                {
-                    do {
-                        finalRequestBody = try compression.pool.compress(data: requestBody)
-                        headers[HeaderConstants.contentEncoding] = [compression.pool.name()]
-                    } catch {
-                        finalRequestBody = requestBody
-                    }
-                } else {
+            let requestBody = request.message ?? Data()
+            let finalRequestBody: Data
+            if let compression = self.config.requestCompression,
+               compression.shouldCompress(requestBody)
+            {
+                do {
+                    finalRequestBody = try compression.pool.compress(data: requestBody)
+                    headers[HeaderConstants.contentEncoding] = [compression.pool.name()]
+                } catch {
                     finalRequestBody = requestBody
                 }
+            } else {
+                finalRequestBody = requestBody
+            }
 
-                return HTTPRequest(
-                    url: request.url,
-                    contentType: request.contentType,
+            proceed(.success(HTTPRequest(
+                url: request.url,
+                contentType: request.contentType,
+                headers: headers,
+                message: finalRequestBody,
+                trailers: nil
+            )))
+        } responseFunction: { response, proceed in
+            let trailerPrefix = "trailer-"
+            let headers = response.headers.filter { header in
+                return header.key != HeaderConstants.contentEncoding
+                && !header.key.hasPrefix(trailerPrefix)
+            }
+            let trailers = response.headers
+                .filter { $0.key.hasPrefix(trailerPrefix) }
+                .reduce(into: Trailers(), { trailers, current in
+                    trailers[
+                        String(current.key.dropFirst(trailerPrefix.count))
+                    ] = current.value
+                })
+
+            if let encoding = response.headers[HeaderConstants.contentEncoding]?.first,
+               let compressionPool = self.config.responseCompressionPool(forName: encoding),
+               let message = response.message.flatMap({ data in
+                   return try? compressionPool.decompress(data: data)
+               })
+            {
+                proceed(HTTPResponse(
+                    code: response.code,
                     headers: headers,
-                    message: finalRequestBody,
-                    trailers: nil
-                )
-            },
-            responseFunction: { response in
-                let trailerPrefix = "trailer-"
-                let headers = response.headers.filter { header in
-                    return header.key != HeaderConstants.contentEncoding
-                        && !header.key.hasPrefix(trailerPrefix)
-                }
-                let trailers = response.headers
-                    .filter { $0.key.hasPrefix(trailerPrefix) }
-                    .reduce(into: Trailers(), { trailers, current in
-                        trailers[
-                            String(current.key.dropFirst(trailerPrefix.count))
-                        ] = current.value
-                    })
-
-                if let encoding = response.headers[HeaderConstants.contentEncoding]?.first,
-                   let compressionPool = self.config.responseCompressionPool(forName: encoding),
-                   let message = response.message.flatMap({ data in
-                       return try? compressionPool.decompress(data: data)
-                   })
-                {
-                    return HTTPResponse(
-                        code: response.code,
-                        headers: headers,
-                        message: message,
-                        trailers: trailers,
-                        error: response.error,
-                        tracingInfo: response.tracingInfo
-                    )
-                } else {
-                    return HTTPResponse(
-                        code: response.code,
-                        headers: headers,
-                        message: response.message,
-                        trailers: trailers,
-                        error: response.error,
-                        tracingInfo: response.tracingInfo
-                    )
-                }
-            },
-            responseMetricsFunction: { $0 }
-        )
+                    message: message,
+                    trailers: trailers,
+                    error: response.error,
+                    tracingInfo: response.tracingInfo
+                ))
+            } else {
+                proceed(HTTPResponse(
+                    code: response.code,
+                    headers: headers,
+                    message: response.message,
+                    trailers: trailers,
+                    error: response.error,
+                    tracingInfo: response.tracingInfo
+                ))
+            }
+        }
     }
 
     func streamFunction() -> StreamFunction {
         let responseHeaders = Locked<Headers?>(nil)
-        return StreamFunction(
-            requestFunction: { request in
-                var headers = request.headers
-                headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
-                headers[HeaderConstants.connectStreamingContentEncoding] = self.config
-                    .requestCompression.map { [$0.pool.name()] }
-                headers[HeaderConstants.connectStreamingAcceptEncoding] = self.config
-                    .acceptCompressionPoolNames()
-                return HTTPRequest(
-                    url: request.url,
-                    contentType: request.contentType,
-                    headers: headers,
-                    message: request.message,
-                    trailers: nil
-                )
-            },
-            requestDataFunction: { data in
-                return Envelope.packMessage(data, using: self.config.requestCompression)
-            },
-            streamResultFunction: { result in
-                switch result {
-                case .headers(let headers):
-                    responseHeaders.value = headers
-                    return result
+        return StreamFunction { request, proceed in
+            var headers = request.headers
+            headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
+            headers[HeaderConstants.connectStreamingContentEncoding] = self.config
+                .requestCompression.map { [$0.pool.name()] }
+            headers[HeaderConstants.connectStreamingAcceptEncoding] = self.config
+                .acceptCompressionPoolNames()
+            proceed(.success(HTTPRequest(
+                url: request.url,
+                contentType: request.contentType,
+                headers: headers,
+                message: request.message,
+                trailers: nil
+            )))
+        } requestDataFunction: { data, proceed in
+            proceed(Envelope.packMessage(data, using: self.config.requestCompression))
+        } streamResultFunction: { result, proceed in
+            switch result {
+            case .headers(let headers):
+                responseHeaders.value = headers
+                proceed(result)
 
-                case .message(let data):
-                    do {
-                        let responseCompressionPool = responseHeaders.value?[
-                            HeaderConstants.connectStreamingContentEncoding
-                        ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
-                        let (headerByte, message) = try Envelope.unpackMessage(
-                            data, compressionPool: responseCompressionPool
+            case .message(let data):
+                do {
+                    let responseCompressionPool = responseHeaders.value?[
+                        HeaderConstants.connectStreamingContentEncoding
+                    ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
+                    let (headerByte, message) = try Envelope.unpackMessage(
+                        data, compressionPool: responseCompressionPool
+                    )
+                    let isEndStream = 0b00000010 & headerByte != 0
+                    if isEndStream {
+                        // Expect a valid Connect end stream response, which can simply be {}.
+                        // https://connectrpc.com/docs/protocol#error-end-stream
+                        let response = try JSONDecoder().decode(
+                            ConnectEndStreamResponse.self, from: message
                         )
-                        let isEndStream = 0b00000010 & headerByte != 0
-                        if isEndStream {
-                            // Expect a valid Connect end stream response, which can simply be {}.
-                            // https://connectrpc.com/docs/protocol#error-end-stream
-                            let response = try JSONDecoder().decode(
-                                ConnectEndStreamResponse.self, from: message
-                            )
-                            return .complete(
-                                code: response.error?.code ?? .ok,
-                                error: response.error,
-                                trailers: response.metadata
-                            )
-                        } else {
-                            return .message(message)
-                        }
-                    } catch let error {
-                        // TODO: Close the stream here?
-                        return .complete(code: .unknown, error: error, trailers: nil)
-                    }
-
-                case .complete(let code, let error, let trailers):
-                    if code != .ok && error == nil {
-                        return .complete(
-                            code: code,
-                            error: ConnectError.from(
-                                code: code,
-                                headers: responseHeaders.value ?? [:],
-                                source: nil
-                            ),
-                            trailers: trailers
-                        )
+                        proceed(.complete(
+                            code: response.error?.code ?? .ok,
+                            error: response.error,
+                            trailers: response.metadata
+                        ))
                     } else {
-                        return result
+                        proceed(.message(message))
                     }
+                } catch let error {
+                    // TODO: Close the stream here?
+                    proceed(.complete(code: .unknown, error: error, trailers: nil))
+                }
+
+            case .complete(let code, let error, let trailers):
+                if code != .ok && error == nil {
+                    proceed(.complete(
+                        code: code,
+                        error: ConnectError.from(
+                            code: code,
+                            headers: responseHeaders.value ?? [:],
+                            source: nil
+                        ),
+                        trailers: trailers
+                    ))
+                } else {
+                    proceed(result)
                 }
             }
-        )
+        }
     }
 }
