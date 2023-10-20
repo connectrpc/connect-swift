@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-arm64-Readme.md#xcode
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_15.0.app
       - name: Build Connect library
         run: make buildpackage
@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-arm64-Readme.md#xcode
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_15.0.app
       - name: Build Eliza CocoaPods example
         run: |
@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-arm64-Readme.md#xcode
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_15.0.app
       - name: Build Eliza Swift PM example
         run: |
@@ -60,7 +60,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-arm64-Readme.md#xcode
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_15.0.app
       - name: Set up docker (missing on macOS GitHub runners)
         # https://github.com/actions/runner-images/issues/2150
