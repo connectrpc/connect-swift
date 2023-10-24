@@ -28,7 +28,7 @@ public struct ProtocolClientConfig: Sendable {
     /// response headers like `content-encoding`.
     public let responseCompressionPools: [CompressionPool]
     /// List of interceptors that should be invoked with requests/responses.
-    public let interceptors: [InterceptorInitializer]
+    public let interceptors: [Interceptor.Type]
 
     /// Configuration used to specify if/how requests should be compressed.
     public struct RequestCompression: Sendable {
@@ -53,7 +53,7 @@ public struct ProtocolClientConfig: Sendable {
         codec: Codec = JSONCodec(),
         requestCompression: RequestCompression? = nil,
         responseCompressionPools: [CompressionPool] = [GzipCompressionPool()],
-        interceptors: [InterceptorInitializer] = []
+        interceptors: [Interceptor.Type] = []
     ) {
         self.host = host
         self.networkProtocol = networkProtocol
@@ -63,9 +63,9 @@ public struct ProtocolClientConfig: Sendable {
 
         switch networkProtocol {
         case .connect:
-            self.interceptors = interceptors + [{ ConnectInterceptor(config: $0) }]
+            self.interceptors = interceptors + [ConnectInterceptor.self]
         case .grpcWeb:
-            self.interceptors = interceptors + [{ GRPCWebInterceptor(config: $0) }]
+            self.interceptors = interceptors + [GRPCWebInterceptor.self]
         case .custom(_, let protocolInterceptor):
             self.interceptors = interceptors + [protocolInterceptor]
         }
@@ -85,15 +85,27 @@ extension ProtocolClientConfig {
 // MARK: - Internal
 
 extension ProtocolClientConfig {
-    func createStreamInterceptorChain() -> InterceptorChain<StreamFunction> {
+    func createUnaryInterceptorChain() -> InterceptorChain<any UnaryInterceptor> {
         return .init(
-            self.interceptors.map { initialize in initialize(self).streamFunction() }
+            self.interceptors.compactMap { type in
+                if let unaryInterceptor = type.self as? UnaryInterceptor.Type {
+                    return unaryInterceptor.init(config: self)
+                } else {
+                    return nil
+                }
+            }
         )
     }
 
-    func createUnaryInterceptorChain() -> InterceptorChain<UnaryFunction> {
+    func createStreamInterceptorChain() -> InterceptorChain<any StreamInterceptor> {
         return .init(
-            self.interceptors.map { initialize in initialize(self).unaryFunction() }
+            self.interceptors.compactMap { type in
+                if let streamInterceptor = type.self as? StreamInterceptor.Type {
+                    return streamInterceptor.init(config: self)
+                } else {
+                    return nil
+                }
+            }
         )
     }
 }

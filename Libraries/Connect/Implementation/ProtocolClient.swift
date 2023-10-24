@@ -44,6 +44,13 @@ extension ProtocolClient: ProtocolClientInterface {
         headers: Headers,
         completion: @escaping @Sendable (ResponseMessage<Output>) -> Void
     ) -> Cancelable {
+        let interceptorChain = self.config.createUnaryInterceptorChain()
+        let request = interceptorChain.executeInterceptors(
+            interceptorChain.interceptors.map { $0.willSendMessage },
+            firstInFirstOut: true,
+            initial: request
+        )
+
         let codec = self.config.codec
         let data: Data
         do {
@@ -59,8 +66,7 @@ extension ProtocolClient: ProtocolClientInterface {
             return Cancelable {}
         }
 
-        let interceptorChain = self.config.createUnaryInterceptorChain()
-        let request = HTTPRequest(
+        let httpRequest = HTTPRequest(
             url: URL(string: path, relativeTo: URL(string: self.config.host))!,
             contentType: "application/\(codec.name())",
             headers: headers,
@@ -88,7 +94,11 @@ extension ProtocolClient: ProtocolClientInterface {
                     responseMessage = ResponseMessage(
                         code: response.code,
                         headers: response.headers,
-                        result: .success(try codec.deserialize(source: message)),
+                        result: .success(interceptorChain.executeInterceptors(
+                            interceptorChain.interceptors.map { $0.didReceiveMessage },
+                            firstInFirstOut: false,
+                            initial: try codec.deserialize(source: message)
+                        )),
                         trailers: response.trailers
                     )
                 } catch let error {
@@ -113,9 +123,9 @@ extension ProtocolClient: ProtocolClientInterface {
             completion(responseMessage)
         }
         interceptorChain.executeInterceptorsAndStopOnFailure(
-            \.requestFunction,
+            interceptorChain.interceptors.map { $0.handleUnaryRequest },
             firstInFirstOut: true,
-            initial: request,
+            initial: httpRequest,
             finish: { result in
                 cancelation.perform { cancelation in
                     if cancelation.isCancelled {
@@ -137,7 +147,7 @@ extension ProtocolClient: ProtocolClientInterface {
                         request: interceptedRequest,
                         onMetrics: { metrics in
                             interceptorChain.executeInterceptors(
-                                \.responseMetricsFunction,
+                                interceptorChain.interceptors.map { $0.handleUnaryResponseMetrics },
                                 firstInFirstOut: false,
                                 initial: metrics,
                                 finish: { _ in }
@@ -145,7 +155,7 @@ extension ProtocolClient: ProtocolClientInterface {
                         },
                         onResponse: { response in
                             interceptorChain.executeInterceptors(
-                                \.responseFunction,
+                                interceptorChain.interceptors.map { $0.handleUnaryResponse },
                                 firstInFirstOut: false,
                                 initial: response,
                                 finish: finishHandlingResponse
@@ -272,10 +282,21 @@ extension ProtocolClient: ProtocolClientInterface {
         let interceptorChain = self.config.createStreamInterceptorChain()
         let finishHandlingResult: @Sendable (StreamResult<Data>) -> Void = { result in
             do {
-                if case .complete = result {
+                switch result {
+                case .headers(let headers):
+                    onResult(.headers(headers))
+                case .message(let data):
+                    let message = interceptorChain.executeInterceptors(
+                        interceptorChain.interceptors.map { $0.didReceiveMessage },
+                        firstInFirstOut: false,
+                        initial: try codec.deserialize(source: data) as Output
+                    )
+                    onResult(.message(message))
+                case .complete(let code, let error, let trailers):
                     hasCompleted.value = true
+                    onResult(.complete(code: code, error: error, trailers: trailers))
                 }
-                onResult(try result.toTypedResult(using: codec))
+
             } catch let error {
                 os_log(
                     .error,
@@ -287,7 +308,7 @@ extension ProtocolClient: ProtocolClientInterface {
         let responseCallbacks = ResponseCallbacks(
             receiveResponseHeaders: { responseHeaders in
                 interceptorChain.executeInterceptors(
-                    \.streamResultFunction,
+                    interceptorChain.interceptors.map { $0.handleStreamResult },
                     firstInFirstOut: false,
                     initial: .headers(responseHeaders),
                     finish: finishHandlingResult
@@ -309,7 +330,7 @@ extension ProtocolClient: ProtocolClientInterface {
                         }
 
                         interceptorChain.executeInterceptors(
-                            \.streamResultFunction,
+                            interceptorChain.interceptors.map { $0.handleStreamResult },
                             firstInFirstOut: false,
                             initial: .message(responseBuffer.prefix(prefixedMessageLength)),
                             finish: finishHandlingResult
@@ -323,7 +344,7 @@ extension ProtocolClient: ProtocolClientInterface {
                     return
                 }
                 interceptorChain.executeInterceptors(
-                    \.streamResultFunction,
+                    interceptorChain.interceptors.map { $0.handleStreamResult },
                     firstInFirstOut: false,
                     initial: .complete(code: code, error: error, trailers: trailers),
                     finish: finishHandlingResult
@@ -340,7 +361,7 @@ extension ProtocolClient: ProtocolClientInterface {
             trailers: nil
         )
         interceptorChain.executeInterceptorsAndStopOnFailure(
-            \.requestFunction,
+            interceptorChain.interceptors.map { $0.handleStreamRequest },
             firstInFirstOut: true,
             initial: request,
             finish: { result in
@@ -358,9 +379,10 @@ extension ProtocolClient: ProtocolClientInterface {
         )
         return RequestCallbacks { requestData in
             // Wait for the stream to be established before sending data.
+            #warning("todo - pipe this through to interceptors with the typed message")
             pendingRequestCallbacks.enqueue { requestCallbacks in
                 interceptorChain.executeInterceptors(
-                    \.requestDataFunction,
+                    interceptorChain.interceptors.map { $0.handleStreamRequestData },
                     firstInFirstOut: true,
                     initial: requestData,
                     finish: requestCallbacks.sendData
@@ -370,19 +392,6 @@ extension ProtocolClient: ProtocolClientInterface {
             pendingRequestCallbacks.enqueue { requestCallbacks in
                 requestCallbacks.sendClose()
             }
-        }
-    }
-}
-
-private extension StreamResult<Data> {
-    func toTypedResult<M: ProtobufMessage>(using codec: Codec) throws -> StreamResult<M> {
-        switch self {
-        case .complete(let code, let error, let trailers):
-            return .complete(code: code, error: error, trailers: trailers)
-        case .headers(let headers):
-            return .headers(headers)
-        case .message(let data):
-            return .message(try codec.deserialize(source: data))
         }
     }
 }

@@ -21,6 +21,6 @@ extension NetworkProtocol {
     /// IMPORTANT: This protocol must be used in conjunction with an HTTP client that supports
     /// trailers, such as the `NIOHTTPClient` included in this library.
     public static var grpc: Self {
-        return .custom(name: "gRPC", protocolInterceptor: { GRPCInterceptor(config: $0) })
+        return .custom(name: "gRPC", protocolInterceptor: GRPCInterceptor.self)
     }
 }

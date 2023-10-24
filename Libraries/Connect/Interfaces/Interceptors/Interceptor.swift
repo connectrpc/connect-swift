@@ -15,9 +15,12 @@
 /// Interceptors are a powerful way to observe and mutate outbound and inbound
 /// headers, data, trailers, and errors both for unary APIs and streams.
 ///
+/// Additionally, interceptors may observe and mutate typed Protobuf messages before requests
+/// are serialized and sent, as well as after responses are deserialized and returned to the caller.
+///
 /// Each interceptor is instantiated **once per request or stream** and
-/// provides a set of closures that are invoked by the client during the lifecycle
-/// of that call. Each closure allows the interceptor to observe and store
+/// provides a set of functions that are invoked by the client during the lifecycle
+/// of that call. Each function allows the interceptor to observe and store
 /// state, as well as to mutate outbound or inbound content.
 ///
 /// Every interceptor has the opportunity to perform asynchronous work before passing a potentially
@@ -29,7 +32,7 @@
 /// interceptors in the chain will not be invoked, and the error will be returned to the
 /// original caller.
 ///
-/// Interceptors are closure-based and receive both the current value and a closure that
+/// Interceptors receive both the current value and a closure that
 /// should be called to resume the interceptor chain. Propagation will not continue until
 /// this closure is invoked. Additional values may still be passed to a given interceptor even
 /// though it has not yet continued the chain with a previous value. For example:
@@ -40,50 +43,27 @@
 ///    this value
 /// 4. The interceptor is expected to resume with headers first, and then with data after
 ///
-/// Implementations should be thread-safe (hence the `Sendable` requirement on interceptor
-/// closures), as closures can be invoked from different threads during the span of a request or
+/// Implementations should be thread-safe (hence the `Sendable` requirement), 
+/// as functions can be invoked from different threads during the span of a request or
 /// stream due to the asynchronous nature of other interceptors which may be present in the chain.
-///
-/// Interceptors can also be written using `async/await` by incorporating a `Task`. For example:
-///
-/// ```
-/// final class AsyncInterceptor: Interceptor, Sendable {
-///    func unaryFunction() -> UnaryFunction {
-///        return .init { request, proceed in
-///            Task {
-///                proceed(await self.handleRequest(request))
-///            }
-///        } responseFunction: { response, proceed in
-///            Task {
-///                proceed(await self.handleUnaryResponse(response))
-///            }
-///        } responseMetricsFunction: { metrics, proceed in
-///            Task {
-///                proceed(await self.handleUnaryResponseMetrics(metrics))
-///            }
-///        }
-///    }
-///
-///    func streamFunction() -> StreamFunction {...}
-/// }
-/// ```
-public protocol Interceptor {
-    /// Invoked when a unary request is started. Provides a set of closures that will be called
-    /// as the request progresses, allowing the interceptor to read/alter request/response data.
-    ///
-    /// - returns: A new set of closures which can be used to read/alter request/response data.
-    func unaryFunction() -> UnaryFunction
+public protocol Interceptor: AnyObject, Sendable {
+    init(config: ProtocolClientConfig)
 
-    /// Invoked when a stream is started. Provides a set of closures that will be called
-    /// as the stream progresses, allowing the interceptor to read/alter request/response data.
-    ///
-    /// NOTE: Some closures may be called multiple times as the stream progresses
-    /// (for example, as data chunks are sent/received over a bidirectional stream).
-    ///
-    /// A guarantee is provided that each data chunk will contain 1 full message
-    /// (for Connect and gRPC, this includes the prefix and message
-    /// length bytes, followed by the actual message data).
-    ///
-    /// - returns: A new set of closures which can be used to read/alter request/response data.
-    func streamFunction() -> StreamFunction
+    @Sendable
+    func willSendMessage<T: ProtobufMessage>(_ message: T) -> T
+
+    @Sendable
+    func didReceiveMessage<T: ProtobufMessage>(_ message: T) -> T
+}
+
+extension Interceptor {
+    @Sendable
+    public func willSendMessage<T: ProtobufMessage>(_ message: T) -> T {
+        return message
+    }
+
+    @Sendable
+    public func didReceiveMessage<T: ProtobufMessage>(_ message: T) -> T {
+        return message
+    }
 }
