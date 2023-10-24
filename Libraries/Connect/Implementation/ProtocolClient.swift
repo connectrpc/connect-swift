@@ -180,12 +180,9 @@ extension ProtocolClient: ProtocolClientInterface {
         headers: Headers,
         onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> any BidirectionalStreamInterface<Input> {
-        return BidirectionalStream(
-            requestCallbacks: self.createRequestCallbacks(
-                path: path, headers: headers, onResult: onResult
-            ),
-            codec: self.config.codec
-        )
+        return BidirectionalStream(requestCallbacks: self.createRequestCallbacks(
+            path: path, headers: headers, onResult: onResult
+        ))
     }
 
     public func clientOnlyStream<
@@ -195,12 +192,9 @@ extension ProtocolClient: ProtocolClientInterface {
         headers: Headers,
         onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> any ClientOnlyStreamInterface<Input> {
-        return BidirectionalStream(
-            requestCallbacks: self.createRequestCallbacks(
-                path: path, headers: headers, onResult: onResult
-            ),
-            codec: self.config.codec
-        )
+        return BidirectionalStream(requestCallbacks: self.createRequestCallbacks(
+            path: path, headers: headers, onResult: onResult
+        ))
     }
 
     public func serverOnlyStream<
@@ -213,8 +207,7 @@ extension ProtocolClient: ProtocolClientInterface {
         return ServerOnlyStream(bidirectionalStream: BidirectionalStream(
             requestCallbacks: self.createRequestCallbacks(
                 path: path, headers: headers, onResult: onResult
-            ),
-            codec: self.config.codec
+            )
         ))
     }
 
@@ -236,8 +229,8 @@ extension ProtocolClient: ProtocolClientInterface {
         path: String,
         headers: Headers
     ) -> any BidirectionalAsyncStreamInterface<Input, Output> {
-        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
-        let callbacks = self.createRequestCallbacks(
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
             path: path, headers: headers, onResult: { bidirectionalAsync.receive($0) }
         )
         return bidirectionalAsync.configureForSending(with: callbacks)
@@ -248,8 +241,8 @@ extension ProtocolClient: ProtocolClientInterface {
         path: String,
         headers: Headers
     ) -> any ClientOnlyAsyncStreamInterface<Input, Output> {
-        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
-        let callbacks = self.createRequestCallbacks(
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
             path: path, headers: headers, onResult: { bidirectionalAsync.receive($0) }
         )
         return bidirectionalAsync.configureForSending(with: callbacks)
@@ -260,8 +253,8 @@ extension ProtocolClient: ProtocolClientInterface {
         path: String,
         headers: Headers
     ) -> any ServerOnlyAsyncStreamInterface<Input, Output> {
-        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
-        let callbacks = self.createRequestCallbacks(
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
             path: path, headers: headers, onResult: { bidirectionalAsync.receive($0) }
         )
         return ServerOnlyAsyncStream(
@@ -271,11 +264,11 @@ extension ProtocolClient: ProtocolClientInterface {
 
     // MARK: - Private
 
-    private func createRequestCallbacks<Output: ProtobufMessage>(
+    private func createRequestCallbacks<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         headers: Headers,
         onResult: @escaping @Sendable (StreamResult<Output>) -> Void
-    ) -> RequestCallbacks {
+    ) -> RequestCallbacks<Input> {
         let codec = self.config.codec
         let responseBuffer = Locked(Data())
         let hasCompleted = Locked(false)
@@ -377,16 +370,28 @@ extension ProtocolClient: ProtocolClientInterface {
                 }
             }
         )
-        return RequestCallbacks { requestData in
+        return RequestCallbacks<Input> { requestMessage in
             // Wait for the stream to be established before sending data.
-            #warning("todo - pipe this through to interceptors with the typed message")
             pendingRequestCallbacks.enqueue { requestCallbacks in
-                interceptorChain.executeInterceptors(
-                    interceptorChain.interceptors.map { $0.handleStreamRequestData },
+                let interceptedMessage = interceptorChain.executeInterceptors(
+                    interceptorChain.interceptors.map { $0.willSendMessage },
                     firstInFirstOut: true,
-                    initial: requestData,
-                    finish: requestCallbacks.sendData
+                    initial: requestMessage
                 )
+                do {
+                    interceptorChain.executeInterceptors(
+                        interceptorChain.interceptors.map { $0.handleStreamRequestData },
+                        firstInFirstOut: true,
+                        initial: try codec.serialize(message: interceptedMessage),
+                        finish: requestCallbacks.sendData
+                    )
+                } catch let error {
+                    os_log(
+                        .error,
+                        "Failed to send request message which could not be serialized: %@",
+                        error.localizedDescription
+                    )
+                }
             }
         } sendClose: {
             pendingRequestCallbacks.enqueue { requestCallbacks in
@@ -398,10 +403,10 @@ extension ProtocolClient: ProtocolClientInterface {
 
 private final class PendingRequestCallbacks: @unchecked Sendable {
     private let lock = Lock()
-    private var callbacks: RequestCallbacks?
-    private var queue = [(RequestCallbacks) -> Void]()
+    private var callbacks: RequestCallbacks<Data>?
+    private var queue = [(RequestCallbacks<Data>) -> Void]()
 
-    func setCallbacks(_ callbacks: RequestCallbacks) {
+    func setCallbacks(_ callbacks: RequestCallbacks<Data>) {
         self.lock.perform {
             self.callbacks = callbacks
             for action in self.queue {
@@ -411,7 +416,7 @@ private final class PendingRequestCallbacks: @unchecked Sendable {
         }
     }
 
-    func enqueue(_ action: @escaping (RequestCallbacks) -> Void) {
+    func enqueue(_ action: @escaping (RequestCallbacks<Data>) -> Void) {
         self.lock.perform {
             if let callbacks = self.callbacks {
                 action(callbacks)

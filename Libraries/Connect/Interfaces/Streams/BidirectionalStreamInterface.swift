@@ -25,7 +25,7 @@ public protocol BidirectionalStreamInterface<Input> {
     ///
     /// - returns: An instance of this stream, for syntactic sugar.
     @discardableResult
-    func send(_ input: Input) throws -> Self
+    func send(_ input: Input) -> Self
 
     /// Close the stream. No calls to `send()` are valid after calling `close()`.
     func close()

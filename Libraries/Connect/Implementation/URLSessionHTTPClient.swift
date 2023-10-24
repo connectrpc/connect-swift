@@ -97,7 +97,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
 
     open func stream(
         request: HTTPRequest, responseCallbacks: ResponseCallbacks
-    ) -> RequestCallbacks {
+    ) -> RequestCallbacks<Data> {
         assert(!request.isGRPC, "URLSessionHTTPClient does not support gRPC, use NIOHTTPClient")
         let urlSessionStream = URLSessionStream(
             request: URLRequest(httpRequest: request),
