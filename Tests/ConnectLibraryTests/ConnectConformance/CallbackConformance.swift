@@ -84,7 +84,7 @@ final class CallbackConformance: XCTestCase {
     func testClientStreaming() throws {
         func createPayload(bytes: Int) -> Connectrpc_Conformance_V1_StreamingInputCallRequest {
             return .with { request in
-                request.payload = .with { $0.body = Data(Array(repeating: 1, count: bytes)) }
+                request.payload = .with { $0.body = Data(repeating: 1, count: bytes) }
             }
         }
 
@@ -151,6 +151,69 @@ final class CallbackConformance: XCTestCase {
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
             XCTAssertEqual(responseCount.value, 4)
+        }
+    }
+
+    @available(macOS 13, *) // Runtime support for parameterized protocol types requires macOS 13
+    func testPingPong() {
+        func createPayload(
+            requestSize: Int,
+            responseSize: Int32
+        ) -> Connectrpc_Conformance_V1_StreamingOutputCallRequest {
+            return .with { request in
+                request.payload = .with { $0.body = Data(repeating: 0, count: requestSize) }
+                request.responseParameters = [.with { $0.size = responseSize }]
+            }
+        }
+
+        self.executeTestWithClients { client in
+            let requests = Locked([
+                createPayload(requestSize: 250 * 1_024, responseSize: 500 * 1_024),
+                createPayload(requestSize: 8, responseSize: 16),
+                createPayload(requestSize: 1_024, responseSize: 2 * 1_024),
+                createPayload(requestSize: 32 * 1_024, responseSize: 64 * 1_024),
+            ])
+            let responseSizes = Locked([Int]())
+            let stream = Locked<(any BidirectionalStreamInterface<
+                Connectrpc_Conformance_V1_StreamingOutputCallRequest
+            >)?>(nil)
+
+            @Sendable
+            func sendNextOrClose() {
+                requests.perform { requests in
+                    if requests.isEmpty {
+                        stream.value?.close()
+                    } else {
+                        _ = try? stream.value?.send(requests.removeFirst())
+                    }
+                }
+            }
+
+            let expectation = self.expectation(description: "Stream completes")
+            stream.value = client.fullDuplexCall { result in
+                switch result {
+                case .headers:
+                    break
+
+                case .message(let output):
+                    responseSizes.perform { $0.append(output.payload.body.count) }
+                    sendNextOrClose()
+
+                case .complete(let code, let error, _):
+                    XCTAssertEqual(code, .ok)
+                    XCTAssertNil(error)
+                    expectation.fulfill()
+                }
+            }
+            sendNextOrClose()
+
+            XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
+            XCTAssertEqual(responseSizes.value, [
+                500 * 1_024,
+                16,
+                2 * 1_024,
+                64 * 1_024,
+            ])
         }
     }
 

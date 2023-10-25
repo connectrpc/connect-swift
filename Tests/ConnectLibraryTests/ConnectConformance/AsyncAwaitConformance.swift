@@ -78,7 +78,7 @@ final class AsyncAwaitConformance: XCTestCase {
     func testClientStreaming() async throws {
         func createPayload(bytes: Int) -> Connectrpc_Conformance_V1_StreamingInputCallRequest {
             return .with { request in
-                request.payload = .with { $0.body = Data(Array(repeating: 1, count: bytes)) }
+                request.payload = .with { $0.body = Data(repeating: 1, count: bytes) }
             }
         }
 
@@ -139,6 +139,56 @@ final class AsyncAwaitConformance: XCTestCase {
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
             XCTAssertEqual(responseCount, 4)
+        }
+    }
+
+    func testPingPong() async throws {
+        func createPayload(
+            requestSize: Int,
+            responseSize: Int32
+        ) -> Connectrpc_Conformance_V1_StreamingOutputCallRequest {
+            return .with { request in
+                request.payload = .with { $0.body = Data(repeating: 0, count: requestSize) }
+                request.responseParameters = [.with { $0.size = responseSize }]
+            }
+        }
+
+        try await self.executeTestWithClients { client in
+            var requests = [
+                createPayload(requestSize: 250 * 1_024, responseSize: 500 * 1_024),
+                createPayload(requestSize: 8, responseSize: 16),
+                createPayload(requestSize: 1_024, responseSize: 2 * 1_024),
+                createPayload(requestSize: 32 * 1_024, responseSize: 64 * 1_024),
+            ]
+            var responseSizes = [Int]()
+
+            let stream = client.fullDuplexCall()
+            _ = try stream.send(requests.removeFirst())
+            for await result in stream.results() {
+                switch result {
+                case .headers:
+                    continue
+
+                case .message(let output):
+                    responseSizes.append(output.payload.body.count)
+                    if requests.isEmpty {
+                        stream.close()
+                    } else {
+                        _ = try stream.send(requests.removeFirst())
+                    }
+
+                case .complete(let code, let error, _):
+                    XCTAssertEqual(code, .ok)
+                    XCTAssertNil(error)
+                }
+            }
+
+            XCTAssertEqual(responseSizes, [
+                500 * 1_024,
+                16,
+                2 * 1_024,
+                64 * 1_024,
+            ])
         }
     }
 
