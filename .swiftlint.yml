@@ -7,7 +7,6 @@ excluded:
   - Libraries/Connect/Implementation/Generated
   - Tests/ConnectLibraryTests/Generated
 disabled_rules:
-  - blanket_disable_command
   - cyclomatic_complexity
   - file_length
   - function_body_length
