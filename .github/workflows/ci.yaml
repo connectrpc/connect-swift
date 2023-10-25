@@ -9,42 +9,42 @@ permissions:
   contents: read
 jobs:
   build-connect-library:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_14.1.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#xcode
+        run: sudo xcode-select --switch /Applications/Xcode_15.0.app
       - name: Build Connect library
         run: make buildpackage
   build-eliza-cocoapods-example:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_14.1.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#xcode
+        run: sudo xcode-select --switch /Applications/Xcode_15.0.app
       - name: Build Eliza CocoaPods example
         run: |
           cd Examples/ElizaCocoaPodsApp
           pod install
           xcodebuild -workspace ElizaCocoaPodsApp.xcworkspace -scheme ElizaCocoaPodsApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
   build-eliza-swiftpm-example:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_14.1.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#xcode
+        run: sudo xcode-select --switch /Applications/Xcode_15.0.app
       - name: Build Eliza Swift PM example
         run: |
           cd Examples/ElizaSwiftPackageApp
           xcodebuild -scheme ElizaSwiftPackageApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
   build-plugin-and-generate:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
-      - uses: bufbuild/buf-setup-action@v1.27.0
+      - uses: bufbuild/buf-setup-action@v1.27.1
         with:
           github_token: ${{ github.token }}
       - name: Build plugins
@@ -56,16 +56,16 @@ jobs:
           git update-index --refresh --add --remove
           git diff-index --quiet HEAD --
   run-connect-tests:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_14.1.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#xcode
+        run: sudo xcode-select --switch /Applications/Xcode_15.0.app
       - name: Set up docker (missing on macOS GitHub runners)
         # https://github.com/actions/runner-images/issues/2150
         run: |
-          brew install docker
+          brew install docker colima
           colima start
       - name: Run tests
         run: make test
