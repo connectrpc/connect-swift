@@ -48,22 +48,4 @@
 /// stream due to the asynchronous nature of other interceptors which may be present in the chain.
 public protocol Interceptor: AnyObject, Sendable {
     init(config: ProtocolClientConfig)
-
-    @Sendable
-    func willSendMessage<T: ProtobufMessage>(_ message: T) -> T
-
-    @Sendable
-    func didReceiveMessage<T: ProtobufMessage>(_ message: T) -> T
-}
-
-extension Interceptor {
-    @Sendable
-    public func willSendMessage<T: ProtobufMessage>(_ message: T) -> T {
-        return message
-    }
-
-    @Sendable
-    public func didReceiveMessage<T: ProtobufMessage>(_ message: T) -> T {
-        return message
-    }
 }

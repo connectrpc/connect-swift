@@ -16,19 +16,43 @@ import Foundation
 
 public protocol StreamInterceptor: Interceptor {
     @Sendable
-    func handleStreamRequest(
-        _ request: HTTPRequest,
-        proceed: @escaping @Sendable (Result<HTTPRequest, ConnectError>) -> Void
+    func handleStreamStart(
+        _ request: HTTPRequest<Void>,
+        proceed: @escaping @Sendable (Result<HTTPRequest<Void>, ConnectError>) -> Void
     )
 
     @Sendable
-    func handleStreamRequestData(
-        _ data: Data,
+    func handleStreamInput(
+        _ input: ProtobufMessage,
+        proceed: @escaping @Sendable (ProtobufMessage) -> Void
+    )
+
+    @Sendable
+    func handleStreamRawInput(
+        _ input: Data,
         proceed: @escaping @Sendable (Data) -> Void
     )
 
     @Sendable
+    func handleStreamResponse(
+        _ response: HTTPResponse<Void>,
+        proceed: @escaping @Sendable (HTTPResponse<Void>) -> Void
+    )
+
+    @Sendable
+    func handleStreamResponseMetrics(
+        _ metrics: HTTPMetrics,
+        proceed: @escaping @Sendable (HTTPMetrics) -> Void
+    )
+
+    @Sendable
     func handleStreamResult(
+        _ result: StreamResult<ProtobufMessage>,
+        proceed: @escaping @Sendable (StreamResult<ProtobufMessage>) -> Void
+    )
+
+    @Sendable
+    func handleStreamRawResult(
         _ result: StreamResult<Data>,
         proceed: @escaping @Sendable (StreamResult<Data>) -> Void
     )
@@ -36,23 +60,55 @@ public protocol StreamInterceptor: Interceptor {
 
 extension StreamInterceptor {
     @Sendable
-    public func handleStreamRequest(
-        _ request: HTTPRequest,
-        proceed: @escaping @Sendable (Result<HTTPRequest, ConnectError>) -> Void
+    public func handleStreamStart(
+        _ request: HTTPRequest<Void>,
+        proceed: @escaping @Sendable (Result<HTTPRequest<Void>, ConnectError>) -> Void
     ) {
         proceed(.success(request))
     }
 
     @Sendable
-    public func handleStreamRequestData(
-        _ data: Data,
+    public func handleStreamInput(
+        _ input: ProtobufMessage,
+        proceed: @escaping @Sendable (ProtobufMessage) -> Void
+    ) {
+        proceed(input)
+    }
+
+    @Sendable
+    public func handleStreamRawInput(
+        _ input: Data,
         proceed: @escaping @Sendable (Data) -> Void
     ) {
-        proceed(data)
+        proceed(input)
+    }
+
+    @Sendable
+    public func handleStreamResponse(
+        _ response: HTTPResponse<Void>,
+        proceed: @escaping @Sendable (HTTPResponse<Void>) -> Void
+    ) {
+        proceed(response)
+    }
+
+    @Sendable
+    public func handleStreamResponseMetrics(
+        _ metrics: HTTPMetrics,
+        proceed: @escaping @Sendable (HTTPMetrics) -> Void
+    ) {
+        proceed(metrics)
     }
 
     @Sendable
     public func handleStreamResult(
+        _ result: StreamResult<ProtobufMessage>,
+        proceed: @escaping @Sendable (StreamResult<ProtobufMessage>) -> Void
+    ) {
+        proceed(result)
+    }
+
+    @Sendable
+    public func handleStreamRawResult(
         _ result: StreamResult<Data>,
         proceed: @escaping @Sendable (StreamResult<Data>) -> Void
     ) {

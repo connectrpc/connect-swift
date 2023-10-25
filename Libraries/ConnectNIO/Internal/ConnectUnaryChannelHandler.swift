@@ -21,9 +21,9 @@ import NIOHTTP1
 /// NIO-based channel handler for unary requests made through the Connect library.
 final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
     private let eventLoop: NIOCore.EventLoop
-    private let request: Connect.HTTPRequest
+    private let request: Connect.HTTPRequest<Data?>
     private let onMetrics: (Connect.HTTPMetrics) -> Void
-    private let onResponse: (Connect.HTTPResponse) -> Void
+    private let onResponse: (Connect.HTTPResponse<Data?>) -> Void
 
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
@@ -32,10 +32,10 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
     private var receivedEnd: NIOHTTP1.HTTPHeaders?
 
     init(
-        request: Connect.HTTPRequest,
+        request: Connect.HTTPRequest<Data?>,
         eventLoop: NIOCore.EventLoop,
         onMetrics: @escaping (Connect.HTTPMetrics) -> Void,
-        onResponse: @escaping (Connect.HTTPResponse) -> Void
+        onResponse: @escaping (Connect.HTTPResponse<Data?>) -> Void
     ) {
         self.request = request
         self.eventLoop = eventLoop
@@ -71,7 +71,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
         }
     }
 
-    private func createResponse(error: Swift.Error?) -> Connect.HTTPResponse {
+    private func createResponse(error: Swift.Error?) -> Connect.HTTPResponse<Data?> {
         return HTTPResponse(
             code: self.receivedHead.map { .fromNIOStatus($0.status) } ?? .unknown,
             headers: self.receivedHead.map { .fromNIOHeaders($0.headers) } ?? [:],
@@ -94,7 +94,6 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
         }
 
         var nioHeaders = NIOHTTP1.HTTPHeaders()
-        nioHeaders.add(name: "Content-Type", value: self.request.contentType)
         nioHeaders.add(name: "Content-Length", value: "\(self.request.message?.count ?? 0)")
         nioHeaders.add(name: "Host", value: self.request.url.host!)
         nioHeaders.addNIOHeadersFromConnect(self.request.headers)

@@ -14,24 +14,21 @@
 
 import Foundation
 
-/// HTTP request used for sending primitive data to the server.
-public struct HTTPRequest: Sendable {
+/// Request used for sending data to the server.
+public struct HTTPRequest<Input: Sendable>: Sendable {
     /// Target URL for the request.
     public let url: URL
-    /// Value to assign to the `content-type` header.
-    public let contentType: String
     /// Additional outbound headers for the request.
     public let headers: Headers
-    /// Body data to send with the request.
-    public let message: Data?
+    /// Data to send with the request.
+    public let message: Input
     /// Outbound trailers for the request.
     public let trailers: Trailers?
 
     public init(
-        url: URL, contentType: String, headers: Headers, message: Data?, trailers: Trailers?
+        url: URL, headers: Headers, message: Input, trailers: Trailers?
     ) {
         self.url = url
-        self.contentType = contentType
         self.headers = headers
         self.message = message
         self.trailers = trailers

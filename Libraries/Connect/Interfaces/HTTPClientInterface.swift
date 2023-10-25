@@ -26,9 +26,9 @@ public protocol HTTPClientInterface: Sendable {
     /// - returns: A type which can be used to cancel the outbound request.
     @discardableResult
     func unary(
-        request: HTTPRequest,
+        request: HTTPRequest<Data?>,
         onMetrics: @escaping @Sendable (HTTPMetrics) -> Void,
-        onResponse: @escaping @Sendable (HTTPResponse) -> Void
+        onResponse: @escaping @Sendable (HTTPResponse<Data?>) -> Void
     ) -> Cancelable
 
     /// Initialize a new HTTP stream.
@@ -39,7 +39,7 @@ public protocol HTTPClientInterface: Sendable {
     ///
     /// - returns: Set of callbacks which can be called to send data over the stream or to close it.
     func stream(
-        request: HTTPRequest,
+        request: HTTPRequest<Data?>,
         responseCallbacks: ResponseCallbacks
     ) -> RequestCallbacks<Data>
 }

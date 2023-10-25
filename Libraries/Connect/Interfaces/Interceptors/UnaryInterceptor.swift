@@ -12,17 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import Foundation
+
 public protocol UnaryInterceptor: Interceptor {
     @Sendable
     func handleUnaryRequest(
-        _ request: HTTPRequest,
-        proceed: @escaping @Sendable (Result<HTTPRequest, ConnectError>) -> Void
+        _ request: HTTPRequest<ProtobufMessage>,
+        proceed: @escaping @Sendable (Result<HTTPRequest<ProtobufMessage>, ConnectError>) -> Void
+    )
+
+    @Sendable
+    func handleUnaryRawRequest(
+        _ request: HTTPRequest<Data?>,
+        proceed: @escaping @Sendable (Result<HTTPRequest<Data?>, ConnectError>) -> Void
     )
 
     @Sendable
     func handleUnaryResponse(
-        _ response: HTTPResponse,
-        proceed: @escaping @Sendable (HTTPResponse) -> Void
+        _ response: HTTPResponse<ProtobufMessage>,
+        proceed: @escaping @Sendable (HTTPResponse<ProtobufMessage>) -> Void
+    )
+
+    @Sendable
+    func handleUnaryRawResponse(
+        _ response: HTTPResponse<Data?>,
+        proceed: @escaping @Sendable (HTTPResponse<Data?>) -> Void
     )
 
     @Sendable
@@ -35,16 +49,32 @@ public protocol UnaryInterceptor: Interceptor {
 extension UnaryInterceptor {
     @Sendable
     public func handleUnaryRequest(
-        _ request: HTTPRequest,
-        proceed: @escaping @Sendable (Result<HTTPRequest, ConnectError>) -> Void
+        _ request: HTTPRequest<ProtobufMessage>,
+        proceed: @escaping @Sendable (Result<HTTPRequest<ProtobufMessage>, ConnectError>) -> Void
+    ) {
+        proceed(.success(request))
+    }
+
+    @Sendable
+    public func handleUnaryRawRequest(
+        _ request: HTTPRequest<Data?>,
+        proceed: @escaping @Sendable (Result<HTTPRequest<Data?>, ConnectError>) -> Void
     ) {
         proceed(.success(request))
     }
 
     @Sendable
     public func handleUnaryResponse(
-        _ response: HTTPResponse,
-        proceed: @escaping @Sendable (HTTPResponse) -> Void
+        _ response: HTTPResponse<ProtobufMessage>,
+        proceed: @escaping @Sendable (HTTPResponse<ProtobufMessage>) -> Void
+    ) {
+        proceed(response)
+    }
+
+    @Sendable
+    public func handleUnaryRawResponse(
+        _ response: HTTPResponse<Data?>,
+        proceed: @escaping @Sendable (HTTPResponse<Data?>) -> Void
     ) {
         proceed(response)
     }

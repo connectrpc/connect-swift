@@ -45,9 +45,9 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
 
     @discardableResult
     open func unary(
-        request: HTTPRequest,
+        request: HTTPRequest<Data?>,
         onMetrics: @escaping @Sendable (HTTPMetrics) -> Void,
-        onResponse: @escaping @Sendable (HTTPResponse) -> Void
+        onResponse: @escaping @Sendable (HTTPResponse<Data?>) -> Void
     ) -> Cancelable {
         assert(!request.isGRPC, "URLSessionHTTPClient does not support gRPC, use NIOHTTPClient")
         let urlRequest = URLRequest(httpRequest: request)
@@ -96,7 +96,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
     }
 
     open func stream(
-        request: HTTPRequest, responseCallbacks: ResponseCallbacks
+        request: HTTPRequest<Data?>, responseCallbacks: ResponseCallbacks
     ) -> RequestCallbacks<Data> {
         assert(!request.isGRPC, "URLSessionHTTPClient does not support gRPC, use NIOHTTPClient")
         let urlSessionStream = URLSessionStream(
@@ -221,11 +221,10 @@ private extension HTTPRequest {
 }
 
 private extension URLRequest {
-    init(httpRequest: HTTPRequest) {
+    init(httpRequest: HTTPRequest<Data?>) {
         self.init(url: httpRequest.url)
         self.httpMethod = "POST"
         self.httpBody = httpRequest.message
-        self.setValue(httpRequest.contentType, forHTTPHeaderField: HeaderConstants.contentType)
         for (headerName, headerValues) in httpRequest.headers {
             self.setValue(headerValues.joined(separator: ","), forHTTPHeaderField: headerName)
         }

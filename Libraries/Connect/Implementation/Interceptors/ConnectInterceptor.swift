@@ -28,9 +28,9 @@ final class ConnectInterceptor: Interceptor {
 }
 
 extension ConnectInterceptor: UnaryInterceptor {
-    func handleUnaryRequest(
-        _ request: HTTPRequest,
-        proceed: @escaping (Result<HTTPRequest, ConnectError>) -> Void
+    func handleUnaryRawRequest(
+        _ request: HTTPRequest<Data?>,
+        proceed: @escaping (Result<HTTPRequest<Data?>, ConnectError>) -> Void
     ) {
         var headers = request.headers
         headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
@@ -53,14 +53,16 @@ extension ConnectInterceptor: UnaryInterceptor {
 
         proceed(.success(HTTPRequest(
             url: request.url,
-            contentType: request.contentType,
             headers: headers,
             message: finalRequestBody,
             trailers: nil
         )))
     }
 
-    func handleUnaryResponse(_ response: HTTPResponse, proceed: @escaping (HTTPResponse) -> Void) {
+    func handleUnaryRawResponse(
+        _ response: HTTPResponse<Data?>,
+        proceed: @escaping (HTTPResponse<Data?>) -> Void
+    ) {
         let trailerPrefix = "trailer-"
         let headers = response.headers.filter { header in
             return header.key != HeaderConstants.contentEncoding
@@ -100,9 +102,9 @@ extension ConnectInterceptor: UnaryInterceptor {
 }
 
 extension ConnectInterceptor: StreamInterceptor {
-    func handleStreamRequest(
-        _ request: HTTPRequest,
-        proceed: @escaping (Result<HTTPRequest, ConnectError>) -> Void
+    func handleStreamStart(
+        _ request: HTTPRequest<Void>,
+        proceed: @escaping (Result<HTTPRequest<Void>, ConnectError>) -> Void
     ) {
         var headers = request.headers
         headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
@@ -112,18 +114,17 @@ extension ConnectInterceptor: StreamInterceptor {
             .acceptCompressionPoolNames()
         proceed(.success(HTTPRequest(
             url: request.url,
-            contentType: request.contentType,
             headers: headers,
             message: request.message,
             trailers: nil
         )))
     }
 
-    func handleStreamRequestData(_ data: Data, proceed: @escaping (Data) -> Void) {
-        proceed(Envelope.packMessage(data, using: self.config.requestCompression))
+    func handleStreamRawInput(_ input: Data, proceed: @escaping (Data) -> Void) {
+        proceed(Envelope.packMessage(input, using: self.config.requestCompression))
     }
 
-    func handleStreamResult(
+    func handleStreamRawResult(
         _ result: StreamResult<Data>,
         proceed: @escaping (StreamResult<Data>) -> Void
     ) {

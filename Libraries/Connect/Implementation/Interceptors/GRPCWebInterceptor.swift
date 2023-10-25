@@ -26,9 +26,9 @@ final class GRPCWebInterceptor: Interceptor {
 }
 
 extension GRPCWebInterceptor: UnaryInterceptor {
-    func handleUnaryRequest(
-        _ request: HTTPRequest,
-        proceed: @escaping (Result<HTTPRequest, ConnectError>) -> Void
+    func handleUnaryRawRequest(
+        _ request: HTTPRequest<Data?>,
+        proceed: @escaping (Result<HTTPRequest<Data?>, ConnectError>) -> Void
     ) {
         // gRPC-Web unary payloads are enveloped.
         let envelopedRequestBody = Envelope.packMessage(
@@ -36,15 +36,16 @@ extension GRPCWebInterceptor: UnaryInterceptor {
         )
         proceed(.success(HTTPRequest(
             url: request.url,
-            // Override the content type to be gRPC Web.
-            contentType: "application/grpc-web+\(self.config.codec.name())",
             headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: true),
             message: envelopedRequestBody,
             trailers: nil
         )))
     }
 
-    func handleUnaryResponse(_ response: HTTPResponse, proceed: @escaping (HTTPResponse) -> Void) {
+    func handleUnaryRawResponse(
+        _ response: HTTPResponse<Data?>,
+        proceed: @escaping (HTTPResponse<Data?>) -> Void
+    ) {
         guard response.code == .ok else {
             // Invalid gRPC-Web response - expects HTTP 200. Potentially a network error.
             proceed(response)
@@ -113,25 +114,23 @@ extension GRPCWebInterceptor: UnaryInterceptor {
 }
 
 extension GRPCWebInterceptor: StreamInterceptor {
-    func handleStreamRequest(
-        _ request: HTTPRequest,
-        proceed: @escaping (Result<HTTPRequest, ConnectError>) -> Void
+    func handleStreamStart(
+        _ request: HTTPRequest<Void>,
+        proceed: @escaping (Result<HTTPRequest<Void>, ConnectError>) -> Void
     ) {
         proceed(.success(HTTPRequest(
             url: request.url,
-            // Override the content type to be gRPC Web.
-            contentType: "application/grpc-web+\(self.config.codec.name())",
             headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: true),
             message: request.message,
             trailers: nil
         )))
     }
 
-    func handleStreamRequestData(_ data: Data, proceed: @escaping (Data) -> Void) {
-        proceed(Envelope.packMessage(data, using: self.config.requestCompression))
+    func handleStreamRawInput(_ input: Data, proceed: @escaping (Data) -> Void) {
+        proceed(Envelope.packMessage(input, using: self.config.requestCompression))
     }
 
-    func handleStreamResult(
+    func handleStreamRawResult(
         _ result: StreamResult<Data>,
         proceed: @escaping (StreamResult<Data>) -> Void
     ) {
@@ -215,7 +214,7 @@ private extension Trailers {
     }
 }
 
-private extension HTTPResponse {
+private extension HTTPResponse<Data?> {
     func withHandledGRPCWebTrailers(_ trailers: Trailers, message: Data?) -> Self {
         let grpcStatus = trailers.grpcStatus() ?? .unknown
         if grpcStatus == .ok {
