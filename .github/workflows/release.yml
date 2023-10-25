@@ -8,10 +8,10 @@ permissions:
   contents: write
 jobs:
   release:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
-      - uses: bufbuild/buf-setup-action@v1.27.0
+      - uses: bufbuild/buf-setup-action@v1.27.1
         with:
           github_token: ${{ github.token }}
       - name: Build plugins
