@@ -43,7 +43,7 @@
 ///    this value
 /// 4. The interceptor is expected to resume with headers first, and then with data after
 ///
-/// Implementations should be thread-safe (hence the `Sendable` requirement), 
+/// Implementations should be thread-safe (hence the `Sendable` requirement),
 /// as functions can be invoked from different threads during the span of a request or
 /// stream due to the asynchronous nature of other interceptors which may be present in the chain.
 public protocol Interceptor: AnyObject, Sendable {
