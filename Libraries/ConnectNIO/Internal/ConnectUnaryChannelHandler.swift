@@ -23,7 +23,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
     private let eventLoop: NIOCore.EventLoop
     private let request: Connect.HTTPRequest<Data?>
     private let onMetrics: (Connect.HTTPMetrics) -> Void
-    private let onResponse: (Connect.HTTPResponse<Data?>) -> Void
+    private let onResponse: (Connect.HTTPResponse) -> Void
 
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
@@ -35,7 +35,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
         request: Connect.HTTPRequest<Data?>,
         eventLoop: NIOCore.EventLoop,
         onMetrics: @escaping (Connect.HTTPMetrics) -> Void,
-        onResponse: @escaping (Connect.HTTPResponse<Data?>) -> Void
+        onResponse: @escaping (Connect.HTTPResponse) -> Void
     ) {
         self.request = request
         self.eventLoop = eventLoop
@@ -71,7 +71,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
         }
     }
 
-    private func createResponse(error: Swift.Error?) -> Connect.HTTPResponse<Data?> {
+    private func createResponse(error: Swift.Error?) -> Connect.HTTPResponse {
         return HTTPResponse(
             code: self.receivedHead.map { .fromNIOStatus($0.status) } ?? .unknown,
             headers: self.receivedHead.map { .fromNIOHeaders($0.headers) } ?? [:],

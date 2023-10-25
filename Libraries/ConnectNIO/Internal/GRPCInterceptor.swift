@@ -45,8 +45,8 @@ extension GRPCInterceptor: UnaryInterceptor {
     }
 
     func handleUnaryRawResponse(
-        _ response: HTTPResponse<Data?>,
-        proceed: @escaping (HTTPResponse<Data?>) -> Void
+        _ response: HTTPResponse,
+        proceed: @escaping (HTTPResponse) -> Void
     ) {
         guard response.code == .ok else {
             // Invalid gRPC response - expects HTTP 200. Potentially a network error.

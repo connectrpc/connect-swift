@@ -21,26 +21,6 @@ final class InterceptorChain<T: Sendable>: Sendable {
         self.interceptors = interceptors
     }
 
-    /// <#executeInterceptors(_:firstInFirstOut:initial:)#>
-    ///
-    /// - parameter functions: <#[@Sendable (Value) -> Value]#>
-    /// - parameter firstInFirstOut: <#Bool#>
-    /// - parameter initial: <#Value#>
-    ///
-    /// - returns: <#Value#>
-    func executeInterceptors<Value>(
-        _ functions: [@Sendable (Value) -> Value],
-        firstInFirstOut: Bool,
-        initial: Value
-    ) -> Value {
-        let functions = firstInFirstOut ? functions.reversed() : functions
-        var value = initial
-        for function in functions {
-            value = function(value)
-        }
-        return value
-    }
-
     /// Invoke each of the interceptors, waiting for a given interceptor to complete before passing
     /// the resulting value to the next interceptor and finally invoking `finish` with the final
     /// value.
@@ -63,6 +43,30 @@ final class InterceptorChain<T: Sendable>: Sendable {
             next = { [next] interceptedValue in function(interceptedValue, next) }
         }
         next(initial)
+    }
+
+    func executeLinkedInterceptors<Value1, Value2>(
+        _ value1Functions: [@Sendable (Value1, @escaping @Sendable (Value1) -> Void) -> Void],
+        firstInFirstOut: Bool,
+        initial: Value1,
+        transform: @escaping @Sendable (Value1, @escaping @Sendable (Value2) -> Void) -> Void,
+        then value2Functions: [@Sendable (Value2, @escaping @Sendable (Value2) -> Void) -> Void],
+        finish: @escaping @Sendable (Value2) -> Void
+    ) {
+        self.executeInterceptors(
+            value1Functions,
+            firstInFirstOut: firstInFirstOut,
+            initial: initial
+        ) { interceptedValue in
+            transform(interceptedValue) { transformedValue in
+                self.executeInterceptors(
+                    value2Functions,
+                    firstInFirstOut: firstInFirstOut,
+                    initial: transformedValue,
+                    finish: finish
+                )
+            }
+        }
     }
 
     /// Invoke each of the interceptors, waiting for a given interceptor to complete before passing
@@ -100,5 +104,45 @@ final class InterceptorChain<T: Sendable>: Sendable {
             }
         }
         next(.success(initial))
+    }
+
+    func executeLinkedInterceptorsAndStopOnFailure<Value1, Value2>(
+        _ value1Functions: [
+            @Sendable (Value1, @escaping @Sendable (Result<Value1, ConnectError>) -> Void) -> Void
+        ],
+        firstInFirstOut: Bool,
+        initial: Value1,
+        transform: @escaping @Sendable (
+            Value1, @escaping @Sendable (Result<Value2, ConnectError>) -> Void
+        ) -> Void,
+        then value2Functions: [
+            @Sendable (Value2, @escaping @Sendable (Result<Value2, ConnectError>) -> Void) -> Void
+        ],
+        finish: @escaping @Sendable (Result<Value2, ConnectError>) -> Void
+    ) {
+        self.executeInterceptorsAndStopOnFailure(
+            value1Functions,
+            firstInFirstOut: firstInFirstOut,
+            initial: initial
+        ) { interceptedResult in
+            switch interceptedResult {
+            case .success(let interceptedValue):
+                transform(interceptedValue) { transformedResult in
+                    switch transformedResult {
+                    case .success(let transformedValue):
+                        self.executeInterceptorsAndStopOnFailure(
+                            value2Functions,
+                            firstInFirstOut: firstInFirstOut,
+                            initial: transformedValue,
+                            finish: finish
+                        )
+                    case .failure(let error):
+                        finish(.failure(error))
+                    }
+                }
+            case .failure(let error):
+                finish(.failure(error))
+            }
+        }
     }
 }

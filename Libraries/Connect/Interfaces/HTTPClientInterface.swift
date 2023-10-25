@@ -28,7 +28,7 @@ public protocol HTTPClientInterface: Sendable {
     func unary(
         request: HTTPRequest<Data?>,
         onMetrics: @escaping @Sendable (HTTPMetrics) -> Void,
-        onResponse: @escaping @Sendable (HTTPResponse<Data?>) -> Void
+        onResponse: @escaping @Sendable (HTTPResponse) -> Void
     ) -> Cancelable
 
     /// Initialize a new HTTP stream.

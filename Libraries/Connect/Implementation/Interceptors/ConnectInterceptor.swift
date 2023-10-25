@@ -60,8 +60,8 @@ extension ConnectInterceptor: UnaryInterceptor {
     }
 
     func handleUnaryRawResponse(
-        _ response: HTTPResponse<Data?>,
-        proceed: @escaping (HTTPResponse<Data?>) -> Void
+        _ response: HTTPResponse,
+        proceed: @escaping (HTTPResponse) -> Void
     ) {
         let trailerPrefix = "trailer-"
         let headers = response.headers.filter { header in

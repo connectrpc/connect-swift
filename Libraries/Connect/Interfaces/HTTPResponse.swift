@@ -15,14 +15,14 @@
 import Foundation
 
 /// Unary HTTP response received from the server.
-public struct HTTPResponse<Output: Sendable>: Sendable {
+public struct HTTPResponse: Sendable {
     /// The status code of the response.
     /// See https://connectrpc.com/docs/protocol/#error-codes for more info.
     public let code: Code
     /// Response headers specified by the server.
     public let headers: Headers
-    /// Data provided by the server.
-    public let message: Output
+    /// Body data provided by the server.
+    public let message: Data?
     /// Trailers provided by the server.
     public let trailers: Trailers
     /// The accompanying error, if the request failed.
@@ -43,7 +43,7 @@ public struct HTTPResponse<Output: Sendable>: Sendable {
     }
 
     public init(
-        code: Code, headers: Headers, message: Output,
+        code: Code, headers: Headers, message: Data?,
         trailers: Trailers, error: Swift.Error?, tracingInfo: TracingInfo?
     ) {
         self.code = code

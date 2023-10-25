@@ -47,7 +47,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
     open func unary(
         request: HTTPRequest<Data?>,
         onMetrics: @escaping @Sendable (HTTPMetrics) -> Void,
-        onResponse: @escaping @Sendable (HTTPResponse<Data?>) -> Void
+        onResponse: @escaping @Sendable (HTTPResponse) -> Void
     ) -> Cancelable {
         assert(!request.isGRPC, "URLSessionHTTPClient does not support gRPC, use NIOHTTPClient")
         let urlRequest = URLRequest(httpRequest: request)

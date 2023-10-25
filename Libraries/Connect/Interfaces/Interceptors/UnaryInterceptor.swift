@@ -16,9 +16,9 @@ import Foundation
 
 public protocol UnaryInterceptor: Interceptor {
     @Sendable
-    func handleUnaryRequest(
-        _ request: HTTPRequest<ProtobufMessage>,
-        proceed: @escaping @Sendable (Result<HTTPRequest<ProtobufMessage>, ConnectError>) -> Void
+    func handleUnaryRequest<Message: ProtobufMessage>(
+        _ request: HTTPRequest<Message>,
+        proceed: @escaping @Sendable (Result<HTTPRequest<Message>, ConnectError>) -> Void
     )
 
     @Sendable
@@ -28,15 +28,15 @@ public protocol UnaryInterceptor: Interceptor {
     )
 
     @Sendable
-    func handleUnaryResponse(
-        _ response: HTTPResponse<ProtobufMessage>,
-        proceed: @escaping @Sendable (HTTPResponse<ProtobufMessage>) -> Void
+    func handleUnaryResponse<Message: ProtobufMessage>(
+        _ response: ResponseMessage<Message>,
+        proceed: @escaping @Sendable (ResponseMessage<Message>) -> Void
     )
 
     @Sendable
     func handleUnaryRawResponse(
-        _ response: HTTPResponse<Data?>,
-        proceed: @escaping @Sendable (HTTPResponse<Data?>) -> Void
+        _ response: HTTPResponse,
+        proceed: @escaping @Sendable (HTTPResponse) -> Void
     )
 
     @Sendable
@@ -48,9 +48,9 @@ public protocol UnaryInterceptor: Interceptor {
 
 extension UnaryInterceptor {
     @Sendable
-    public func handleUnaryRequest(
-        _ request: HTTPRequest<ProtobufMessage>,
-        proceed: @escaping @Sendable (Result<HTTPRequest<ProtobufMessage>, ConnectError>) -> Void
+    public func handleUnaryRequest<Message: ProtobufMessage>(
+        _ request: HTTPRequest<Message>,
+        proceed: @escaping @Sendable (Result<HTTPRequest<Message>, ConnectError>) -> Void
     ) {
         proceed(.success(request))
     }
@@ -64,17 +64,17 @@ extension UnaryInterceptor {
     }
 
     @Sendable
-    public func handleUnaryResponse(
-        _ response: HTTPResponse<ProtobufMessage>,
-        proceed: @escaping @Sendable (HTTPResponse<ProtobufMessage>) -> Void
+    public func handleUnaryResponse<Message: ProtobufMessage>(
+        _ response: ResponseMessage<Message>,
+        proceed: @escaping @Sendable (ResponseMessage<Message>) -> Void
     ) {
         proceed(response)
     }
 
     @Sendable
     public func handleUnaryRawResponse(
-        _ response: HTTPResponse<Data?>,
-        proceed: @escaping @Sendable (HTTPResponse<Data?>) -> Void
+        _ response: HTTPResponse,
+        proceed: @escaping @Sendable (HTTPResponse) -> Void
     ) {
         proceed(response)
     }

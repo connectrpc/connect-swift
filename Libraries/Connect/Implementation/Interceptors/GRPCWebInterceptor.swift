@@ -43,8 +43,8 @@ extension GRPCWebInterceptor: UnaryInterceptor {
     }
 
     func handleUnaryRawResponse(
-        _ response: HTTPResponse<Data?>,
-        proceed: @escaping (HTTPResponse<Data?>) -> Void
+        _ response: HTTPResponse,
+        proceed: @escaping (HTTPResponse) -> Void
     ) {
         guard response.code == .ok else {
             // Invalid gRPC-Web response - expects HTTP 200. Potentially a network error.
@@ -214,7 +214,7 @@ private extension Trailers {
     }
 }
 
-private extension HTTPResponse<Data?> {
+private extension HTTPResponse {
     func withHandledGRPCWebTrailers(_ trailers: Trailers, message: Data?) -> Self {
         let grpcStatus = trailers.grpcStatus() ?? .unknown
         if grpcStatus == .ok {

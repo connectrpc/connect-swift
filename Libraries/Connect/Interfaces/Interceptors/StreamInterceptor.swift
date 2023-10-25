@@ -22,9 +22,9 @@ public protocol StreamInterceptor: Interceptor {
     )
 
     @Sendable
-    func handleStreamInput(
-        _ input: ProtobufMessage,
-        proceed: @escaping @Sendable (ProtobufMessage) -> Void
+    func handleStreamInput<Message: ProtobufMessage>(
+        _ input: Message,
+        proceed: @escaping @Sendable (Message) -> Void
     )
 
     @Sendable
@@ -34,21 +34,9 @@ public protocol StreamInterceptor: Interceptor {
     )
 
     @Sendable
-    func handleStreamResponse(
-        _ response: HTTPResponse<Void>,
-        proceed: @escaping @Sendable (HTTPResponse<Void>) -> Void
-    )
-
-    @Sendable
-    func handleStreamResponseMetrics(
-        _ metrics: HTTPMetrics,
-        proceed: @escaping @Sendable (HTTPMetrics) -> Void
-    )
-
-    @Sendable
-    func handleStreamResult(
-        _ result: StreamResult<ProtobufMessage>,
-        proceed: @escaping @Sendable (StreamResult<ProtobufMessage>) -> Void
+    func handleStreamResult<Message: ProtobufMessage>(
+        _ result: StreamResult<Message>,
+        proceed: @escaping @Sendable (StreamResult<Message>) -> Void
     )
 
     @Sendable
@@ -68,9 +56,9 @@ extension StreamInterceptor {
     }
 
     @Sendable
-    public func handleStreamInput(
-        _ input: ProtobufMessage,
-        proceed: @escaping @Sendable (ProtobufMessage) -> Void
+    public func handleStreamInput<Message: ProtobufMessage>(
+        _ input: Message,
+        proceed: @escaping @Sendable (Message) -> Void
     ) {
         proceed(input)
     }
@@ -84,25 +72,9 @@ extension StreamInterceptor {
     }
 
     @Sendable
-    public func handleStreamResponse(
-        _ response: HTTPResponse<Void>,
-        proceed: @escaping @Sendable (HTTPResponse<Void>) -> Void
-    ) {
-        proceed(response)
-    }
-
-    @Sendable
-    public func handleStreamResponseMetrics(
-        _ metrics: HTTPMetrics,
-        proceed: @escaping @Sendable (HTTPMetrics) -> Void
-    ) {
-        proceed(metrics)
-    }
-
-    @Sendable
-    public func handleStreamResult(
-        _ result: StreamResult<ProtobufMessage>,
-        proceed: @escaping @Sendable (StreamResult<ProtobufMessage>) -> Void
+    public func handleStreamResult<Message: ProtobufMessage>(
+        _ result: StreamResult<Message>,
+        proceed: @escaping @Sendable (StreamResult<Message>) -> Void
     ) {
         proceed(result)
     }
