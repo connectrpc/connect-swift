@@ -44,7 +44,7 @@ open class MockServerOnlyStream<
         self.outputs = outputs
     }
 
-    open func send(_ input: Input) throws {
+    open func send(_ input: Input) {
         self.inputs.append(input)
         self.onSend?(input)
     }

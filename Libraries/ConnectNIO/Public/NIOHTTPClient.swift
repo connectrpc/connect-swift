@@ -119,7 +119,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     // MARK: - HTTPClientInterface
 
     open func unary(
-        request: Connect.HTTPRequest,
+        request: Connect.HTTPRequest<Data?>,
         onMetrics: @escaping @Sendable (Connect.HTTPMetrics) -> Void,
         onResponse: @escaping @Sendable (Connect.HTTPResponse) -> Void
     ) -> Connect.Cancelable {
@@ -150,9 +150,9 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     }
 
     open func stream(
-        request: Connect.HTTPRequest,
+        request: Connect.HTTPRequest<Data?>,
         responseCallbacks: Connect.ResponseCallbacks
-    ) -> Connect.RequestCallbacks {
+    ) -> Connect.RequestCallbacks<Data> {
         let eventLoop = self.loopGroup.next()
         let handler = ConnectStreamChannelHandler(
             request: request,

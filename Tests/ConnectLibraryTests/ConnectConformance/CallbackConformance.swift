@@ -118,8 +118,8 @@ final class CallbackConformance: XCTestCase {
         }
     }
 
-    func testServerStreaming() throws {
-        try self.executeTestWithClients { client in
+    func testServerStreaming() {
+        self.executeTestWithClients { client in
             let sizes = [31_415, 9, 2_653, 58_979]
             let expectation = self.expectation(description: "Stream completes")
             let responseCount = Locked(0)
@@ -140,7 +140,7 @@ final class CallbackConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
+            stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
                 proto.responseParameters = sizes.enumerated().map { index, size in
                     return .with { parameters in
                         parameters.size = Int32(size)
@@ -154,8 +154,8 @@ final class CallbackConformance: XCTestCase {
         }
     }
 
-    func testEmptyStream() throws {
-        try self.executeTestWithClients { client in
+    func testEmptyStream() {
+        self.executeTestWithClients { client in
             let closeExpectation = self.expectation(description: "Stream completes")
             let stream = client.streamingOutputCall { result in
                 switch result {
@@ -171,7 +171,7 @@ final class CallbackConformance: XCTestCase {
                     closeExpectation.fulfill()
                 }
             }
-            try stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
+            stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
                 proto.responseParameters = []
             })
 
@@ -211,7 +211,7 @@ final class CallbackConformance: XCTestCase {
         }
     }
 
-    func testCustomMetadataServerStreaming() throws {
+    func testCustomMetadataServerStreaming() {
         let size = 314_159
         let leadingKey = "x-grpc-test-echo-initial"
         let leadingValue = "test_initial_metadata_value"
@@ -222,7 +222,7 @@ final class CallbackConformance: XCTestCase {
             trailingKey: [trailingValue.base64EncodedString()],
         ]
 
-        try self.executeTestWithClients { client in
+        self.executeTestWithClients { client in
             let headersExpectation = self.expectation(description: "Receives headers")
             let messageExpectation = self.expectation(description: "Receives message")
             let trailersExpectation = self.expectation(description: "Receives trailers")
@@ -243,7 +243,7 @@ final class CallbackConformance: XCTestCase {
                     trailersExpectation.fulfill()
                 }
             }
-            try stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
+            stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
                 proto.responseParameters = [.with { $0.size = Int32(size) }]
             })
 
@@ -303,8 +303,8 @@ final class CallbackConformance: XCTestCase {
         }
     }
 
-    func testTimeoutOnSleepingServer() throws {
-        try self.executeTestWithClients(timeout: 0.01) { client in
+    func testTimeoutOnSleepingServer() {
+        self.executeTestWithClients(timeout: 0.01) { client in
             let expectation = self.expectation(description: "Stream times out")
             let message = Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
                 proto.payload = .with { $0.body = Data(count: 271_828) }
@@ -329,7 +329,7 @@ final class CallbackConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(message)
+            stream.send(message)
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
@@ -354,7 +354,7 @@ final class CallbackConformance: XCTestCase {
         }
     }
 
-    func testUnimplementedServerStreamingMethod() throws {
+    func testUnimplementedServerStreamingMethod() {
         let validErrorMessages = [
             // connect-go
             """
@@ -364,7 +364,7 @@ final class CallbackConformance: XCTestCase {
             // grpc-go
             "method UnimplementedStreamingOutputCall not implemented",
         ]
-        try self.executeTestWithClients { client in
+        self.executeTestWithClients { client in
             let expectation = self.expectation(description: "Stream completes")
             let stream = client.unimplementedStreamingOutputCall { result in
                 switch result {
@@ -379,7 +379,7 @@ final class CallbackConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(SwiftProtobuf.Google_Protobuf_Empty())
+            stream.send(SwiftProtobuf.Google_Protobuf_Empty())
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
@@ -398,8 +398,8 @@ final class CallbackConformance: XCTestCase {
         }
     }
 
-    func testUnimplementedServerStreamingService() throws {
-        try self.executeTestWithUnimplementedClients { client in
+    func testUnimplementedServerStreamingService() {
+        self.executeTestWithUnimplementedClients { client in
             let expectation = self.expectation(description: "Stream completes")
             let stream = client.unimplementedStreamingOutputCall { result in
                 switch result {
@@ -414,7 +414,7 @@ final class CallbackConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(SwiftProtobuf.Google_Protobuf_Empty())
+            stream.send(SwiftProtobuf.Google_Protobuf_Empty())
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
@@ -438,8 +438,8 @@ final class CallbackConformance: XCTestCase {
         }
     }
 
-    func testFailServerStreaming() throws {
-        try self.executeTestWithClients { client in
+    func testFailServerStreaming() {
+        self.executeTestWithClients { client in
             let expectedErrorDetail = Connectrpc_Conformance_V1_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
                 proto.domain = "connect-conformance"
@@ -465,14 +465,14 @@ final class CallbackConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest())
+            stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest())
 
             XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: kTimeout), .completed)
         }
     }
 
-    func testFailServerStreamingAfterResponse() throws {
-        try self.executeTestWithClients { client in
+    func testFailServerStreamingAfterResponse() {
+        self.executeTestWithClients { client in
             let expectedErrorDetail = Connectrpc_Conformance_V1_ErrorDetail.with { proto in
                 proto.reason = "soirée 🎉"
                 proto.domain = "connect-conformance"
@@ -503,7 +503,7 @@ final class CallbackConformance: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            try stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
+            stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest.with { proto in
                 proto.responseParameters = sizes.enumerated().map { index, size in
                     return .with { parameters in
                         parameters.size = Int32(size)

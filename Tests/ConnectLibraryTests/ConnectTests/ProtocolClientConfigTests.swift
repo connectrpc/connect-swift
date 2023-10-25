@@ -16,22 +16,11 @@
 import Foundation
 import XCTest
 
-private struct NoopInterceptor: Interceptor {
-    func unaryFunction() -> UnaryFunction {
-        return UnaryFunction(
-            requestFunction: { $1(.success($0)) },
-            responseFunction: { $1($0) }
-        )
-    }
+private final class NoopInterceptor1: UnaryInterceptor, StreamInterceptor {
+    init(config: ProtocolClientConfig) {}
+}
 
-    func streamFunction() -> StreamFunction {
-        return StreamFunction(
-            requestFunction: { $1(.success($0)) },
-            requestDataFunction: { $1($0) },
-            streamResultFunction: { $1($0) }
-        )
-    }
-
+private final class NoopInterceptor2: UnaryInterceptor, StreamInterceptor {
     init(config: ProtocolClientConfig) {}
 }
 
@@ -62,19 +51,29 @@ final class ProtocolClientConfigTests: XCTestCase {
         let config = ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
-            interceptors: [{ NoopInterceptor(config: $0) }]
+            interceptors: [NoopInterceptor1.self]
         )
-        XCTAssertTrue(config.interceptors[0](config) is NoopInterceptor)
-        XCTAssertTrue(config.interceptors[1](config) is ConnectInterceptor)
+        XCTAssertTrue(config.interceptors[0].init(config: config) is NoopInterceptor1)
+        XCTAssertTrue(config.interceptors[1].init(config: config) is ConnectInterceptor)
     }
 
     func testAddsGRPCWebInterceptorLastWhenUsingGRPCWebProtocol() {
         let config = ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .grpcWeb,
-            interceptors: [{ NoopInterceptor(config: $0) }]
+            interceptors: [NoopInterceptor1.self]
         )
-        XCTAssertTrue(config.interceptors[0](config) is NoopInterceptor)
-        XCTAssertTrue(config.interceptors[1](config) is GRPCWebInterceptor)
+        XCTAssertTrue(config.interceptors[0].init(config: config) is NoopInterceptor1)
+        XCTAssertTrue(config.interceptors[1].init(config: config) is GRPCWebInterceptor)
+    }
+
+    func testAddsProtocolInterceptorLastWhenUsingOtherProtocol() {
+        let config = ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .custom(name: "custom", protocolInterceptor: NoopInterceptor2.self),
+            interceptors: [NoopInterceptor1.self]
+        )
+        XCTAssertTrue(config.interceptors[0].init(config: config) is NoopInterceptor1)
+        XCTAssertTrue(config.interceptors[1].init(config: config) is NoopInterceptor2)
     }
 }

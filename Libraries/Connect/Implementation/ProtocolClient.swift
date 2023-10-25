@@ -225,6 +225,12 @@ extension ProtocolClient: ProtocolClientInterface {
         let responseBuffer = Locked(Data())
         let hasCompleted = Locked(false)
         let interceptorChain = self.config.createStreamInterceptorChain()
+        let onResult: @Sendable (StreamResult<Output>) -> Void = { output in
+            if case .complete = output {
+                hasCompleted.value = true
+            }
+            onResult(output)
+        }
         let responseCallbacks = ResponseCallbacks(
             receiveResponseHeaders: { responseHeaders in
                 interceptorChain.executeLinkedInterceptors(
