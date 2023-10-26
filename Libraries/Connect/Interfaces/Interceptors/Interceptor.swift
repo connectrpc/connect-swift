@@ -48,4 +48,20 @@
 /// stream due to the asynchronous nature of other interceptors which may be present in the chain.
 public protocol Interceptor: AnyObject, Sendable {
     init(config: ProtocolClientConfig)
+
+    @Sendable
+    func handleResponseMetrics(
+        _ metrics: HTTPMetrics,
+        proceed: @escaping @Sendable (HTTPMetrics) -> Void
+    )
+}
+
+extension Interceptor {
+    @Sendable
+    public func handleResponseMetrics(
+        _ metrics: HTTPMetrics,
+        proceed: @escaping @Sendable (HTTPMetrics) -> Void
+    ) {
+        proceed(metrics)
+    }
 }

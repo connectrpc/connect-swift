@@ -38,12 +38,6 @@ public protocol UnaryInterceptor: Interceptor {
         _ response: HTTPResponse,
         proceed: @escaping @Sendable (HTTPResponse) -> Void
     )
-
-    @Sendable
-    func handleUnaryResponseMetrics(
-        _ metrics: HTTPMetrics,
-        proceed: @escaping @Sendable (HTTPMetrics) -> Void
-    )
 }
 
 extension UnaryInterceptor {
@@ -77,13 +71,5 @@ extension UnaryInterceptor {
         proceed: @escaping @Sendable (HTTPResponse) -> Void
     ) {
         proceed(response)
-    }
-
-    @Sendable
-    public func handleUnaryResponseMetrics(
-        _ metrics: HTTPMetrics,
-        proceed: @escaping @Sendable (HTTPMetrics) -> Void
-    ) {
-        proceed(metrics)
     }
 }

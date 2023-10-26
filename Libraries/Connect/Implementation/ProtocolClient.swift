@@ -96,7 +96,7 @@ extension ProtocolClient: ProtocolClientInterface {
                     request: interceptedRequest,
                     onMetrics: { metrics in
                         interceptorChain.executeInterceptors(
-                            interceptorChain.interceptors.map { $0.handleUnaryResponseMetrics },
+                            interceptorChain.interceptors.map { $0.handleResponseMetrics },
                             firstInFirstOut: false,
                             initial: metrics,
                             finish: { _ in }
@@ -278,6 +278,14 @@ extension ProtocolClient: ProtocolClientInterface {
                         responseBuffer = Data(responseBuffer.suffix(from: prefixedMessageLength))
                     }
                 }
+            },
+            receiveResponseMetrics: { metrics in
+                interceptorChain.executeInterceptors(
+                    interceptorChain.interceptors.map { $0.handleResponseMetrics },
+                    firstInFirstOut: false,
+                    initial: metrics,
+                    finish: { _ in }
+                )
             },
             receiveClose: { code, trailers, error in
                 if hasCompleted.value {

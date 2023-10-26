@@ -104,7 +104,10 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
             session: self.session,
             responseCallbacks: responseCallbacks
         )
-        self.lock.perform { self.streams[urlSessionStream.taskID] = urlSessionStream }
+        self.lock.perform {
+            self.streams[urlSessionStream.taskID] = urlSessionStream
+            self.metricsClosures[urlSessionStream.taskID] = responseCallbacks.receiveResponseMetrics
+        }
         return RequestCallbacks(
             sendData: { data in
                 do {
