@@ -22,21 +22,23 @@
 ///
 /// Every interceptor has the opportunity to perform asynchronous work before passing a potentially
 /// altered value to the next interceptor in the chain. When the end of the chain is reached, the
-/// final value is passed to the networking client where it is sent to the server (outbound request)
-/// or to the caller (inbound response).
+/// final value is passed to the networking client, where it is sent to the server
+/// (outbound request) or to the caller (inbound response).
 ///
-/// Interceptors may also fail outbound requests before they're sent, thus preventing subsequent
-/// interceptors from being invoked and returning a specified error back to the original caller.
+/// Interceptors may also fail outbound requests before they are sent; subsequent
+/// interceptors in the chain will not be invoked, and the error will be returned to the
+/// original caller.
 ///
-/// Interceptors are closure-based and are passed both the current value and a closure which
+/// Interceptors are closure-based and receive both the current value and a closure that
 /// should be called to resume the interceptor chain. Propagation will not continue until
-/// this closure is called. Additional values may still be passed to a given interceptor even
+/// this closure is invoked. Additional values may still be passed to a given interceptor even
 /// though it has not yet continued the chain with a previous value. For example:
 ///
-/// - A request is sent
-/// - Response headers are received, and an interceptor pauses the chain while processing them
-/// - First chunk of streamed data is received, and the interceptor is invoked with this value
-/// - Interceptor is expected to resume with headers first, and then with data after
+/// 1. A request is sent
+/// 2. Response headers are received, and an interceptor pauses the chain while processing them
+/// 3. The first chunk of streamed response data is received, and the interceptor is invoked with
+///    this value
+/// 4. The interceptor is expected to resume with headers first, and then with data after
 ///
 /// Implementations should be thread-safe (hence the `Sendable` requirement on interceptor
 /// closures), as closures can be invoked from different threads during the span of a request or
