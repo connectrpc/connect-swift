@@ -16,123 +16,6 @@
 import SwiftProtobuf
 import XCTest
 
-private struct MockUnaryInterceptor: Interceptor {
-    let failOutboundRequests: Bool
-    let headerID: String
-    let requestExpectation: XCTestExpectation?
-    let responseExpectation: XCTestExpectation?
-    let responseMetricsExpectation: XCTestExpectation?
-
-    func unaryFunction() -> UnaryFunction {
-        return UnaryFunction { request, proceed in
-            self.requestExpectation?.fulfill()
-            if self.failOutboundRequests {
-                proceed(.failure(ConnectError(
-                    code: .unknown, message: "request failed by interceptor",
-                    exception: nil, details: [], metadata: [:]
-                )))
-                return
-            }
-
-            var headers = request.headers
-            headers["interceptor-chain", default: []].append(self.headerID)
-            proceed(.success(HTTPRequest(
-                url: request.url,
-                contentType: request.contentType,
-                headers: headers,
-                message: request.message,
-                trailers: request.trailers
-            )))
-        } responseFunction: { response, proceed in
-            var headers = response.headers
-            headers["interceptor-chain", default: []].append(self.headerID)
-            self.responseExpectation?.fulfill()
-            proceed(HTTPResponse(
-                code: response.code,
-                headers: headers,
-                message: response.message,
-                trailers: response.trailers,
-                error: response.error,
-                tracingInfo: .init(httpStatus: 200)
-            ))
-        } responseMetricsFunction: { metrics, proceed in
-            self.responseMetricsExpectation?.fulfill()
-            proceed(metrics)
-        }
-    }
-
-    func streamFunction() -> StreamFunction {
-        fatalError("Unexpectedly called with stream")
-    }
-}
-
-private struct MockStreamInterceptor: Interceptor {
-    let failOutboundRequests: Bool
-    let headerID: String
-    let requestDelayMS: Int
-    let requestData: Data
-    let responseData: Data
-    let requestExpectation: XCTestExpectation?
-    let requestDataExpectation: XCTestExpectation?
-    let resultExpectation: XCTestExpectation?
-
-    func unaryFunction() -> UnaryFunction {
-        fatalError("Unexpectedly called with unary request")
-    }
-
-    func streamFunction() -> StreamFunction {
-        return StreamFunction { request, proceed in
-            self.requestExpectation?.fulfill()
-            if self.failOutboundRequests {
-                proceed(.failure(ConnectError(
-                    code: .unknown, message: "request failed by interceptor",
-                    exception: nil, details: [], metadata: [:]
-                )))
-                return
-            }
-
-            let finish = { @Sendable in
-                var headers = request.headers
-                headers["interceptor-chain", default: []].append(self.headerID)
-                proceed(.success(HTTPRequest(
-                    url: request.url,
-                    contentType: request.contentType,
-                    headers: headers,
-                    message: request.message,
-                    trailers: Trailers()
-                )))
-            }
-            if self.requestDelayMS > 0 {
-                DispatchQueue.main.asyncAfter(
-                    deadline: .now() + .milliseconds(self.requestDelayMS),
-                    execute: finish
-                )
-            } else {
-                finish()
-            }
-        } requestDataFunction: { _, proceed in
-            self.requestDataExpectation?.fulfill()
-            proceed(self.requestData)
-        } streamResultFunction: { result, proceed in
-            self.resultExpectation?.fulfill()
-            switch result {
-            case .headers(let headers):
-                var headers = headers
-                headers["interceptor-chain", default: []].append(self.headerID)
-                proceed(.headers(headers))
-
-            case .message:
-                proceed(.message(self.responseData))
-
-            case .complete(let code, let error, let trailers):
-                var trailers = trailers ?? [:]
-                trailers["interceptor-chain", default: []].append(self.headerID)
-                proceed(.complete(code: code, error: error, trailers: trailers))
-            }
-        }
-    }
-}
-
 final class InterceptorChainTests: XCTestCase {
     // MARK: - Invoking chain directly
 
@@ -150,23 +33,22 @@ final class InterceptorChainTests: XCTestCase {
                 requestExpectation: aRequestExpectation,
                 responseExpectation: aResponseExpectation,
                 responseMetricsExpectation: aMetricsExpectation
-            ).unaryFunction(),
+            ),
             MockUnaryInterceptor(
                 failOutboundRequests: false,
                 headerID: "interceptor-b",
                 requestExpectation: bRequestExpectation,
                 responseExpectation: bResponseExpectation,
                 responseMetricsExpectation: bMetricsExpectation
-            ).unaryFunction(),
+            ),
         ])
 
-        let interceptedRequest = Locked<HTTPRequest?>(nil)
+        let interceptedRequest = Locked<HTTPRequest<Data?>?>(nil)
         chain.executeInterceptorsAndStopOnFailure(
-            \.requestFunction,
+            chain.interceptors.map { $0.handleUnaryRawRequest },
             firstInFirstOut: true,
             initial: HTTPRequest(
                 url: try XCTUnwrap(URL(string: "https://connectrpc.com/mock")),
-                contentType: "application/json",
                 headers: Headers(),
                 message: nil,
                 trailers: Trailers()
@@ -174,13 +56,13 @@ final class InterceptorChainTests: XCTestCase {
             finish: { interceptedRequest.value = try? $0.get() }
         )
         XCTAssertEqual(
-            interceptedRequest.value?.headers["interceptor-chain"],
+            interceptedRequest.value?.headers[kMockInterceptorHeaderKey],
             ["interceptor-a", "interceptor-b"]
         )
 
         let interceptedResponse = Locked<HTTPResponse?>(nil)
         chain.executeInterceptors(
-            \.responseFunction,
+            chain.interceptors.map { $0.handleUnaryRawResponse },
             firstInFirstOut: false,
             initial: HTTPResponse(
                 code: .ok,
@@ -193,13 +75,13 @@ final class InterceptorChainTests: XCTestCase {
             finish: { interceptedResponse.value = $0 }
         )
         XCTAssertEqual(
-            interceptedResponse.value?.headers["interceptor-chain"],
+            interceptedResponse.value?.headers[kMockInterceptorHeaderKey],
             ["interceptor-b", "interceptor-a"]
         )
 
         let interceptedMetrics = Locked<HTTPMetrics?>(nil)
         chain.executeInterceptors(
-            \.responseMetricsFunction,
+            chain.interceptors.map { $0.handleResponseMetrics },
             firstInFirstOut: false,
             initial: HTTPMetrics(taskMetrics: nil),
             finish: { interceptedMetrics.value = $0 }
@@ -229,7 +111,7 @@ final class InterceptorChainTests: XCTestCase {
                 requestExpectation: aRequestExpectation,
                 responseExpectation: nil,
                 responseMetricsExpectation: nil
-            ).unaryFunction(),
+            ),
             // Should never be invoked if the request is failed by the previous interceptor.
             MockUnaryInterceptor(
                 failOutboundRequests: false,
@@ -237,15 +119,14 @@ final class InterceptorChainTests: XCTestCase {
                 requestExpectation: bRequestExpectation,
                 responseExpectation: nil,
                 responseMetricsExpectation: nil
-            ).unaryFunction(),
+            ),
         ])
 
         chain.executeInterceptorsAndStopOnFailure(
-            \.requestFunction,
+            chain.interceptors.map { $0.handleUnaryRawRequest },
             firstInFirstOut: true,
             initial: HTTPRequest(
                url: try XCTUnwrap(URL(string: "https://connectrpc.com/mock")),
-               contentType: "application/json",
                headers: Headers(),
                message: nil,
                trailers: Trailers()
@@ -289,7 +170,7 @@ final class InterceptorChainTests: XCTestCase {
                 requestExpectation: aRequestExpectation,
                 requestDataExpectation: aRequestDataExpectation,
                 resultExpectation: aResultExpectation
-            ).streamFunction(),
+            ),
             MockStreamInterceptor(
                 failOutboundRequests: false,
                 headerID: "interceptor-b",
@@ -299,31 +180,29 @@ final class InterceptorChainTests: XCTestCase {
                 requestExpectation: bRequestExpectation,
                 requestDataExpectation: bRequestDataExpectation,
                 resultExpectation: bResultExpectation
-            ).streamFunction(),
+            ),
         ])
 
-        let interceptedRequest = Locked<HTTPRequest?>(nil)
+        let interceptedRequest = Locked<HTTPRequest<Void>?>(nil)
         chain.executeInterceptorsAndStopOnFailure(
-            \.requestFunction,
+            chain.interceptors.map { $0.handleStreamStart },
             firstInFirstOut: true,
             initial: HTTPRequest(
                 url: try XCTUnwrap(URL(string: "https://connectrpc.com/mock")),
-                contentType: "application/json",
                 headers: Headers(),
-                message: nil,
+                message: (),
                 trailers: Trailers()
             ),
             finish: { interceptedRequest.value = try? $0.get() }
         )
         XCTAssertEqual(
-            interceptedRequest.value?.headers["interceptor-chain"],
+            interceptedRequest.value?.headers[kMockInterceptorHeaderKey],
             ["interceptor-a", "interceptor-b"]
         )
-        XCTAssertNil(interceptedRequest.value?.message)
 
         let interceptedRequestData = Locked<Data?>(nil)
         chain.executeInterceptors(
-            \.requestDataFunction,
+            chain.interceptors.map { $0.handleStreamRawInput },
             firstInFirstOut: true,
             initial: Data(),
             finish: { interceptedRequestData.value = $0 }
@@ -332,18 +211,18 @@ final class InterceptorChainTests: XCTestCase {
 
         let interceptedResult = Locked<StreamResult<Data>?>(nil)
         chain.executeInterceptors(
-            \.streamResultFunction,
+            chain.interceptors.map { $0.handleStreamRawResult },
             firstInFirstOut: false,
             initial: .headers(Headers()),
             finish: { interceptedResult.value = $0 }
         )
         XCTAssertEqual(
             interceptedResult.value,
-            .headers(["interceptor-chain": ["interceptor-b", "interceptor-a"]])
+            .headers([kMockInterceptorHeaderKey: ["interceptor-b", "interceptor-a"]])
         )
 
         chain.executeInterceptors(
-            \.streamResultFunction,
+            chain.interceptors.map { $0.handleStreamRawResult },
             firstInFirstOut: false,
             initial: .message(Data()),
             finish: { interceptedResult.value = $0 }
@@ -351,7 +230,7 @@ final class InterceptorChainTests: XCTestCase {
         XCTAssertEqual(interceptedResult.value, .message(interceptorAData))
 
         chain.executeInterceptors(
-            \.streamResultFunction,
+            chain.interceptors.map { $0.handleStreamRawResult },
             firstInFirstOut: false,
             initial: .complete(code: .ok, error: nil, trailers: nil),
             finish: { interceptedResult.value = $0 }
@@ -359,7 +238,7 @@ final class InterceptorChainTests: XCTestCase {
         switch interceptedResult.value {
         case .complete(_, _, let interceptedTrailers):
             XCTAssertEqual(
-                interceptedTrailers?["interceptor-chain"],
+                interceptedTrailers?[kMockInterceptorHeaderKey],
                 ["interceptor-b", "interceptor-a"]
             )
         case .headers, .message, .none:
@@ -393,7 +272,7 @@ final class InterceptorChainTests: XCTestCase {
                 requestExpectation: aRequestExpectation,
                 requestDataExpectation: nil,
                 resultExpectation: nil
-            ).streamFunction(),
+            ),
             // Should never be invoked if the request is failed by the previous interceptor.
             MockStreamInterceptor(
                 failOutboundRequests: false,
@@ -404,17 +283,16 @@ final class InterceptorChainTests: XCTestCase {
                 requestExpectation: bRequestExpectation,
                 requestDataExpectation: nil,
                 resultExpectation: nil
-            ).streamFunction(),
+            ),
         ])
 
         chain.executeInterceptorsAndStopOnFailure(
-            \.requestFunction,
+            chain.interceptors.map { $0.handleStreamStart },
             firstInFirstOut: true,
             initial: HTTPRequest(
                url: try XCTUnwrap(URL(string: "https://connectrpc.com/mock")),
-               contentType: "application/json",
                headers: Headers(),
-               message: nil,
+               message: (),
                trailers: Trailers()
             ),
             finish: { interceptedResult in
@@ -441,7 +319,7 @@ final class InterceptorChainTests: XCTestCase {
         let bRequestExpectation = self.expectation(description: "B called")
         bRequestExpectation.isInverted = true
         let client = self.createClient(interceptors: [
-            { _ in
+            InterceptorFactory { _ in
                 // Will return an error immediately when sending the request.
                 MockUnaryInterceptor(
                     failOutboundRequests: true,
@@ -451,7 +329,7 @@ final class InterceptorChainTests: XCTestCase {
                     responseMetricsExpectation: nil
                 )
             },
-            { _ in
+            InterceptorFactory { _ in
                 // Should never be invoked if the request is failed by the previous interceptor.
                 MockUnaryInterceptor(
                     failOutboundRequests: false,
@@ -462,7 +340,7 @@ final class InterceptorChainTests: XCTestCase {
                 )
             },
         ])
-        let response = await client.emptyCall(request: .init())
+        let response = await client.emptyCall(request: SwiftProtobuf.Google_Protobuf_Empty())
         XCTAssertNotNil(response.error) // Interceptor failed the request.
         XCTAssertEqual(XCTWaiter().wait(for: [
             aRequestExpectation,
@@ -475,7 +353,7 @@ final class InterceptorChainTests: XCTestCase {
         let bRequestExpectation = self.expectation(description: "B called")
         bRequestExpectation.isInverted = true
         let client = self.createClient(interceptors: [
-            { _ in
+            InterceptorFactory { _ in
                 // Will return an error immediately when sending the request.
                 MockStreamInterceptor(
                     failOutboundRequests: true,
@@ -488,7 +366,7 @@ final class InterceptorChainTests: XCTestCase {
                     resultExpectation: nil
                 )
             },
-            { _ in
+            InterceptorFactory { _ in
                 // Should never be invoked if the request is failed by the previous interceptor.
                 MockStreamInterceptor(
                     failOutboundRequests: false,
@@ -522,7 +400,7 @@ final class InterceptorChainTests: XCTestCase {
         let aRequestDataExpectation = self.expectation(description: "A called with data")
         let bRequestDataExpectation = self.expectation(description: "B called with data")
         let client = self.createClient(interceptors: [
-            { _ in
+            InterceptorFactory { _ in
                 MockStreamInterceptor(
                     failOutboundRequests: false,
                     headerID: "interceptor-a",
@@ -534,7 +412,7 @@ final class InterceptorChainTests: XCTestCase {
                     resultExpectation: nil
                 )
             },
-            { _ in
+            InterceptorFactory { _ in
                 MockStreamInterceptor(
                     failOutboundRequests: false,
                     headerID: "interceptor-a",
@@ -550,7 +428,7 @@ final class InterceptorChainTests: XCTestCase {
         let call = client.streamingOutputCall()
 
         // Send data immediately (before the first interceptor has finished processing headers).
-        try call.send(.init())
+        try call.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest())
 
         // The client should wait for all interceptors to finish processing headers before it
         // passes any data through the chain. Validate this by enforcing order of expectations.
@@ -563,12 +441,168 @@ final class InterceptorChainTests: XCTestCase {
     }
 
     private func createClient(
-        interceptors: [InterceptorInitializer]
+        interceptors: [InterceptorFactory]
     ) -> Connectrpc_Conformance_V1_TestServiceClient {
         let protocolClient = ProtocolClient(config: ProtocolClientConfig(
             host: "https://localhost",
             interceptors: interceptors
         ))
         return Connectrpc_Conformance_V1_TestServiceClient(client: protocolClient)
+    }
+}
+
+private let kMockInterceptorHeaderKey = "interceptor-tests"
+
+private final class MockUnaryInterceptor: UnaryInterceptor {
+    private let failOutboundRequests: Bool
+    private let headerID: String
+    private let requestExpectation: XCTestExpectation?
+    private let responseExpectation: XCTestExpectation?
+    private let responseMetricsExpectation: XCTestExpectation?
+
+    init(
+        failOutboundRequests: Bool, headerID: String, requestExpectation: XCTestExpectation?,
+        responseExpectation: XCTestExpectation?, responseMetricsExpectation: XCTestExpectation?
+    ) {
+        self.failOutboundRequests = failOutboundRequests
+        self.headerID = headerID
+        self.requestExpectation = requestExpectation
+        self.responseExpectation = responseExpectation
+        self.responseMetricsExpectation = responseMetricsExpectation
+    }
+
+    @Sendable
+    func handleUnaryRawRequest(
+        _ request: HTTPRequest<Data?>,
+        proceed: @escaping (Result<HTTPRequest<Data?>, ConnectError>) -> Void
+    ) {
+        self.requestExpectation?.fulfill()
+        if self.failOutboundRequests {
+            proceed(.failure(ConnectError(
+                code: .unknown, message: "request failed by interceptor",
+                exception: nil, details: [], metadata: [:]
+            )))
+            return
+        }
+
+        var headers = request.headers
+        headers[kMockInterceptorHeaderKey, default: []].append(self.headerID)
+        proceed(.success(HTTPRequest(
+            url: request.url,
+            headers: headers,
+            message: request.message,
+            trailers: request.trailers
+        )))
+    }
+
+    @Sendable
+    func handleUnaryRawResponse(
+        _ response: HTTPResponse,
+        proceed: @escaping (HTTPResponse) -> Void
+    ) {
+        var headers = response.headers
+        headers[kMockInterceptorHeaderKey, default: []].append(self.headerID)
+        self.responseExpectation?.fulfill()
+        proceed(HTTPResponse(
+            code: response.code,
+            headers: headers,
+            message: response.message,
+            trailers: response.trailers,
+            error: response.error,
+            tracingInfo: .init(httpStatus: 200)
+        ))
+    }
+
+    @Sendable
+    func handleResponseMetrics(_ metrics: HTTPMetrics, proceed: @escaping (HTTPMetrics) -> Void) {
+        self.responseMetricsExpectation?.fulfill()
+        proceed(metrics)
+    }
+}
+
+private final class MockStreamInterceptor: StreamInterceptor {
+    private let failOutboundRequests: Bool
+    private let headerID: String
+    private let requestDelayMS: Int
+    private let requestData: Data
+    private let responseData: Data
+    private let requestExpectation: XCTestExpectation?
+    private let requestDataExpectation: XCTestExpectation?
+    private let resultExpectation: XCTestExpectation?
+
+    init(failOutboundRequests: Bool, headerID: String, requestDelayMS: Int, requestData: Data,
+         responseData: Data, requestExpectation: XCTestExpectation?,
+         requestDataExpectation: XCTestExpectation?, resultExpectation: XCTestExpectation?
+    ) {
+        self.failOutboundRequests = failOutboundRequests
+        self.headerID = headerID
+        self.requestDelayMS = requestDelayMS
+        self.requestData = requestData
+        self.responseData = responseData
+        self.requestExpectation = requestExpectation
+        self.requestDataExpectation = requestDataExpectation
+        self.resultExpectation = resultExpectation
+    }
+
+    @Sendable
+    func handleStreamStart(
+        _ request: HTTPRequest<Void>,
+        proceed: @escaping (Result<HTTPRequest<Void>, ConnectError>) -> Void
+    ) {
+        self.requestExpectation?.fulfill()
+        if self.failOutboundRequests {
+            proceed(.failure(ConnectError(
+                code: .unknown, message: "request failed by interceptor",
+                exception: nil, details: [], metadata: [:]
+            )))
+            return
+        }
+
+        let finish = { @Sendable in
+            var headers = request.headers
+            headers[kMockInterceptorHeaderKey, default: []].append(self.headerID)
+            proceed(.success(HTTPRequest(
+                url: request.url,
+                headers: headers,
+                message: request.message,
+                trailers: Trailers()
+            )))
+        }
+        if self.requestDelayMS > 0 {
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + .milliseconds(self.requestDelayMS),
+                execute: finish
+            )
+        } else {
+            finish()
+        }
+    }
+
+    @Sendable
+    func handleStreamRawInput(_ input: Data, proceed: @escaping (Data) -> Void) {
+        self.requestDataExpectation?.fulfill()
+        proceed(self.requestData)
+    }
+
+    @Sendable
+    func handleStreamRawResult(
+        _ result: StreamResult<Data>,
+        proceed: @escaping (StreamResult<Data>) -> Void
+    ) {
+        self.resultExpectation?.fulfill()
+        switch result {
+        case .headers(let headers):
+            var headers = headers
+            headers[kMockInterceptorHeaderKey, default: []].append(self.headerID)
+            proceed(.headers(headers))
+
+        case .message:
+            proceed(.message(self.responseData))
+
+        case .complete(let code, let error, let trailers):
+            var trailers = trailers ?? [:]
+            trailers[kMockInterceptorHeaderKey, default: []].append(self.headerID)
+            proceed(.complete(code: code, error: error, trailers: trailers))
+        }
     }
 }

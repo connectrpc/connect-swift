@@ -27,6 +27,7 @@ final class GRPCInterceptor: Interceptor {
 }
 
 extension GRPCInterceptor: UnaryInterceptor {
+    @Sendable
     func handleUnaryRawRequest(
         _ request: HTTPRequest<Data?>,
         proceed: @escaping (Result<HTTPRequest<Data?>, ConnectError>) -> Void
@@ -44,6 +45,7 @@ extension GRPCInterceptor: UnaryInterceptor {
         )))
     }
 
+    @Sendable
     func handleUnaryRawResponse(
         _ response: HTTPResponse,
         proceed: @escaping (HTTPResponse) -> Void
@@ -99,6 +101,7 @@ extension GRPCInterceptor: UnaryInterceptor {
 }
 
 extension GRPCInterceptor: StreamInterceptor {
+    @Sendable
     func handleStreamStart(
         _ request: HTTPRequest<Void>,
         proceed: @escaping (Result<HTTPRequest<Void>, ConnectError>) -> Void
@@ -111,10 +114,12 @@ extension GRPCInterceptor: StreamInterceptor {
         )))
     }
 
+    @Sendable
     func handleStreamRawInput(_ input: Data, proceed: @escaping (Data) -> Void) {
         proceed(Envelope.packMessage(input, using: self.config.requestCompression))
     }
 
+    @Sendable
     func handleStreamRawResult(
         _ result: StreamResult<Data>,
         proceed: @escaping (StreamResult<Data>) -> Void

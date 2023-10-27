@@ -25,9 +25,9 @@ final class InterceptorChain<T: Sendable>: Sendable {
     /// the resulting value to the next interceptor and finally invoking `finish` with the final
     /// value.
     ///
-    /// - parameter functions: <#[@Sendable (Value, @escaping @Sendable (Value) -> Void) -> Void]#>
-    /// - parameter firstInFirstOut: If true, interceptors will be invoked in the order they were
-    ///                              originally registered. If false, the order will be reversed.
+    /// - parameter functions: The functions to call (one for each interceptor).
+    /// - parameter firstInFirstOut: If true, `functions` will be invoked in the order they were
+    ///                              passed. If false, the order will be reversed.
     /// - parameter initial: The initial value to pass to the first interceptor.
     /// - parameter finish: Closure to call with the final value after each interceptor has finished
     ///                     processing.
@@ -45,6 +45,20 @@ final class InterceptorChain<T: Sendable>: Sendable {
         next(initial)
     }
 
+    /// Performs the same functionality as `executeInterceptors()`, but allows for joining two
+    /// sets of functions and doing a transformation from one type to another inbetween sets (for
+    /// example, invoking a set of interceptors with a typed message value, serializing the
+    /// resulting message, and then invoking a second set of interceptors with the serialized data).
+    ///
+    /// - parameter value1Functions: The set of interceptor functions to call with `Value1`.
+    /// - parameter firstInFirstOut: If true, functions will be invoked in the order they were
+    ///                              passed. If false, the order will be reversed.
+    /// - parameter initial: The initial value to pass to the first interceptor.
+    /// - parameter transform: Closure called to convert `Value1` to `Value2` after
+    ///                        `value1Functions` are completed.
+    /// - parameter value2Functions: The set of interceptor functions to be called with `Value2`.
+    /// - parameter finish: Closure to call with the final value after each interceptor has finished
+    ///                     processing.
     func executeLinkedInterceptors<Value1, Value2>(
         _ value1Functions: [@Sendable (Value1, @escaping @Sendable (Value1) -> Void) -> Void],
         firstInFirstOut: Bool,
@@ -77,9 +91,9 @@ final class InterceptorChain<T: Sendable>: Sendable {
     /// without invoking additional interceptors, and the failure result will be returned to the
     /// caller.**
     ///
-    /// - parameter functions: <#[@Sendable (Value, @escaping @Sendable (Value) -> Void) -> Void]#>
-    /// - parameter firstInFirstOut: If true, interceptors will be invoked in the order they were
-    ///                              originally registered. If false, the order will be reversed.
+    /// - parameter functions: The functions to call (one for each interceptor).
+    /// - parameter firstInFirstOut: If true, `functions` will be invoked in the order they were
+    ///                              passed. If false, the order will be reversed.
     /// - parameter initial: The initial value to pass to the first interceptor.
     /// - parameter finish: Closure to call with the final value either after each interceptor has
     ///                     finished processing or when one returns a `Result.failure`.
@@ -106,6 +120,25 @@ final class InterceptorChain<T: Sendable>: Sendable {
         next(.success(initial))
     }
 
+    /// Performs the same functionality as `executeInterceptorsAndStopOnFailure()`, but allows for
+    /// joining two sets of functions and doing a transformation from one type to another inbetween
+    /// sets (for example, invoking a set of interceptors with a typed message value,
+    /// serializing the resulting message, and then invoking a second set of interceptors with the
+    /// serialized data).
+    ///
+    /// **If an interceptor returns a `Result.failure`, both chains will be terminated immediately
+    /// without invoking additional interceptors, and the failure result will be returned to the
+    /// caller.**
+    ///
+    /// - parameter value1Functions: The set of interceptor functions to call with `Value1`.
+    /// - parameter firstInFirstOut: If true, functions will be invoked in the order they were
+    ///                              passed. If false, the order will be reversed.
+    /// - parameter initial: The initial value to pass to the first interceptor.
+    /// - parameter transform: Closure called to convert `Value1` to `Value2` after
+    ///                        `value1Functions` are completed.
+    /// - parameter value2Functions: The set of interceptor functions to be called with `Value2`.
+    /// - parameter finish: Closure to call with the final value after each interceptor has finished
+    ///                     processing.
     func executeLinkedInterceptorsAndStopOnFailure<Value1, Value2>(
         _ value1Functions: [
             @Sendable (Value1, @escaping @Sendable (Result<Value1, ConnectError>) -> Void) -> Void

@@ -74,49 +74,52 @@ extension ProtocolClient: ProtocolClientInterface {
                     )))
                 }
             },
-            then: interceptorChain.interceptors.map { $0.handleUnaryRawRequest }
-        ) { interceptedResult in
-            cancelation.perform { cancelation in
-                if cancelation.isCancelled {
-                    // If the caller cancelled the request while it was being processed
-                    // by interceptors, don't send the request.
-                    return
-                }
-
-                let interceptedRequest: HTTPRequest<Data?>
-                switch interceptedResult {
-                case .success(let value):
-                    interceptedRequest = value
-                case .failure(let error):
-                    completion(ResponseMessage(result: .failure(error)))
-                    return
-                }
-
-                cancelation.cancelable = self.httpClient.unary(
-                    request: interceptedRequest,
-                    onMetrics: { metrics in
-                        interceptorChain.executeInterceptors(
-                            interceptorChain.interceptors.map { $0.handleResponseMetrics },
-                            firstInFirstOut: false,
-                            initial: metrics,
-                            finish: { _ in }
-                        )
-                    },
-                    onResponse: { interceptedResponse in
-                        interceptorChain.executeLinkedInterceptors(
-                            interceptorChain.interceptors.map { $0.handleUnaryRawResponse },
-                            firstInFirstOut: false,
-                            initial: interceptedResponse,
-                            transform: { response, proceed in
-                                proceed(ResponseMessage<Output>(response: response, codec: codec))
-                            },
-                            then: interceptorChain.interceptors.map { $0.handleUnaryResponse },
-                            finish: completion
-                        )
+            then: interceptorChain.interceptors.map { $0.handleUnaryRawRequest },
+            finish: { interceptedResult in
+                cancelation.perform { cancelation in
+                    if cancelation.isCancelled {
+                        // If the caller cancelled the request while it was being processed
+                        // by interceptors, don't send the request.
+                        return
                     }
-                )
+
+                    let interceptedRequest: HTTPRequest<Data?>
+                    switch interceptedResult {
+                    case .success(let value):
+                        interceptedRequest = value
+                    case .failure(let error):
+                        completion(ResponseMessage(result: .failure(error)))
+                        return
+                    }
+
+                    cancelation.cancelable = self.httpClient.unary(
+                        request: interceptedRequest,
+                        onMetrics: { metrics in
+                            interceptorChain.executeInterceptors(
+                                interceptorChain.interceptors.map { $0.handleResponseMetrics },
+                                firstInFirstOut: false,
+                                initial: metrics,
+                                finish: { _ in }
+                            )
+                        },
+                        onResponse: { interceptedResponse in
+                            interceptorChain.executeLinkedInterceptors(
+                                interceptorChain.interceptors.map { $0.handleUnaryRawResponse },
+                                firstInFirstOut: false,
+                                initial: interceptedResponse,
+                                transform: { response, proceed in
+                                    proceed(ResponseMessage<Output>(
+                                        response: response, codec: codec
+                                    ))
+                                },
+                                then: interceptorChain.interceptors.map { $0.handleUnaryResponse },
+                                finish: completion
+                            )
+                        }
+                    )
+                }
             }
-        }
+        )
         return Cancelable {
             cancelation.perform { cancelation in
                 cancelation.cancelable?.cancel()

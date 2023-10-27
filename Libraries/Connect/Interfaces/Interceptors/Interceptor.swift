@@ -13,15 +13,14 @@
 // limitations under the License.
 
 /// Interceptors are a powerful way to observe and mutate outbound and inbound
-/// headers, data, trailers, and errors both for unary APIs and streams.
-///
-/// Additionally, interceptors may observe and mutate typed Protobuf messages before requests
-/// are serialized and sent, as well as after responses are deserialized and returned to the caller.
+/// headers, data, trailers, typed messages, and errors both for unary APIs and streams.
 ///
 /// Each interceptor is instantiated **once per request or stream** and
 /// provides a set of functions that are invoked by the client during the lifecycle
 /// of that call. Each function allows the interceptor to observe and store
-/// state, as well as to mutate outbound or inbound content.
+/// state, as well as to mutate outbound or inbound content. Interceptors have the ability to
+/// interact with both typed messages (request messages prior to serialization and response
+/// messages after deserialization) and raw data.
 ///
 /// Every interceptor has the opportunity to perform asynchronous work before passing a potentially
 /// altered value to the next interceptor in the chain. When the end of the chain is reached, the
@@ -43,12 +42,14 @@
 ///    this value
 /// 4. The interceptor is expected to resume with headers first, and then with data after
 ///
-/// Implementations should be thread-safe (hence the `Sendable` requirement),
+/// Implementations should be thread-safe (hence the `Sendable` requirements),
 /// as functions can be invoked from different threads during the span of a request or
 /// stream due to the asynchronous nature of other interceptors which may be present in the chain.
+///
+/// This high-level protocol encompasses characteristics shared by unary and stream interceptors.
+/// Implementations can interact with unary requests, streams, or both. See the
+/// derived `UnaryInterceptor` and `StreamInterceptor` protocols for additional details.
 public protocol Interceptor: AnyObject, Sendable {
-    init(config: ProtocolClientConfig)
-
     @Sendable
     func handleResponseMetrics(
         _ metrics: HTTPMetrics,

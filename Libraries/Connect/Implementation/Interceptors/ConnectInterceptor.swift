@@ -28,6 +28,7 @@ final class ConnectInterceptor: Interceptor {
 }
 
 extension ConnectInterceptor: UnaryInterceptor {
+    @Sendable
     func handleUnaryRawRequest(
         _ request: HTTPRequest<Data?>,
         proceed: @escaping (Result<HTTPRequest<Data?>, ConnectError>) -> Void
@@ -59,6 +60,7 @@ extension ConnectInterceptor: UnaryInterceptor {
         )))
     }
 
+    @Sendable
     func handleUnaryRawResponse(
         _ response: HTTPResponse,
         proceed: @escaping (HTTPResponse) -> Void
@@ -102,6 +104,7 @@ extension ConnectInterceptor: UnaryInterceptor {
 }
 
 extension ConnectInterceptor: StreamInterceptor {
+    @Sendable
     func handleStreamStart(
         _ request: HTTPRequest<Void>,
         proceed: @escaping (Result<HTTPRequest<Void>, ConnectError>) -> Void
@@ -120,10 +123,12 @@ extension ConnectInterceptor: StreamInterceptor {
         )))
     }
 
+    @Sendable
     func handleStreamRawInput(_ input: Data, proceed: @escaping (Data) -> Void) {
         proceed(Envelope.packMessage(input, using: self.config.requestCompression))
     }
 
+    @Sendable
     func handleStreamRawResult(
         _ result: StreamResult<Data>,
         proceed: @escaping (StreamResult<Data>) -> Void
