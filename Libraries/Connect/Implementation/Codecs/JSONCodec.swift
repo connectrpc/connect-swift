@@ -18,7 +18,8 @@ import Foundation
 
 /// Codec providing functionality for serializing to/from JSON.
 public struct JSONCodec: Sendable {
-    private let encodingOptions: JSONEncodingOptions
+    private let defaultEncodingOptions: JSONEncodingOptions
+    private let deterministicEncodingOptions: JSONEncodingOptions
     private let decodingOptions: JSONDecodingOptions = {
         var options = JSONDecodingOptions()
         options.ignoreUnknownFields = true
@@ -33,10 +34,19 @@ public struct JSONCodec: Sendable {
     ///                                         defined in the `.proto` files. By default they are
     ///                                         converted to Protobuf's JSON lowerCamelCase format.
     public init(alwaysEncodeEnumsAsInts: Bool = false, preserveProtobufFieldNames: Bool = false) {
-        var encodingOptions = JSONEncodingOptions()
-        encodingOptions.alwaysPrintEnumsAsInts = alwaysEncodeEnumsAsInts
-        encodingOptions.preserveProtoFieldNames = preserveProtobufFieldNames
-        self.encodingOptions = encodingOptions
+        self.defaultEncodingOptions = {
+            var encodingOptions = JSONEncodingOptions()
+            encodingOptions.alwaysPrintEnumsAsInts = alwaysEncodeEnumsAsInts
+            encodingOptions.preserveProtoFieldNames = preserveProtobufFieldNames
+            return encodingOptions
+        }()
+        self.deterministicEncodingOptions = {
+            var encodingOptions = JSONEncodingOptions()
+            encodingOptions.useDeterministicOrdering = true
+            encodingOptions.alwaysPrintEnumsAsInts = alwaysEncodeEnumsAsInts
+            encodingOptions.preserveProtoFieldNames = preserveProtobufFieldNames
+            return encodingOptions
+        }()
     }
 }
 
@@ -46,12 +56,11 @@ extension JSONCodec: Codec {
     }
 
     public func serialize<Input: ProtobufMessage>(message: Input) throws -> Data {
-        return try message.jsonUTF8Data(options: self.encodingOptions)
+        return try message.jsonUTF8Data(options: self.defaultEncodingOptions)
     }
 
     public func deterministicallySerialize<Input: ProtobufMessage>(message: Input) throws -> Data {
-        #warning("Use settings from https://github.com/apple/swift-protobuf/pull/1478")
-        return try message.jsonUTF8Data(options: self.encodingOptions)
+        return try message.jsonUTF8Data(options: self.deterministicEncodingOptions)
     }
 
     public func deserialize<Output: ProtobufMessage>(source: Data) throws -> Output {
