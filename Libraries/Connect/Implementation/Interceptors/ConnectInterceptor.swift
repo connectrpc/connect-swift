@@ -212,7 +212,7 @@ private extension ProtocolClientConfig {
             return false
         }
 
-        switch self.getConfiguration {
+        switch self.unaryGET {
         case .disabled:
             return false
         case .alwaysEnabled:

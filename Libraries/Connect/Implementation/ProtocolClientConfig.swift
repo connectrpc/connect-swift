@@ -17,7 +17,7 @@ import Foundation
 /// Configuration used to set up `ProtocolClientInterface` implementations.
 public struct ProtocolClientConfig: Sendable {
     /// Configuration used to determine when and how to send GET requests.
-    public let getConfiguration: GETConfiguration
+    public let unaryGET: UnaryGET
     /// Target host (e.g., `https://connectrpc.com`).
     public let host: String
     /// Protocol to use for requests and streams.
@@ -55,7 +55,7 @@ public struct ProtocolClientConfig: Sendable {
     /// Doing so makes it easier to cache responses.
     ///
     /// More info: https://connectrpc.com/docs/protocol#unary-get-request
-    public enum GETConfiguration: Sendable {
+    public enum UnaryGET: Sendable {
         /// Do not send idempotent requests using HTTP GET.
         case disabled
         /// Send idempotent requests using HTTP GET, regardless of their payload size.
@@ -78,12 +78,12 @@ public struct ProtocolClientConfig: Sendable {
         host: String,
         networkProtocol: NetworkProtocol = .connect,
         codec: Codec = JSONCodec(),
-        getConfiguration: GETConfiguration = .disabled,
+        unaryGET: UnaryGET = .disabled,
         requestCompression: RequestCompression? = nil,
         responseCompressionPools: [CompressionPool] = [GzipCompressionPool()],
         interceptors: [InterceptorInitializer] = []
     ) {
-        self.getConfiguration = getConfiguration
+        self.unaryGET = unaryGET
         self.host = host
         self.networkProtocol = networkProtocol
         self.codec = codec
