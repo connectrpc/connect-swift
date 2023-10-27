@@ -201,7 +201,6 @@ final class InterceptorIntegrationTests: XCTestCase {
 
         // The client should wait for all interceptors to finish processing headers before it
         // passes any data through the chain.
-        print(trackedSteps.value)
         XCTAssertEqual(trackedSteps.value, [
             .streamStart(id: "a"),
             .streamStart(id: "b"),
