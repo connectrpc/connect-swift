@@ -109,6 +109,60 @@ final class InterceptorIntegrationTests: XCTestCase {
         ])
     }
 
+    func testUnaryInterceptorIsCalledWithMetrics() async {
+        let trackedSteps = Locked([InterceptorStep]())
+        let client = self.createClient(interceptors: [
+            InterceptorFactory { _ in
+                StepTrackingInterceptor(
+                    id: "a",
+                    trackUsing: trackedSteps
+                )
+            },
+            InterceptorFactory { _ in
+                StepTrackingInterceptor(
+                    id: "b",
+                    trackUsing: trackedSteps
+                )
+            },
+        ])
+        let response = await client.emptyCall(request: SwiftProtobuf.Google_Protobuf_Empty())
+        XCTAssertNil(response.error)
+
+        // Order is not tested here since URLSession does not guarantee metric callback ordering.
+        XCTAssertTrue(trackedSteps.value.contains(.responseMetrics(id: "a")))
+        XCTAssertTrue(trackedSteps.value.contains(.responseMetrics(id: "b")))
+    }
+
+    func testStreamInterceptorIsCalledWithMetrics() async throws {
+        let trackedSteps = Locked([InterceptorStep]())
+        let client = self.createClient(interceptors: [
+            InterceptorFactory { _ in
+                StepTrackingInterceptor(
+                    id: "a",
+                    trackUsing: trackedSteps
+                )
+            },
+            InterceptorFactory { _ in
+                StepTrackingInterceptor(
+                    id: "b",
+                    trackUsing: trackedSteps
+                )
+            },
+        ])
+        let stream = client.streamingOutputCall()
+        try stream.send(Connectrpc_Conformance_V1_StreamingOutputCallRequest())
+        for await result in stream.results() {
+            if case .complete(let code, _, _) = result {
+                XCTAssertEqual(code, .ok)
+            }
+            sleep(1) // URLSession sometimes produces metric information late.
+        }
+
+        // Order is not tested here since URLSession does not guarantee metric callback ordering.
+        XCTAssertTrue(trackedSteps.value.contains(.responseMetrics(id: "a")))
+        XCTAssertTrue(trackedSteps.value.contains(.responseMetrics(id: "b")))
+    }
+
     func testUnaryInterceptorCanFailOutboundRequest() async {
         let trackedSteps = Locked([InterceptorStep]())
         let client = self.createClient(interceptors: [
@@ -219,6 +273,8 @@ final class InterceptorIntegrationTests: XCTestCase {
         ])
     }
 
+    // MARK: - Private
+
     private func createClient(
         interceptors: [InterceptorFactory]
     ) -> Connectrpc_Conformance_V1_TestServiceClient {
@@ -231,6 +287,7 @@ final class InterceptorIntegrationTests: XCTestCase {
 }
 
 private enum InterceptorStep: Equatable {
+    case responseMetrics(id: String)
     case streamStart(id: String)
     case streamInput(id: String)
     case streamRawInput(id: String)
@@ -258,6 +315,15 @@ private final class StepTrackingInterceptor: Interceptor {
         self.failOutboundRequests = failOutboundRequests
         self.requestDelay = requestDelay
         self.steps = steps
+    }
+
+    @Sendable
+    func handleResponseMetrics(
+        _ metrics: HTTPMetrics,
+        proceed: @escaping @Sendable (HTTPMetrics) -> Void
+    ) {
+        self.trackStep(.responseMetrics(id: self.id))
+        proceed(metrics)
     }
 
     private func trackStep(_ step: InterceptorStep) {
