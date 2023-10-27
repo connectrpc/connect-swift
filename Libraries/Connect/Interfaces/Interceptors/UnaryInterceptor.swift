@@ -14,29 +14,58 @@
 
 import Foundation
 
+/// Interceptor that can observe and/or mutate unary requests.
 public protocol UnaryInterceptor: Interceptor {
+    /// Observe and/or mutate a typed request message to be sent to the server.
+    ///
+    /// Order of invocation during a request's lifecycle: 1
+    ///
+    /// - parameter request: The typed request and message to be sent.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
+    ///                      next interceptor.
     @Sendable
     func handleUnaryRequest<Message: ProtobufMessage>(
         _ request: HTTPRequest<Message>,
         proceed: @escaping @Sendable (Result<HTTPRequest<Message>, ConnectError>) -> Void
     )
 
+    /// Observe and/or mutate a raw (serialized) request to be sent to the server.
+    ///
+    /// Order of invocation during a request's lifecycle: 2 (after `handleUnaryRawRequest()`)
+    ///
+    /// - parameter request: The raw (serialized) request to be sent.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
+    ///                      next interceptor.
     @Sendable
     func handleUnaryRawRequest(
         _ request: HTTPRequest<Data?>,
         proceed: @escaping @Sendable (Result<HTTPRequest<Data?>, ConnectError>) -> Void
     )
 
-    @Sendable
-    func handleUnaryResponse<Message: ProtobufMessage>(
-        _ response: ResponseMessage<Message>,
-        proceed: @escaping @Sendable (ResponseMessage<Message>) -> Void
-    )
-
+    /// Observe and/or mutate a raw (serialized) response received from the server.
+    ///
+    /// Order of invocation during a request's lifecycle: 3
+    ///
+    /// - parameter response: The raw (serialized) response that was received.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
+    ///                      next interceptor.
     @Sendable
     func handleUnaryRawResponse(
         _ response: HTTPResponse,
         proceed: @escaping @Sendable (HTTPResponse) -> Void
+    )
+
+    /// Observe and/or mutate a typed (deserialized) response received from the server.
+    ///
+    /// Order of invocation during a request's lifecycle: 4 (after `handleUnaryRawResponse()`)
+    ///
+    /// - parameter response: The typed (deserialized) response received from the server.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
+    ///                      next interceptor.
+    @Sendable
+    func handleUnaryResponse<Message: ProtobufMessage>(
+        _ response: ResponseMessage<Message>,
+        proceed: @escaping @Sendable (ResponseMessage<Message>) -> Void
     )
 }
 
@@ -58,17 +87,17 @@ extension UnaryInterceptor {
     }
 
     @Sendable
-    public func handleUnaryResponse<Message: ProtobufMessage>(
-        _ response: ResponseMessage<Message>,
-        proceed: @escaping @Sendable (ResponseMessage<Message>) -> Void
+    public func handleUnaryRawResponse(
+        _ response: HTTPResponse,
+        proceed: @escaping @Sendable (HTTPResponse) -> Void
     ) {
         proceed(response)
     }
 
     @Sendable
-    public func handleUnaryRawResponse(
-        _ response: HTTPResponse,
-        proceed: @escaping @Sendable (HTTPResponse) -> Void
+    public func handleUnaryResponse<Message: ProtobufMessage>(
+        _ response: ResponseMessage<Message>,
+        proceed: @escaping @Sendable (ResponseMessage<Message>) -> Void
     ) {
         proceed(response)
     }

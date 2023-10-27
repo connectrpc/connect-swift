@@ -50,6 +50,11 @@
 /// Implementations can interact with unary requests, streams, or both. See the
 /// derived `UnaryInterceptor` and `StreamInterceptor` protocols for additional details.
 public protocol Interceptor: AnyObject, Sendable {
+    /// Observe and/or mutate response metrics for a unary request or stream.
+    ///
+    /// - parameter metrics: Metrics containing data about the completed request/stream.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
+    ///                      next interceptor.
     @Sendable
     func handleResponseMetrics(
         _ metrics: HTTPMetrics,
