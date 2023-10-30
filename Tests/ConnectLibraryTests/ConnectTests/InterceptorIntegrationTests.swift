@@ -115,13 +115,15 @@ final class InterceptorIntegrationTests: XCTestCase {
             InterceptorFactory { _ in
                 StepTrackingInterceptor(
                     id: "a",
-                    trackUsing: trackedSteps
+                    trackUsing: trackedSteps,
+                    trackMetrics: true
                 )
             },
             InterceptorFactory { _ in
                 StepTrackingInterceptor(
                     id: "b",
-                    trackUsing: trackedSteps
+                    trackUsing: trackedSteps,
+                    trackMetrics: true
                 )
             },
         ])
@@ -140,13 +142,15 @@ final class InterceptorIntegrationTests: XCTestCase {
             InterceptorFactory { _ in
                 StepTrackingInterceptor(
                     id: "a",
-                    trackUsing: trackedSteps
+                    trackUsing: trackedSteps,
+                    trackMetrics: true
                 )
             },
             InterceptorFactory { _ in
                 StepTrackingInterceptor(
                     id: "b",
-                    trackUsing: trackedSteps
+                    trackUsing: trackedSteps,
+                    trackMetrics: true
                 )
             },
         ])
@@ -306,17 +310,20 @@ private final class StepTrackingInterceptor: Interceptor {
     private let id: String
     private let requestDelay: DispatchTimeInterval
     private let steps: Locked<[InterceptorStep]>
+    private let trackMetrics: Bool
 
     init(
         id: String,
         failOutboundRequests: Bool = false,
         requestDelay: DispatchTimeInterval = .never,
-        trackUsing steps: Locked<[InterceptorStep]>
+        trackUsing steps: Locked<[InterceptorStep]>,
+        trackMetrics: Bool = false
     ) {
         self.id = id
         self.failOutboundRequests = failOutboundRequests
         self.requestDelay = requestDelay
         self.steps = steps
+        self.trackMetrics = trackMetrics
     }
 
     @Sendable
@@ -324,7 +331,9 @@ private final class StepTrackingInterceptor: Interceptor {
         _ metrics: HTTPMetrics,
         proceed: @escaping @Sendable (HTTPMetrics) -> Void
     ) {
-        self.trackStep(.responseMetrics(id: self.id))
+        if self.trackMetrics {
+            self.trackStep(.responseMetrics(id: self.id))
+        }
         proceed(metrics)
     }
 
