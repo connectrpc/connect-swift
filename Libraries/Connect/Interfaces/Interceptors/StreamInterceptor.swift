@@ -21,8 +21,8 @@ public protocol StreamInterceptor: Interceptor {
     /// Order of invocation during a stream's lifecycle: 1
     ///
     /// - parameter request: The request being used to create the stream.
-    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
-    ///                      next interceptor.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) request
+    ///                      to the next interceptor.
     @Sendable
     func handleStreamStart(
         _ request: HTTPRequest<Void>,
@@ -34,8 +34,8 @@ public protocol StreamInterceptor: Interceptor {
     /// Order of invocation during a stream's lifecycle: 2 (after `handleStreamStart()`)
     ///
     /// - parameter input: The message to be sent over the stream.
-    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
-    ///                      next interceptor.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) message
+    ///                      to the next interceptor.
     @Sendable
     func handleStreamInput<Message: ProtobufMessage>(
         _ input: Message,
@@ -48,8 +48,8 @@ public protocol StreamInterceptor: Interceptor {
     /// Order of invocation during a stream's lifecycle: 3 (after `handleStreamInput()`)
     ///
     /// - parameter input: The raw data to be sent over the stream.
-    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
-    ///                      next interceptor.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) data
+    ///                      to the next interceptor.
     @Sendable
     func handleStreamRawInput(
         _ input: Data,
@@ -62,8 +62,8 @@ public protocol StreamInterceptor: Interceptor {
     /// Order of invocation during a stream's lifecycle: 4
     ///
     /// - parameter result: The raw result that was received over the stream.
-    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
-    ///                      next interceptor.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) result
+    ///                      to the next interceptor.
     @Sendable
     func handleStreamRawResult(
         _ result: StreamResult<Data>,
@@ -75,8 +75,8 @@ public protocol StreamInterceptor: Interceptor {
     /// Order of invocation during a stream's lifecycle: 5 (after `handleStreamRawResult()`)
     ///
     /// - parameter result: The deserialized result that was received over the stream.
-    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
-    ///                      next interceptor.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) message
+    ///                      to the next interceptor.
     @Sendable
     func handleStreamResult<Message: ProtobufMessage>(
         _ result: StreamResult<Message>,

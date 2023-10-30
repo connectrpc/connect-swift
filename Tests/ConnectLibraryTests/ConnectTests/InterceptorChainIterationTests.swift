@@ -32,6 +32,22 @@ final class InterceptorChainIterationTests: XCTestCase {
         XCTAssertEqual(result.value, "ab")
     }
 
+    func testExecutingNonFailingReversed() {
+        let initialValue = ""
+        let result = Locked(initialValue)
+        let chain = InterceptorChain([Void]())
+        chain.executeInterceptors(
+            [
+                { value, proceed in proceed(value + "a") },
+                { value, proceed in proceed(value + "b") },
+            ],
+            firstInFirstOut: false,
+            initial: initialValue,
+            finish: { result.value = $0 }
+        )
+        XCTAssertEqual(result.value, "ba")
+    }
+
     func testExecutingLinkedNonFailing() {
         let result = Locked(0)
         let chain = InterceptorChain([Void]())
@@ -65,6 +81,21 @@ final class InterceptorChainIterationTests: XCTestCase {
             finish: { result.value = $0 }
         )
         XCTAssertEqual(try? result.value?.get(), "ab")
+    }
+
+    func testExecutingFailableWithoutErrorReversed() {
+        let result = Locked<Result<String, ConnectError>?>(nil)
+        let chain = InterceptorChain([Void]())
+        chain.executeInterceptorsAndStopOnFailure(
+            [
+                { value, proceed in proceed(.success(value + "a")) },
+                { value, proceed in proceed(.success(value + "b")) },
+            ],
+            firstInFirstOut: false,
+            initial: "",
+            finish: { result.value = $0 }
+        )
+        XCTAssertEqual(try? result.value?.get(), "ba")
     }
 
     func testExecutingFailableWithError() {
@@ -160,10 +191,10 @@ final class InterceptorChainIterationTests: XCTestCase {
             initial: "",
             transform: { value1, proceed in proceed(.success(Int(value1)!)) },
             then: [
-                { value, proceed in proceed(.success(value + 1)) },
                 { _, proceed in
                     proceed(.failure(.from(code: .unknown, headers: Headers(), source: nil)))
                 },
+                { value, proceed in proceed(.success(value + 3)) },
             ],
             finish: { result.value = $0 }
         )

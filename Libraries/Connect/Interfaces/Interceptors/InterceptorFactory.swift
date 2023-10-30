@@ -15,9 +15,9 @@
 /// Factory for creating interceptors. Invoked once per request/stream to produce interceptor
 /// instances.
 ///
-/// This wrapper also captures the underlying type of the interceptor class, allowing us to only
-/// instantiate instances when necessary (for example, a stream-only interceptor should not be
-/// instantiated for a unary request).
+/// This wrapper also captures the underlying type of the interceptor class, allowing the factory
+/// to only instantiate instances when necessary (for example, a stream-only interceptor should not
+/// be instantiated for a unary request).
 public struct InterceptorFactory: Sendable {
     private let factory: @Sendable (ProtocolClientConfig) -> Interceptor
     private let interceptorType: Interceptor.Type

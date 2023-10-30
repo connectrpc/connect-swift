@@ -21,8 +21,8 @@ public protocol UnaryInterceptor: Interceptor {
     /// Order of invocation during a request's lifecycle: 1
     ///
     /// - parameter request: The typed request and message to be sent.
-    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
-    ///                      next interceptor.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) request
+    ///                      to the next interceptor.
     @Sendable
     func handleUnaryRequest<Message: ProtobufMessage>(
         _ request: HTTPRequest<Message>,
@@ -31,11 +31,11 @@ public protocol UnaryInterceptor: Interceptor {
 
     /// Observe and/or mutate a raw (serialized) request to be sent to the server.
     ///
-    /// Order of invocation during a request's lifecycle: 2 (after `handleUnaryRawRequest()`)
+    /// Order of invocation during a request's lifecycle: 2 (after `handleUnaryRequest()`)
     ///
     /// - parameter request: The raw (serialized) request to be sent.
-    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
-    ///                      next interceptor.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) request
+    ///                      to the next interceptor.
     @Sendable
     func handleUnaryRawRequest(
         _ request: HTTPRequest<Data?>,
@@ -47,8 +47,8 @@ public protocol UnaryInterceptor: Interceptor {
     /// Order of invocation during a request's lifecycle: 3
     ///
     /// - parameter response: The raw (serialized) response that was received.
-    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
-    ///                      next interceptor.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) response
+    ///                      to the next interceptor.
     @Sendable
     func handleUnaryRawResponse(
         _ response: HTTPResponse,
@@ -60,8 +60,8 @@ public protocol UnaryInterceptor: Interceptor {
     /// Order of invocation during a request's lifecycle: 4 (after `handleUnaryRawResponse()`)
     ///
     /// - parameter response: The typed (deserialized) response received from the server.
-    /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
-    ///                      next interceptor.
+    /// - parameter proceed: Closure which must be called to pass (potentially altered) response
+    ///                      to the next interceptor.
     @Sendable
     func handleUnaryResponse<Message: ProtobufMessage>(
         _ response: ResponseMessage<Message>,

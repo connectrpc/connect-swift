@@ -128,9 +128,10 @@ final class InterceptorIntegrationTests: XCTestCase {
         let response = await client.emptyCall(request: SwiftProtobuf.Google_Protobuf_Empty())
         XCTAssertNil(response.error)
 
-        // Order is not tested here since URLSession does not guarantee metric callback ordering.
-        XCTAssertTrue(trackedSteps.value.contains(.responseMetrics(id: "a")))
-        XCTAssertTrue(trackedSteps.value.contains(.responseMetrics(id: "b")))
+        // Subset of steps is tested since URLSession does not guarantee metric callback ordering.
+        XCTAssertTrue(trackedSteps.value.contains(
+            [.responseMetrics(id: "b"), .responseMetrics(id: "a")]
+        ))
     }
 
     func testStreamInterceptorIsCalledWithMetrics() async throws {
@@ -155,12 +156,13 @@ final class InterceptorIntegrationTests: XCTestCase {
             if case .complete(let code, _, _) = result {
                 XCTAssertEqual(code, .ok)
             }
-            sleep(1) // URLSession sometimes produces metric information late.
+            sleep(1) // URLSession sometimes produces metrics information late.
         }
 
-        // Order is not tested here since URLSession does not guarantee metric callback ordering.
-        XCTAssertTrue(trackedSteps.value.contains(.responseMetrics(id: "a")))
-        XCTAssertTrue(trackedSteps.value.contains(.responseMetrics(id: "b")))
+        // Subset of steps is tested since URLSession does not guarantee metric callback ordering.
+        XCTAssertTrue(trackedSteps.value.contains(
+            [.responseMetrics(id: "b"), .responseMetrics(id: "a")]
+        ))
     }
 
     func testUnaryInterceptorCanFailOutboundRequest() async {

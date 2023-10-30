@@ -329,7 +329,7 @@ extension ProtocolClient: ProtocolClientInterface {
                         request: HTTPRequest(
                             url: interceptedRequest.url,
                             headers: interceptedRequest.headers,
-                            message: nil, // Message is void on stream requests
+                            message: nil, // Message is void on stream creation.
                             trailers: interceptedRequest.trailers
                         ),
                         responseCallbacks: responseCallbacks

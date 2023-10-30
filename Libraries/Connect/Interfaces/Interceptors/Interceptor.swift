@@ -31,16 +31,22 @@
 /// interceptors in the chain will not be invoked, and the error will be returned to the
 /// original caller.
 ///
+/// Interceptors are invoked in FIFO order on the request path, and in LIFO order on the
+/// response path. For example:
+///
+/// Client -> A -> B -> C -> D -> Server
+/// Client <- D <- C <- B <- A <- Server
+///
 /// Interceptors receive both the current value and a closure that
 /// should be called to resume the interceptor chain. Propagation will not continue until
 /// this closure is invoked. Additional values may still be passed to a given interceptor even
 /// though it has not yet continued the chain with a previous value. For example:
 ///
-/// 1. A request is sent
-/// 2. Response headers are received, and an interceptor pauses the chain while processing them
+/// 1. A request is sent.
+/// 2. Response headers are received, and an interceptor pauses the chain while processing them.
 /// 3. The first chunk of streamed response data is received, and the interceptor is invoked with
-///    this value
-/// 4. The interceptor is expected to resume with headers first, and then with data after
+///    this value.
+/// 4. The interceptor is expected to resume with headers first, and then with data after.
 ///
 /// Implementations should be thread-safe (hence the `Sendable` requirements),
 /// as functions can be invoked from different threads during the span of a request or
