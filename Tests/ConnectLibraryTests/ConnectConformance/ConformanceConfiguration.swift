@@ -20,11 +20,9 @@ import Foundation
 
 /// Represents a specific configuration with which to run a suite of conformance tests.
 final class ConformanceConfiguration {
-    let description: String
     let protocolClient: ProtocolClient
 
-    private init(description: String, protocolClient: ProtocolClient) {
-        self.description = description
+    private init(protocolClient: ProtocolClient) {
         self.protocolClient = protocolClient
     }
 
@@ -61,10 +59,6 @@ final class ConformanceConfiguration {
             for httpClient in tuple.httpClients {
                 for codec in tuple.codecs {
                     configurations.append(.init(
-                        description: """
-                        \(tuple.networkProtocol) + \(type(of: codec)) via \(type(of: httpClient)) \
-                        on port \(tuple.port)
-                        """,
                         protocolClient: ProtocolClient(
                             httpClient: httpClient,
                             config: ProtocolClientConfig(

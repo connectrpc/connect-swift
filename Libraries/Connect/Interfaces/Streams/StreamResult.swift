@@ -23,6 +23,15 @@ public enum StreamResult<Output: Sendable>: Sendable {
     case headers(Headers)
     /// A response message has been received over the stream.
     case message(Output)
+
+    public var messageValue: Output? {
+        switch self {
+        case .headers, .complete:
+            return nil
+        case .message(let output):
+            return output
+        }
+    }
 }
 
 extension StreamResult: Equatable where Output: Equatable {

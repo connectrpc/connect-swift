@@ -45,85 +45,50 @@ extension ProtocolClient: ProtocolClientInterface {
         headers: Headers,
         completion: @escaping @Sendable (ResponseMessage<Output>) -> Void
     ) -> Cancelable {
-        let codec = self.config.codec
-        let data: Data
-        do {
-            if self.config.unaryGET.isEnabled && idempotencyLevel == .noSideEffects {
-                data = try codec.deterministicallySerialize(message: request)
-            } else {
-                data = try codec.serialize(message: request)
-            }
-        } catch let error {
-            completion(ResponseMessage(
-                code: .unknown,
-                result: .failure(ConnectError(
-                    code: .unknown, message: "request serialization failed", exception: error,
-                    details: [], metadata: [:]
-                ))
-            ))
-            return Cancelable {}
-        }
-
-        let interceptorChain = self.config.createUnaryInterceptorChain()
-        let request = HTTPRequest(
-            url: URL(string: path, relativeTo: URL(string: self.config.host))!,
-            contentType: "application/\(codec.name())",
+        let cancelation = Locked<(cancelable: Cancelable?, isCancelled: Bool)>((nil, false))
+        let config = self.config
+        var headers = headers
+        headers[HeaderConstants.contentType] = ["application/\(config.codec.name())"]
+        let request = HTTPRequest<Input>(
+            url: URL(string: path, relativeTo: URL(string: config.host))!,
             headers: headers,
-            message: data,
+            message: request,
             method: .post,
             trailers: nil,
             idempotencyLevel: idempotencyLevel
         )
-        let cancelation = Locked<(cancelable: Cancelable?, isCancelled: Bool)>((nil, false))
-        let finishHandlingResponse: @Sendable (HTTPResponse) -> Void = { response in
-            let responseMessage: ResponseMessage<Output>
-            if response.code != .ok {
-                let error = (response.error as? ConnectError)
-                ?? ConnectError.from(
-                    code: response.code,
-                    headers: response.headers,
-                    source: response.message
-                )
-                responseMessage = ResponseMessage(
-                    code: response.code,
-                    headers: response.headers,
-                    result: .failure(error),
-                    trailers: response.trailers
-                )
-            } else if let message = response.message {
-                do {
-                    responseMessage = ResponseMessage(
-                        code: response.code,
-                        headers: response.headers,
-                        result: .success(try codec.deserialize(source: message)),
-                        trailers: response.trailers
-                    )
-                } catch let error {
-                    responseMessage = ResponseMessage(
-                        code: response.code,
-                        headers: response.headers,
-                        result: .failure(ConnectError(
-                            code: response.code, message: nil, exception: error,
-                            details: [], metadata: response.headers
-                        )),
-                        trailers: response.trailers
-                    )
-                }
-            } else {
-                responseMessage = ResponseMessage(
-                    code: response.code,
-                    headers: response.headers,
-                    result: .success(.init()),
-                    trailers: response.trailers
-                )
-            }
-            completion(responseMessage)
-        }
-        interceptorChain.executeInterceptorsAndStopOnFailure(
-            \.requestFunction,
+        let interceptorChain = self.config.createUnaryInterceptorChain()
+        interceptorChain.executeLinkedInterceptorsAndStopOnFailure(
+            interceptorChain.interceptors.map { $0.handleUnaryRequest },
             firstInFirstOut: true,
             initial: request,
-            finish: { result in
+            transform: { interceptedRequest, proceed in
+                do {
+                    let data: Data
+                    if config.unaryGET.isEnabled && interceptedRequest.idempotencyLevel == .noSideEffects {
+                        data = try config.codec.deterministicallySerialize(
+                            message: interceptedRequest.message
+                        )
+                    } else {
+                        data = try config.codec.serialize(message: interceptedRequest.message)
+                    }
+                    proceed(.success(HTTPRequest<Data?>(
+                        url: interceptedRequest.url,
+                        headers: interceptedRequest.headers,
+                        message: data,
+                        method: interceptedRequest.method,
+                        trailers: interceptedRequest.trailers,
+                        idempotencyLevel: interceptedRequest.idempotencyLevel
+                    )))
+                } catch let error {
+                    proceed(.failure(ConnectError(
+                        code: .unknown, message: "request serialization failed",
+                        exception: error, details: [], metadata: [:]
+                    )))
+                }
+            },
+            then: interceptorChain.interceptors.map { $0.handleUnaryRawRequest },
+            finish: { interceptedResult in
                 cancelation.perform { cancelation in
                     if cancelation.isCancelled {
                         // If the caller cancelled the request while it was being processed
@@ -131,12 +96,12 @@ extension ProtocolClient: ProtocolClientInterface {
                         return
                     }
 
-                    let interceptedRequest: HTTPRequest
-                    switch result {
+                    let interceptedRequest: HTTPRequest<Data?>
+                    switch interceptedResult {
                     case .success(let value):
                         interceptedRequest = value
                     case .failure(let error):
-                        completion(.init(result: .failure(error)))
+                        completion(ResponseMessage(result: .failure(error)))
                         return
                     }
 
@@ -144,18 +109,24 @@ extension ProtocolClient: ProtocolClientInterface {
                         request: interceptedRequest,
                         onMetrics: { metrics in
                             interceptorChain.executeInterceptors(
-                                \.responseMetricsFunction,
+                                interceptorChain.interceptors.map { $0.handleResponseMetrics },
                                 firstInFirstOut: false,
                                 initial: metrics,
                                 finish: { _ in }
                             )
                         },
-                        onResponse: { response in
-                            interceptorChain.executeInterceptors(
-                                \.responseFunction,
+                        onResponse: { interceptedResponse in
+                            interceptorChain.executeLinkedInterceptors(
+                                interceptorChain.interceptors.map { $0.handleUnaryRawResponse },
                                 firstInFirstOut: false,
-                                initial: response,
-                                finish: finishHandlingResponse
+                                initial: interceptedResponse,
+                                transform: { response, proceed in
+                                    proceed(ResponseMessage<Output>(
+                                        response: response, codec: config.codec
+                                    ))
+                                },
+                                then: interceptorChain.interceptors.map { $0.handleUnaryResponse },
+                                finish: completion
                             )
                         }
                     )
@@ -177,12 +148,9 @@ extension ProtocolClient: ProtocolClientInterface {
         headers: Headers,
         onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> any BidirectionalStreamInterface<Input> {
-        return BidirectionalStream(
-            requestCallbacks: self.createRequestCallbacks(
-                path: path, headers: headers, onResult: onResult
-            ),
-            codec: self.config.codec
-        )
+        return BidirectionalStream(requestCallbacks: self.createRequestCallbacks(
+            path: path, headers: headers, onResult: onResult
+        ))
     }
 
     public func clientOnlyStream<
@@ -192,12 +160,9 @@ extension ProtocolClient: ProtocolClientInterface {
         headers: Headers,
         onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> any ClientOnlyStreamInterface<Input> {
-        return BidirectionalStream(
-            requestCallbacks: self.createRequestCallbacks(
-                path: path, headers: headers, onResult: onResult
-            ),
-            codec: self.config.codec
-        )
+        return BidirectionalStream(requestCallbacks: self.createRequestCallbacks(
+            path: path, headers: headers, onResult: onResult
+        ))
     }
 
     public func serverOnlyStream<
@@ -210,8 +175,7 @@ extension ProtocolClient: ProtocolClientInterface {
         return ServerOnlyStream(bidirectionalStream: BidirectionalStream(
             requestCallbacks: self.createRequestCallbacks(
                 path: path, headers: headers, onResult: onResult
-            ),
-            codec: self.config.codec
+            )
         ))
     }
 
@@ -237,8 +201,8 @@ extension ProtocolClient: ProtocolClientInterface {
         path: String,
         headers: Headers
     ) -> any BidirectionalAsyncStreamInterface<Input, Output> {
-        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
-        let callbacks = self.createRequestCallbacks(
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
             path: path, headers: headers, onResult: { bidirectionalAsync.receive($0) }
         )
         return bidirectionalAsync.configureForSending(with: callbacks)
@@ -249,8 +213,8 @@ extension ProtocolClient: ProtocolClientInterface {
         path: String,
         headers: Headers
     ) -> any ClientOnlyAsyncStreamInterface<Input, Output> {
-        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
-        let callbacks = self.createRequestCallbacks(
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
             path: path, headers: headers, onResult: { bidirectionalAsync.receive($0) }
         )
         return bidirectionalAsync.configureForSending(with: callbacks)
@@ -261,8 +225,8 @@ extension ProtocolClient: ProtocolClientInterface {
         path: String,
         headers: Headers
     ) -> any ServerOnlyAsyncStreamInterface<Input, Output> {
-        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>(codec: self.config.codec)
-        let callbacks = self.createRequestCallbacks(
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
             path: path, headers: headers, onResult: { bidirectionalAsync.receive($0) }
         )
         return ServerOnlyAsyncStream(
@@ -272,36 +236,34 @@ extension ProtocolClient: ProtocolClientInterface {
 
     // MARK: - Private
 
-    private func createRequestCallbacks<Output: ProtobufMessage>(
+    private func createRequestCallbacks<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         headers: Headers,
         onResult: @escaping @Sendable (StreamResult<Output>) -> Void
-    ) -> RequestCallbacks {
+    ) -> RequestCallbacks<Input> {
         let codec = self.config.codec
         let responseBuffer = Locked(Data())
         let hasCompleted = Locked(false)
         let interceptorChain = self.config.createStreamInterceptorChain()
-        let finishHandlingResult: @Sendable (StreamResult<Data>) -> Void = { result in
-            do {
-                if case .complete = result {
-                    hasCompleted.value = true
-                }
-                onResult(try result.toTypedResult(using: codec))
-            } catch let error {
-                os_log(
-                    .error,
-                    "Dropping stream result which failed to deserialize: %@",
-                    error.localizedDescription
-                )
+        let onResult: @Sendable (StreamResult<Output>) -> Void = { output in
+            if case .complete = output {
+                hasCompleted.value = true
             }
+            onResult(output)
         }
         let responseCallbacks = ResponseCallbacks(
             receiveResponseHeaders: { responseHeaders in
-                interceptorChain.executeInterceptors(
-                    \.streamResultFunction,
+                interceptorChain.executeLinkedInterceptors(
+                    interceptorChain.interceptors.map { $0.handleStreamRawResult },
                     firstInFirstOut: false,
                     initial: .headers(responseHeaders),
-                    finish: finishHandlingResult
+                    transform: { interceptedResult, proceed in
+                        if let typedResult = interceptedResult.toTyped(Output.self, using: codec) {
+                            proceed(typedResult)
+                        }
+                    },
+                    then: interceptorChain.interceptors.map { $0.handleStreamResult },
+                    finish: onResult
                 )
             },
             receiveResponseData: { data in
@@ -319,48 +281,78 @@ extension ProtocolClient: ProtocolClientInterface {
                             return
                         }
 
-                        interceptorChain.executeInterceptors(
-                            \.streamResultFunction,
+                        interceptorChain.executeLinkedInterceptors(
+                            interceptorChain.interceptors.map { $0.handleStreamRawResult },
                             firstInFirstOut: false,
                             initial: .message(responseBuffer.prefix(prefixedMessageLength)),
-                            finish: finishHandlingResult
+                            transform: { interceptedResult, proceed in
+                                if let typedResult = interceptedResult.toTyped(
+                                    Output.self, using: codec
+                                ) {
+                                    proceed(typedResult)
+                                }
+                            },
+                            then: interceptorChain.interceptors.map { $0.handleStreamResult },
+                            finish: onResult
                         )
                         responseBuffer = Data(responseBuffer.suffix(from: prefixedMessageLength))
                     }
                 }
             },
+            receiveResponseMetrics: { metrics in
+                interceptorChain.executeInterceptors(
+                    interceptorChain.interceptors.map { $0.handleResponseMetrics },
+                    firstInFirstOut: false,
+                    initial: metrics,
+                    finish: { _ in }
+                )
+            },
             receiveClose: { code, trailers, error in
                 if hasCompleted.value {
                     return
                 }
-                interceptorChain.executeInterceptors(
-                    \.streamResultFunction,
+                interceptorChain.executeLinkedInterceptors(
+                    interceptorChain.interceptors.map { $0.handleStreamRawResult },
                     firstInFirstOut: false,
                     initial: .complete(code: code, error: error, trailers: trailers),
-                    finish: finishHandlingResult
+                    transform: { interceptedResult, proceed in
+                        if let typedResult = interceptedResult.toTyped(Output.self, using: codec) {
+                            proceed(typedResult)
+                        }
+                    },
+                    then: interceptorChain.interceptors.map { $0.handleStreamResult },
+                    finish: onResult
                 )
             }
         )
 
         let pendingRequestCallbacks = PendingRequestCallbacks()
-        let request = HTTPRequest(
+        var headers = headers
+        headers[HeaderConstants.contentType] = ["application/connect+\(codec.name())"]
+        let request = HTTPRequest<Void>(
             url: URL(string: path, relativeTo: URL(string: self.config.host))!,
-            contentType: "application/connect+\(codec.name())",
             headers: headers,
-            message: nil,
+            message: (),
             method: .post,
             trailers: nil,
             idempotencyLevel: .unknown
         )
         interceptorChain.executeInterceptorsAndStopOnFailure(
-            \.requestFunction,
+            interceptorChain.interceptors.map { $0.handleStreamStart },
             firstInFirstOut: true,
             initial: request,
             finish: { result in
                 switch result {
                 case .success(let interceptedRequest):
                     pendingRequestCallbacks.setCallbacks(self.httpClient.stream(
-                        request: interceptedRequest,
+                        request: HTTPRequest(
+                            url: interceptedRequest.url,
+                            headers: interceptedRequest.headers,
+                            message: nil, // Message is void on stream creation.
+                            method: interceptedRequest.method,
+                            trailers: interceptedRequest.trailers,
+                            idempotencyLevel: interceptedRequest.idempotencyLevel
+                        ),
                         responseCallbacks: responseCallbacks
                     ))
                 case .failure(let error):
@@ -369,13 +361,25 @@ extension ProtocolClient: ProtocolClientInterface {
                 }
             }
         )
-        return RequestCallbacks { requestData in
+        return RequestCallbacks<Input> { requestMessage in
             // Wait for the stream to be established before sending data.
             pendingRequestCallbacks.enqueue { requestCallbacks in
-                interceptorChain.executeInterceptors(
-                    \.requestDataFunction,
+                interceptorChain.executeLinkedInterceptors(
+                    interceptorChain.interceptors.map { $0.handleStreamInput },
                     firstInFirstOut: true,
-                    initial: requestData,
+                    initial: requestMessage,
+                    transform: { interceptedMessage, proceed in
+                        do {
+                            proceed(try codec.serialize(message: interceptedMessage))
+                        } catch let error {
+                            os_log(
+                                .error,
+                                "Failed to send request message which could not be serialized: %@",
+                                error.localizedDescription
+                            )
+                        }
+                    },
+                    then: interceptorChain.interceptors.map { $0.handleStreamRawInput },
                     finish: requestCallbacks.sendData
                 )
             }
@@ -387,25 +391,12 @@ extension ProtocolClient: ProtocolClientInterface {
     }
 }
 
-private extension StreamResult<Data> {
-    func toTypedResult<M: ProtobufMessage>(using codec: Codec) throws -> StreamResult<M> {
-        switch self {
-        case .complete(let code, let error, let trailers):
-            return .complete(code: code, error: error, trailers: trailers)
-        case .headers(let headers):
-            return .headers(headers)
-        case .message(let data):
-            return .message(try codec.deserialize(source: data))
-        }
-    }
-}
-
 private final class PendingRequestCallbacks: @unchecked Sendable {
     private let lock = Lock()
-    private var callbacks: RequestCallbacks?
-    private var queue = [(RequestCallbacks) -> Void]()
+    private var callbacks: RequestCallbacks<Data>?
+    private var queue = [(RequestCallbacks<Data>) -> Void]()
 
-    func setCallbacks(_ callbacks: RequestCallbacks) {
+    func setCallbacks(_ callbacks: RequestCallbacks<Data>) {
         self.lock.perform {
             self.callbacks = callbacks
             for action in self.queue {
@@ -415,12 +406,81 @@ private final class PendingRequestCallbacks: @unchecked Sendable {
         }
     }
 
-    func enqueue(_ action: @escaping (RequestCallbacks) -> Void) {
+    func enqueue(_ action: @escaping (RequestCallbacks<Data>) -> Void) {
         self.lock.perform {
             if let callbacks = self.callbacks {
                 action(callbacks)
             } else {
                 self.queue.append(action)
+            }
+        }
+    }
+}
+
+private extension ResponseMessage where Output: ProtobufMessage {
+    init(response: HTTPResponse, codec: Codec) {
+        if response.code != .ok {
+            let error = (response.error as? ConnectError)
+            ?? ConnectError.from(
+                code: response.code,
+                headers: response.headers,
+                source: response.message
+            )
+            self.init(
+                code: response.code,
+                headers: response.headers,
+                result: .failure(error),
+                trailers: response.trailers
+            )
+        } else if let message = response.message {
+            do {
+                self.init(
+                    code: response.code,
+                    headers: response.headers,
+                    result: .success(try codec.deserialize(source: message)),
+                    trailers: response.trailers
+                )
+            } catch let error {
+                self.init(
+                    code: response.code,
+                    headers: response.headers,
+                    result: .failure(ConnectError(
+                        code: response.code, message: nil, exception: error,
+                        details: [], metadata: response.headers
+                    )),
+                    trailers: response.trailers
+                )
+            }
+        } else {
+            self.init(
+                code: response.code,
+                headers: response.headers,
+                result: .success(.init()),
+                trailers: response.trailers
+            )
+        }
+    }
+}
+
+private extension StreamResult<Data> {
+    func toTyped<Message: ProtobufMessage>(
+        _ type: Message.Type, using codec: Codec
+    ) -> StreamResult<Message>? {
+        switch self {
+        case .complete(let code, let error, let trailers):
+            return .complete(code: code, error: error, trailers: trailers)
+        case .headers(let headers):
+            return .headers(headers)
+        case .message(let data):
+            do {
+                return .message(try codec.deserialize(source: data))
+            } catch let error {
+                os_log(
+                    .error,
+                    "Stream result failed to deserialize: %@",
+                    error.localizedDescription
+                )
+                return nil
             }
         }
     }

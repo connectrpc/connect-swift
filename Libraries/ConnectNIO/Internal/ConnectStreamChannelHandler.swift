@@ -21,7 +21,7 @@ import NIOHTTP1
 /// NIO-based channel handler for streams made through the Connect library.
 final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
     private let eventLoop: NIOCore.EventLoop
-    private let request: Connect.HTTPRequest
+    private let request: Connect.HTTPRequest<Data?>
     private let responseCallbacks: Connect.ResponseCallbacks
 
     private var context: NIOCore.ChannelHandlerContext?
@@ -31,7 +31,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     private var receivedStatus: NIOHTTP1.HTTPResponseStatus?
 
     init(
-        request: Connect.HTTPRequest,
+        request: Connect.HTTPRequest<Data?>,
         responseCallbacks: Connect.ResponseCallbacks,
         eventLoop: NIOCore.EventLoop
     ) {
@@ -117,12 +117,6 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
         }
 
         var nioHeaders = NIOHTTP1.HTTPHeaders()
-        switch self.request.method {
-        case .get:
-            break
-        case .post:
-            nioHeaders.add(name: "Content-Type", value: self.request.contentType)
-        }
         nioHeaders.add(name: "Host", value: self.request.url.host!)
         nioHeaders.addNIOHeadersFromConnect(self.request.headers)
 

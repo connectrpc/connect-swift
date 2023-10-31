@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import Foundation
+
 /// Interface for a client that performs underlying HTTP requests and streams with primitive types.
 public protocol HTTPClientInterface: Sendable {
     /// Perform a unary HTTP request.
@@ -24,7 +26,7 @@ public protocol HTTPClientInterface: Sendable {
     /// - returns: A type which can be used to cancel the outbound request.
     @discardableResult
     func unary(
-        request: HTTPRequest,
+        request: HTTPRequest<Data?>,
         onMetrics: @escaping @Sendable (HTTPMetrics) -> Void,
         onResponse: @escaping @Sendable (HTTPResponse) -> Void
     ) -> Cancelable
@@ -36,5 +38,8 @@ public protocol HTTPClientInterface: Sendable {
     ///                                when response data is received from the server.
     ///
     /// - returns: Set of callbacks which can be called to send data over the stream or to close it.
-    func stream(request: HTTPRequest, responseCallbacks: ResponseCallbacks) -> RequestCallbacks
+    func stream(
+        request: HTTPRequest<Data?>,
+        responseCallbacks: ResponseCallbacks
+    ) -> RequestCallbacks<Data>
 }

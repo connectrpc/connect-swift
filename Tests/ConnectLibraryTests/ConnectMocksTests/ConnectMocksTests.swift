@@ -49,7 +49,7 @@ final class ConnectMocksTests: XCTestCase {
 
     // MARK: - Bidirectional stream
 
-    func testMockBidirectionalStreamCallbacks() throws {
+    func testMockBidirectionalStreamCallbacks() {
         let client = Connectrpc_Conformance_V1_TestServiceClientMock()
         let expectedInputs: [Connectrpc_Conformance_V1_StreamingOutputCallRequest] = [
             .with { $0.responseParameters = [.with { $0.size = 123 }] },
@@ -76,8 +76,8 @@ final class ConnectMocksTests: XCTestCase {
         let stream = client.fullDuplexCall { result in
             receivedResults.perform { $0.append(result) }
         }
-        try stream.send(expectedInputs[0])
-        try stream.send(expectedInputs[1])
+        stream.send(expectedInputs[0])
+        stream.send(expectedInputs[1])
         stream.close()
 
         XCTAssertEqual(sentInputs, expectedInputs)
@@ -126,7 +126,7 @@ final class ConnectMocksTests: XCTestCase {
 
     // MARK: - Server-only stream
 
-    func testMockServerOnlyStreamCallbacks() throws {
+    func testMockServerOnlyStreamCallbacks() {
         let client = Connectrpc_Conformance_V1_TestServiceClientMock()
         let expectedInput = SwiftProtobuf.Google_Protobuf_Empty()
         let expectedResults: [StreamResult<SwiftProtobuf.Google_Protobuf_Empty>] = [
@@ -144,7 +144,7 @@ final class ConnectMocksTests: XCTestCase {
         let stream = client.unimplementedStreamingOutputCall { result in
             receivedResults.perform { $0.append(result) }
         }
-        try stream.send(expectedInput)
+        stream.send(expectedInput)
 
         XCTAssertEqual(sentInputs, [expectedInput])
         XCTAssertEqual(client.mockUnimplementedStreamingOutputCall.inputs, [expectedInput])

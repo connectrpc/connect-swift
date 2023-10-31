@@ -21,7 +21,7 @@ import NIOHTTP1
 /// NIO-based channel handler for unary requests made through the Connect library.
 final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
     private let eventLoop: NIOCore.EventLoop
-    private let request: Connect.HTTPRequest
+    private let request: Connect.HTTPRequest<Data?>
     private let onMetrics: (Connect.HTTPMetrics) -> Void
     private let onResponse: (Connect.HTTPResponse) -> Void
 
@@ -32,7 +32,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
     private var receivedEnd: NIOHTTP1.HTTPHeaders?
 
     init(
-        request: Connect.HTTPRequest,
+        request: Connect.HTTPRequest<Data?>,
         eventLoop: NIOCore.EventLoop,
         onMetrics: @escaping (Connect.HTTPMetrics) -> Void,
         onResponse: @escaping (Connect.HTTPResponse) -> Void
@@ -94,12 +94,8 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
         }
 
         var nioHeaders = NIOHTTP1.HTTPHeaders()
-        switch self.request.method {
-        case .get:
-            break
-        case .post:
-            nioHeaders.add(name: "Content-Type", value: self.request.contentType)
-            nioHeaders.add(name: "Content-Length", value: "\(self.request.message?.count ?? 0)")
+        if let messageLength = self.request.message?.count {
+            nioHeaders.add(name: "Content-Length", value: "\(messageLength)")
         }
         nioHeaders.add(name: "Host", value: self.request.url.host!)
         nioHeaders.addNIOHeadersFromConnect(self.request.headers)

@@ -25,5 +25,5 @@ public protocol ServerOnlyStreamInterface<Input> {
     /// Should be called exactly one time when starting the stream.
     ///
     /// - parameter input: The request message to send.
-    func send(_ input: Input) throws
+    func send(_ input: Input)
 }

@@ -13,11 +13,12 @@
 // limitations under the License.
 
 import Connect
+import Foundation
 import NIOHTTP1
 
 extension HTTPRequestHead {
     static func fromConnect(
-        _ request: Connect.HTTPRequest, nioHeaders: NIOHTTP1.HTTPHeaders
+        _ request: Connect.HTTPRequest<Data?>, nioHeaders: NIOHTTP1.HTTPHeaders
     ) -> Self {
         switch request.method {
         case .get:

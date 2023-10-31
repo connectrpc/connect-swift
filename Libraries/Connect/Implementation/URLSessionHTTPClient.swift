@@ -45,7 +45,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
 
     @discardableResult
     open func unary(
-        request: HTTPRequest,
+        request: HTTPRequest<Data?>,
         onMetrics: @escaping @Sendable (HTTPMetrics) -> Void,
         onResponse: @escaping @Sendable (HTTPResponse) -> Void
     ) -> Cancelable {
@@ -96,15 +96,18 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
     }
 
     open func stream(
-        request: HTTPRequest, responseCallbacks: ResponseCallbacks
-    ) -> RequestCallbacks {
+        request: HTTPRequest<Data?>, responseCallbacks: ResponseCallbacks
+    ) -> RequestCallbacks<Data> {
         assert(!request.isGRPC, "URLSessionHTTPClient does not support gRPC, use NIOHTTPClient")
         let urlSessionStream = URLSessionStream(
             request: URLRequest(httpRequest: request),
             session: self.session,
             responseCallbacks: responseCallbacks
         )
-        self.lock.perform { self.streams[urlSessionStream.taskID] = urlSessionStream }
+        self.lock.perform {
+            self.streams[urlSessionStream.taskID] = urlSessionStream
+            self.metricsClosures[urlSessionStream.taskID] = responseCallbacks.receiveResponseMetrics
+        }
         return RequestCallbacks(
             sendData: { data in
                 do {
@@ -221,16 +224,10 @@ private extension HTTPRequest {
 }
 
 private extension URLRequest {
-    init(httpRequest: HTTPRequest) {
+    init(httpRequest: HTTPRequest<Data?>) {
         self.init(url: httpRequest.url)
         self.httpMethod = httpRequest.method.rawValue
         self.httpBody = httpRequest.message
-        switch httpRequest.method {
-        case .get:
-            break
-        case .post:
-            self.setValue(httpRequest.contentType, forHTTPHeaderField: HeaderConstants.contentType)
-        }
         for (headerName, headerValues) in httpRequest.headers {
             self.setValue(headerValues.joined(separator: ","), forHTTPHeaderField: headerName)
         }
