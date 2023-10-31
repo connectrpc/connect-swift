@@ -219,13 +219,17 @@ private extension ProtocolClientConfig {
             headers: headers,
             message: nil,
             method: .get,
-            trailers: request.trailers,
+            trailers: nil,
             idempotencyLevel: request.idempotencyLevel
         )
     }
+}
 
-    private func shouldUseUnaryGET(for request: HTTPRequest<Data?>) -> Bool {
-        guard request.idempotencyLevel == .noSideEffects else {
+extension ProtocolClientConfig {
+    func shouldUseUnaryGET(for request: HTTPRequest<Data?>) -> Bool {
+        guard
+            case .connect = self.networkProtocol, request.idempotencyLevel == .noSideEffects 
+        else {
             return false
         }
 

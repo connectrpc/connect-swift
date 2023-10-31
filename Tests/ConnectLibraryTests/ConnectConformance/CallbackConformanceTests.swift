@@ -26,7 +26,7 @@ private typealias UnimplementedServiceClient = Connectrpc_Conformance_V1_Unimple
 /// Tests are based on https://github.com/connectrpc/conformance
 ///
 /// Tests are written using callback APIs.
-final class CallbackConformance: XCTestCase {
+final class CallbackConformanceTests: XCTestCase {
     private func executeTestWithClients(
         timeout: TimeInterval = 60,
         runTestsWithClient: (TestServiceClient) throws -> Void
@@ -37,12 +37,23 @@ final class CallbackConformance: XCTestCase {
         }
     }
 
-    private func executeTestWithUnimplementedClients(
-        runTestsWithClient: (UnimplementedServiceClient) throws -> Void
-    ) rethrows {
+    private func executeTestWithConnectOnlyClients(
+        runTestsWithClient: (TestServiceClient) -> Void
+    ) {
         let configurations = ConformanceConfiguration.all(timeout: 60)
         for configuration in configurations {
-            try runTestsWithClient(UnimplementedServiceClient(client: configuration.protocolClient))
+            if case .connect = configuration.networkProtocol {
+                runTestsWithClient(TestServiceClient(client: configuration.protocolClient))
+            }
+        }
+    }
+
+    private func executeTestWithUnimplementedClients(
+        runTestsWithClient: (UnimplementedServiceClient) -> Void
+    ) {
+        let configurations = ConformanceConfiguration.all(timeout: 60)
+        for configuration in configurations {
+            runTestsWithClient(UnimplementedServiceClient(client: configuration.protocolClient))
         }
     }
 
@@ -78,7 +89,7 @@ final class CallbackConformance: XCTestCase {
     }
 
     func testCacheableUnary() {
-        self.executeTestWithClients { client in
+        self.executeTestWithConnectOnlyClients { client in
             let size = 123
             let message = Connectrpc_Conformance_V1_SimpleRequest.with { proto in
                 proto.responseSize = Int32(size)
@@ -87,6 +98,7 @@ final class CallbackConformance: XCTestCase {
             let expectation = self.expectation(description: "Receives successful response")
             client.cacheableUnaryCall(request: message) { response in
                 XCTAssertNil(response.error)
+                XCTAssertEqual(response.headers["get-request"], ["true"])
                 XCTAssertEqual(response.message?.payload.body.count, size)
                 expectation.fulfill()
             }

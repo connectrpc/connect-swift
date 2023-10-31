@@ -62,23 +62,23 @@ extension ProtocolClient: ProtocolClientInterface {
             interceptorChain.interceptors.map { $0.handleUnaryRequest },
             firstInFirstOut: true,
             initial: request,
-            transform: { interceptedRequest, proceed in
+            transform: { intercepted, proceed in
                 do {
                     let data: Data
-                    if config.unaryGET.isEnabled && interceptedRequest.idempotencyLevel == .noSideEffects {
+                    if config.unaryGET.isEnabled && intercepted.idempotencyLevel == .noSideEffects {
                         data = try config.codec.deterministicallySerialize(
-                            message: interceptedRequest.message
+                            message: intercepted.message
                         )
                     } else {
-                        data = try config.codec.serialize(message: interceptedRequest.message)
+                        data = try config.codec.serialize(message: intercepted.message)
                     }
                     proceed(.success(HTTPRequest<Data?>(
-                        url: interceptedRequest.url,
-                        headers: interceptedRequest.headers,
+                        url: intercepted.url,
+                        headers: intercepted.headers,
                         message: data,
-                        method: interceptedRequest.method,
-                        trailers: interceptedRequest.trailers,
-                        idempotencyLevel: interceptedRequest.idempotencyLevel
+                        method: intercepted.method,
+                        trailers: intercepted.trailers,
+                        idempotencyLevel: intercepted.idempotencyLevel
                     )))
                 } catch let error {
                     proceed(.failure(ConnectError(

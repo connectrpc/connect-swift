@@ -27,7 +27,7 @@ private typealias UnimplementedServiceClient = Connectrpc_Conformance_V1_Unimple
 ///
 /// Tests are written using async/await APIs.
 @available(iOS 13, *)
-final class AsyncAwaitConformance: XCTestCase {
+final class AsyncAwaitConformanceTests: XCTestCase {
     private func executeTestWithClients(
         timeout: TimeInterval = 60,
         runTestsWithClient: (TestServiceClient) async throws -> Void
@@ -35,6 +35,17 @@ final class AsyncAwaitConformance: XCTestCase {
         let configurations = ConformanceConfiguration.all(timeout: timeout)
         for configuration in configurations {
             try await runTestsWithClient(TestServiceClient(client: configuration.protocolClient))
+        }
+    }
+
+    private func executeTestWithConnectOnlyClients(
+        runTestsWithClient: (TestServiceClient) async -> Void
+    ) async {
+        let configurations = ConformanceConfiguration.all(timeout: 60)
+        for configuration in configurations {
+            if case .connect = configuration.networkProtocol {
+                await runTestsWithClient(TestServiceClient(client: configuration.protocolClient))
+            }
         }
     }
 
@@ -72,7 +83,7 @@ final class AsyncAwaitConformance: XCTestCase {
     }
 
     func testCacheableUnary() async {
-        await self.executeTestWithClients { client in
+        await self.executeTestWithConnectOnlyClients { client in
             let size = 123
             let message = Connectrpc_Conformance_V1_SimpleRequest.with { proto in
                 proto.responseSize = Int32(size)
@@ -80,6 +91,7 @@ final class AsyncAwaitConformance: XCTestCase {
             }
             let response = await client.cacheableUnaryCall(request: message)
             XCTAssertNil(response.error)
+            XCTAssertEqual(response.headers["get-request"], ["true"])
             XCTAssertEqual(response.message?.payload.body.count, size)
         }
     }
