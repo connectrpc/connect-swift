@@ -228,7 +228,7 @@ private extension ProtocolClientConfig {
 extension ProtocolClientConfig {
     func shouldUseUnaryGET(for request: HTTPRequest<Data?>) -> Bool {
         guard
-            case .connect = self.networkProtocol, request.idempotencyLevel == .noSideEffects 
+            case .connect = self.networkProtocol, request.idempotencyLevel == .noSideEffects
         else {
             return false
         }
