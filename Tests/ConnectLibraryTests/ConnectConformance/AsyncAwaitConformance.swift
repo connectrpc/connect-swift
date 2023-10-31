@@ -29,19 +29,16 @@ private typealias UnimplementedServiceClient = Connectrpc_Conformance_V1_Unimple
 @available(iOS 13, *)
 final class AsyncAwaitConformance: XCTestCase {
     private func executeTestWithClients(
-        function: Selector = #function,
         timeout: TimeInterval = 60,
         runTestsWithClient: (TestServiceClient) async throws -> Void
     ) async rethrows {
         let configurations = ConformanceConfiguration.all(timeout: timeout)
         for configuration in configurations {
             try await runTestsWithClient(TestServiceClient(client: configuration.protocolClient))
-            print("Ran \(function) with \(configuration.description)")
         }
     }
 
     private func executeTestWithUnimplementedClients(
-        function: Selector = #function,
         runTestsWithClient: (UnimplementedServiceClient) async throws -> Void
     ) async rethrows {
         let configurations = ConformanceConfiguration.all(timeout: 60)
@@ -49,7 +46,6 @@ final class AsyncAwaitConformance: XCTestCase {
             try await runTestsWithClient(
                 UnimplementedServiceClient(client: configuration.protocolClient)
             )
-            print("Ran \(function) with \(configuration.description)")
         }
     }
 
