@@ -234,7 +234,17 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         using multiplexer: NIOHTTP2.HTTP2StreamMultiplexer,
         with connectHandler: any NIOCore.ChannelInboundHandler
     ) {
-        var handlers: [ChannelHandler] = [
+        let handlers = self.createChannelHandlers(with: connectHandler)
+        let promise = eventLoop.makePromise(of: NIOCore.Channel.self)
+        multiplexer.createStreamChannel(promise: promise) { channel in
+            return channel.pipeline.addHandlers(handlers)
+        }
+    }
+
+    private func createChannelHandlers(
+        with connectHandler: any NIOCore.ChannelInboundHandler
+    ) -> [NIOCore.ChannelHandler] {
+        var handlers: [NIOCore.ChannelHandler] = [
             self.useSSL
             ? HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https)
             : HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .http),
@@ -245,11 +255,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 IdleStateHandler(allTimeout: .milliseconds(Int64(timeout * 1_000.0))), at: 0
             )
         }
-
-        let promise = eventLoop.makePromise(of: NIOCore.Channel.self)
-        multiplexer.createStreamChannel(promise: promise) { channel in
-            return channel.pipeline.addHandlers(handlers)
-        }
+        return handlers
     }
 
     deinit {
