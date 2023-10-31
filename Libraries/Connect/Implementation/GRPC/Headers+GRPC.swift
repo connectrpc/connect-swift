@@ -28,7 +28,14 @@ extension Headers {
             .acceptCompressionPoolNames()
         headers[HeaderConstants.grpcContentEncoding] = config.requestCompression
             .map { [$0.pool.name()] }
-        if !grpcWeb {
+        if grpcWeb {
+            headers[HeaderConstants.contentType] = [
+                "application/grpc-web+\(config.codec.name())",
+            ]
+        } else {
+            headers[HeaderConstants.contentType] = [
+                "application/grpc+\(config.codec.name())",
+            ]
             headers[HeaderConstants.grpcTE] = ["trailers"]
         }
 

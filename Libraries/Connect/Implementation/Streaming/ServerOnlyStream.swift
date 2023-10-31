@@ -26,8 +26,8 @@ final class ServerOnlyStream<Message: ProtobufMessage>: Sendable {
 extension ServerOnlyStream: ServerOnlyStreamInterface {
     typealias Input = Message
 
-    func send(_ input: Message) throws {
-        try self.bidirectionalStream.send(input)
+    func send(_ input: Message) {
+        self.bidirectionalStream.send(input)
         self.bidirectionalStream.close()
     }
 }

@@ -49,7 +49,7 @@ open class MockBidirectionalStream<
     }
 
     @discardableResult
-    open func send(_ input: Input) throws -> Self {
+    open func send(_ input: Input) -> Self {
         self.inputs.append(input)
         self.onSend?(input)
         return self
