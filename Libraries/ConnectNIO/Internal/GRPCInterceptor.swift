@@ -14,6 +14,7 @@
 
 import Connect
 import Foundation
+import NIOConcurrencyHelpers
 
 /// Implementation of the gRPC protocol as an interceptor.
 /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
@@ -184,5 +185,20 @@ extension GRPCInterceptor: StreamInterceptor {
         } else {
             return (.unknown, nil)
         }
+    }
+}
+
+private final class Locked<T>: @unchecked Sendable {
+    private let lock = NIOLock()
+    private var wrappedValue: T
+
+    /// Thread-safe access to the underlying value.
+    var value: T {
+        get { self.lock.withLock { self.wrappedValue } }
+        set { self.lock.withLock { self.wrappedValue = newValue } }
+    }
+
+    init(_ value: T) {
+        self.wrappedValue = value
     }
 }

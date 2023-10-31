@@ -4,7 +4,7 @@ included:
   - Plugins
   - Tests
 excluded:
-  - Libraries/Connect/Implementation/Generated
+  - Libraries/Connect/Internal/Generated
   - Tests/ConnectLibraryTests/Generated
 disabled_rules:
   - blanket_disable_command

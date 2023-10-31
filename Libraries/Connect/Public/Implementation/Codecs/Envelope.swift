@@ -17,38 +17,6 @@ import SwiftProtobuf
 
 /// Provides functionality for packing and unpacking (headers and length prefixed) messages.
 public enum Envelope {
-    public enum Error: Swift.Error {
-        case missingExpectedCompressionPool
-    }
-
-    /// The total number of bytes that will prefix a message.
-    public static var prefixLength: Int {
-        return 5 // Header flags (1 byte) + message length (4 bytes)
-    }
-
-    /// Computes the length of the message contained by a packed chunk of data.
-    /// A packed chunk in this context refers to prefixed message data.
-    ///
-    /// Compliant with Connect streams: https://connectrpc.com/docs/protocol/#streaming-request
-    /// And gRPC: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md#responses
-    ///
-    /// - parameter data: The packed data from which to determine the enveloped message's size.
-    ///
-    /// - returns: The length of the next expected message in the packed data. If multiple chunks
-    ///            are specified, this will return the length of the first. Returns -1 if there is
-    ///            not enough prefix data to determine the message length.
-    public static func messageLength(forPackedData data: Data) -> Int {
-        guard data.count >= self.prefixLength else {
-            return -1
-        }
-
-        // Skip header flags (1 byte) and determine the message length (next 4 bytes, big-endian)
-        var messageLength: UInt32 = 0
-        (data[1...4] as NSData).getBytes(&messageLength, length: 4)
-        messageLength = UInt32(bigEndian: messageLength)
-        return Int(messageLength)
-    }
-
     /// Packs a message into an "envelope", adding required header bytes and optionally
     /// applying compression.
     ///
@@ -110,6 +78,40 @@ public enum Envelope {
         } else {
             return (headerByte, messageData)
         }
+    }
+
+    // MARK: - Internal
+
+    enum Error: Swift.Error {
+        case missingExpectedCompressionPool
+    }
+
+    /// The total number of bytes that will prefix a message.
+    static var prefixLength: Int {
+        return 5 // Header flags (1 byte) + message length (4 bytes)
+    }
+
+    /// Computes the length of the message contained by a packed chunk of data.
+    /// A packed chunk in this context refers to prefixed message data.
+    ///
+    /// Compliant with Connect streams: https://connectrpc.com/docs/protocol/#streaming-request
+    /// And gRPC: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md#responses
+    ///
+    /// - parameter data: The packed data from which to determine the enveloped message's size.
+    ///
+    /// - returns: The length of the next expected message in the packed data. If multiple chunks
+    ///            are specified, this will return the length of the first. Returns -1 if there is
+    ///            not enough prefix data to determine the message length.
+    static func messageLength(forPackedData data: Data) -> Int {
+        guard data.count >= self.prefixLength else {
+            return -1
+        }
+
+        // Skip header flags (1 byte) and determine the message length (next 4 bytes, big-endian)
+        var messageLength: UInt32 = 0
+        (data[1...4] as NSData).getBytes(&messageLength, length: 4)
+        messageLength = UInt32(bigEndian: messageLength)
+        return Int(messageLength)
     }
 
     // MARK: - Private
