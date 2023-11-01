@@ -22,7 +22,17 @@ extension Headers {
     /// - parameter grpcWeb: Should be true if using gRPC-Web, false if gRPC.
     ///
     /// - returns: A set of updated headers.
-    public func addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
+#if COCOAPODS
+    func addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
+        return self._addingGRPCHeaders(using: config, grpcWeb: grpcWeb)
+    }
+#else
+    package func addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
+        return self._addingGRPCHeaders(using: config, grpcWeb: grpcWeb)
+    }
+#endif
+
+    private func _addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
         var headers = self
         headers[HeaderConstants.grpcAcceptEncoding] = config
             .acceptCompressionPoolNames()

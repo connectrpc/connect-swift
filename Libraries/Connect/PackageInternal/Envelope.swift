@@ -16,6 +16,9 @@ import Foundation
 import SwiftProtobuf
 
 /// Provides functionality for packing and unpacking (headers and length prefixed) messages.
+///
+/// This API is not considered part of Connect's public interface and is subject to change.
+/// TODO: Make this `package` instead of `public` if/when CocoaPods support is dropped.
 public enum Envelope {
     /// Packs a message into an "envelope", adding required header bytes and optionally
     /// applying compression.

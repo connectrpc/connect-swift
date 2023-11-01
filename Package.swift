@@ -16,8 +16,10 @@
 
 import PackageDescription
 
+private let packageName = "Connect"
+
 let package = Package(
-    name: "Connect",
+    name: packageName,
     platforms: [
         .iOS(.v12),
         .macOS(.v10_15),
@@ -75,6 +77,9 @@ let package = Package(
                 "buf.work.yaml",
                 "proto",
                 "README.md",
+            ],
+            swiftSettings: [
+                .unsafeFlags(["-package-name", packageName])
             ]
         ),
         .testTarget(
@@ -104,6 +109,9 @@ let package = Package(
             path: "Libraries/ConnectMocks",
             exclude: [
                 "README.md",
+            ],
+            swiftSettings: [
+                .unsafeFlags(["-package-name", packageName])
             ]
         ),
         .executableTarget(
@@ -129,6 +137,9 @@ let package = Package(
             path: "Libraries/ConnectNIO",
             exclude: [
                 "README.md",
+            ],
+            swiftSettings: [
+                .unsafeFlags(["-package-name", packageName])
             ]
         ),
         .target(
