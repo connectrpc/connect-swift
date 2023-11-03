@@ -16,7 +16,7 @@ extension Trailers {
     /// Identifies the status code from gRPC and gRPC-Web trailers.
     ///
     /// - returns: The gRPC status code, if specified.
-#if COCOAPODS
+#if COCOAPODS // ConnectNIO is unavailable from CocoaPods, so this can be internal.
     func grpcStatus() -> Code? {
         return self._grpcStatus()
     }
