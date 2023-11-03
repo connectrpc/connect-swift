@@ -14,7 +14,7 @@ LICENSE_HEADER_VERSION := v1.12.0
 LICENSE_IGNORE := -e Package.swift \
     -e $(BIN)\/ \
     -e Examples/ElizaSharedSources/GeneratedSources\/ \
-    -e Libraries/Connect/Implementation/Generated\/ \
+    -e Libraries/Connect/Internal/Generated\/ \
     -e Tests/ConnectLibraryTests/proto/grpc\/ \
     -e Tests/ConnectLibraryTests/Generated\/
 
