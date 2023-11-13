@@ -44,6 +44,9 @@ jobs:
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
+      - name: Select Xcode version
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#xcode
+        run: sudo xcode-select --switch /Applications/Xcode_15.0.app
       - uses: bufbuild/buf-setup-action@v1.27.2
         with:
           github_token: ${{ github.token }}
