@@ -20,7 +20,7 @@ final class ConnectInterceptor: Interceptor {
     private let config: ProtocolClientConfig
     private let streamResponseHeaders = Locked<Headers?>(nil)
 
-    private static let protocolVersion = "1"
+    fileprivate static let protocolVersion = "1"
 
     init(config: ProtocolClientConfig) {
         self.config = config
@@ -52,12 +52,14 @@ extension ConnectInterceptor: UnaryInterceptor {
             finalRequestBody = requestBody
         }
 
-        proceed(.success(HTTPRequest(
+        proceed(.success(self.config.transformToGETIfNeeded(HTTPRequest(
             url: request.url,
             headers: headers,
             message: finalRequestBody,
-            trailers: nil
-        )))
+            method: request.method,
+            trailers: nil,
+            idempotencyLevel: request.idempotencyLevel
+        ))))
     }
 
     @Sendable
@@ -119,7 +121,9 @@ extension ConnectInterceptor: StreamInterceptor {
             url: request.url,
             headers: headers,
             message: request.message,
-            trailers: nil
+            method: request.method,
+            trailers: nil,
+            idempotencyLevel: request.idempotencyLevel
         )))
     }
 
@@ -180,6 +184,62 @@ extension ConnectInterceptor: StreamInterceptor {
             } else {
                 proceed(result)
             }
+        }
+    }
+}
+
+private extension ProtocolClientConfig {
+    func transformToGETIfNeeded(_ request: HTTPRequest<Data?>) -> HTTPRequest<Data?> {
+        guard self.shouldUseUnaryGET(for: request) else {
+            return request
+        }
+
+        var components = URLComponents(url: request.url, resolvingAgainstBaseURL: true)
+        components?.queryItems = [
+            URLQueryItem(name: "base64", value: "1"),
+            URLQueryItem(
+                name: "compression",
+                value: request.headers[HeaderConstants.contentEncoding]?.first
+            ),
+            URLQueryItem(name: "connect", value: "v\(ConnectInterceptor.protocolVersion)"),
+            URLQueryItem(name: "encoding", value: self.codec.name()),
+            URLQueryItem(name: "message", value: request.message?.base64EncodedString()),
+        ]
+        guard let url = components?.url else {
+            return request
+        }
+
+        var headers = request.headers
+        headers.removeValue(forKey: HeaderConstants.contentEncoding)
+        headers.removeValue(forKey: HeaderConstants.contentType)
+        headers.removeValue(forKey: HeaderConstants.connectProtocolVersion)
+
+        return HTTPRequest(
+            url: url,
+            headers: headers,
+            message: nil,
+            method: .get,
+            trailers: nil,
+            idempotencyLevel: request.idempotencyLevel
+        )
+    }
+}
+
+extension ProtocolClientConfig {
+    func shouldUseUnaryGET(for request: HTTPRequest<Data?>) -> Bool {
+        guard
+            case .connect = self.networkProtocol, request.idempotencyLevel == .noSideEffects
+        else {
+            return false
+        }
+
+        switch self.unaryGET {
+        case .disabled:
+            return false
+        case .alwaysEnabled:
+            return true
+        case .enabledForLimitedPayloadSizes(let maxBytes):
+            return (request.message?.count ?? 0) <= maxBytes
         }
     }
 }

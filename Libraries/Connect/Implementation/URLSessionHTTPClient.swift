@@ -226,7 +226,7 @@ private extension HTTPRequest {
 private extension URLRequest {
     init(httpRequest: HTTPRequest<Data?>) {
         self.init(url: httpRequest.url)
-        self.httpMethod = "POST"
+        self.httpMethod = httpRequest.method.rawValue
         self.httpBody = httpRequest.message
         for (headerName, headerValues) in httpRequest.headers {
             self.setValue(headerValues.joined(separator: ","), forHTTPHeaderField: headerName)

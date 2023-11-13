@@ -40,32 +40,45 @@ extension ProtocolClient: ProtocolClientInterface {
     @discardableResult
     public func unary<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
+        idempotencyLevel: IdempotencyLevel,
         request: Input,
         headers: Headers,
         completion: @escaping @Sendable (ResponseMessage<Output>) -> Void
     ) -> Cancelable {
         let cancelation = Locked<(cancelable: Cancelable?, isCancelled: Bool)>((nil, false))
-        let codec = self.config.codec
+        let config = self.config
         var headers = headers
-        headers[HeaderConstants.contentType] = ["application/\(codec.name())"]
+        headers[HeaderConstants.contentType] = ["application/\(config.codec.name())"]
         let request = HTTPRequest<Input>(
-            url: URL(string: path, relativeTo: URL(string: self.config.host))!,
+            url: URL(string: path, relativeTo: URL(string: config.host))!,
             headers: headers,
             message: request,
-            trailers: nil
+            method: .post,
+            trailers: nil,
+            idempotencyLevel: idempotencyLevel
         )
         let interceptorChain = self.config.createUnaryInterceptorChain()
         interceptorChain.executeLinkedInterceptorsAndStopOnFailure(
             interceptorChain.interceptors.map { $0.handleUnaryRequest },
             firstInFirstOut: true,
             initial: request,
-            transform: { interceptedRequest, proceed in
+            transform: { intercepted, proceed in
                 do {
+                    let data: Data
+                    if config.unaryGET.isEnabled && intercepted.idempotencyLevel == .noSideEffects {
+                        data = try config.codec.deterministicallySerialize(
+                            message: intercepted.message
+                        )
+                    } else {
+                        data = try config.codec.serialize(message: intercepted.message)
+                    }
                     proceed(.success(HTTPRequest<Data?>(
-                        url: interceptedRequest.url,
-                        headers: interceptedRequest.headers,
-                        message: try codec.serialize(message: interceptedRequest.message),
-                        trailers: interceptedRequest.trailers
+                        url: intercepted.url,
+                        headers: intercepted.headers,
+                        message: data,
+                        method: intercepted.method,
+                        trailers: intercepted.trailers,
+                        idempotencyLevel: intercepted.idempotencyLevel
                     )))
                 } catch let error {
                     proceed(.failure(ConnectError(
@@ -109,7 +122,7 @@ extension ProtocolClient: ProtocolClientInterface {
                                 initial: interceptedResponse,
                                 transform: { response, proceed in
                                     proceed(ResponseMessage<Output>(
-                                        response: response, codec: codec
+                                        response: response, codec: config.codec
                                     ))
                                 },
                                 then: interceptorChain.interceptors.map { $0.handleUnaryResponse },
@@ -171,11 +184,15 @@ extension ProtocolClient: ProtocolClientInterface {
     @available(iOS 13, *)
     public func unary<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
+        idempotencyLevel: IdempotencyLevel,
         request: Input,
         headers: Headers
     ) async -> ResponseMessage<Output> {
         return await UnaryAsyncWrapper { completion in
-            self.unary(path: path, request: request, headers: headers, completion: completion)
+            self.unary(
+                path: path, idempotencyLevel: idempotencyLevel, request: request,
+                headers: headers, completion: completion
+            )
         }.send()
     }
 
@@ -316,7 +333,9 @@ extension ProtocolClient: ProtocolClientInterface {
             url: URL(string: path, relativeTo: URL(string: self.config.host))!,
             headers: headers,
             message: (),
-            trailers: nil
+            method: .post,
+            trailers: nil,
+            idempotencyLevel: .unknown
         )
         interceptorChain.executeInterceptorsAndStopOnFailure(
             interceptorChain.interceptors.map { $0.handleStreamStart },
@@ -330,7 +349,9 @@ extension ProtocolClient: ProtocolClientInterface {
                             url: interceptedRequest.url,
                             headers: interceptedRequest.headers,
                             message: nil, // Message is void on stream creation.
-                            trailers: interceptedRequest.trailers
+                            method: interceptedRequest.method,
+                            trailers: interceptedRequest.trailers,
+                            idempotencyLevel: interceptedRequest.idempotencyLevel
                         ),
                         responseCallbacks: responseCallbacks
                     ))

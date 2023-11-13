@@ -189,6 +189,17 @@ private extension MethodDescriptor {
         }
     }
 
+    func idempotencyLevel() -> String {
+        switch self.proto.options.idempotencyLevel {
+        case .idempotencyUnknown:
+            return "unknown"
+        case .noSideEffects:
+            return "noSideEffects"
+        case .idempotent:
+            return "idempotent"
+        }
+    }
+
     func callbackReturnValue() -> String {
         if self.clientStreaming && self.serverStreaming {
             return """
@@ -208,7 +219,11 @@ private extension MethodDescriptor {
         } else {
             return """
             self.client.unary(\
-            path: "\(self.methodPath)", request: request, headers: headers, completion: completion)
+            path: "\(self.methodPath)", \
+            idempotencyLevel: .\(self.idempotencyLevel()), \
+            request: request, \
+            headers: headers, \
+            completion: completion)
             """
         }
     }
@@ -228,7 +243,11 @@ private extension MethodDescriptor {
             """
         } else {
             return """
-            await self.client.unary(path: "\(self.methodPath)", request: request, headers: headers)
+            await self.client.unary(\
+            path: "\(self.methodPath)", \
+            idempotencyLevel: .\(self.idempotencyLevel()), \
+            request: request, \
+            headers: headers)
             """
         }
     }

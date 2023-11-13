@@ -16,6 +16,8 @@ import Foundation
 
 /// Configuration used to set up `ProtocolClientInterface` implementations.
 public struct ProtocolClientConfig: Sendable {
+    /// Configuration used to determine when and how to send GET requests.
+    public let unaryGET: UnaryGET
     /// Target host (e.g., `https://connectrpc.com`).
     public let host: String
     /// Protocol to use for requests and streams.
@@ -47,14 +49,41 @@ public struct ProtocolClientConfig: Sendable {
         }
     }
 
+    /// Configuration used to determine when and how to send GET requests.
+    /// HTTP GET requests can be sent in place of unary HTTP POST requests when using
+    /// the Connect protocol with idempotent RPCs that do not have side effects.
+    /// Doing so makes it easier to cache responses.
+    ///
+    /// More info: https://connectrpc.com/docs/protocol#unary-get-request
+    public enum UnaryGET: Sendable {
+        /// Do not send idempotent requests using HTTP GET.
+        case disabled
+        /// Send idempotent requests using HTTP GET, regardless of their payload size.
+        case alwaysEnabled
+        /// Send idempotent requests using HTTP GET, but only if their payload size is less than
+        /// or equal to a specific size.
+        case enabledForLimitedPayloadSizes(maxBytes: Int)
+
+        var isEnabled: Bool {
+            switch self {
+            case .alwaysEnabled, .enabledForLimitedPayloadSizes:
+                return true
+            case .disabled:
+                return false
+            }
+        }
+    }
+
     public init(
         host: String,
         networkProtocol: NetworkProtocol = .connect,
         codec: Codec = JSONCodec(),
+        unaryGET: UnaryGET = .disabled,
         requestCompression: RequestCompression? = nil,
         responseCompressionPools: [CompressionPool] = [GzipCompressionPool()],
         interceptors: [InterceptorFactory] = []
     ) {
+        self.unaryGET = unaryGET
         self.host = host
         self.networkProtocol = networkProtocol
         self.codec = codec

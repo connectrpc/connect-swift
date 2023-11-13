@@ -41,7 +41,9 @@ extension GRPCInterceptor: UnaryInterceptor {
             url: request.url,
             headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: false),
             message: envelopedRequestBody,
-            trailers: nil
+            method: request.method,
+            trailers: nil,
+            idempotencyLevel: request.idempotencyLevel
         )))
     }
 
@@ -110,7 +112,9 @@ extension GRPCInterceptor: StreamInterceptor {
             url: request.url,
             headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: false),
             message: request.message,
-            trailers: nil
+            method: request.method,
+            trailers: nil,
+            idempotencyLevel: request.idempotencyLevel
         )))
     }
 

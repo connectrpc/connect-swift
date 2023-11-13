@@ -22,15 +22,22 @@ public struct HTTPRequest<Input: Sendable>: Sendable {
     public let headers: Headers
     /// Data to send with the request.
     public let message: Input
+    /// HTTP method to use for the request.
+    public let method: HTTPMethod
     /// Outbound trailers for the request.
     public let trailers: Trailers?
+    /// Idempotency level of the request.
+    public let idempotencyLevel: IdempotencyLevel
 
     public init(
-        url: URL, headers: Headers, message: Input, trailers: Trailers?
+        url: URL, headers: Headers, message: Input, method: HTTPMethod,
+        trailers: Trailers?, idempotencyLevel: IdempotencyLevel
     ) {
         self.url = url
         self.headers = headers
         self.message = message
+        self.method = method
         self.trailers = trailers
+        self.idempotencyLevel = idempotencyLevel
     }
 }

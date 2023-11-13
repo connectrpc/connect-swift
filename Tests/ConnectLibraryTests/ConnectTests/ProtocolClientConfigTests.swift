@@ -80,4 +80,97 @@ final class ProtocolClientConfigTests: XCTestCase {
         XCTAssertTrue(config.interceptors[0].createStream(with: config) is NoopInterceptor1)
         XCTAssertTrue(config.interceptors[1].createStream(with: config) is NoopInterceptor2)
     }
+
+    func testUnaryGETRequestWithNoSideEffects() {
+        let request = HTTPRequest<Data?>(
+            url: URL(string: "https://connectrpc.com")!,
+            headers: Headers(),
+            message: Data([0x0, 0x1, 0x2]),
+            method: .post,
+            trailers: nil,
+            idempotencyLevel: .noSideEffects
+        )
+        XCTAssertTrue(ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .alwaysEnabled
+        ).shouldUseUnaryGET(for: request))
+        XCTAssertTrue(ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
+        ).shouldUseUnaryGET(for: request))
+        XCTAssertFalse(ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
+        ).shouldUseUnaryGET(for: request))
+        XCTAssertFalse(ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .disabled
+        ).shouldUseUnaryGET(for: request))
+    }
+
+    func testUnaryGETRequestWithIdempotentSideEffects() {
+        let request = HTTPRequest<Data?>(
+            url: URL(string: "https://connectrpc.com")!,
+            headers: Headers(),
+            message: Data([0x0, 0x1, 0x2]),
+            method: .post,
+            trailers: nil,
+            idempotencyLevel: .idempotent
+        )
+        XCTAssertFalse(ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .alwaysEnabled
+        ).shouldUseUnaryGET(for: request))
+        XCTAssertFalse(ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
+        ).shouldUseUnaryGET(for: request))
+        XCTAssertFalse(ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
+        ).shouldUseUnaryGET(for: request))
+        XCTAssertFalse(ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .disabled
+        ).shouldUseUnaryGET(for: request))
+    }
+
+    func testUnaryGETRequestWithUnknownSideEffects() {
+        let request = HTTPRequest<Data?>(
+            url: URL(string: "https://connectrpc.com")!,
+            headers: Headers(),
+            message: Data([0x0, 0x1, 0x2]),
+            method: .post,
+            trailers: nil,
+            idempotencyLevel: .unknown
+        )
+        XCTAssertFalse(ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .alwaysEnabled
+        ).shouldUseUnaryGET(for: request))
+        XCTAssertFalse(ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
+        ).shouldUseUnaryGET(for: request))
+        XCTAssertFalse(ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
+        ).shouldUseUnaryGET(for: request))
+        XCTAssertFalse(ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .disabled
+        ).shouldUseUnaryGET(for: request))
+    }
 }
