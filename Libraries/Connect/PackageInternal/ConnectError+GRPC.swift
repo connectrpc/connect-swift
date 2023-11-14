@@ -15,23 +15,16 @@
 import Foundation
 
 extension ConnectError {
+    /// This should not be considered part of Connect's public/stable interface, and is subject
+    /// to change. When the compiler supports it, this should be package-internal.
+    ///
     /// Creates an error using gRPC trailers.
     ///
     /// - parameter trailers: The trailers (or headers, for gRPC-Web) from which to parse the error.
     /// - parameter code: The status code received from the server.
     ///
     /// - returns: An error, if the status indicated an error.
-#if COCOAPODS // ConnectNIO is unavailable from CocoaPods, so this can be internal.
-    static func fromGRPCTrailers(_ trailers: Trailers, code: Code) -> Self? {
-        return self._fromGRPCTrailers(trailers, code: code)
-    }
-#else
-    package static func fromGRPCTrailers(_ trailers: Trailers, code: Code) -> Self? {
-        return self._fromGRPCTrailers(trailers, code: code)
-    }
-#endif
-
-    private static func _fromGRPCTrailers(_ trailers: Trailers, code: Code) -> Self? {
+    public static func fromGRPCTrailers(_ trailers: Trailers, code: Code) -> Self? {
         if code == .ok {
             return nil
         }
