@@ -21,7 +21,17 @@ extension ConnectError {
     /// - parameter code: The status code received from the server.
     ///
     /// - returns: An error, if the status indicated an error.
-    public static func fromGRPCTrailers(_ trailers: Trailers, code: Code) -> Self? {
+#if COCOAPODS // ConnectNIO is unavailable from CocoaPods, so this can be internal.
+    static func fromGRPCTrailers(_ trailers: Trailers, code: Code) -> Self? {
+        return self._fromGRPCTrailers(trailers, code: code)
+    }
+#else
+    package static func fromGRPCTrailers(_ trailers: Trailers, code: Code) -> Self? {
+        return self._fromGRPCTrailers(trailers, code: code)
+    }
+#endif
+
+    private static func _fromGRPCTrailers(_ trailers: Trailers, code: Code) -> Self? {
         if code == .ok {
             return nil
         }
