@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import CFNetwork
 import Foundation
 import os.log
 
@@ -195,15 +194,20 @@ extension Code {
     static func fromURLSessionCode(_ code: Int) -> Self {
         // https://developer.apple.com/documentation/cfnetwork/cfnetworkerrors?language=swift
         switch Int32(code) {
-        case CFNetworkErrors.cfurlErrorUnknown.rawValue:
+        // CFNetworkErrors.cfurlErrorUnknown.rawValue
+        case -998:
             return .unknown
-        case CFNetworkErrors.cfurlErrorCancelled.rawValue:
+        // CFNetworkErrors.cfurlErrorCancelled.rawValue
+        case -999:
             return .canceled
-        case CFNetworkErrors.cfurlErrorBadURL.rawValue:
+        // CFNetworkErrors.cfurlErrorBadURL.rawValue
+        case -1000:
             return .invalidArgument
-        case CFNetworkErrors.cfurlErrorTimedOut.rawValue:
+        // CFNetworkErrors.cfurlErrorTimedOut.rawValue
+        case -1001:
             return .deadlineExceeded
-        case CFNetworkErrors.cfurlErrorUnsupportedURL.rawValue:
+        // CFNetworkErrors.cfurlErrorUnsupportedURL.rawValue
+        case -1002:
             return .unimplemented
         case ...100:
             // URLSession can return errors in this range
