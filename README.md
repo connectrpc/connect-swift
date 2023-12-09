@@ -1,5 +1,4 @@
 Connect-Swift
-=============
 
 [![Build](https://github.com/connectrpc/connect-swift/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/connectrpc/connect-swift/actions/workflows/ci.yaml)
 [![Version](https://img.shields.io/cocoapods/v/Connect-Swift.svg?style=flat)](https://cocoapods.org/pods/Connect-Swift)
