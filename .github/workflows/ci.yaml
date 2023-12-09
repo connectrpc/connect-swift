@@ -68,7 +68,7 @@ jobs:
       - name: Set up docker (missing on macOS GitHub runners)
         # https://github.com/actions/runner-images/issues/2150
         run: |
-          brew unlink python@3.12
+          brew unlink 2to3
           brew install docker colima
           colima start
       - name: Run tests
