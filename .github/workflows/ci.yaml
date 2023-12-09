@@ -67,7 +67,9 @@ jobs:
         run: sudo xcode-select --switch /Applications/Xcode_15.0.app
       - name: Set up docker (missing on macOS GitHub runners)
         # https://github.com/actions/runner-images/issues/2150
-        run: brew install docker colima
+        run: |
+          brew update
+          brew install docker colima
       - name: Start docker
         run: colima start
       - name: Run tests
