@@ -201,16 +201,16 @@ extension Code {
         case -999:
             return .canceled
         // CFNetworkErrors.cfurlErrorBadURL.rawValue
-        case -1000:
+        case -1_000:
             return .invalidArgument
         // CFNetworkErrors.cfurlErrorTimedOut.rawValue
-        case -1001:
+        case -1_001:
             return .deadlineExceeded
         // CFNetworkErrors.cfurlErrorUnsupportedURL.rawValue
-        case -1002:
+        case -1_002:
             return .unimplemented
+        // URLSession can return errors in this range
         case ...100:
-            // URLSession can return errors in this range
             return .unknown
         default:
             return Code.fromHTTPStatus(code)
