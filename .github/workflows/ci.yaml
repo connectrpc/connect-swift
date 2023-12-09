@@ -69,7 +69,7 @@ jobs:
         # https://github.com/actions/runner-images/issues/2150
         run: |
           brew install docker colima
-          colima start
+          /usr/local/opt/colima/bin/colima start -f
       - name: Run tests
         run: make test
   run-swiftlint:
