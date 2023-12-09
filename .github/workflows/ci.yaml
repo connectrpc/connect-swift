@@ -70,6 +70,7 @@ jobs:
         run: |
           rm '/usr/local/bin/2to3-3.12'
           rm '/usr/local/bin/idle3.12'
+          rm '/usr/local/bin/pydoc3.12'
           brew unlink python@3.12
           brew install docker colima
           colima start
