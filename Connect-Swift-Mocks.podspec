@@ -13,7 +13,7 @@ Pod::Spec.new do |spec|
   spec.tvos.deployment_target = '13.0'
 
   spec.dependency 'Connect-Swift', "#{spec.version.to_s}"
-  spec.dependency 'SwiftProtobuf', '~> 1.25.1'
+  spec.dependency 'SwiftProtobuf', '~> 1.25.2'
 
   spec.source_files = 'Libraries/ConnectMocks/**/*.swift'
 
