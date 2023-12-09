@@ -69,6 +69,7 @@ jobs:
         # https://github.com/actions/runner-images/issues/2150
         run: |
           rm '/usr/local/bin/2to3-3.12'
+          rm '/usr/local/bin/idle3.12'
           brew install docker colima
           colima start
       - name: Run tests
