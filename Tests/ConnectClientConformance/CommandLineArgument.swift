@@ -29,7 +29,10 @@ extension CommandLineArgument where RawValue == String {
                 .replacingOccurrences(of: "\(self.key)=", with: "")
                 .trimmingCharacters(in: .whitespaces)
         ) else {
-            throw "Invalid argument passed for '\(self.key)' argument. Expected \(self.allCases)"
+            throw """
+            Invalid argument passed for '\(self.key)' argument. \
+            Expected \(self.allCases.map(\.rawValue)), got '\(argument)'
+            """
         }
 
         return argumentValue

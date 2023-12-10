@@ -8,8 +8,9 @@ MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-print-directory
 BIN := .tmp/bin
 LICENSE_HEADER_YEAR_RANGE := 2022-2023
-CONFORMANCE_VERSION := 1f21c14840df5c3184667c94b0bb025764763bc6
-EXAMPLES_VERSION := e74547031f662f81a62f5e95ebaa9f7037e0c41b
+CONFORMANCE_PROTO_REF := 1b090e97fef779aaac8266fbccbf776cf092372c
+CONFORMANCE_RUNNER_TAG := v1.0.0-rc1
+EXAMPLES_PROTO_REF := e74547031f662f81a62f5e95ebaa9f7037e0c41b
 LICENSE_HEADER_VERSION := v1.12.0
 LICENSE_IGNORE := -e Package.swift \
     -e $(BIN)\/ \
@@ -44,10 +45,16 @@ cleangenerated: ## Delete all generated outputs
 
 .PHONY: generate
 generate: cleangenerated ## Regenerate outputs for all .proto files
-	cd Examples; buf generate https://github.com/connectrpc/examples-go.git#ref=$(EXAMPLES_VERSION),subdir=proto
+	cd Examples; buf generate https://github.com/connectrpc/examples-go.git#ref=$(EXAMPLES_PROTO_REF),subdir=proto
 	cd Libraries/Connect; buf generate
-	cd Tests/ConnectConformance; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_VERSION),subdir=proto
-	cd Tests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_VERSION),subdir=proto
+	cd Tests/ConnectConformance; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
+	cd Tests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
+
+.PHONY: installconformancerunner
+installconformancerunner: ## Install the Connect conformance test runner
+	mkdir -p $(BIN)
+	curl -L "https://github.com/connectrpc/conformance/releases/download/$(CONFORMANCE_RUNNER_TAG)/connectconformance-$(CONFORMANCE_RUNNER_TAG)-Darwin-arm64.tar.gz" > $(BIN)/connectconformance.tar.gz
+	tar -xvzf $(BIN)/connectconformance.tar.gz -C $(BIN)
 
 .PHONY: help
 help: ## Describe useful make targets
@@ -68,6 +75,8 @@ $(BIN)/license-headers: Makefile
 	GOBIN=$(abspath $(BIN)) go install github.com/bufbuild/buf/private/pkg/licenseheader/cmd/license-header@$(LICENSE_HEADER_VERSION)
 
 .PHONY: test
-test: conformanceserverrun ## Run all tests
-	swift test
-	$(MAKE) conformanceserverstop
+test: installconformancerunner ## Run all tests
+	swift build -c release --product ConnectClientConformance
+	mv ./.build/release/ConnectClientConformance $(BIN)
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/conformance-config.yaml --mode client $(BIN)/ConnectClientConformance httpclient=urlsession
+# 	swift test

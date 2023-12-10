@@ -20,18 +20,23 @@ import SwiftProtobuf
 // MARK: - Main function
 
 private let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLine.arguments)
-//private let encodingArg = try EncodingArg.fromCommandLineArguments(CommandLine.arguments)
+private let prefixLength = 4
+private var messageLength: UInt32 = 0
+(FileHandle.standardInput.availableData[0...3] as NSData).getBytes(&messageLength, length: 4)
+messageLength = UInt32(bigEndian: messageLength)
+throw "length: \(messageLength), total: \(FileHandle.standardInput.availableData.count)"
+
 private let request = try Connectrpc_Conformance_V1_ClientCompatRequest(
-    serializedData: FileHandle.standardInput.readDataToEndOfFile()
+    serializedData: Data(FileHandle.standardInput.availableData[prefixLength...Int(messageLength)])
 )
 
 guard request.service == "connectrpc.conformance.v1.ConformanceService" else {
     throw "Unexpected service specified: \(request.service)"
 }
 
-let protocolClient = try createProtocolClient()
-let invoker = ConformanceInvoker(request: request, protocolClient: protocolClient)
-let response: Connectrpc_Conformance_V1_ClientCompatResponse
+private let protocolClient = try createProtocolClient()
+private let invoker = ConformanceInvoker(request: request, protocolClient: protocolClient)
+private let response: Connectrpc_Conformance_V1_ClientCompatResponse
 do {
     let result = try await invoker.invokeRequest()
     response = .with { conformanceResponse in
@@ -39,6 +44,7 @@ do {
         conformanceResponse.response = result
     }
 } catch let error {
+    // Unexpected local/runtime error (no RPC response).
     response = .with { conformanceResponse in
         conformanceResponse.testName = request.testName
         conformanceResponse.error = .with { conformanceError in
@@ -59,15 +65,8 @@ private enum ClientTypeArg: String, CaseIterable, CommandLineArgument {
     case swiftNIO = "nio"
     case urlSession = "urlsession"
 
-    static let key = "client"
+    static let key = "httpclient"
 }
-
-//private enum EncodingArg: String, CaseIterable, CommandLineArgument {
-//    case binary = "binary"
-//    case json = "json"
-//
-//    static let key = "encoding"
-//}
 
 // MARK: - Helper functions
 

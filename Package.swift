@@ -77,16 +77,17 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "ConnectConformance",
+            name: "ConnectClientConformance",
             dependencies: [
                 "Connect",
                 "ConnectNIO",
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "Tests/ConnectConformance",
+            path: "Tests/ConnectClientConformance",
             exclude: [
                 "buf.gen.yaml",
+                "conformance-config.yaml",
             ]
         ),
         .testTarget(
