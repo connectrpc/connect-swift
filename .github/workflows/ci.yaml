@@ -73,7 +73,7 @@ jobs:
           rm '/usr/local/bin/pydoc3.12'
           brew unlink python@3.12
           brew install docker colima
-          /usr/local/opt/colima/bin/colima start -f
+          colima start
       - name: Run tests
         run: make test
   run-swiftlint:
