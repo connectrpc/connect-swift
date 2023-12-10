@@ -70,7 +70,7 @@ jobs:
         run: |
           brew unlink python@3.12 && brew link --overwrite python@3.12
           brew install docker colima
-          colima start
+          /usr/local/opt/colima/bin/colima start -f
       - name: Run tests
         run: make test
   run-swiftlint:
