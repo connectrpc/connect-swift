@@ -72,9 +72,21 @@ let package = Package(
             path: "Libraries/Connect",
             exclude: [
                 "buf.gen.yaml",
-                "buf.work.yaml",
                 "proto",
                 "README.md",
+            ]
+        ),
+        .executableTarget(
+            name: "ConnectConformance",
+            dependencies: [
+                "Connect",
+                "ConnectNIO",
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+            ],
+            path: "Tests/ConnectConformance",
+            exclude: [
+                "buf.gen.yaml",
             ]
         ),
         .testTarget(
@@ -82,14 +94,11 @@ let package = Package(
             dependencies: [
                 "Connect",
                 "ConnectMocks",
-                "ConnectNIO",
-                .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
             path: "Tests/ConnectLibraryTests",
             exclude: [
                 "buf.gen.yaml",
-                "buf.work.yaml",
             ],
             resources: [
                 .copy("TestResources"),

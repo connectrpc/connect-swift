@@ -5,6 +5,7 @@ included:
   - Tests
 excluded:
   - Libraries/Connect/Internal/Generated
+  - Tests/ConnectConformance/Generated
   - Tests/ConnectLibraryTests/Generated
 disabled_rules:
   - blanket_disable_command

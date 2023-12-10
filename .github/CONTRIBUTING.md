@@ -81,6 +81,8 @@ Outputted code will be available in the `out` directories specified by
 
 ## Running Tests
 
+FIXME
+
 A test server is used to run
 [conformance](../Tests/ConnectLibraryTests/ConnectConformance) -
 integration tests which validate the behavior of the `Connect` library with

@@ -8,7 +8,7 @@ MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-print-directory
 BIN := .tmp/bin
 LICENSE_HEADER_YEAR_RANGE := 2022-2023
-CONFORMANCE_VERSION := f56b513a78b007e4a9eaa95c40bfd76c60ea9be1
+CONFORMANCE_VERSION := 1f21c14840df5c3184667c94b0bb025764763bc6
 EXAMPLES_VERSION := e74547031f662f81a62f5e95ebaa9f7037e0c41b
 LICENSE_HEADER_VERSION := v1.12.0
 LICENSE_IGNORE := -e Package.swift \
@@ -39,25 +39,14 @@ clean: cleangenerated ## Delete all plugins and generated outputs
 cleangenerated: ## Delete all generated outputs
 	rm -rf ./Examples/ElizaSharedSources/GeneratedSources/*
 	rm -rf ./Libraries/Connect/Implementation/Generated/*
+	rm -rf ./Tests/ConnectConformance/Generated/*
 	rm -rf ./Tests/ConnectLibraryTests/Generated/*
-
-.PHONY: conformanceserverstop
-conformanceserverstop: ## Stop the conformance server
-	-docker container stop serverconnect servergrpc
-
-.PHONY: conformanceserverrun
-conformanceserverrun: conformanceserverstop ## Start the conformance server
-	docker run --rm --name serverconnect -p 8080:8080 -p 8081:8081 -d \
-		connectrpc/conformance:$(CONFORMANCE_VERSION) \
-		/usr/local/bin/serverconnect --h1port "8080" --h2port "8081" --cert "cert/localhost.crt" --key "cert/localhost.key"
-	docker run --rm --name servergrpc -p 8083:8083 -d \
-		connectrpc/conformance:$(CONFORMANCE_VERSION) \
-		/usr/local/bin/servergrpc --port "8083" --cert "cert/localhost.crt" --key "cert/localhost.key"
 
 .PHONY: generate
 generate: cleangenerated ## Regenerate outputs for all .proto files
 	cd Examples; buf generate https://github.com/connectrpc/examples-go.git#ref=$(EXAMPLES_VERSION),subdir=proto
 	cd Libraries/Connect; buf generate
+	cd Tests/ConnectConformance; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_VERSION),subdir=proto
 	cd Tests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_VERSION),subdir=proto
 
 .PHONY: help
