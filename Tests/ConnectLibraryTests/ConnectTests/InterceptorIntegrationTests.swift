@@ -16,6 +16,9 @@
 import SwiftProtobuf
 import XCTest
 
+@available(iOS 16, *)
+@available(tvOS 16, *)
+@available(watchOS 9, *)
 final class InterceptorIntegrationTests: XCTestCase {
     func testUnaryInterceptorSuccess() async {
         let trackedSteps = Locked([InterceptorStep]())
