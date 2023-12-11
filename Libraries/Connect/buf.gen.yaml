@@ -1,5 +1,5 @@
 version: v1
 plugins:
-  - plugin: buf.build/apple/swift:v1.25.1
+  - plugin: buf.build/apple/swift:v1.25.2
     opt: Visibility=Internal
     out: ./Internal/Generated
