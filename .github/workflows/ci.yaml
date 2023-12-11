@@ -71,8 +71,14 @@ jobs:
           brew unlink python@3.12 && brew link --overwrite python@3.12
           brew install docker colima
           colima delete && colima start
-      - name: Run tests
-        run: make test
+      - name: Run iOS tests
+        run: make testios
+      - name: Run macOS tests
+        run: make testmacos
+      - name: Run tvOS tests
+        run: make testtvos
+      - name: Run watchOS tests
+        run: make testwatchos
   run-swiftlint:
     runs-on: ubuntu-latest
     container:

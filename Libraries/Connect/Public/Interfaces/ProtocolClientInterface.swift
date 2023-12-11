@@ -109,7 +109,7 @@ public protocol ProtocolClientInterface: Sendable {
     /// - parameter headers: The outbound request headers to include.
     ///
     /// - returns: The response which is returned asynchronously.
-    @available(iOS 13, *)
+    @available(iOS 13.0, watchOS 6.0, *)
     func unary<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         idempotencyLevel: IdempotencyLevel,
@@ -129,7 +129,7 @@ public protocol ProtocolClientInterface: Sendable {
     /// - parameter headers: The outbound request headers to include.
     ///
     /// - returns: An interface for sending and receiving data over the stream using async/await.
-    @available(iOS 13, *)
+    @available(iOS 13.0, watchOS 6.0, *)
     func bidirectionalStream<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         headers: Headers
@@ -147,7 +147,7 @@ public protocol ProtocolClientInterface: Sendable {
     /// - parameter headers: The outbound request headers to include.
     ///
     /// - returns: An interface for sending and receiving data over the stream using async/await.
-    @available(iOS 13, *)
+    @available(iOS 13.0, watchOS 6.0, *)
     func clientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         headers: Headers
@@ -165,7 +165,7 @@ public protocol ProtocolClientInterface: Sendable {
     /// - parameter headers: The outbound request headers to include.
     ///
     /// - returns: An interface for sending and receiving data over the stream using async/await.
-    @available(iOS 13, *)
+    @available(iOS 13.0, watchOS 6.0, *)
     func serverOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         headers: Headers

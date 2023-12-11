@@ -17,7 +17,7 @@ import SwiftProtobuf
 /// Concrete implementation of `BidirectionalAsyncStreamInterface`.
 /// Provides the necessary wiring to bridge from closures/callbacks to Swift's `AsyncStream`
 /// to work with async/await.
-@available(iOS 13, *)
+@available(iOS 13.0, watchOS 6.0, *)
 final class BidirectionalAsyncStream<
     Input: ProtobufMessage, Output: ProtobufMessage
 >: @unchecked Sendable {
@@ -79,7 +79,7 @@ final class BidirectionalAsyncStream<
     }
 }
 
-@available(iOS 13, *)
+@available(iOS 13.0, watchOS 6.0, *)
 extension BidirectionalAsyncStream: BidirectionalAsyncStreamInterface {
     @discardableResult
     func send(_ input: Input) throws -> Self {
@@ -101,5 +101,5 @@ extension BidirectionalAsyncStream: BidirectionalAsyncStreamInterface {
 }
 
 // Conforms to the client-only interface since it matches exactly and the implementation is internal
-@available(iOS 13, *)
+@available(iOS 13.0, watchOS 6.0, *)
 extension BidirectionalAsyncStream: ClientOnlyAsyncStreamInterface {}

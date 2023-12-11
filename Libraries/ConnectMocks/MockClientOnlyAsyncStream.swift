@@ -23,7 +23,7 @@ import SwiftProtobuf
 ///
 /// To return data over the stream, outputs can be specified using `init(outputs: ...)` or by
 /// subclassing and overriding `results()`.
-@available(iOS 13, *)
+@available(iOS 13.0, watchOS 6.0, *)
 open class MockClientOnlyAsyncStream<
     Input: ProtobufMessage,
     Output: ProtobufMessage

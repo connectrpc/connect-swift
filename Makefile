@@ -78,7 +78,22 @@ $(BIN)/license-headers: Makefile
 	mkdir -p $(@D)
 	GOBIN=$(abspath $(BIN)) go install github.com/bufbuild/buf/private/pkg/licenseheader/cmd/license-header@$(LICENSE_HEADER_VERSION)
 
-.PHONY: test
-test: conformanceserverrun ## Run all tests
-	swift test
+.PHONY: testios
+testios: conformanceserverrun ## Run iOS tests
+	xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0.1' test
+	$(MAKE) conformanceserverstop
+
+.PHONY: testmacos
+testmacos: conformanceserverrun ## Run macOS tests
+	xcodebuild -scheme Connect-Package -destination 'platform=macOS,arch=arm64' test
+	$(MAKE) conformanceserverstop
+
+.PHONY: testtvos
+testtvos: conformanceserverrun ## Run tvOS tests
+	xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=17.0' test
+	$(MAKE) conformanceserverstop
+
+.PHONY: testwatchos
+testwatchos: conformanceserverrun ## Run watchOS tests
+	xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm),OS=10.0' test
 	$(MAKE) conformanceserverstop

@@ -60,7 +60,7 @@ final class ConnectMockGenerator: Generator {
         self.printLine("///")
         self.printLine("/// Note: This class does not handle thread-safe locking, but provides")
         self.printLine("/// `@unchecked Sendable` conformance to simplify testing and mocking.")
-        self.printLine("@available(iOS 13, *)")
+        self.printLine("@available(iOS 13.0, watchOS 6.0, *)")
         self.printLine(
             """
             \(self.typeVisibility) class \(service.mockName(using: self.namer)): \

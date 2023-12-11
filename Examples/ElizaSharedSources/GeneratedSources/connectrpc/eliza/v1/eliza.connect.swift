@@ -16,18 +16,18 @@ import SwiftProtobuf
 internal protocol Connectrpc_Eliza_V1_ElizaServiceClientInterface: Sendable {
 
     /// Say is a unary RPC. Eliza responds to the prompt with a single sentence.
-    @available(iOS 13, *)
+    @available(iOS 13.0, *)
     func `say`(request: Connectrpc_Eliza_V1_SayRequest, headers: Connect.Headers) async -> ResponseMessage<Connectrpc_Eliza_V1_SayResponse>
 
     /// Converse is a bidirectional RPC. The caller may exchange multiple
     /// back-and-forth messages with Eliza over a long-lived connection. Eliza
     /// responds to each ConverseRequest with a ConverseResponse.
-    @available(iOS 13, *)
+    @available(iOS 13.0, *)
     func `converse`(headers: Connect.Headers) -> any Connect.BidirectionalAsyncStreamInterface<Connectrpc_Eliza_V1_ConverseRequest, Connectrpc_Eliza_V1_ConverseResponse>
 
     /// Introduce is a server streaming RPC. Given the caller's name, Eliza
     /// returns a stream of sentences to introduce itself.
-    @available(iOS 13, *)
+    @available(iOS 13.0, *)
     func `introduce`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<Connectrpc_Eliza_V1_IntroduceRequest, Connectrpc_Eliza_V1_IntroduceResponse>
 }
 
@@ -39,17 +39,17 @@ internal final class Connectrpc_Eliza_V1_ElizaServiceClient: Connectrpc_Eliza_V1
         self.client = client
     }
 
-    @available(iOS 13, *)
+    @available(iOS 13.0, *)
     internal func `say`(request: Connectrpc_Eliza_V1_SayRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Eliza_V1_SayResponse> {
         return await self.client.unary(path: "/connectrpc.eliza.v1.ElizaService/Say", idempotencyLevel: .noSideEffects, request: request, headers: headers)
     }
 
-    @available(iOS 13, *)
+    @available(iOS 13.0, *)
     internal func `converse`(headers: Connect.Headers = [:]) -> any Connect.BidirectionalAsyncStreamInterface<Connectrpc_Eliza_V1_ConverseRequest, Connectrpc_Eliza_V1_ConverseResponse> {
         return self.client.bidirectionalStream(path: "/connectrpc.eliza.v1.ElizaService/Converse", headers: headers)
     }
 
-    @available(iOS 13, *)
+    @available(iOS 13.0, *)
     internal func `introduce`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Connectrpc_Eliza_V1_IntroduceRequest, Connectrpc_Eliza_V1_IntroduceResponse> {
         return self.client.serverOnlyStream(path: "/connectrpc.eliza.v1.ElizaService/Introduce", headers: headers)
     }

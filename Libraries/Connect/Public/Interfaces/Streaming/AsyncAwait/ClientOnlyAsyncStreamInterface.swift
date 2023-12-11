@@ -16,7 +16,7 @@ import SwiftProtobuf
 
 /// Represents a client-only stream (a stream where the client streams data to the server and
 /// eventually receives a response) that can be interacted with using async/await.
-@available(iOS 13, *)
+@available(iOS 13.0, watchOS 6.0, *)
 public protocol ClientOnlyAsyncStreamInterface<Input, Output> {
     /// The input (request) message type.
     associatedtype Input: ProtobufMessage
