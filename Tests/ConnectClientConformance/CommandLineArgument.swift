@@ -12,6 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// MARK: - Arguments
+
+enum ClientTypeArg: String, CaseIterable, CommandLineArgument {
+    case swiftNIO = "nio"
+    case urlSession = "urlsession"
+
+    static let key = "httpclient"
+}
+
+// MARK: - Protocol interface
+
 protocol CommandLineArgument: RawRepresentable, CaseIterable {
     static var key: String { get }
 

@@ -12,126 +12,60 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Connect
-import ConnectNIO
 import Foundation
 import SwiftProtobuf
+
+// MARK: - Helpers
+
+private let prefixLength = MemoryLayout<UInt32>.size // 4
+
+private func nextMessageLength(for data: Data) -> Int {
+    var messageLength: UInt32 = 0
+    (data[0...3] as NSData).getBytes(&messageLength, length: prefixLength)
+    messageLength = UInt32(bigEndian: messageLength)
+    return Int(messageLength)
+}
+
+extension String: Swift.Error {}
 
 // MARK: - Main function
 
 private let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLine.arguments)
-private let prefixLength = 4
-private var messageLength: UInt32 = 0
-(FileHandle.standardInput.availableData[0...3] as NSData).getBytes(&messageLength, length: 4)
-messageLength = UInt32(bigEndian: messageLength)
-throw "length: \(messageLength), total: \(FileHandle.standardInput.availableData.count)"
 
-private let request = try Connectrpc_Conformance_V1_ClientCompatRequest(
-    serializedData: Data(FileHandle.standardInput.availableData[prefixLength...Int(messageLength)])
-)
-
-guard request.service == "connectrpc.conformance.v1.ConformanceService" else {
-    throw "Unexpected service specified: \(request.service)"
-}
-
-private let protocolClient = try createProtocolClient()
-private let invoker = ConformanceInvoker(request: request, protocolClient: protocolClient)
-private let response: Connectrpc_Conformance_V1_ClientCompatResponse
-do {
-    let result = try await invoker.invokeRequest()
-    response = .with { conformanceResponse in
-        conformanceResponse.testName = request.testName
-        conformanceResponse.response = result
+var pendingData = FileHandle.standardInput.availableData
+while !pendingData.isEmpty {
+    let nextRequestLength = nextMessageLength(for: pendingData)
+    let nextRequest = pendingData[prefixLength ..< prefixLength + nextRequestLength]
+    pendingData = Data(pendingData[prefixLength + nextRequestLength ..< pendingData.count - 1])
+    let request = try Connectrpc_Conformance_V1_ClientCompatRequest(serializedData: nextRequest)
+    guard request.service == "connectrpc.conformance.v1.ConformanceService" else {
+        throw "Unexpected service specified: \(request.service)"
     }
-} catch let error {
-    // Unexpected local/runtime error (no RPC response).
-    response = .with { conformanceResponse in
-        conformanceResponse.testName = request.testName
-        conformanceResponse.error = .with { conformanceError in
-            conformanceError.message = error.localizedDescription
+
+    let invoker = try ConformanceInvoker(request: request, clientType: clientTypeArg)
+    let response: Connectrpc_Conformance_V1_ClientCompatResponse
+    do {
+        let result = try await invoker.invokeRequest()
+        response = .with { conformanceResponse in
+            conformanceResponse.testName = request.testName
+            conformanceResponse.response = result
+        }
+    } catch let error {
+        // Unexpected local/runtime error (no RPC response).
+        response = .with { conformanceResponse in
+            conformanceResponse.testName = request.testName
+            conformanceResponse.error = .with { conformanceError in
+                conformanceError.message = error.localizedDescription
+            }
         }
     }
-}
 
-if #available(macOS 10.15.4, *) {
-    try FileHandle.standardOutput.write(contentsOf: response.serializedData())
-} else {
-    throw "Unsupported version of macOS"
-}
-
-// MARK: - CLI arguments
-
-private enum ClientTypeArg: String, CaseIterable, CommandLineArgument {
-    case swiftNIO = "nio"
-    case urlSession = "urlsession"
-
-    static let key = "httpclient"
-}
-
-// MARK: - Helper functions
-
-private func createProtocolClient() throws -> Connect.ProtocolClientInterface {
-    return ProtocolClient(
-        httpClient: createHTTPClient(),
-        config: ProtocolClientConfig(
-            host: "https://\(request.host)",
-            networkProtocol: try createNetworkProtocol(),
-            codec: try createCodec(),
-            unaryGET: .alwaysEnabled,
-            requestCompression: try createRequestCompression()
-        )
-    )
-}
-
-private func createHTTPClient() -> Connect.HTTPClientInterface {
-    let timeout: TimeInterval = request.hasTimeoutMs ? Double(request.timeoutMs) / 1_000.0 : 60.0
-    switch clientTypeArg {
-    case .swiftNIO:
-        return ConformanceNIOHTTPClient(
-            host: "https://\(request.host)",
-            port: Int(request.port),
-            timeout: timeout
-        )
-    case .urlSession:
-        return ConformanceURLSessionHTTPClient(
-            timeout: timeout
-        )
+    guard #available(macOS 10.15.4, *) else {
+        throw "Unsupported version of macOS"
     }
-}
 
-private func createRequestCompression() throws -> Connect.ProtocolClientConfig.RequestCompression? {
-    switch request.compression {
-    case .identity, .unspecified:
-        return nil
-    case .gzip:
-        return Connect.ProtocolClientConfig.RequestCompression(minBytes: 1, pool: GzipCompressionPool())
-    case .br, .zstd, .deflate, .snappy, .UNRECOGNIZED:
-        throw "Unexpected request compression specified: \(request.compression)"
-    }
+    let serializedResponse = try response.serializedData()
+    var responseLength = UInt32(serializedResponse.count).bigEndian
+    let output = Data(bytes: &responseLength, count: prefixLength) + serializedResponse
+    try FileHandle.standardOutput.write(contentsOf: output)
 }
-
-private func createCodec() throws -> Connect.Codec {
-    switch request.codec {
-    case .proto, .unspecified:
-        return ProtoCodec()
-    case .json:
-        return JSONCodec()
-    case .text, .UNRECOGNIZED:
-        throw "Unexpected codec specified: \(request.codec)"
-    }
-}
-
-private func createNetworkProtocol() throws -> Connect.NetworkProtocol {
-    switch request.protocol {
-    case .connect, .unspecified:
-        return .connect
-    case .grpc:
-        return .grpc
-    case .grpcWeb:
-        return .grpcWeb
-    case .UNRECOGNIZED:
-        throw "Unexpected protocol specified: \(request.protocol)"
-    }
-}
-
-extension String: Swift.Error {}

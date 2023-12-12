@@ -17,18 +17,93 @@ import Foundation
 import SwiftProtobuf
 
 final class ConformanceInvoker {
-    private let request: Connectrpc_Conformance_V1_ClientCompatRequest
-    private let client: Connectrpc_Conformance_V1_ConformanceServiceClient
+    private let client: ConformanceClient
+    private let request: ConformanceRequest
 
-    init(
-        request: Connectrpc_Conformance_V1_ClientCompatRequest,
-        protocolClient: Connect.ProtocolClientInterface
-    ) {
+    typealias ConformanceClient = Connectrpc_Conformance_V1_ConformanceServiceClient
+    typealias ConformanceRequest = Connectrpc_Conformance_V1_ClientCompatRequest
+    typealias ConformanceResult = Connectrpc_Conformance_V1_ClientResponseResult
+
+    // MARK: - Initialization
+
+    init(request: ConformanceRequest, clientType: ClientTypeArg) throws {
         self.request = request
-        self.client = Connectrpc_Conformance_V1_ConformanceServiceClient(client: protocolClient)
+        self.client = try ConformanceClient(client: Self.protocolClient(for: request, clientType: clientType))
     }
 
-    func invokeRequest() async throws -> Connectrpc_Conformance_V1_ClientResponseResult {
+    private static func protocolClient(
+        for request: ConformanceRequest, clientType: ClientTypeArg
+    ) throws -> ProtocolClientInterface {
+        return ProtocolClient(
+            httpClient: self.httpClient(for: request, clientType: clientType),
+            config: ProtocolClientConfig(
+                host: "https://\(request.host)",
+                networkProtocol: try self.networkProtocol(for: request),
+                codec: try self.codec(for: request),
+                unaryGET: .alwaysEnabled,
+                requestCompression: try self.requestCompression(for: request)
+            )
+        )
+    }
+
+    private static func httpClient(
+        for request: ConformanceRequest, clientType: ClientTypeArg
+    ) -> HTTPClientInterface {
+        let timeout: TimeInterval = request.hasTimeoutMs ? Double(request.timeoutMs) / 1_000.0 : 60.0
+        switch clientType {
+        case .swiftNIO:
+            return ConformanceNIOHTTPClient(
+                host: "https://\(request.host)",
+                port: Int(request.port),
+                timeout: timeout
+            )
+        case .urlSession:
+            return ConformanceURLSessionHTTPClient(
+                timeout: timeout
+            )
+        }
+    }
+
+    private static func requestCompression(
+        for request: ConformanceRequest
+    ) throws -> ProtocolClientConfig.RequestCompression? {
+        switch request.compression {
+        case .identity, .unspecified:
+            return nil
+        case .gzip:
+            return Connect.ProtocolClientConfig.RequestCompression(minBytes: 1, pool: GzipCompressionPool())
+        case .br, .zstd, .deflate, .snappy, .UNRECOGNIZED:
+            throw "Unexpected request compression specified: \(request.compression)"
+        }
+    }
+
+    private static func codec(for request: ConformanceRequest) throws -> Codec {
+        switch request.codec {
+        case .proto, .unspecified:
+            return ProtoCodec()
+        case .json:
+            return JSONCodec()
+        case .text, .UNRECOGNIZED:
+            throw "Unexpected codec specified: \(request.codec)"
+        }
+    }
+
+    private static func networkProtocol(for request: ConformanceRequest) throws -> NetworkProtocol {
+        switch request.protocol {
+        case .connect, .unspecified:
+            return .connect
+        case .grpc:
+            return .grpc
+        case .grpcWeb:
+            return .grpcWeb
+        case .UNRECOGNIZED:
+            throw "Unexpected protocol specified: \(request.protocol)"
+        }
+    }
+
+    // MARK: - Invocation
+
+    func invokeRequest() async throws -> ConformanceResult {
         switch self.request.method {
         case "Unary":
             guard self.request.requestMessages.count == 1 else {
@@ -65,7 +140,7 @@ final class ConformanceInvoker {
         }
     }
 
-    private func invokeUnary() async throws -> Connectrpc_Conformance_V1_ClientResponseResult {
+    private func invokeUnary() async throws -> ConformanceResult {
         let unaryRequest = try Connectrpc_Conformance_V1_UnaryRequest(
             unpackingAny: self.request.requestMessages[0]
         )
@@ -89,7 +164,7 @@ final class ConformanceInvoker {
         }
     }
 
-    private func invokeIdempotentUnary() async throws -> Connectrpc_Conformance_V1_ClientResponseResult {
+    private func invokeIdempotentUnary() async throws -> ConformanceResult {
         let unaryRequest = try Connectrpc_Conformance_V1_IdempotentUnaryRequest(
             unpackingAny: self.request.requestMessages[0]
         )
@@ -113,14 +188,14 @@ final class ConformanceInvoker {
         }
     }
 
-    private func invokeServerStream() async throws -> Connectrpc_Conformance_V1_ClientResponseResult {
+    private func invokeServerStream() async throws -> ConformanceResult {
         let streamRequest = try Connectrpc_Conformance_V1_ServerStreamRequest(
             unpackingAny: self.request.requestMessages[0]
         )
         let stream = self.client.serverStream(headers: .fromConformanceHeaders(self.request.requestHeaders))
         try stream.send(streamRequest)
 
-        var conformanceResult = Connectrpc_Conformance_V1_ClientResponseResult()
+        var conformanceResult = ConformanceResult()
         for await result in stream.results() {
             switch result {
             case .headers(let headers):
@@ -142,7 +217,7 @@ final class ConformanceInvoker {
         return conformanceResult
     }
 
-    private func invokeClientStream() async throws -> Connectrpc_Conformance_V1_ClientResponseResult {
+    private func invokeClientStream() async throws -> ConformanceResult {
         let stream = self.client.clientStream(headers: .fromConformanceHeaders(self.request.requestHeaders))
         for requestMessage in self.request.requestMessages {
             let streamRequest = try Connectrpc_Conformance_V1_ClientStreamRequest(
@@ -155,7 +230,7 @@ final class ConformanceInvoker {
         }
         stream.close()
 
-        var conformanceResult = Connectrpc_Conformance_V1_ClientResponseResult()
+        var conformanceResult = ConformanceResult()
         for await result in stream.results() {
             switch result {
             case .headers(let headers):
@@ -177,10 +252,10 @@ final class ConformanceInvoker {
         return conformanceResult
     }
 
-    private func invokeBidirectionalStream() async throws -> Connectrpc_Conformance_V1_ClientResponseResult {
+    private func invokeBidirectionalStream() async throws -> ConformanceResult {
         let stream = self.client.bidiStream(headers: .fromConformanceHeaders(self.request.requestHeaders))
         let asyncResults = stream.results()
-        var conformanceResult = Connectrpc_Conformance_V1_ClientResponseResult()
+        var conformanceResult = ConformanceResult()
         func receive(upTo count: Int) async {
             for await result in asyncResults.prefix(count) {
                 switch result {
@@ -223,7 +298,7 @@ final class ConformanceInvoker {
         return conformanceResult
     }
 
-    private func invokeUnimplemented() async throws -> Connectrpc_Conformance_V1_ClientResponseResult {
+    private func invokeUnimplemented() async throws -> ConformanceResult {
         let unimplementedRequest = try Connectrpc_Conformance_V1_UnimplementedRequest(
             unpackingAny: self.request.requestMessages[0]
         )
