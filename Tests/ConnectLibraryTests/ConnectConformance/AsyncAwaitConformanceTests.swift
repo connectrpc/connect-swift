@@ -26,7 +26,7 @@ private typealias UnimplementedServiceClient = Connectrpc_Conformance_V1_Unimple
 /// Tests are based on https://github.com/connectrpc/conformance
 ///
 /// Tests are written using async/await APIs.
-@available(iOS 13.0, watchOS 6.0, *)
+@available(iOS 13, *)
 final class AsyncAwaitConformanceTests: XCTestCase {
     private func executeTestWithClients(
         timeout: TimeInterval = 60,

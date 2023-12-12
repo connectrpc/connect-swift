@@ -18,7 +18,7 @@ import SwiftProtobuf
 ///
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
-@available(iOS 13.0, watchOS 6.0, *)
+@available(iOS 13, *)
 internal class Connectrpc_Conformance_V1_TestServiceClientMock: Connectrpc_Conformance_V1_TestServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
@@ -183,7 +183,7 @@ internal class Connectrpc_Conformance_V1_TestServiceClientMock: Connectrpc_Confo
 ///
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
-@available(iOS 13.0, watchOS 6.0, *)
+@available(iOS 13, *)
 internal class Connectrpc_Conformance_V1_UnimplementedServiceClientMock: Connectrpc_Conformance_V1_UnimplementedServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
@@ -227,7 +227,7 @@ internal class Connectrpc_Conformance_V1_UnimplementedServiceClientMock: Connect
 ///
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
-@available(iOS 13.0, watchOS 6.0, *)
+@available(iOS 13, *)
 internal class Connectrpc_Conformance_V1_ReconnectServiceClientMock: Connectrpc_Conformance_V1_ReconnectServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
@@ -272,7 +272,7 @@ internal class Connectrpc_Conformance_V1_ReconnectServiceClientMock: Connectrpc_
 ///
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
-@available(iOS 13.0, watchOS 6.0, *)
+@available(iOS 13, *)
 internal class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientMock: Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
@@ -317,7 +317,7 @@ internal class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientMock: Con
 ///
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
-@available(iOS 13.0, watchOS 6.0, *)
+@available(iOS 13, *)
 internal class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientMock: Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 
@@ -362,7 +362,7 @@ internal class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientMock: Conne
 ///
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
-@available(iOS 13.0, watchOS 6.0, *)
+@available(iOS 13, *)
 internal class Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClientMock: Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 

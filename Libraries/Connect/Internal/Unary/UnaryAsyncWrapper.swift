@@ -20,7 +20,7 @@ import SwiftProtobuf
 /// For discussions on why this is necessary, see:
 /// https://forums.swift.org/t/how-to-use-withtaskcancellationhandler-properly/54341/37
 /// https://stackoverflow.com/q/71898080
-@available(iOS 13.0, watchOS 6.0, *)
+@available(iOS 13, *)
 actor UnaryAsyncWrapper<Output: ProtobufMessage>: Sendable {
     private var cancelable: Cancelable?
     private let sendUnary: PerformClosure

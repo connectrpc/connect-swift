@@ -180,7 +180,7 @@ final class CallbackConformanceTests: XCTestCase {
     }
 
     // Minimum requirements for runtime support for parameterized protocol types
-    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
+    @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *)
     func testPingPong() {
         func createPayload(
             requestSize: Int,

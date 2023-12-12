@@ -16,7 +16,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface: Sendable
     func `emptyCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
 
     /// One empty request followed by one empty response.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `emptyCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>
 
     /// One request followed by one response.
@@ -24,7 +24,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface: Sendable
     func `unaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable
 
     /// One request followed by one response.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `unaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers) async -> ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>
 
     /// One request followed by one response. This RPC always fails.
@@ -32,7 +32,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface: Sendable
     func `failUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>) -> Void) -> Connect.Cancelable
 
     /// One request followed by one response. This RPC always fails.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `failUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers) async -> ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>
 
     /// One request followed by one response. Response has cache control
@@ -44,7 +44,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface: Sendable
     /// One request followed by one response. Response has cache control
     /// headers set such that a caching HTTP proxy (such as GFE) can
     /// satisfy subsequent requests.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `cacheableUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers) async -> ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse>
 
     /// One request followed by a sequence of responses (streamed download).
@@ -53,7 +53,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface: Sendable
 
     /// One request followed by a sequence of responses (streamed download).
     /// The server returns the payload with client desired type and sizes.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `streamingOutputCall`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest, Connectrpc_Conformance_V1_StreamingOutputCallResponse>
 
     /// One request followed by a sequence of responses (streamed download).
@@ -64,7 +64,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface: Sendable
     /// One request followed by a sequence of responses (streamed download).
     /// The server returns the payload with client desired type and sizes.
     /// This RPC always responds with an error status.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `failStreamingOutputCall`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest, Connectrpc_Conformance_V1_StreamingOutputCallResponse>
 
     /// A sequence of requests followed by one response (streamed upload).
@@ -73,7 +73,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface: Sendable
 
     /// A sequence of requests followed by one response (streamed upload).
     /// The server returns the aggregated size of client payload as the result.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `streamingInputCall`(headers: Connect.Headers) -> any Connect.ClientOnlyAsyncStreamInterface<Connectrpc_Conformance_V1_StreamingInputCallRequest, Connectrpc_Conformance_V1_StreamingInputCallResponse>
 
     /// A sequence of requests with each request served by the server immediately.
@@ -84,7 +84,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface: Sendable
     /// A sequence of requests with each request served by the server immediately.
     /// As one request could lead to multiple responses, this interface
     /// demonstrates the idea of full duplexing.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `fullDuplexCall`(headers: Connect.Headers) -> any Connect.BidirectionalAsyncStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest, Connectrpc_Conformance_V1_StreamingOutputCallResponse>
 
     /// A sequence of requests followed by a sequence of responses.
@@ -97,7 +97,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface: Sendable
     /// The server buffers all the client requests and then serves them in order. A
     /// stream of responses are returned to the client when the server starts with
     /// first request.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `halfDuplexCall`(headers: Connect.Headers) -> any Connect.BidirectionalAsyncStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest, Connectrpc_Conformance_V1_StreamingOutputCallResponse>
 
     /// The test server will not implement this method. It will be used
@@ -107,7 +107,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface: Sendable
 
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented methods.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>
 
     /// The test server will not implement this method. It will be used
@@ -116,7 +116,7 @@ internal protocol Connectrpc_Conformance_V1_TestServiceClientInterface: Sendable
 
     /// The test server will not implement this method. It will be used
     /// to test the behavior when clients call unimplemented streaming output methods.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `unimplementedStreamingOutputCall`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<SwiftProtobuf.Google_Protobuf_Empty, SwiftProtobuf.Google_Protobuf_Empty>
 }
 
@@ -133,7 +133,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.unary(path: "/connectrpc.conformance.v1.TestService/EmptyCall", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `emptyCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/EmptyCall", idempotencyLevel: .unknown, request: request, headers: headers)
     }
@@ -143,7 +143,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnaryCall", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `unaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnaryCall", idempotencyLevel: .unknown, request: request, headers: headers)
     }
@@ -153,7 +153,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.unary(path: "/connectrpc.conformance.v1.TestService/FailUnaryCall", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `failUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/FailUnaryCall", idempotencyLevel: .unknown, request: request, headers: headers)
     }
@@ -163,7 +163,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.unary(path: "/connectrpc.conformance.v1.TestService/CacheableUnaryCall", idempotencyLevel: .noSideEffects, request: request, headers: headers, completion: completion)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `cacheableUnaryCall`(request: Connectrpc_Conformance_V1_SimpleRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_SimpleResponse> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/CacheableUnaryCall", idempotencyLevel: .noSideEffects, request: request, headers: headers)
     }
@@ -172,7 +172,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.TestService/StreamingOutputCall", headers: headers, onResult: onResult)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `streamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest, Connectrpc_Conformance_V1_StreamingOutputCallResponse> {
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.TestService/StreamingOutputCall", headers: headers)
     }
@@ -181,7 +181,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.TestService/FailStreamingOutputCall", headers: headers, onResult: onResult)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `failStreamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest, Connectrpc_Conformance_V1_StreamingOutputCallResponse> {
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.TestService/FailStreamingOutputCall", headers: headers)
     }
@@ -190,7 +190,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.clientOnlyStream(path: "/connectrpc.conformance.v1.TestService/StreamingInputCall", headers: headers, onResult: onResult)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `streamingInputCall`(headers: Connect.Headers = [:]) -> any Connect.ClientOnlyAsyncStreamInterface<Connectrpc_Conformance_V1_StreamingInputCallRequest, Connectrpc_Conformance_V1_StreamingInputCallResponse> {
         return self.client.clientOnlyStream(path: "/connectrpc.conformance.v1.TestService/StreamingInputCall", headers: headers)
     }
@@ -199,7 +199,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.bidirectionalStream(path: "/connectrpc.conformance.v1.TestService/FullDuplexCall", headers: headers, onResult: onResult)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `fullDuplexCall`(headers: Connect.Headers = [:]) -> any Connect.BidirectionalAsyncStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest, Connectrpc_Conformance_V1_StreamingOutputCallResponse> {
         return self.client.bidirectionalStream(path: "/connectrpc.conformance.v1.TestService/FullDuplexCall", headers: headers)
     }
@@ -208,7 +208,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.bidirectionalStream(path: "/connectrpc.conformance.v1.TestService/HalfDuplexCall", headers: headers, onResult: onResult)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `halfDuplexCall`(headers: Connect.Headers = [:]) -> any Connect.BidirectionalAsyncStreamInterface<Connectrpc_Conformance_V1_StreamingOutputCallRequest, Connectrpc_Conformance_V1_StreamingOutputCallResponse> {
         return self.client.bidirectionalStream(path: "/connectrpc.conformance.v1.TestService/HalfDuplexCall", headers: headers)
     }
@@ -218,7 +218,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnimplementedCall", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.TestService/UnimplementedCall", idempotencyLevel: .unknown, request: request, headers: headers)
     }
@@ -227,7 +227,7 @@ internal final class Connectrpc_Conformance_V1_TestServiceClient: Connectrpc_Con
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.TestService/UnimplementedStreamingOutputCall", headers: headers, onResult: onResult)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<SwiftProtobuf.Google_Protobuf_Empty, SwiftProtobuf.Google_Protobuf_Empty> {
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.TestService/UnimplementedStreamingOutputCall", headers: headers)
     }
@@ -258,14 +258,14 @@ internal protocol Connectrpc_Conformance_V1_UnimplementedServiceClientInterface:
     func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
 
     /// A call that no server should implement
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>
 
     /// A call that no server should implement
     func `unimplementedStreamingOutputCall`(headers: Connect.Headers, onResult: @escaping @Sendable (Connect.StreamResult<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> any Connect.ServerOnlyStreamInterface<SwiftProtobuf.Google_Protobuf_Empty>
 
     /// A call that no server should implement
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `unimplementedStreamingOutputCall`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<SwiftProtobuf.Google_Protobuf_Empty, SwiftProtobuf.Google_Protobuf_Empty>
 }
 
@@ -282,7 +282,7 @@ internal final class Connectrpc_Conformance_V1_UnimplementedServiceClient: Conne
         return self.client.unary(path: "/connectrpc.conformance.v1.UnimplementedService/UnimplementedCall", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `unimplementedCall`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.UnimplementedService/UnimplementedCall", idempotencyLevel: .unknown, request: request, headers: headers)
     }
@@ -291,7 +291,7 @@ internal final class Connectrpc_Conformance_V1_UnimplementedServiceClient: Conne
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.UnimplementedService/UnimplementedStreamingOutputCall", headers: headers, onResult: onResult)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `unimplementedStreamingOutputCall`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<SwiftProtobuf.Google_Protobuf_Empty, SwiftProtobuf.Google_Protobuf_Empty> {
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.UnimplementedService/UnimplementedStreamingOutputCall", headers: headers)
     }
@@ -310,13 +310,13 @@ internal protocol Connectrpc_Conformance_V1_ReconnectServiceClientInterface: Sen
     @discardableResult
     func `start`(request: Connectrpc_Conformance_V1_ReconnectParams, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `start`(request: Connectrpc_Conformance_V1_ReconnectParams, headers: Connect.Headers) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>
 
     @discardableResult
     func `stop`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_ReconnectInfo>) -> Void) -> Connect.Cancelable
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `stop`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers) async -> ResponseMessage<Connectrpc_Conformance_V1_ReconnectInfo>
 }
 
@@ -333,7 +333,7 @@ internal final class Connectrpc_Conformance_V1_ReconnectServiceClient: Connectrp
         return self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Start", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `start`(request: Connectrpc_Conformance_V1_ReconnectParams, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Start", idempotencyLevel: .unknown, request: request, headers: headers)
     }
@@ -343,7 +343,7 @@ internal final class Connectrpc_Conformance_V1_ReconnectServiceClient: Connectrp
         return self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Stop", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `stop`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_ReconnectInfo> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.ReconnectService/Stop", idempotencyLevel: .unknown, request: request, headers: headers)
     }
@@ -364,7 +364,7 @@ internal protocol Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientInterf
     func `getClientStats`(request: Connectrpc_Conformance_V1_LoadBalancerStatsRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerStatsResponse>) -> Void) -> Connect.Cancelable
 
     /// Gets the backend distribution for RPCs sent by a test client.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `getClientStats`(request: Connectrpc_Conformance_V1_LoadBalancerStatsRequest, headers: Connect.Headers) async -> ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerStatsResponse>
 
     /// Gets the accumulated stats for RPCs sent by a test client.
@@ -372,7 +372,7 @@ internal protocol Connectrpc_Conformance_V1_LoadBalancerStatsServiceClientInterf
     func `getClientAccumulatedStats`(request: Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsResponse>) -> Void) -> Connect.Cancelable
 
     /// Gets the accumulated stats for RPCs sent by a test client.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `getClientAccumulatedStats`(request: Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers) async -> ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsResponse>
 }
 
@@ -389,7 +389,7 @@ internal final class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClient: C
         return self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientStats", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `getClientStats`(request: Connectrpc_Conformance_V1_LoadBalancerStatsRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerStatsResponse> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientStats", idempotencyLevel: .unknown, request: request, headers: headers)
     }
@@ -399,7 +399,7 @@ internal final class Connectrpc_Conformance_V1_LoadBalancerStatsServiceClient: C
         return self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientAccumulatedStats", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `getClientAccumulatedStats`(request: Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_LoadBalancerAccumulatedStatsResponse> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.LoadBalancerStatsService/GetClientAccumulatedStats", idempotencyLevel: .unknown, request: request, headers: headers)
     }
@@ -418,13 +418,13 @@ internal protocol Connectrpc_Conformance_V1_XdsUpdateHealthServiceClientInterfac
     @discardableResult
     func `setServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `setServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>
 
     @discardableResult
     func `setNotServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>) -> Void) -> Connect.Cancelable
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `setNotServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty>
 }
 
@@ -441,7 +441,7 @@ internal final class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClient: Con
         return self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetServing", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `setServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetServing", idempotencyLevel: .unknown, request: request, headers: headers)
     }
@@ -451,7 +451,7 @@ internal final class Connectrpc_Conformance_V1_XdsUpdateHealthServiceClient: Con
         return self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetNotServing", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `setNotServing`(request: SwiftProtobuf.Google_Protobuf_Empty, headers: Connect.Headers = [:]) async -> ResponseMessage<SwiftProtobuf.Google_Protobuf_Empty> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateHealthService/SetNotServing", idempotencyLevel: .unknown, request: request, headers: headers)
     }
@@ -472,7 +472,7 @@ internal protocol Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceClien
     func `configure`(request: Connectrpc_Conformance_V1_ClientConfigureRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_ClientConfigureResponse>) -> Void) -> Connect.Cancelable
 
     /// Update the tes client's configuration.
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     func `configure`(request: Connectrpc_Conformance_V1_ClientConfigureRequest, headers: Connect.Headers) async -> ResponseMessage<Connectrpc_Conformance_V1_ClientConfigureResponse>
 }
 
@@ -489,7 +489,7 @@ internal final class Connectrpc_Conformance_V1_XdsUpdateClientConfigureServiceCl
         return self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateClientConfigureService/Configure", idempotencyLevel: .unknown, request: request, headers: headers, completion: completion)
     }
 
-    @available(iOS 13.0, watchOS 6.0, *)
+    @available(iOS 13, *)
     internal func `configure`(request: Connectrpc_Conformance_V1_ClientConfigureRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_ClientConfigureResponse> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.XdsUpdateClientConfigureService/Configure", idempotencyLevel: .unknown, request: request, headers: headers)
     }

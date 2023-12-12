@@ -80,20 +80,20 @@ $(BIN)/license-headers: Makefile
 
 .PHONY: testios
 testios: conformanceserverrun ## Run iOS tests
-	xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0.1' test
+	set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0.1' test | xcbeautify
 	$(MAKE) conformanceserverstop
 
 .PHONY: testmacos
 testmacos: conformanceserverrun ## Run macOS tests
-	xcodebuild -scheme Connect-Package -destination 'platform=macOS,arch=arm64' test
+	set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS,arch=arm64' test | xcbeautify
 	$(MAKE) conformanceserverstop
 
 .PHONY: testtvos
 testtvos: conformanceserverrun ## Run tvOS tests
-	xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=17.0' test
+	set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=17.0' test | xcbeautify
 	$(MAKE) conformanceserverstop
 
 .PHONY: testwatchos
 testwatchos: conformanceserverrun ## Run watchOS tests
-	xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm),OS=10.0' test
+	set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm),OS=10.0' test | xcbeautify
 	$(MAKE) conformanceserverstop

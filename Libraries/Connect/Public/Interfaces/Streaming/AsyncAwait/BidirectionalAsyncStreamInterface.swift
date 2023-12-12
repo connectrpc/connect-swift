@@ -15,7 +15,7 @@
 import SwiftProtobuf
 
 /// Represents a bidirectional stream that can be interacted with using async/await.
-@available(iOS 13.0, watchOS 6.0, *)
+@available(iOS 13, *)
 public protocol BidirectionalAsyncStreamInterface<Input, Output> {
     /// The input (request) message type.
     associatedtype Input: ProtobufMessage

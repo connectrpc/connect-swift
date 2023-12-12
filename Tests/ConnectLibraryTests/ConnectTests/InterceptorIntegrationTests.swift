@@ -16,7 +16,7 @@
 import SwiftProtobuf
 import XCTest
 
-@available(iOS 13.0, watchOS 6.0, *)
+@available(iOS 13, *)
 final class InterceptorIntegrationTests: XCTestCase {
     func testUnaryInterceptorSuccess() async {
         let trackedSteps = Locked([InterceptorStep]())
@@ -110,7 +110,7 @@ final class InterceptorIntegrationTests: XCTestCase {
         ])
     }
 
-    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) // Required for .contains()
+    @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *) // Required for .contains()
     func testUnaryInterceptorIsCalledWithMetrics() async {
         let trackedSteps = Locked([InterceptorStep]())
         let client = self.createClient(interceptors: [
@@ -138,7 +138,7 @@ final class InterceptorIntegrationTests: XCTestCase {
         ))
     }
 
-    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) // Required for .contains()
+    @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *) // Required for .contains()
     func testStreamInterceptorIsCalledWithMetrics() async throws {
         let trackedSteps = Locked([InterceptorStep]())
         let client = self.createClient(interceptors: [
