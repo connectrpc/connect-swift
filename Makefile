@@ -40,14 +40,14 @@ clean: cleangenerated ## Delete all plugins and generated outputs
 cleangenerated: ## Delete all generated outputs
 	rm -rf ./Examples/ElizaSharedSources/GeneratedSources/*
 	rm -rf ./Libraries/Connect/Implementation/Generated/*
-	rm -rf ./Tests/ConnectConformance/Generated/*
+	rm -rf ./Tests/ConnectClientConformance/Generated/*
 	rm -rf ./Tests/ConnectLibraryTests/Generated/*
 
 .PHONY: generate
 generate: cleangenerated ## Regenerate outputs for all .proto files
 	cd Examples; buf generate https://github.com/connectrpc/examples-go.git#ref=$(EXAMPLES_PROTO_REF),subdir=proto
 	cd Libraries/Connect; buf generate
-	cd Tests/ConnectConformance; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
+	cd Tests/ConnectClientConformance; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
 	cd Tests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
 
 .PHONY: installconformancerunner

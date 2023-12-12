@@ -42,6 +42,7 @@ while !pendingData.isEmpty {
         throw "Unexpected service specified: \(request.service)"
     }
 
+    // TODO: Run tests concurrently
     let invoker = try ConformanceInvoker(request: request, clientType: clientTypeArg)
     let response: Connectrpc_Conformance_V1_ClientCompatResponse
     do {
