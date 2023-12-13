@@ -38,14 +38,15 @@ while !pendingData.isEmpty {
     let nextRequest = pendingData[prefixLength ..< prefixLength + nextRequestLength]
     pendingData = Data(pendingData[prefixLength + nextRequestLength ..< pendingData.count - 1])
     let request = try Connectrpc_Conformance_V1_ClientCompatRequest(serializedData: nextRequest)
-    guard request.service == "connectrpc.conformance.v1.ConformanceService" else {
-        throw "Unexpected service specified: \(request.service)"
-    }
 
     // TODO: Run tests concurrently
     let invoker = try ConformanceInvoker(request: request, clientType: clientTypeArg)
     let response: Connectrpc_Conformance_V1_ClientCompatResponse
     do {
+        guard request.service == "connectrpc.conformance.v1.ConformanceService" else {
+            throw "Unexpected service specified: \(request.service)"
+        }
+
         let result = try await invoker.invokeRequest()
         response = .with { conformanceResponse in
             conformanceResponse.testName = request.testName
@@ -68,5 +69,5 @@ while !pendingData.isEmpty {
     let serializedResponse = try response.serializedData()
     var responseLength = UInt32(serializedResponse.count).bigEndian
     let output = Data(bytes: &responseLength, count: prefixLength) + serializedResponse
-    try FileHandle.standardOutput.write(contentsOf: output)
+    FileHandle.standardOutput.write(output)
 }
