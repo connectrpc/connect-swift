@@ -59,7 +59,7 @@ jobs:
           git update-index --refresh --add --remove
           git diff-index --quiet HEAD --
   run-connect-tests:
-    runs-on: macos-13-xlarge # M1 runner
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
