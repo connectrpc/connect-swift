@@ -85,7 +85,7 @@ testios: conformanceserverrun ## Run iOS tests
 
 .PHONY: testmacos
 testmacos: conformanceserverrun ## Run macOS tests
-	set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS,arch=arm64' test | xcbeautify
+	set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS' test | xcbeautify
 	$(MAKE) conformanceserverstop
 
 .PHONY: testtvos
