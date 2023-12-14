@@ -37,7 +37,7 @@ final class ConformanceInvoker {
         return ProtocolClient(
             httpClient: self.httpClient(for: request, clientType: clientType),
             config: ProtocolClientConfig(
-                host: "https://\(request.host)",
+                host: "http://\(request.host):\(request.port)",
                 networkProtocol: try self.networkProtocol(for: request),
                 codec: try self.codec(for: request),
                 unaryGET: .alwaysEnabled,
@@ -53,7 +53,7 @@ final class ConformanceInvoker {
         switch clientType {
         case .swiftNIO:
             return ConformanceNIOHTTPClient(
-                host: "https://\(request.host)",
+                host: "http://\(request.host)",
                 port: Int(request.port),
                 timeout: timeout
             )

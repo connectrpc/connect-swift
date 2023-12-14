@@ -30,9 +30,15 @@ extension String: Swift.Error {}
 
 // MARK: - Main function
 
-private let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLine.arguments)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_BidiStreamRequest.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientCompatResponse.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientResponseResult.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientStreamRequest.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ServerStreamRequest.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_UnaryRequest.self)
 
-var pendingData = FileHandle.standardInput.availableData
+private let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLine.arguments)
+private var pendingData = FileHandle.standardInput.availableData
 while !pendingData.isEmpty {
     let nextRequestLength = nextMessageLength(for: pendingData)
     let nextRequest = pendingData[prefixLength ..< prefixLength + nextRequestLength]
