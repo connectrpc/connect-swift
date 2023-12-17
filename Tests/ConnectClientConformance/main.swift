@@ -19,61 +19,90 @@ import SwiftProtobuf
 
 private let prefixLength = MemoryLayout<UInt32>.size // 4
 
-private func nextMessageLength(for data: Data) -> Int {
+private func nextMessageLength(using data: Data) -> Int {
     var messageLength: UInt32 = 0
     (data[0...3] as NSData).getBytes(&messageLength, length: prefixLength)
     messageLength = UInt32(bigEndian: messageLength)
     return Int(messageLength)
 }
 
+@available(macOS 10.15.4, *)
+private func main() async throws {
+//    var number = 0
+    while let lengthData = try FileHandle.standardInput.read(upToCount: prefixLength) {
+//        number += 1
+//        FileHandle.standardOutput.write("preparing to read request \(number)\n".data(using: .utf8)!)
+
+        let nextRequestLength = nextMessageLength(using: lengthData)
+        guard let nextRequestData = try FileHandle.standardInput.read(upToCount: nextRequestLength) else {
+            throw "Expected \(nextRequestLength) bytes to deserialize request"
+        }
+
+        let request = try Connectrpc_Conformance_V1_ClientCompatRequest(serializedData: nextRequestData)
+//        let x = {
+//            var copy = request
+//            copy.requestMessages = []
+//            FileHandle.standardOutput.write("request \(number):\n\n\(try! copy.jsonString())\n\n".data(using: .utf8)!)
+//        }
+//        x()
+
+        // TODO: Run tests concurrently
+        let invoker = try ConformanceInvoker(request: request, clientType: clientTypeArg)
+        let response: Connectrpc_Conformance_V1_ClientCompatResponse
+        do {
+            guard request.service == "connectrpc.conformance.v1.ConformanceService" else {
+                throw "Unexpected service specified: \(request.service)"
+            }
+
+            let result = try await invoker.invokeRequest()
+            response = .with { conformanceResponse in
+                conformanceResponse.testName = request.testName
+                conformanceResponse.response = result
+//                if result.hasError {
+//                    FileHandle.standardError.write("FAILED!!! \(try! result.jsonString())".data(using: .utf8)!)
+//                }
+            }
+        } catch let error {
+            // Unexpected local/runtime error (no RPC response).
+            response = .with { conformanceResponse in
+                conformanceResponse.testName = request.testName
+                conformanceResponse.error = .with { conformanceError in
+                    conformanceError.message = "\(error)"
+                }
+            }
+        }
+
+        let serializedResponse = try response.serializedData()
+        var responseLength = UInt32(serializedResponse.count).bigEndian
+        let output = Data(bytes: &responseLength, count: prefixLength) + serializedResponse
+//        FileHandle.standardOutput.write("response \(number) OK\n\n".data(using: .utf8)!)
+        FileHandle.standardOutput.write(output)
+    }
+}
+
 extension String: Swift.Error {}
 
-// MARK: - Main function
+// MARK: - Main invocation
 
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_BidiStreamRequest.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientCompatResponse.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientErrorResult.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientResponseResult.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientStreamRequest.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ConformancePayload.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_Error.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_Header.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ServerStreamRequest.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_UnaryRequest.self)
 
 private let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLine.arguments)
-private var pendingData = FileHandle.standardInput.availableData
-while !pendingData.isEmpty {
-    let nextRequestLength = nextMessageLength(for: pendingData)
-    let nextRequest = pendingData[prefixLength ..< prefixLength + nextRequestLength]
-    pendingData = Data(pendingData[prefixLength + nextRequestLength ..< pendingData.count - 1])
-    let request = try Connectrpc_Conformance_V1_ClientCompatRequest(serializedData: nextRequest)
 
-    // TODO: Run tests concurrently
-    let invoker = try ConformanceInvoker(request: request, clientType: clientTypeArg)
-    let response: Connectrpc_Conformance_V1_ClientCompatResponse
-    do {
-        guard request.service == "connectrpc.conformance.v1.ConformanceService" else {
-            throw "Unexpected service specified: \(request.service)"
-        }
-
-        let result = try await invoker.invokeRequest()
-        response = .with { conformanceResponse in
-            conformanceResponse.testName = request.testName
-            conformanceResponse.response = result
-        }
-    } catch let error {
-        // Unexpected local/runtime error (no RPC response).
-        response = .with { conformanceResponse in
-            conformanceResponse.testName = request.testName
-            conformanceResponse.error = .with { conformanceError in
-                conformanceError.message = error.localizedDescription
-            }
-        }
-    }
-
-    guard #available(macOS 10.15.4, *) else {
-        throw "Unsupported version of macOS"
-    }
-
-    let serializedResponse = try response.serializedData()
-    var responseLength = UInt32(serializedResponse.count).bigEndian
-    let output = Data(bytes: &responseLength, count: prefixLength) + serializedResponse
-    FileHandle.standardOutput.write(output)
+if #available(macOS 10.15.4, *) {
+    try await main()
+} else {
+    throw "Unsupported version of macOS"
 }
+
+//FileHandle.standardOutput.write("Data exhausted".data(using: .utf8)!)
+//print("\n", terminator: "")
+fflush(stdout)
