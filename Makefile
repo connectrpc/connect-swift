@@ -79,7 +79,7 @@ test: ## Run all tests
 # test: installconformancerunner ## Run all tests
 	swift build -c release --product ConnectClientConformance
 	mv ./.build/release/ConnectClientConformance $(BIN)
-	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/conformance-config.yaml --mode client $(BIN)/test.sh httpclient=urlsession
-# 	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/conformance-config.yaml --mode client $(BIN)/ConnectClientConformance httpclient=urlsession
+# 	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/conformance-config.yaml --mode client $(BIN)/test.sh httpclient=urlsession
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/conformance-config.yaml --mode client $(BIN)/ConnectClientConformance httpclient=urlsession
 # 	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/conformance-config.yaml --mode client $(BIN)/ConnectClientConformance httpclient=swiftnio
 # 	swift test

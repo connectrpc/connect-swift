@@ -35,7 +35,7 @@ private func main() async throws {
         if lengthData.count != prefixLength {
             break
         }
-        FileHandle.standardOutput.write("\n\npreparing to read request \(number)\n".data(using: .utf8)!)
+//        FileHandle.standardOutput.write("\n\npreparing to read request \(number)\n".data(using: .utf8)!)
 
         let nextRequestLength = nextMessageLength(using: lengthData)
         guard let nextRequestData = try FileHandle.standardInput.read(upToCount: nextRequestLength) else {
@@ -70,7 +70,7 @@ private func main() async throws {
         var responseLength = UInt32(serializedResponse.count).bigEndian
         let output = Data(bytes: &responseLength, count: prefixLength) + serializedResponse
         FileHandle.standardOutput.write(output)
-        FileHandle.standardOutput.write("response \(number) done".data(using: .utf8)!)
+//        FileHandle.standardOutput.write("\n".data(using: .utf8)!)
     }
 //    throw "DONE WITH LOOP"
 }
