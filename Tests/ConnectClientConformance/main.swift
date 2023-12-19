@@ -28,25 +28,22 @@ private func nextMessageLength(using data: Data) -> Int {
 
 @available(macOS 10.15.4, *)
 private func main() async throws {
-//    var number = 0
+    var number = 0
     while let lengthData = try FileHandle.standardInput.read(upToCount: prefixLength) {
-//        number += 1
-//        FileHandle.standardOutput.write("preparing to read request \(number)\n".data(using: .utf8)!)
+        number += 1
+
+        if lengthData.count != prefixLength {
+            break
+        }
+//        FileHandle.standardOutput.write("\n\npreparing to read request \(number)\n".data(using: .utf8)!)
 
         let nextRequestLength = nextMessageLength(using: lengthData)
         guard let nextRequestData = try FileHandle.standardInput.read(upToCount: nextRequestLength) else {
             throw "Expected \(nextRequestLength) bytes to deserialize request"
         }
 
-        let request = try Connectrpc_Conformance_V1_ClientCompatRequest(serializedData: nextRequestData)
-//        let x = {
-//            var copy = request
-//            copy.requestMessages = []
-//            FileHandle.standardOutput.write("request \(number):\n\n\(try! copy.jsonString())\n\n".data(using: .utf8)!)
-//        }
-//        x()
-
         // TODO: Run tests concurrently
+        let request = try Connectrpc_Conformance_V1_ClientCompatRequest(serializedData: nextRequestData)
         let invoker = try ConformanceInvoker(request: request, clientType: clientTypeArg)
         let response: Connectrpc_Conformance_V1_ClientCompatResponse
         do {
@@ -58,9 +55,6 @@ private func main() async throws {
             response = .with { conformanceResponse in
                 conformanceResponse.testName = request.testName
                 conformanceResponse.response = result
-//                if result.hasError {
-//                    FileHandle.standardError.write("FAILED!!! \(try! result.jsonString())".data(using: .utf8)!)
-//                }
             }
         } catch let error {
             // Unexpected local/runtime error (no RPC response).
@@ -75,9 +69,10 @@ private func main() async throws {
         let serializedResponse = try response.serializedData()
         var responseLength = UInt32(serializedResponse.count).bigEndian
         let output = Data(bytes: &responseLength, count: prefixLength) + serializedResponse
-//        FileHandle.standardOutput.write("response \(number) OK\n\n".data(using: .utf8)!)
         FileHandle.standardOutput.write(output)
+//        FileHandle.standardOutput.write("\n".data(using: .utf8)!)
     }
+//    throw "DONE WITH LOOP"
 }
 
 extension String: Swift.Error {}
@@ -99,10 +94,13 @@ private let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLi
 
 if #available(macOS 10.15.4, *) {
     try await main()
+    FileHandle.standardOutput.write("\n".data(using: .utf8)!)
+    _ = try FileHandle.standardInput.readToEnd()
+    fflush(stdout)
+//    try FileHandle.standardOutput.close()
+//    throw "Finished main"
+    exit(EXIT_SUCCESS)
+//    FileHandle.standardOutput.write("Data left: \(try FileHandle.standardInput.readToEnd()?.count ?? 0)".data(using: .utf8)!)
 } else {
     throw "Unsupported version of macOS"
 }
-
-//FileHandle.standardOutput.write("Data exhausted".data(using: .utf8)!)
-//print("\n", terminator: "")
-fflush(stdout)
