@@ -80,20 +80,20 @@ $(BIN)/license-headers: Makefile
 
 .PHONY: testios
 testios: conformanceserverrun ## Run iOS tests
-	set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0.1' | xcbeautify
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.0.1' test | xcbeautify
 	$(MAKE) conformanceserverstop
 
 .PHONY: testmacos
 testmacos: conformanceserverrun ## Run macOS tests
-	set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS' | xcbeautify
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -scheme Connect-Package -destination 'platform=macOS' test | xcbeautify
 	$(MAKE) conformanceserverstop
 
 .PHONY: testtvos
 testtvos: conformanceserverrun ## Run tvOS tests
-	set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=17.0' | xcbeautify
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=17.0' test | xcbeautify
 	$(MAKE) conformanceserverstop
 
 .PHONY: testwatchos
 testwatchos: conformanceserverrun ## Run watchOS tests
-	set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm),OS=10.0' | xcbeautify
+	set -o pipefail && env NSUnbufferedIO=YES xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm),OS=10.0' test | xcbeautify
 	$(MAKE) conformanceserverstop
