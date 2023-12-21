@@ -27,6 +27,13 @@ final class ConformanceInvoker {
     // MARK: - Initialization
 
     init(request: ConformanceRequest, clientType: ClientTypeArg) throws {
+        switch (request.protocol, clientType) {
+        case (.grpc, .urlSession):
+            throw "gRPC is not supported by URLSession"
+        default:
+            break
+        }
+
         self.request = request
         self.client = try ConformanceClient(client: Self.protocolClient(for: request, clientType: clientType))
     }
@@ -71,7 +78,7 @@ final class ConformanceInvoker {
         case .identity, .unspecified:
             return nil
         case .gzip:
-            return Connect.ProtocolClientConfig.RequestCompression(minBytes: 1, pool: GzipCompressionPool())
+            return Connect.ProtocolClientConfig.RequestCompression(minBytes: 0, pool: GzipCompressionPool())
         case .br, .zstd, .deflate, .snappy, .UNRECOGNIZED:
             throw "Unexpected request compression specified: \(request.compression)"
         }
@@ -306,6 +313,7 @@ final class ConformanceInvoker {
             request: unimplementedRequest,
             headers: .fromConformanceHeaders(self.request.requestHeaders)
         )
+        FileHandle.standardError.write("\nUnimplemented response: \(response)\n".data(using: .utf8)!)
         if let error = response.error {
             return .with { responseResult in
                 responseResult.responseHeaders = error.metadata.toConformanceHeaders()

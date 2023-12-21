@@ -186,7 +186,9 @@ extension HTTPURLResponse {
             }
 
             let headerValue = current.value as? String ?? String(describing: current.value)
-            headers[headerName] = headerValue.components(separatedBy: ",")
+            for value in headerValue.components(separatedBy: ",") {
+                headers[headerName, default: []].append(value.trimmingCharacters(in: .whitespaces))
+            }
         }
     }
 }

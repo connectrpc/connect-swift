@@ -1,10 +1,8 @@
 features:
   versions:
     - HTTP_VERSION_1
-    - HTTP_VERSION_2
   protocols:
     - PROTOCOL_CONNECT
-    - PROTOCOL_GRPC
     - PROTOCOL_GRPC_WEB
   codecs:
     - CODEC_PROTO
@@ -12,9 +10,10 @@ features:
   compressions:
     - COMPRESSION_IDENTITY
     - COMPRESSION_GZIP
-  supportsTls: true
+  supportsTls: false
+  supportsTrailers: false
   supportsTlsClientCerts: false
   supportsConnectGet: true
-  supportsHalfDuplexBidiOverHttp1: true
+  supportsHalfDuplexBidiOverHttp1: false
   requiresConnectVersionHeader: false
   supportsMessageReceiveLimit: false

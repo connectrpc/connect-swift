@@ -87,7 +87,8 @@ let package = Package(
             path: "Tests/ConnectClientConformance",
             exclude: [
                 "buf.gen.yaml",
-                "conformance-config.yaml",
+                "conformance-nio.yaml",
+                "conformance-urlsession.yaml",
             ]
         ),
         .testTarget(

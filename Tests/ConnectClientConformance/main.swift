@@ -94,7 +94,7 @@ private let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLi
 
 if #available(macOS 10.15.4, *) {
     try await main()
-    FileHandle.standardOutput.write("\n".data(using: .utf8)!)
+//    FileHandle.standardOutput.write("\n".data(using: .utf8)!)
     _ = try FileHandle.standardInput.readToEnd()
     fflush(stdout)
 //    try FileHandle.standardOutput.close()

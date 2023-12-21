@@ -212,13 +212,10 @@ private extension Trailers {
                 }
 
                 let trailerName = String(line.prefix(upTo: separatorIndex)).lowercased()
-                var trailerValue = String(line.suffix(from: separatorIndex + 1))
-                if trailerValue.hasPrefix(" ") {
-                    trailerValue.removeFirst()
+                let trailerValues = String(line.suffix(from: separatorIndex + 1))
+                for value in trailerValues.components(separatedBy: ",") {
+                    trailers[trailerName, default: []].append(value.trimmingCharacters(in: .whitespaces))
                 }
-                trailers[trailerName] = trailerValue
-                    .split(separator: ",")
-                    .map { String($0) }
             }
     }
 }
