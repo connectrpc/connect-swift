@@ -47,12 +47,12 @@ private extension Trailers {
     func connectErrorDetailsFromGRPC() -> [ConnectError.Detail] {
         return self[HeaderConstants.grpcStatusDetails]?
             .first
-            .flatMap { Data(base64Encoded: $0) }
+            .flatMap { Data(base64Encoded: $0.addingBase64PaddingIfNeeded()) }
             .flatMap { data -> Grpc_Status_V1_Status? in
                 return try? ProtoCodec().deserialize(source: data)
             }?
             .details
-            .compactMap { protoDetail in
+            .map { protoDetail in
                 return ConnectError.Detail(
                     // Include only the type name (last component of the type URL)
                     // to be compatible with SwiftProtobuf's `Google_Protobuf_Any`.

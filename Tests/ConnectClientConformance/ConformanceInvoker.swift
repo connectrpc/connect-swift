@@ -313,7 +313,6 @@ final class ConformanceInvoker {
             request: unimplementedRequest,
             headers: .fromConformanceHeaders(self.request.requestHeaders)
         )
-        FileHandle.standardError.write("\nUnimplemented response: \(response)\n".data(using: .utf8)!)
         if let error = response.error {
             return .with { responseResult in
                 responseResult.responseHeaders = error.metadata.toConformanceHeaders()

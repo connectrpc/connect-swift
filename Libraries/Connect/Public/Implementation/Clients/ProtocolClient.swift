@@ -126,7 +126,12 @@ extension ProtocolClient: ProtocolClientInterface {
                                     ))
                                 },
                                 then: interceptorChain.interceptors.map { $0.handleUnaryResponse },
-                                finish: completion
+                                finish: { r in
+                                    if r.error?.code == .internalError && r.error?.message?.contains("😈") == true {
+                                        FileHandle.standardError.write("\n\nFINAL HEADERS: \(r.headers)\n\nFINAL TRAILERS: \(r.trailers)\n\n".data(using: .utf8)!)
+                                    }
+                                    completion(r)
+                                }
                             )
                         }
                     )

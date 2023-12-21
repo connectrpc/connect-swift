@@ -28,14 +28,10 @@ private func nextMessageLength(using data: Data) -> Int {
 
 @available(macOS 10.15.4, *)
 private func main() async throws {
-    var number = 0
     while let lengthData = try FileHandle.standardInput.read(upToCount: prefixLength) {
-        number += 1
-
         if lengthData.count != prefixLength {
             break
         }
-//        FileHandle.standardOutput.write("\n\npreparing to read request \(number)\n".data(using: .utf8)!)
 
         let nextRequestLength = nextMessageLength(using: lengthData)
         guard let nextRequestData = try FileHandle.standardInput.read(upToCount: nextRequestLength) else {
@@ -51,6 +47,7 @@ private func main() async throws {
                 throw "Unexpected service specified: \(request.service)"
             }
 
+            FileHandle.standardError.write("\n\nRUNNING REQUEST: \(request.testName)\n\n".data(using: .utf8)!)
             let result = try await invoker.invokeRequest()
             response = .with { conformanceResponse in
                 conformanceResponse.testName = request.testName
@@ -70,9 +67,7 @@ private func main() async throws {
         var responseLength = UInt32(serializedResponse.count).bigEndian
         let output = Data(bytes: &responseLength, count: prefixLength) + serializedResponse
         FileHandle.standardOutput.write(output)
-//        FileHandle.standardOutput.write("\n".data(using: .utf8)!)
     }
-//    throw "DONE WITH LOOP"
 }
 
 extension String: Swift.Error {}

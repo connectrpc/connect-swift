@@ -72,6 +72,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
     }
 
     private func createResponse(error: Swift.Error?) -> Connect.HTTPResponse {
+        FileHandle.standardError.write("\n\nNIO HEADERS: \(self.receivedHead?.headers)\n\nNIO TRAILERS: \(self.receivedEnd)\n\n".data(using: .utf8)!)
         return HTTPResponse(
             code: self.receivedHead.map { .fromNIOStatus($0.status) } ?? .unknown,
             headers: self.receivedHead.map { .fromNIOHeaders($0.headers) } ?? [:],
