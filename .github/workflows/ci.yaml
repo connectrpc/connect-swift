@@ -8,15 +8,6 @@ on:
 permissions:
   contents: read
 jobs:
-  build-connect-library:
-    runs-on: macos-13
-    steps:
-      - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
-        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
-      - name: Build Connect library
-        run: make buildpackage
   build-eliza-cocoapods-example:
     runs-on: macos-13
     steps:
@@ -24,11 +15,13 @@ jobs:
       - name: Select Xcode version
         # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
         run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+      - name: Install xcbeautify
+        run: brew install xcbeautify
       - name: Build Eliza CocoaPods example
         run: |
           cd Examples/ElizaCocoaPodsApp
           pod install
-          xcodebuild -workspace ElizaCocoaPodsApp.xcworkspace -scheme ElizaCocoaPodsApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+          set -o pipefail && xcodebuild -workspace ElizaCocoaPodsApp.xcworkspace -scheme ElizaCocoaPodsApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
   build-eliza-swiftpm-example:
     runs-on: macos-13
     steps:
@@ -36,10 +29,56 @@ jobs:
       - name: Select Xcode version
         # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
         run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+      - name: Install xcbeautify
+        run: brew install xcbeautify
       - name: Build Eliza Swift PM example
         run: |
           cd Examples/ElizaSwiftPackageApp
-          xcodebuild -scheme ElizaSwiftPackageApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+          set -o pipefail && xcodebuild -scheme ElizaSwiftPackageApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
+  build-library-ios:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode version
+        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
+        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+      - name: Install xcbeautify
+        run: brew install xcbeautify
+      - name: Build Connect iOS library
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' | xcbeautify
+  build-library-macos:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode version
+        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
+        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+      - name: Install xcbeautify
+        run: brew install xcbeautify
+      - name: Build Connect macOS library
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS' | xcbeautify
+  build-library-tvos:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode version
+        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
+        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+      - name: Install xcbeautify
+        run: brew install xcbeautify
+      - name: Build Connect tvOS library
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=17.2' | xcbeautify
+  build-library-watchos:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode version
+        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
+        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+      - name: Install xcbeautify
+        run: brew install xcbeautify
+      - name: Build Connect watchOS library
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm),OS=10.2' | xcbeautify
   build-plugin-and-generate:
     runs-on: macos-13
     steps:
@@ -71,16 +110,8 @@ jobs:
           brew unlink python@3.12 && brew link --overwrite python@3.12
           brew install docker colima
           colima delete && colima start
-      - name: Install xcbeautify
-        run: brew install xcbeautify
-      - name: Run iOS tests
-        run: make testios
-      - name: Run macOS tests
-        run: make testmacos
-      - name: Run tvOS tests
-        run: make testtvos
-      - name: Run watchOS tests
-        run: make testwatchos
+      - name: Run tests
+        run: make test
   run-swiftlint:
     runs-on: ubuntu-latest
     container:
