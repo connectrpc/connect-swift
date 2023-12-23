@@ -1,0 +1,2 @@
+Idempotency/HTTPVersion:1/Codec:CODEC_JSON/TLS:false/idempotent unary success proto
+Idempotency/HTTPVersion:1/Codec:CODEC_PROTO/TLS:false/idempotent unary success proto

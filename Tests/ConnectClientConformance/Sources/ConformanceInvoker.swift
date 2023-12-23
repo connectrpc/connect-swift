@@ -202,6 +202,24 @@ final class ConformanceInvoker {
         let stream = self.client.serverStream(headers: .fromConformanceHeaders(self.request.requestHeaders))
         try stream.send(streamRequest)
 
+        var cancelAfterResponses = -1
+        switch self.request.cancel.cancelTiming {
+        case .beforeCloseSend:
+            break // Does not apply to server-only streams.
+        case .afterCloseSendMs(let milliseconds):
+            DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(Int(milliseconds))) {
+                stream.cancel()
+            }
+        case .afterNumResponses(let responsesToReceive):
+            cancelAfterResponses = Int(responsesToReceive)
+        case .none:
+            break
+        }
+
+        if cancelAfterResponses == 0 {
+            stream.cancel()
+        }
+
         var conformanceResult = ConformanceResult()
         for await result in stream.results() {
             switch result {
@@ -209,6 +227,10 @@ final class ConformanceInvoker {
                 conformanceResult.responseHeaders = headers.toConformanceHeaders()
             case .message(let message):
                 conformanceResult.payloads.append(message.payload)
+                cancelAfterResponses -= 1
+                if cancelAfterResponses == 0 {
+                    stream.cancel()
+                }
             case .complete(_, let error, let trailers):
                 conformanceResult.responseTrailers = trailers?.toConformanceHeaders() ?? .init()
                 if let connectError = error as? ConnectError {
@@ -235,7 +257,18 @@ final class ConformanceInvoker {
             }
             try stream.send(streamRequest)
         }
-        stream.close()
+        switch self.request.cancel.cancelTiming {
+        case .beforeCloseSend:
+            stream.cancel()
+        case .afterCloseSendMs(let milliseconds):
+            DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(Int(milliseconds))) {
+                stream.cancel()
+            }
+        case .afterNumResponses: // Does not apply to client-only streams.
+            stream.close()
+        case .none:
+            stream.close()
+        }
 
         var conformanceResult = ConformanceResult()
         for await result in stream.results() {
@@ -262,6 +295,7 @@ final class ConformanceInvoker {
     private func invokeBidirectionalStream() async throws -> ConformanceResult {
         let stream = self.client.bidiStream(headers: .fromConformanceHeaders(self.request.requestHeaders))
         let asyncResults = stream.results()
+        var cancelAfterResponses = -1
         var conformanceResult = ConformanceResult()
         func receive(upTo count: Int) async {
             for await result in asyncResults.prefix(count) {
@@ -270,6 +304,10 @@ final class ConformanceInvoker {
                     conformanceResult.responseHeaders = headers.toConformanceHeaders()
                 case .message(let message):
                     conformanceResult.payloads.append(message.payload)
+                    cancelAfterResponses -= 1
+                    if cancelAfterResponses == 0 {
+                        stream.cancel()
+                    }
                 case .complete(_, let error, let trailers):
                     conformanceResult.responseTrailers = trailers?.toConformanceHeaders() ?? .init()
                     if let connectError = error as? ConnectError {
@@ -282,6 +320,23 @@ final class ConformanceInvoker {
                     }
                 }
             }
+        }
+
+        switch self.request.cancel.cancelTiming {
+        case .beforeCloseSend:
+            stream.cancel()
+        case .afterCloseSendMs(let milliseconds):
+            DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(Int(milliseconds))) {
+                stream.cancel()
+            }
+        case .afterNumResponses(let responsesToReceive):
+            cancelAfterResponses = Int(responsesToReceive)
+        case .none:
+            break
+        }
+
+        if cancelAfterResponses == 0 {
+            stream.cancel()
         }
 
         for requestMessage in self.request.requestMessages {
@@ -298,7 +353,12 @@ final class ConformanceInvoker {
                 await receive(upTo: 1)
             }
         }
-        stream.close()
+
+        if case .beforeCloseSend = self.request.cancel.cancelTiming {
+            stream.cancel()
+        } else {
+            stream.close()
+        }
 
         // Receive any remaining responses.
         await receive(upTo: .max)

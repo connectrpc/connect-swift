@@ -127,9 +127,7 @@ extension ProtocolClient: ProtocolClientInterface {
                                 },
                                 then: interceptorChain.interceptors.map { $0.handleUnaryResponse },
                                 finish: { r in
-                                    if r.error?.code == .internalError && r.error?.message?.contains("😈") == true {
-                                        FileHandle.standardError.write("\n\nFINAL HEADERS: \(r.headers)\n\nFINAL TRAILERS: \(r.trailers)\n\n".data(using: .utf8)!)
-                                    }
+                                    FileHandle.standardError.write("\n\nFINAL HEADERS: \(r.headers)\n\nFINAL TRAILERS: \(r.trailers)\n\n".data(using: .utf8)!)
                                     completion(r)
                                 }
                             )
@@ -138,7 +136,7 @@ extension ProtocolClient: ProtocolClientInterface {
                 }
             }
         )
-        return Cancelable {
+        return CancelableClosure {
             cancelation.perform { cancelation in
                 cancelation.cancelable?.cancel()
                 cancelation = (cancelable: nil, isCancelled: true)
@@ -366,7 +364,12 @@ extension ProtocolClient: ProtocolClientInterface {
                 }
             }
         )
-        return RequestCallbacks<Input> { requestMessage in
+        return RequestCallbacks<Input>(cancel: {
+            #warning("FIXME")
+            pendingRequestCallbacks.enqueue { requestCallbacks in
+                requestCallbacks.cancel()
+            }
+        }, sendData: { requestMessage in
             // Wait for the stream to be established before sending data.
             pendingRequestCallbacks.enqueue { requestCallbacks in
                 interceptorChain.executeLinkedInterceptors(
@@ -388,11 +391,11 @@ extension ProtocolClient: ProtocolClientInterface {
                     finish: requestCallbacks.sendData
                 )
             }
-        } sendClose: {
+        }, sendClose: {
             pendingRequestCallbacks.enqueue { requestCallbacks in
                 requestCallbacks.sendClose()
             }
-        }
+        })
     }
 }
 

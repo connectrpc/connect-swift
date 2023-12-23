@@ -75,13 +75,20 @@ extension String: Swift.Error {}
 // MARK: - Main invocation
 
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_BidiStreamRequest.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientCompatRequest.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientCompatRequest.TLSCreds.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientCompatResponse.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientErrorResult.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientResponseResult.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientStreamRequest.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ConformancePayload.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ConformancePayload.ConnectGetInfo.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ConformancePayload.RequestInfo.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_Error.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_Header.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_IdempotentUnaryRequest.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_RawHTTPRequest.self)
+Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_RawHTTPResponse.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ServerStreamRequest.self)
 Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_UnaryRequest.self)
 

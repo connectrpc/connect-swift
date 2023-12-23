@@ -44,6 +44,10 @@ internal protocol Connectrpc_Conformance_V1_ConformanceServiceClientInterface: S
     /// message data in the data field. Subsequent messages after the first one
     /// should contain only the data field.
     ///
+    /// Servers should immediately send response headers on the stream before sleeping
+    /// for any specified response delay and/or sending the first message so that
+    /// clients can be unblocked reading response headers.
+    ///
     /// If a response definition is not specified OR is specified, but response data
     /// is empty, the server should skip sending anything on the stream. When there
     /// are no responses to send, servers should throw an error if one is provided
@@ -61,6 +65,10 @@ internal protocol Connectrpc_Conformance_V1_ConformanceServiceClientInterface: S
     /// request properties in the first ConformancePayload, and then include the
     /// message data in the data field. Subsequent messages after the first one
     /// should contain only the data field.
+    ///
+    /// Servers should immediately send response headers on the stream before sleeping
+    /// for any specified response delay and/or sending the first message so that
+    /// clients can be unblocked reading response headers.
     ///
     /// If a response definition is not specified OR is specified, but response data
     /// is empty, the server should skip sending anything on the stream. When there
@@ -124,6 +132,10 @@ internal protocol Connectrpc_Conformance_V1_ConformanceServiceClientInterface: S
     /// vs. full duplex streams. Once all responses are sent, the server should either
     /// return an error if specified or close the stream without error.
     ///
+    /// Servers should immediately send response headers on the stream before sleeping
+    /// for any specified response delay and/or sending the first message so that
+    /// clients can be unblocked reading response headers.
+    ///
     /// If a response definition is not specified OR is specified, but response data
     /// is empty, the server should skip sending anything on the stream. Stream
     /// headers and trailers should always be set on the stream if provided
@@ -168,6 +180,10 @@ internal protocol Connectrpc_Conformance_V1_ConformanceServiceClientInterface: S
     /// Servers should send responses indicated according to the rules of half duplex
     /// vs. full duplex streams. Once all responses are sent, the server should either
     /// return an error if specified or close the stream without error.
+    ///
+    /// Servers should immediately send response headers on the stream before sleeping
+    /// for any specified response delay and/or sending the first message so that
+    /// clients can be unblocked reading response headers.
     ///
     /// If a response definition is not specified OR is specified, but response data
     /// is empty, the server should skip sending anything on the stream. Stream

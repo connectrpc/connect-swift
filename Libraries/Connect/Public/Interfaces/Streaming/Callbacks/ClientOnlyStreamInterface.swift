@@ -16,7 +16,7 @@ import SwiftProtobuf
 
 /// Represents a client-only stream (a stream where the client streams data to the server and
 /// eventually receives a response) that can send request messages and initiate closes.
-public protocol ClientOnlyStreamInterface<Input> {
+public protocol ClientOnlyStreamInterface<Input>: Cancelable {
     /// The input (request) message type.
     associatedtype Input: ProtobufMessage
 

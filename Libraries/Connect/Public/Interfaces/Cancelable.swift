@@ -12,12 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// Type that wraps an action that can be canceled.
-public struct Cancelable: Sendable {
+public protocol Cancelable: Sendable {
     /// Cancel the current action.
-    public let cancel: @Sendable () -> Void
-
-    public init(cancel: @escaping @Sendable () -> Void) {
-        self.cancel = cancel
-    }
+    func cancel()
 }

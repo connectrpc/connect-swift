@@ -19,7 +19,8 @@ import NIOFoundationCompat
 import NIOHTTP1
 
 /// NIO-based channel handler for unary requests made through the Connect library.
-final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
+final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, Connect.Cancelable, @unchecked Sendable 
+{
     private let eventLoop: NIOCore.EventLoop
     private let request: Connect.HTTPRequest<Data?>
     private let onMetrics: (Connect.HTTPMetrics) -> Void
@@ -43,26 +44,6 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
         self.onResponse = onResponse
     }
 
-    /// Cancel the in-flight request, if currently active.
-    func cancel() {
-        self.runOnEventLoop {
-            if self.isClosed {
-                return
-            }
-
-            self.isClosed = true
-            self.context?.close(promise: nil)
-            self.onResponse(HTTPResponse(
-                code: .canceled,
-                headers: [:],
-                message: nil,
-                trailers: [:],
-                error: nil,
-                tracingInfo: nil
-            ))
-        }
-    }
-
     private func runOnEventLoop(action: @escaping @Sendable () -> Void) {
         if self.eventLoop.inEventLoop {
             action()
@@ -81,6 +62,27 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
             error: error,
             tracingInfo: self.receivedHead.map { .init(httpStatus: Int($0.status.code)) }
         )
+    }
+
+    // MARK: - Cancelable
+
+    func cancel() {
+        self.runOnEventLoop {
+            if self.isClosed {
+                return
+            }
+
+            self.isClosed = true
+            self.context?.close(promise: nil)
+            self.onResponse(HTTPResponse(
+                code: .canceled,
+                headers: [:],
+                message: nil,
+                trailers: [:],
+                error: nil,
+                tracingInfo: nil
+            ))
+        }
     }
 
     // MARK: - ChannelInboundHandler

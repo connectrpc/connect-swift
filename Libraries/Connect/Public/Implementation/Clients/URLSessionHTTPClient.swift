@@ -52,6 +52,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
         assert(!request.isGRPC, "URLSessionHTTPClient does not support gRPC, use NIOHTTPClient")
         let urlRequest = URLRequest(httpRequest: request)
         let task = self.session.dataTask(with: urlRequest) { data, urlResponse, error in
+            FileHandle.standardError.write("\nRESPONSE RAW:\n\(urlResponse)\n\n".data(using: .utf8)!)
             if let httpURLResponse = urlResponse as? HTTPURLResponse {
                 onResponse(HTTPResponse(
                     code: Code.fromURLSessionCode(httpURLResponse.statusCode),
@@ -92,7 +93,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
         }
         self.lock.perform { self.metricsClosures[task.taskIdentifier] = onMetrics }
         task.resume()
-        return Cancelable { task.cancel() }
+        return CancelableClosure { task.cancel() }
     }
 
     open func stream(
@@ -109,6 +110,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
             self.metricsClosures[urlSessionStream.taskID] = responseCallbacks.receiveResponseMetrics
         }
         return RequestCallbacks(
+            cancel: { urlSessionStream.cancel() },
             sendData: { data in
                 do {
                     try urlSessionStream.sendData(data)

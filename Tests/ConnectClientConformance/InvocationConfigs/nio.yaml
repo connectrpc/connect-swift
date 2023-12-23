@@ -6,8 +6,8 @@ features:
     - COMPRESSION_IDENTITY
     - COMPRESSION_GZIP
   protocols:
-    # - PROTOCOL_CONNECT
-    # - PROTOCOL_GRPC_WEB
+    - PROTOCOL_CONNECT
+    - PROTOCOL_GRPC_WEB
     - PROTOCOL_GRPC
   requires_connect_version_header: false
   supports_connect_get: true

@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import SwiftProtobuf
+/// Type that wraps an action that can be canceled.
+struct CancelableClosure: Sendable {
+    private let handleCancel: @Sendable () -> Void
 
-/// Represents a server-only stream (a stream where the server streams data to the client after
-/// receiving an initial request) that can send request messages.
-public protocol ServerOnlyStreamInterface<Input>: Cancelable {
-    /// The input (request) message type.
-    associatedtype Input: ProtobufMessage
+    init(cancel: @escaping @Sendable () -> Void) {
+        self.handleCancel = cancel
+    }
+}
 
-    /// Send a request to the server over the stream.
-    ///
-    /// Should be called exactly one time when starting the stream.
-    ///
-    /// - parameter input: The request message to send.
-    func send(_ input: Input)
+extension CancelableClosure: Cancelable {
+    func cancel() {
+        self.handleCancel()
+    }
 }

@@ -34,7 +34,7 @@ extension ConnectError {
             message: trailers.grpcMessage(),
             exception: nil,
             details: trailers.connectErrorDetailsFromGRPC(),
-            metadata: [:]
+            metadata: trailers
         )
     }
 }
