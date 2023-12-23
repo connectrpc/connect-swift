@@ -171,7 +171,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         return .init(
             cancel: { handler.cancel() },
             sendData: { handler.sendData($0) },
-            sendClose: { handler.close(trailers: nil) }
+            sendClose: { handler.close() }
         )
     }
 
