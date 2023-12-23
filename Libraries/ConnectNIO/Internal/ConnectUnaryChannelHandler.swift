@@ -79,7 +79,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, Connect.C
                 headers: [:],
                 message: nil,
                 trailers: [:],
-                error: nil,
+                error: ConnectError.canceled(),
                 tracingInfo: nil
             ))
         }

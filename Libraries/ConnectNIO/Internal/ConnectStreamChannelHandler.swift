@@ -93,7 +93,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
 
             self.isClosed = true
             self.context?.close(promise: nil)
-            self.responseCallbacks.receiveClose(.canceled, [:], nil)
+            self.responseCallbacks.receiveClose(.canceled, [:], ConnectError.canceled())
         }
     }
 

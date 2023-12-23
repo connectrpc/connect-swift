@@ -79,6 +79,6 @@ test: ## Run all tests
 # test: installconformancerunner ## Run all tests
 	swift build -c release --product ConnectClientConformance
 	mv ./.build/release/ConnectClientConformance $(BIN)
-	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/InvocationConfigs/urlsession.yaml --known-failing ./Tests/ConnectClientConformance/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectClientConformance httpclient=urlsession
-# 	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/InvocationConfigs/nio.yaml --mode client $(BIN)/ConnectClientConformance httpclient=nio
+# 	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/InvocationConfigs/urlsession.yaml --known-failing ./Tests/ConnectClientConformance/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectClientConformance httpclient=urlsession
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/InvocationConfigs/nio.yaml --known-failing ./Tests/ConnectClientConformance/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectClientConformance httpclient=nio
 # 	swift test
