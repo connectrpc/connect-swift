@@ -83,5 +83,6 @@ testconformance: ## Run all conformance tests
 
 .PHONY: testunit
 testunit: ## Run all unit tests
-	echo "{\"protocol\": \"PROTOCOL_CONNECT\", \"httpVersion\": \"HTTP_VERSION_1\"}" | go run connectrpc.com/conformance/cmd/referenceserver@$(CONFORMANCE_RUNNER_TAG) -port 52107 -json
+	go install connectrpc.com/conformance/cmd/referenceserver@$(CONFORMANCE_RUNNER_TAG)
+	echo "{\"protocol\": \"PROTOCOL_CONNECT\", \"httpVersion\": \"HTTP_VERSION_1\"}" | go run connectrpc.com/conformance/cmd/referenceserver@$(CONFORMANCE_RUNNER_TAG) -port 52107 -json &
 	swift test

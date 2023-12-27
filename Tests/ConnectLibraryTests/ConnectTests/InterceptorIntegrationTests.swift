@@ -34,7 +34,11 @@ final class InterceptorIntegrationTests: XCTestCase {
                 )
             },
         ])
-        let response = await client.unary(request: .init())
+        let response = await client.unary(request: .with { request in
+            request.responseDefinition = .with { response in
+                response.responseData = Data(repeating: 0, count: 10)
+            }
+        })
         XCTAssertNil(response.error)
         XCTAssertEqual(trackedSteps.value, [
             .unaryRequest(id: "a"),
@@ -64,20 +68,21 @@ final class InterceptorIntegrationTests: XCTestCase {
                 )
             },
         ])
-        let stream = client.bidiStream()
-        try stream.send(.with { $0.responseDefinition = .with { response in
-            response.responseData = [Data(repeating: 0, count: 100)]
-        } })
+        let stream = client.serverStream()
+        try stream.send(.with { request in
+            request.responseDefinition = .with { response in
+                response.responseData = [
+                    Data(repeating: 0, count: 100),
+                    Data(repeating: 0, count: 200)
+                ]
+            }
+        })
         if let firstResponse = await stream.results().first(where: { $0.messageValue != nil }) {
             XCTAssertEqual(firstResponse.messageValue?.payload.data.count, 100)
         }
-//        try stream.send(.with { $0.responseDefinition = .with { response in
-//            response.responseData = [Data(repeating: 0, count: 200)]
-//        } })
-//        if let secondResponse = await stream.results().first(where: { $0.messageValue != nil }) {
-//            XCTAssertEqual(secondResponse.messageValue?.payload.data.count, 100)
-//        }
-        stream.close()
+        if let secondResponse = await stream.results().first(where: { $0.messageValue != nil }) {
+            XCTAssertEqual(secondResponse.messageValue?.payload.data.count, 200)
+        }
         for await result in stream.results() {
             if case .complete(let code, _, _) = result {
                 XCTAssertEqual(code, .ok)
@@ -97,16 +102,12 @@ final class InterceptorIntegrationTests: XCTestCase {
             .streamResult(id: "a", type: "headers"),
             .streamRawResult(id: "b", type: "message"),
             .streamRawResult(id: "a", type: "message"),
-//            .streamResult(id: "b", type: "message"),
-//            .streamResult(id: "a", type: "message"),
-            .streamInput(id: "a"),
-            .streamInput(id: "b"),
-            .streamRawInput(id: "a"),
-            .streamRawInput(id: "b"),
+            .streamResult(id: "b", type: "message"),
+            .streamResult(id: "a", type: "message"),
             .streamRawResult(id: "b", type: "message"),
             .streamRawResult(id: "a", type: "message"),
-//            .streamResult(id: "b", type: "message"),
-//            .streamResult(id: "a", type: "message"),
+            .streamResult(id: "b", type: "message"),
+            .streamResult(id: "a", type: "message"),
             .streamRawResult(id: "b", type: "complete"),
             .streamRawResult(id: "a", type: "complete"),
             .streamResult(id: "b", type: "complete"),
@@ -133,7 +134,11 @@ final class InterceptorIntegrationTests: XCTestCase {
                 )
             },
         ])
-        let response = await client.unary(request: .init())
+        let response = await client.unary(request: .with { request in
+            request.responseDefinition = .with { response in
+                response.responseData = Data(repeating: 0, count: 10)
+            }
+        })
         XCTAssertNil(response.error)
 
         // Subset of steps is tested since URLSession does not guarantee metric callback ordering.
@@ -162,7 +167,11 @@ final class InterceptorIntegrationTests: XCTestCase {
             },
         ])
         let stream = client.serverStream()
-        try stream.send(.init())
+        try stream.send(.with { request in
+            request.responseDefinition = .with { response in
+                response.responseData = [Data(repeating: 0, count: 10)]
+            }
+        })
         for await result in stream.results() {
             if case .complete(let code, _, _) = result {
                 XCTAssertEqual(code, .ok)
@@ -196,7 +205,11 @@ final class InterceptorIntegrationTests: XCTestCase {
                 )
             },
         ])
-        let response = await client.unary(request: .init())
+        let response = await client.unary(request: .with { request in
+            request.responseDefinition = .with { response in
+                response.responseData = Data(repeating: 0, count: 10)
+            }
+        })
         XCTAssertNotNil(response.error) // Interceptor failed the request.
         XCTAssertEqual(trackedSteps.value, [
             .unaryRequest(id: "a"),
@@ -259,7 +272,11 @@ final class InterceptorIntegrationTests: XCTestCase {
 
         let stream = client.serverStream()
         // Send data immediately (before the first interceptor has finished processing headers).
-        try stream.send(.init())
+        try stream.send(.with { request in
+            request.responseDefinition = .with { response in
+                response.responseData = []
+            }
+        })
         for await result in stream.results() {
             if case .complete(let code, _, _) = result {
                 XCTAssertEqual(code, .ok)
