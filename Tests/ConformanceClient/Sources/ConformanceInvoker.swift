@@ -267,7 +267,6 @@ final class ConformanceInvoker {
         case .beforeCloseSend:
             stream.cancel()
         case .afterCloseSendMs(let milliseconds):
-            stream.close()
             DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(Int(milliseconds))) {
                 stream.cancel()
             }
