@@ -17,7 +17,7 @@ import SwiftProtobuf
 /// Represents a client-only stream (a stream where the client streams data to the server and
 /// eventually receives a response) that can be interacted with using async/await.
 @available(iOS 13, *)
-public protocol ClientOnlyAsyncStreamInterface<Input, Output>: Cancelable {
+public protocol ClientOnlyAsyncStreamInterface<Input, Output> {
     /// The input (request) message type.
     associatedtype Input: ProtobufMessage
 
@@ -41,4 +41,7 @@ public protocol ClientOnlyAsyncStreamInterface<Input, Output>: Cancelable {
 
     /// Close the stream. No calls to `send()` are valid after calling `close()`.
     func close()
+
+    /// Cancel the stream and return a canceled code. No calls to `send()` are valid after calling `cancel()`.
+    func cancel()
 }

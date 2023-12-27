@@ -27,7 +27,7 @@ import SwiftProtobuf
 open class MockServerOnlyStream<
     Input: ProtobufMessage,
     Output: ProtobufMessage
->: ServerOnlyStreamInterface {
+>: ServerOnlyStreamInterface, @unchecked Sendable {
     /// Closure that is called when `send()` is invoked.
     public var onSend: ((Input) -> Void)?
     /// The list of outputs to return to the client once one input has been sent.
@@ -48,4 +48,6 @@ open class MockServerOnlyStream<
         self.inputs.append(input)
         self.onSend?(input)
     }
+
+    open func cancel() {}
 }

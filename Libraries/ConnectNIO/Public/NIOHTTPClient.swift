@@ -146,7 +146,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 ))
             }
         }
-        return handler
+        return Connect.Cancelable { handler.cancel() }
     }
 
     open func stream(

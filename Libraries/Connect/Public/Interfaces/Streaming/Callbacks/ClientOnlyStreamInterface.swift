@@ -16,7 +16,7 @@ import SwiftProtobuf
 
 /// Represents a client-only stream (a stream where the client streams data to the server and
 /// eventually receives a response) that can send request messages and initiate closes.
-public protocol ClientOnlyStreamInterface<Input>: Cancelable {
+public protocol ClientOnlyStreamInterface<Input> {
     /// The input (request) message type.
     associatedtype Input: ProtobufMessage
 
@@ -30,4 +30,7 @@ public protocol ClientOnlyStreamInterface<Input>: Cancelable {
 
     /// Close the stream. No calls to `send()` are valid after calling `close()`.
     func close()
+
+    /// Cancel the stream and return a canceled code. No calls to `send()` are valid after calling `cancel()`.
+    func cancel()
 }

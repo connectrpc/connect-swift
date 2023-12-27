@@ -15,7 +15,7 @@
 import SwiftProtobuf
 
 /// Represents a bidirectional stream that can send request messages and initiate closes.
-public protocol BidirectionalStreamInterface<Input>: Cancelable {
+public protocol BidirectionalStreamInterface<Input> {
     /// The input (request) message type.
     associatedtype Input: ProtobufMessage
 
@@ -29,4 +29,7 @@ public protocol BidirectionalStreamInterface<Input>: Cancelable {
 
     /// Close the stream. No calls to `send()` are valid after calling `close()`.
     func close()
+
+    /// Cancel the stream and return a canceled code. No calls to `send()` are valid after calling `cancel()`.
+    func cancel()
 }

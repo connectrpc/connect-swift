@@ -92,7 +92,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
         }
         self.lock.perform { self.metricsClosures[task.taskIdentifier] = onMetrics }
         task.resume()
-        return CancelableClosure { task.cancel() }
+        return Cancelable { task.cancel() }
     }
 
     open func stream(

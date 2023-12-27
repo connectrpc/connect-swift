@@ -13,12 +13,13 @@
 // limitations under the License.
 
 import Connect
+import ConnectNIO
 import Foundation
 import SwiftProtobuf
 
 final class ConformanceInvoker {
     private let client: ConformanceClient
-    private let request: ConformanceRequest
+    private let context: ConformanceRequest
 
     typealias ConformanceClient = Connectrpc_Conformance_V1_ConformanceServiceClient
     typealias ConformanceRequest = Connectrpc_Conformance_V1_ClientCompatRequest
@@ -34,7 +35,7 @@ final class ConformanceInvoker {
             break
         }
 
-        self.request = request
+        self.context = request
         self.client = try ConformanceClient(client: Self.protocolClient(for: request, clientType: clientType))
     }
 
@@ -59,15 +60,16 @@ final class ConformanceInvoker {
         let timeout: TimeInterval = request.hasTimeoutMs ? Double(request.timeoutMs) / 1_000.0 : 60.0
         switch clientType {
         case .swiftNIO:
-            return ConformanceNIOHTTPClient(
+            return NIOHTTPClient(
                 host: "http://\(request.host)",
                 port: Int(request.port),
                 timeout: timeout
             )
         case .urlSession:
-            return ConformanceURLSessionHTTPClient(
-                timeout: timeout
-            )
+            let configuration = URLSessionConfiguration.default
+            configuration.timeoutIntervalForRequest = timeout
+            configuration.timeoutIntervalForResource = timeout
+            return URLSessionHTTPClient(configuration: configuration)
         }
     }
 
@@ -111,21 +113,21 @@ final class ConformanceInvoker {
     // MARK: - Invocation
 
     func invokeRequest() async throws -> ConformanceResult {
-        switch self.request.method {
+        switch self.context.method {
         case "Unary":
-            guard self.request.requestMessages.count == 1 else {
+            guard self.context.requestMessages.count == 1 else {
                 throw "Unary calls must specify exactly one request message"
             }
             return try await self.invokeUnary()
 
         case "IdempotentUnary":
-            guard self.request.requestMessages.count == 1 else {
+            guard self.context.requestMessages.count == 1 else {
                 throw "Unary calls must specify exactly one request message"
             }
             return try await self.invokeIdempotentUnary()
 
         case "ServerStream":
-            guard self.request.requestMessages.count == 1 else {
+            guard self.context.requestMessages.count == 1 else {
                 throw "Server streaming calls must specify exactly one request message"
             }
             return try await self.invokeServerStream()
@@ -137,73 +139,65 @@ final class ConformanceInvoker {
             return try await self.invokeBidirectionalStream()
 
         case "Unimplemented":
-            guard self.request.requestMessages.count == 1 else {
+            guard self.context.requestMessages.count == 1 else {
                 throw "Unimplemented calls must specify exactly one request message"
             }
             return try await self.invokeUnimplemented()
 
         default:
-            throw "Unexpected RPC method: \(self.request.method)"
+            throw "Unexpected RPC method: \(self.context.method)"
         }
     }
 
     private func invokeUnary() async throws -> ConformanceResult {
         let unaryRequest = try Connectrpc_Conformance_V1_UnaryRequest(
-            unpackingAny: self.request.requestMessages[0]
+            unpackingAny: self.context.requestMessages[0]
         )
         let response = await self.client.unary(
             request: unaryRequest,
-            headers: .fromConformanceHeaders(self.request.requestHeaders)
+            headers: .fromConformanceHeaders(self.context.requestHeaders)
         )
-        if let error = response.error {
-            return .with { responseResult in
-                responseResult.responseHeaders = error.metadata.toConformanceHeaders()
+        return .with { responseResult in
+            responseResult.responseHeaders = response.headers.toConformanceHeaders()
+            responseResult.responseTrailers = response.trailers.toConformanceHeaders()
+            if let error = response.error {
                 responseResult.error = error.toConformanceError()
-            }
-        } else {
-            return .with { responseResult in
-                responseResult.responseHeaders = response.headers.toConformanceHeaders()
-                responseResult.responseTrailers = response.trailers.toConformanceHeaders()
-                if response.message?.hasPayload == true, let payload = response.message?.payload {
-                    responseResult.payloads = [payload]
-                }
+
+            } else if response.message?.hasPayload == true, let payload = response.message?.payload {
+                responseResult.payloads = [payload]
             }
         }
     }
 
     private func invokeIdempotentUnary() async throws -> ConformanceResult {
         let unaryRequest = try Connectrpc_Conformance_V1_IdempotentUnaryRequest(
-            unpackingAny: self.request.requestMessages[0]
+            unpackingAny: self.context.requestMessages[0]
         )
         let response = await self.client.idempotentUnary(
             request: unaryRequest,
-            headers: .fromConformanceHeaders(self.request.requestHeaders)
+            headers: .fromConformanceHeaders(self.context.requestHeaders)
         )
-        if let error = response.error {
-            return .with { responseResult in
-                responseResult.responseHeaders = error.metadata.toConformanceHeaders()
+        return .with { responseResult in
+            responseResult.responseHeaders = response.headers.toConformanceHeaders()
+            responseResult.responseTrailers = response.trailers.toConformanceHeaders()
+            if let error = response.error {
                 responseResult.error = error.toConformanceError()
-            }
-        } else {
-            return .with { responseResult in
-                responseResult.responseHeaders = response.headers.toConformanceHeaders()
-                responseResult.responseTrailers = response.trailers.toConformanceHeaders()
-                if response.message?.hasPayload == true, let payload = response.message?.payload {
-                    responseResult.payloads = [payload]
-                }
+
+            } else if response.message?.hasPayload == true, let payload = response.message?.payload {
+                responseResult.payloads = [payload]
             }
         }
     }
 
     private func invokeServerStream() async throws -> ConformanceResult {
         let streamRequest = try Connectrpc_Conformance_V1_ServerStreamRequest(
-            unpackingAny: self.request.requestMessages[0]
+            unpackingAny: self.context.requestMessages[0]
         )
-        let stream = self.client.serverStream(headers: .fromConformanceHeaders(self.request.requestHeaders))
+        let stream = self.client.serverStream(headers: .fromConformanceHeaders(self.context.requestHeaders))
         try stream.send(streamRequest)
 
         var cancelAfterResponses = -1
-        switch self.request.cancel.cancelTiming {
+        switch self.context.cancel.cancelTiming {
         case .beforeCloseSend:
             break // Does not apply to server-only streams.
         case .afterCloseSendMs(let milliseconds):
@@ -247,17 +241,17 @@ final class ConformanceInvoker {
     }
 
     private func invokeClientStream() async throws -> ConformanceResult {
-        let stream = self.client.clientStream(headers: .fromConformanceHeaders(self.request.requestHeaders))
-        for requestMessage in self.request.requestMessages {
+        let stream = self.client.clientStream(headers: .fromConformanceHeaders(self.context.requestHeaders))
+        for requestMessage in self.context.requestMessages {
             let streamRequest = try Connectrpc_Conformance_V1_ClientStreamRequest(
                 unpackingAny: requestMessage
             )
-            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *), self.request.requestDelayMs > 0 {
-                try await Task.sleep(for: .milliseconds(self.request.requestDelayMs))
+            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *), self.context.requestDelayMs > 0 {
+                try await Task.sleep(for: .milliseconds(self.context.requestDelayMs))
             }
             try stream.send(streamRequest)
         }
-        switch self.request.cancel.cancelTiming {
+        switch self.context.cancel.cancelTiming {
         case .beforeCloseSend:
             stream.cancel()
         case .afterCloseSendMs(let milliseconds):
@@ -293,18 +287,20 @@ final class ConformanceInvoker {
     }
 
     private func invokeBidirectionalStream() async throws -> ConformanceResult {
-        let stream = self.client.bidiStream(headers: .fromConformanceHeaders(self.request.requestHeaders))
+        let stream = self.client.bidiStream(headers: .fromConformanceHeaders(self.context.requestHeaders))
         let asyncResults = stream.results()
         var cancelAfterResponses = -1
         var conformanceResult = ConformanceResult()
-        func receive(upTo count: Int) async {
-            for await result in asyncResults.prefix(count) {
+        func receive(maxMessages: Int) async {
+            var messageCount = 0
+            for await result in asyncResults {
                 switch result {
                 case .headers(let headers):
                     conformanceResult.responseHeaders = headers.toConformanceHeaders()
                 case .message(let message):
                     conformanceResult.payloads.append(message.payload)
                     cancelAfterResponses -= 1
+                    messageCount += 1
                     if cancelAfterResponses == 0 {
                         stream.cancel()
                     }
@@ -319,59 +315,59 @@ final class ConformanceInvoker {
                         }
                     }
                 }
+
+                if messageCount >= maxMessages {
+                    break
+                }
             }
         }
 
-        switch self.request.cancel.cancelTiming {
-        case .beforeCloseSend:
-            stream.cancel()
-        case .afterCloseSendMs(let milliseconds):
-            DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(Int(milliseconds))) {
-                stream.cancel()
-            }
-        case .afterNumResponses(let responsesToReceive):
+        if case .afterNumResponses(let responsesToReceive) = self.context.cancel.cancelTiming {
             cancelAfterResponses = Int(responsesToReceive)
-        case .none:
-            break
         }
-
         if cancelAfterResponses == 0 {
             stream.cancel()
         }
 
-        for requestMessage in self.request.requestMessages {
+        for requestMessage in self.context.requestMessages {
             let streamRequest = try Connectrpc_Conformance_V1_BidiStreamRequest(
                 unpackingAny: requestMessage
             )
-            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *), self.request.requestDelayMs > 0 {
-                try await Task.sleep(for: .milliseconds(self.request.requestDelayMs))
+            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *), self.context.requestDelayMs > 0 {
+                try await Task.sleep(for: .milliseconds(self.context.requestDelayMs))
             }
             try stream.send(streamRequest)
 
-            if self.request.streamType == .fullDuplexBidiStream {
+            if self.context.streamType == .fullDuplexBidiStream {
                 // Receive after sending each request message.
-                await receive(upTo: 1)
+                await receive(maxMessages: 1)
             }
         }
 
-        if case .beforeCloseSend = self.request.cancel.cancelTiming {
+        switch self.context.cancel.cancelTiming {
+        case .beforeCloseSend:
             stream.cancel()
-        } else {
+        case .afterCloseSendMs(let milliseconds):
+            stream.close()
+            DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(Int(milliseconds))) {
+                stream.cancel()
+            }
+        case .afterNumResponses, .none:
             stream.close()
         }
 
         // Receive any remaining responses.
-        await receive(upTo: .max)
+        await receive(maxMessages: .max)
         return conformanceResult
     }
 
     private func invokeUnimplemented() async throws -> ConformanceResult {
         let unimplementedRequest = try Connectrpc_Conformance_V1_UnimplementedRequest(
-            unpackingAny: self.request.requestMessages[0]
+            unpackingAny: self.context.requestMessages[0]
         )
         let response = await self.client.unimplemented(
             request: unimplementedRequest,
-            headers: .fromConformanceHeaders(self.request.requestHeaders)
+            headers: .fromConformanceHeaders(self.context.requestHeaders)
         )
         if let error = response.error {
             return .with { responseResult in

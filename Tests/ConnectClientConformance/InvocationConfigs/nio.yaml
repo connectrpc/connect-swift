@@ -18,5 +18,4 @@ features:
   supports_tls_client_certs: false
   supports_trailers: true
   versions:
-    # - HTTP_VERSION_1
     - HTTP_VERSION_2

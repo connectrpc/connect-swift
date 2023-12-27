@@ -126,17 +126,14 @@ extension ProtocolClient: ProtocolClientInterface {
                                     ))
                                 },
                                 then: interceptorChain.interceptors.map { $0.handleUnaryResponse },
-                                finish: { r in
-                                    FileHandle.standardError.write("\n\nFINAL HEADERS: \(r.headers)\n\nFINAL TRAILERS: \(r.trailers)\n\n".data(using: .utf8)!)
-                                    completion(r)
-                                }
+                                finish: completion
                             )
                         }
                     )
                 }
             }
         )
-        return CancelableClosure {
+        return Cancelable {
             cancelation.perform { cancelation in
                 cancelation.cancelable?.cancel()
                 cancelation = (cancelable: nil, isCancelled: true)

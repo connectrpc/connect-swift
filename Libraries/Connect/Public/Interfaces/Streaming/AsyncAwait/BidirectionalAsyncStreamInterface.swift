@@ -16,7 +16,7 @@ import SwiftProtobuf
 
 /// Represents a bidirectional stream that can be interacted with using async/await.
 @available(iOS 13, *)
-public protocol BidirectionalAsyncStreamInterface<Input, Output>: Cancelable {
+public protocol BidirectionalAsyncStreamInterface<Input, Output> {
     /// The input (request) message type.
     associatedtype Input: ProtobufMessage
 
@@ -40,4 +40,7 @@ public protocol BidirectionalAsyncStreamInterface<Input, Output>: Cancelable {
 
     /// Close the stream. No calls to `send()` are valid after calling `close()`.
     func close()
+
+    /// Cancel the stream and return a canceled code. No calls to `send()` are valid after calling `cancel()`.
+    func cancel()
 }

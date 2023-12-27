@@ -26,7 +26,7 @@ private func nextMessageLength(using data: Data) -> Int {
     return Int(messageLength)
 }
 
-@available(macOS 10.15.4, *)
+@available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
 private func main() async throws {
     while let lengthData = try FileHandle.standardInput.read(upToCount: prefixLength) {
         if lengthData.count != prefixLength {
@@ -38,7 +38,6 @@ private func main() async throws {
             throw "Expected \(nextRequestLength) bytes to deserialize request"
         }
 
-        // TODO: Run tests concurrently
         let request = try Connectrpc_Conformance_V1_ClientCompatRequest(serializedData: nextRequestData)
         let invoker = try ConformanceInvoker(request: request, clientType: clientTypeArg)
         let response: Connectrpc_Conformance_V1_ClientCompatResponse
@@ -47,7 +46,6 @@ private func main() async throws {
                 throw "Unexpected service specified: \(request.service)"
             }
 
-            FileHandle.standardError.write("\n\nRUNNING REQUEST: \(request.testName)\n\n".data(using: .utf8)!)
             let result = try await invoker.invokeRequest()
             response = .with { conformanceResponse in
                 conformanceResponse.testName = request.testName
@@ -94,15 +92,10 @@ Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_UnaryRequest
 
 private let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLine.arguments)
 
-if #available(macOS 10.15.4, *) {
+if #available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *) {
     try await main()
-//    FileHandle.standardOutput.write("\n".data(using: .utf8)!)
-    _ = try FileHandle.standardInput.readToEnd()
     fflush(stdout)
-//    try FileHandle.standardOutput.close()
-//    throw "Finished main"
     exit(EXIT_SUCCESS)
-//    FileHandle.standardOutput.write("Data left: \(try FileHandle.standardInput.readToEnd()?.count ?? 0)".data(using: .utf8)!)
 } else {
     throw "Unsupported version of macOS"
 }

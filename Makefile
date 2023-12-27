@@ -74,11 +74,14 @@ $(BIN)/license-headers: Makefile
 	mkdir -p $(@D)
 	GOBIN=$(abspath $(BIN)) go install github.com/bufbuild/buf/private/pkg/licenseheader/cmd/license-header@$(LICENSE_HEADER_VERSION)
 
-.PHONY: test
-test: ## Run all tests
-# test: installconformancerunner ## Run all tests
+.PHONY: testconformance
+testconformance: ## Run all conformance tests
 	swift build -c release --product ConnectClientConformance
 	mv ./.build/release/ConnectClientConformance $(BIN)
-# 	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/InvocationConfigs/urlsession.yaml --known-failing ./Tests/ConnectClientConformance/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectClientConformance httpclient=urlsession
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/InvocationConfigs/urlsession.yaml --known-failing ./Tests/ConnectClientConformance/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectClientConformance httpclient=urlsession
 	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/InvocationConfigs/nio.yaml --known-failing ./Tests/ConnectClientConformance/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectClientConformance httpclient=nio
-# 	swift test
+
+.PHONY: testunit
+testunit: ## Run all unit tests
+	echo "{\"protocol\": \"PROTOCOL_CONNECT\", \"httpVersion\": \"HTTP_VERSION_1\"}" | go run connectrpc.com/conformance/cmd/referenceserver@$(CONFORMANCE_RUNNER_TAG) -port 52107 -json
+	swift test

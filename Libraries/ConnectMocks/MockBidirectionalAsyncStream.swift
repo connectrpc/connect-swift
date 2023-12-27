@@ -28,7 +28,7 @@ import SwiftProtobuf
 open class MockBidirectionalAsyncStream<
     Input: ProtobufMessage,
     Output: ProtobufMessage
->: BidirectionalAsyncStreamInterface {
+>: BidirectionalAsyncStreamInterface, @unchecked Sendable {
     private var cancellables = [AnyCancellable]()
 
     /// Closure that is called when `close()` is invoked.
@@ -78,4 +78,6 @@ open class MockBidirectionalAsyncStream<
         self.isClosed = true
         self.onClose?()
     }
+
+    open func cancel() {}
 }

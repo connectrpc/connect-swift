@@ -28,7 +28,7 @@ import SwiftProtobuf
 open class MockServerOnlyAsyncStream<
     Input: ProtobufMessage,
     Output: ProtobufMessage
->: ServerOnlyAsyncStreamInterface {
+>: ServerOnlyAsyncStreamInterface, @unchecked Sendable {
     private var cancellables = [AnyCancellable]()
 
     /// Closure that is called when `send()` is invoked.
@@ -67,4 +67,6 @@ open class MockServerOnlyAsyncStream<
                 .store(in: &self.cancellables)
         }
     }
+
+    open func cancel() {}
 }

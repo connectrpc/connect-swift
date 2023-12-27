@@ -19,8 +19,7 @@ import NIOFoundationCompat
 import NIOHTTP1
 
 /// NIO-based channel handler for unary requests made through the Connect library.
-final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, Connect.Cancelable, @unchecked Sendable 
-{
+final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
     private let eventLoop: NIOCore.EventLoop
     private let request: Connect.HTTPRequest<Data?>
     private let onMetrics: (Connect.HTTPMetrics) -> Void
@@ -44,28 +43,6 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, Connect.C
         self.onResponse = onResponse
     }
 
-    private func runOnEventLoop(action: @escaping @Sendable () -> Void) {
-        if self.eventLoop.inEventLoop {
-            action()
-        } else {
-            self.eventLoop.submit(action).cascade(to: nil)
-        }
-    }
-
-    private func createResponse(error: Swift.Error?) -> Connect.HTTPResponse {
-        FileHandle.standardError.write("\n\nNIO HEADERS: \(self.receivedHead?.headers)\n\nNIO TRAILERS: \(self.receivedEnd)\n\n".data(using: .utf8)!)
-        return HTTPResponse(
-            code: self.receivedHead.map { .fromNIOStatus($0.status) } ?? .unknown,
-            headers: self.receivedHead.map { .fromNIOHeaders($0.headers) } ?? [:],
-            message: self.receivedData,
-            trailers: self.receivedEnd.map { .fromNIOHeaders($0) } ?? [:],
-            error: error,
-            tracingInfo: self.receivedHead.map { .init(httpStatus: Int($0.status.code)) }
-        )
-    }
-
-    // MARK: - Cancelable
-
     func cancel() {
         self.runOnEventLoop {
             if self.isClosed {
@@ -83,6 +60,25 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, Connect.C
                 tracingInfo: nil
             ))
         }
+    }
+
+    private func runOnEventLoop(action: @escaping @Sendable () -> Void) {
+        if self.eventLoop.inEventLoop {
+            action()
+        } else {
+            self.eventLoop.submit(action).cascade(to: nil)
+        }
+    }
+
+    private func createResponse(error: Swift.Error?) -> Connect.HTTPResponse {
+        return HTTPResponse(
+            code: self.receivedHead.map { .fromNIOStatus($0.status) } ?? .unknown,
+            headers: self.receivedHead.map { .fromNIOHeaders($0.headers) } ?? [:],
+            message: self.receivedData,
+            trailers: self.receivedEnd.map { .fromNIOHeaders($0) } ?? [:],
+            error: error,
+            tracingInfo: self.receivedHead.map { .init(httpStatus: Int($0.status.code)) }
+        )
     }
 
     // MARK: - ChannelInboundHandler

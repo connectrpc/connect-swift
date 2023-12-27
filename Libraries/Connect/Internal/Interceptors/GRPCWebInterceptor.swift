@@ -58,7 +58,6 @@ extension GRPCWebInterceptor: UnaryInterceptor {
 
         guard let responseData = response.message, !responseData.isEmpty else {
             let code = response.headers.grpcStatus() ?? response.code
-            FileHandle.standardError.write("\n\nEARLY RETURN: \(response)\n\n".data(using: .utf8)!)
             proceed(HTTPResponse(
                 code: code,
                 headers: response.headers,
@@ -92,7 +91,6 @@ extension GRPCWebInterceptor: UnaryInterceptor {
                 let unpackedTrailers = try Trailers.fromGRPCHeadersBlock(
                     firstChunk.unpacked
                 )
-                FileHandle.standardError.write("\n\nTRAILERS ONLY: \(unpackedTrailers)\n\n".data(using: .utf8)!)
                 proceed(response.withHandledGRPCWebTrailers(unpackedTrailers, message: nil))
             } else {
                 let trailersData = Data(responseData.suffix(from: prefixedFirstChunkLength))
@@ -101,14 +99,12 @@ extension GRPCWebInterceptor: UnaryInterceptor {
                         trailersData, compressionPool: compressionPool
                     ).unpacked
                 )
-                FileHandle.standardError.write("\n\nFULL RESPONSE TRAILERS: \(unpackedTrailers)\n\n".data(using: .utf8)!)
                 proceed(response.withHandledGRPCWebTrailers(
                     unpackedTrailers,
                     message: firstChunk.unpacked
                 ))
             }
         } catch let error {
-            FileHandle.standardError.write("\n\nERROR!!: \(error)\n\n".data(using: .utf8)!)
             proceed(HTTPResponse(
                 code: .unknown,
                 headers: response.headers,
