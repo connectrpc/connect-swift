@@ -362,9 +362,10 @@ extension ProtocolClient: ProtocolClientInterface {
             }
         )
         return RequestCallbacks<Input>(cancel: {
-            #warning("FIXME")
-            #warning("Add readmes to test directories and add to package.swift ignores")
-            #warning("Update CI scripts and fix one stalling test")
+#warning("FIXME")
+#warning("Add readmes to test directories and add to package.swift ignores")
+#warning("fix one stalling test")
+#warning("fix script to start server")
             pendingRequestCallbacks.enqueue { requestCallbacks in
                 requestCallbacks.cancel()
             }
