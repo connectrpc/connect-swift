@@ -28,6 +28,7 @@ private func nextMessageLength(using data: Data) -> Int {
 
 @available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
 private func main() async throws {
+    let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLine.arguments)
     while let lengthData = try FileHandle.standardInput.read(upToCount: prefixLength) {
         if lengthData.count != prefixLength {
             break
@@ -132,7 +133,6 @@ extension String: Swift.Error {}
 registerAnyTypes()
 
 if #available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *) {
-    let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLine.arguments)
     try await main()
     fflush(stdout)
     exit(EXIT_SUCCESS)
