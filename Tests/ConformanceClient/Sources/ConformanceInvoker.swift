@@ -17,6 +17,7 @@ import ConnectNIO
 import Foundation
 import SwiftProtobuf
 
+@available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
 final class ConformanceInvoker {
     private let client: ConformanceClient
     private let context: ConformanceRequest

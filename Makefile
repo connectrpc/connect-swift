@@ -76,8 +76,8 @@ $(BIN)/license-headers: Makefile
 
 .PHONY: testconformance
 testconformance: ## Run all conformance tests
-	swift build -c release --product ConnectConformanceClient
-	mv ./.build/release/ConnectConformanceClient $(BIN)
+	swift build -c release --arch arm64 --arch x86_64 --product ConnectConformanceClient
+	mv ./.build/apple/Products/Release/ConnectConformanceClient $(BIN)
 	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConformanceClient/InvocationConfigs/urlsession.yaml --known-failing ./Tests/ConformanceClient/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectConformanceClient httpclient=urlsession
 	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConformanceClient/InvocationConfigs/nio.yaml --known-failing ./Tests/ConformanceClient/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectConformanceClient httpclient=nio
 
