@@ -24,10 +24,12 @@ final class JSONCodecTests: XCTestCase {
             message.compression = .gzip
         })
         proto.uri = "foo/bar"
-        proto.headers = [.with { header in
-            header.name = "x-header"
-            header.value = ["a"]
-        }]
+        proto.headers = [
+            .with { header in
+                header.name = "x-header"
+                header.value = ["a"]
+            },
+        ]
         proto.rawQueryParams = [.init()]
     }
 
@@ -53,7 +55,9 @@ final class JSONCodecTests: XCTestCase {
         let dictionary = try XCTUnwrap(
             try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
         )
-        XCTAssertEqual((dictionary["unary"] as? [String: Any])?["compression"] as? String, "COMPRESSION_GZIP")
+        XCTAssertEqual(
+            (dictionary["unary"] as? [String: Any])?["compression"] as? String, "COMPRESSION_GZIP"
+        )
         XCTAssertEqual(try codec.deserialize(source: serialized), self.message)
     }
 

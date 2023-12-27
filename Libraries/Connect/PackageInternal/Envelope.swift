@@ -35,7 +35,7 @@ public enum Envelope {
     ) -> Data {
         var buffer = Data()
         if !source.isEmpty,
-            let compression = compression, 
+            let compression = compression,
             compression.shouldCompress(source),
             let compressedSource = try? compression.pool.compress(data: source)
         {

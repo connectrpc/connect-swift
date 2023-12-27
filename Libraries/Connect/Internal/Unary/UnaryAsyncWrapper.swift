@@ -44,7 +44,9 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage>: Sendable {
         return await withTaskCancellationHandler(operation: {
             return await withCheckedContinuation { continuation in
                 if Task.isCancelled {
-                    continuation.resume(returning: .init(code: .canceled, result: .failure(.canceled())))
+                    continuation.resume(
+                        returning: .init(code: .canceled, result: .failure(.canceled()))
+                    )
                 } else {
                     self.cancelable = self.sendUnary { response in
                         continuation.resume(returning: response)

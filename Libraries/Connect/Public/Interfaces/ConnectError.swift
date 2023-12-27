@@ -136,7 +136,8 @@ extension ConnectError {
 
     public static func canceled() -> Self {
         return .init(
-            code: .canceled, message: "request canceled by client", exception: nil, details: [], metadata: [:]
+            code: .canceled, message: "request canceled by client",
+            exception: nil, details: [], metadata: [:]
         )
     }
 }

@@ -142,7 +142,9 @@ final class ConnectMocksTests: XCTestCase {
         client.mockServerStream.onSend = { sentInputs.append($0) }
         client.mockServerStream.outputs = Array(expectedResults)
 
-        let receivedResults = Locked([StreamResult<Connectrpc_Conformance_V1_ServerStreamResponse>]())
+        let receivedResults = Locked([
+            StreamResult<Connectrpc_Conformance_V1_ServerStreamResponse>
+        ]())
         let stream = client.serverStream { result in
             receivedResults.perform { $0.append(result) }
         }

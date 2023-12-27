@@ -73,7 +73,7 @@ final class InterceptorIntegrationTests: XCTestCase {
             request.responseDefinition = .with { response in
                 response.responseData = [
                     Data(repeating: 0, count: 100),
-                    Data(repeating: 0, count: 200)
+                    Data(repeating: 0, count: 200),
                 ]
             }
         })

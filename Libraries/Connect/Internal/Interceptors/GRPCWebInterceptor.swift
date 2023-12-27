@@ -214,7 +214,9 @@ private extension Trailers {
                 let trailerName = String(line.prefix(upTo: separatorIndex)).lowercased()
                 let trailerValues = String(line.suffix(from: separatorIndex + 1))
                 for value in trailerValues.components(separatedBy: ",") {
-                    trailers[trailerName, default: []].append(value.trimmingCharacters(in: .whitespaces))
+                    trailers[trailerName, default: []].append(
+                        value.trimmingCharacters(in: .whitespaces)
+                    )
                 }
             }
     }

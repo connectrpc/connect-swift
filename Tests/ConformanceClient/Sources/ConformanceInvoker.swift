@@ -36,7 +36,9 @@ final class ConformanceInvoker {
         }
 
         self.context = request
-        self.client = try ConformanceClient(client: Self.protocolClient(for: request, clientType: clientType))
+        self.client = try ConformanceClient(
+            client: Self.protocolClient(for: request, clientType: clientType)
+        )
     }
 
     private static func protocolClient(
@@ -57,7 +59,9 @@ final class ConformanceInvoker {
     private static func httpClient(
         for request: ConformanceRequest, clientType: ClientTypeArg
     ) -> HTTPClientInterface {
-        let timeout: TimeInterval = request.hasTimeoutMs ? Double(request.timeoutMs) / 1_000.0 : 60.0
+        let timeout: TimeInterval = request.hasTimeoutMs
+        ? Double(request.timeoutMs) / 1_000.0
+        : 60.0
         switch clientType {
         case .swiftNIO:
             return NIOHTTPClient(
@@ -80,7 +84,9 @@ final class ConformanceInvoker {
         case .identity, .unspecified:
             return nil
         case .gzip:
-            return Connect.ProtocolClientConfig.RequestCompression(minBytes: 0, pool: GzipCompressionPool())
+            return Connect.ProtocolClientConfig.RequestCompression(
+                minBytes: 0, pool: GzipCompressionPool()
+            )
         case .br, .zstd, .deflate, .snappy, .UNRECOGNIZED:
             throw "Unexpected request compression specified: \(request.compression)"
         }
@@ -162,8 +168,7 @@ final class ConformanceInvoker {
             responseResult.responseTrailers = response.trailers.toConformanceHeaders()
             if let error = response.error {
                 responseResult.error = error.toConformanceError()
-
-            } else if response.message?.hasPayload == true, let payload = response.message?.payload {
+            } else if let payload = response.message?.payload {
                 responseResult.payloads = [payload]
             }
         }
@@ -182,8 +187,7 @@ final class ConformanceInvoker {
             responseResult.responseTrailers = response.trailers.toConformanceHeaders()
             if let error = response.error {
                 responseResult.error = error.toConformanceError()
-
-            } else if response.message?.hasPayload == true, let payload = response.message?.payload {
+            } else if let payload = response.message?.payload {
                 responseResult.payloads = [payload]
             }
         }
@@ -193,7 +197,9 @@ final class ConformanceInvoker {
         let streamRequest = try Connectrpc_Conformance_V1_ServerStreamRequest(
             unpackingAny: self.context.requestMessages[0]
         )
-        let stream = self.client.serverStream(headers: .fromConformanceHeaders(self.context.requestHeaders))
+        let stream = self.client.serverStream(
+            headers: .fromConformanceHeaders(self.context.requestHeaders)
+        )
         try stream.send(streamRequest)
 
         var cancelAfterResponses = -1
@@ -241,12 +247,16 @@ final class ConformanceInvoker {
     }
 
     private func invokeClientStream() async throws -> ConformanceResult {
-        let stream = self.client.clientStream(headers: .fromConformanceHeaders(self.context.requestHeaders))
+        let stream = self.client.clientStream(headers: .fromConformanceHeaders(
+            self.context.requestHeaders)
+        )
         for requestMessage in self.context.requestMessages {
             let streamRequest = try Connectrpc_Conformance_V1_ClientStreamRequest(
                 unpackingAny: requestMessage
             )
-            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *), self.context.requestDelayMs > 0 {
+            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *),
+                self.context.requestDelayMs > 0
+            {
                 try await Task.sleep(for: .milliseconds(self.context.requestDelayMs))
             }
             try stream.send(streamRequest)
@@ -287,7 +297,9 @@ final class ConformanceInvoker {
     }
 
     private func invokeBidirectionalStream() async throws -> ConformanceResult {
-        let stream = self.client.bidiStream(headers: .fromConformanceHeaders(self.context.requestHeaders))
+        let stream = self.client.bidiStream(
+            headers: .fromConformanceHeaders(self.context.requestHeaders)
+        )
         let asyncResults = stream.results()
         var cancelAfterResponses = -1
         var conformanceResult = ConformanceResult()
@@ -333,7 +345,9 @@ final class ConformanceInvoker {
             let streamRequest = try Connectrpc_Conformance_V1_BidiStreamRequest(
                 unpackingAny: requestMessage
             )
-            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *), self.context.requestDelayMs > 0 {
+            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *),
+                self.context.requestDelayMs > 0
+            {
                 try await Task.sleep(for: .milliseconds(self.context.requestDelayMs))
             }
             try stream.send(streamRequest)
@@ -381,7 +395,9 @@ final class ConformanceInvoker {
 }
 
 private extension Connect.Headers {
-    static func fromConformanceHeaders(_ conformanceHeaders: [Connectrpc_Conformance_V1_Header]) -> Self {
+    static func fromConformanceHeaders(
+        _ conformanceHeaders: [Connectrpc_Conformance_V1_Header]
+    ) -> Self {
         return conformanceHeaders.reduce(into: Headers()) { partialResult, conformanceHeader in
             partialResult[conformanceHeader.name] = conformanceHeader.value
         }

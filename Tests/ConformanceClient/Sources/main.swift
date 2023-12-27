@@ -34,11 +34,15 @@ private func main() async throws {
         }
 
         let nextRequestLength = nextMessageLength(using: lengthData)
-        guard let nextRequestData = try FileHandle.standardInput.read(upToCount: nextRequestLength) else {
+        guard let nextRequestData = try FileHandle.standardInput.read(
+            upToCount: nextRequestLength
+        ) else {
             throw "Expected \(nextRequestLength) bytes to deserialize request"
         }
 
-        let request = try Connectrpc_Conformance_V1_ClientCompatRequest(serializedData: nextRequestData)
+        let request = try Connectrpc_Conformance_V1_ClientCompatRequest(
+            serializedData: nextRequestData
+        )
         let invoker = try ConformanceInvoker(request: request, clientType: clientTypeArg)
         let response: Connectrpc_Conformance_V1_ClientCompatResponse
         do {
@@ -68,31 +72,67 @@ private func main() async throws {
     }
 }
 
+private func registerAnyTypes() {
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_BidiStreamRequest.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_ClientCompatRequest.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_ClientCompatRequest.TLSCreds.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_ClientCompatResponse.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_ClientErrorResult.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_ClientResponseResult.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_ClientStreamRequest.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_ConformancePayload.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_ConformancePayload.ConnectGetInfo.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_ConformancePayload.RequestInfo.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_Error.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_Header.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_IdempotentUnaryRequest.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_RawHTTPRequest.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_RawHTTPResponse.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_ServerStreamRequest.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_UnaryRequest.self)
+}
+
 extension String: Swift.Error {}
 
 // MARK: - Main invocation
 
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_BidiStreamRequest.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientCompatRequest.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientCompatRequest.TLSCreds.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientCompatResponse.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientErrorResult.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientResponseResult.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ClientStreamRequest.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ConformancePayload.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ConformancePayload.ConnectGetInfo.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ConformancePayload.RequestInfo.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_Error.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_Header.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_IdempotentUnaryRequest.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_RawHTTPRequest.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_RawHTTPResponse.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_ServerStreamRequest.self)
-Google_Protobuf_Any.register(messageType: Connectrpc_Conformance_V1_UnaryRequest.self)
-
-private let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLine.arguments)
+registerAnyTypes()
 
 if #available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *) {
+    let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLine.arguments)
     try await main()
     fflush(stdout)
     exit(EXIT_SUCCESS)

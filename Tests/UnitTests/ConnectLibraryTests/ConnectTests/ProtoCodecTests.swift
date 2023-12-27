@@ -22,10 +22,12 @@ final class ProtoCodecTests: XCTestCase {
             message.binary = Data([0x0, 0x1, 0x2, 0x3])
         })
         proto.uri = "foo/bar"
-        proto.headers = [.with { header in
-            header.name = "x-header"
-            header.value = ["a"]
-        }]
+        proto.headers = [
+            .with { header in
+                header.name = "x-header"
+                header.value = ["a"]
+            },
+        ]
     }
 
     func testSerializingAndDeserializing() throws {
