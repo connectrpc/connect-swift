@@ -51,9 +51,9 @@ generate: cleangenerated ## Regenerate outputs for all .proto files
 	cd Tests/UnitTests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
 
 .PHONY: installconformancerunner
-installconformancerunner: ## Install the Connect conformance test runner
+installconformancerunner: ## Install the Connect conformance test runner using "make installconformancerunner ARCH=arm64" for Apple Silicon or "ARCH=x86_64"
 	mkdir -p $(BIN)
-	curl -L "https://github.com/connectrpc/conformance/releases/download/$(CONFORMANCE_RUNNER_TAG)/connectconformance-$(CONFORMANCE_RUNNER_TAG)-Darwin-arm64.tar.gz" > $(BIN)/connectconformance.tar.gz
+	curl -L "https://github.com/connectrpc/conformance/releases/download/$(CONFORMANCE_RUNNER_TAG)/connectconformance-$(CONFORMANCE_RUNNER_TAG)-Darwin-$(ARCH).tar.gz" > $(BIN)/connectconformance.tar.gz
 	tar -xvzf $(BIN)/connectconformance.tar.gz -C $(BIN)
 
 .PHONY: help
@@ -76,8 +76,8 @@ $(BIN)/license-headers: Makefile
 
 .PHONY: testconformance
 testconformance: ## Run all conformance tests
-	swift build -c release --arch arm64 --arch x86_64 --product ConnectConformanceClient
-	mv ./.build/apple/Products/Release/ConnectConformanceClient $(BIN)
+	swift build -c release --product ConnectConformanceClient
+	mv ./.build/release/ConnectConformanceClient $(BIN)
 	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConformanceClient/InvocationConfigs/urlsession.yaml --known-failing ./Tests/ConformanceClient/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectConformanceClient httpclient=urlsession
 	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConformanceClient/InvocationConfigs/nio.yaml --known-failing ./Tests/ConformanceClient/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectConformanceClient httpclient=nio
 
