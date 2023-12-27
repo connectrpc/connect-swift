@@ -362,7 +362,6 @@ extension ProtocolClient: ProtocolClientInterface {
             }
         )
         return RequestCallbacks<Input>(cancel: {
-            #warning("FIXME")
             pendingRequestCallbacks.enqueue { requestCallbacks in
                 requestCallbacks.cancel()
             }

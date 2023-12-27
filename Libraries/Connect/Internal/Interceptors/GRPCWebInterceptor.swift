@@ -63,9 +63,7 @@ extension GRPCWebInterceptor: UnaryInterceptor {
                 headers: response.headers,
                 message: response.message,
                 trailers: response.trailers,
-                error: ConnectError.fromGRPCTrailers(
-                    response.headers, code: code
-                ),
+                error: ConnectError.fromGRPCTrailers(response.headers, code: code),
                 tracingInfo: response.tracingInfo
             ))
             return

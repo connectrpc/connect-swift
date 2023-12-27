@@ -43,6 +43,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
         self.onResponse = onResponse
     }
 
+    /// Cancel the in-flight request, if currently active.
     func cancel() {
         self.runOnEventLoop {
             if self.isClosed {

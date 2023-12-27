@@ -148,7 +148,7 @@ extension String {
         // original string is not, it should be padded with "=" to guard against a
         // corrupted string.
         return self.padding(
-            // Calculate the nearest multiple of 4 that is >= the length of encodedPayload,
+            // Calculate the nearest multiple of 4 that is >= the length of the string,
             // then pad the string to that length.
             toLength: ((self.count + 3) / 4) * 4,
             withPad: "=",

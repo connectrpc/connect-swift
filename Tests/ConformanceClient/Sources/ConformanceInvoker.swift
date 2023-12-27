@@ -17,6 +17,7 @@ import ConnectNIO
 import Foundation
 import SwiftProtobuf
 
+/// Class responsible for running a specific conformance test case against a service.
 @available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
 final class ConformanceInvoker {
     private let client: ConformanceClient
@@ -85,7 +86,7 @@ final class ConformanceInvoker {
         case .identity, .unspecified:
             return nil
         case .gzip:
-            return Connect.ProtocolClientConfig.RequestCompression(
+            return ProtocolClientConfig.RequestCompression(
                 minBytes: 0, pool: GzipCompressionPool()
             )
         case .br, .zstd, .deflate, .snappy, .UNRECOGNIZED:
@@ -266,6 +267,7 @@ final class ConformanceInvoker {
         case .beforeCloseSend:
             stream.cancel()
         case .afterCloseSendMs(let milliseconds):
+            stream.close()
             DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(Int(milliseconds))) {
                 stream.cancel()
             }
