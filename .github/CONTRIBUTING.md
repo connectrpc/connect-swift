@@ -81,24 +81,32 @@ Outputted code will be available in the `out` directories specified by
 
 ## Running Tests
 
-FIXME
+### Conformance Tests
 
-A test server is used to run
-[conformance](../Tests/ConnectLibraryTests/ConnectConformance) -
-integration tests which validate the behavior of the `Connect` library with
-various protocols. **Starting the server requires Docker,
-so ensure that you have Docker installed before proceeding.**
+The various Connect implementations across languages leverage a shared
+[conformance test repository](https://github.com/connectrpc/conformance) which
+contains a test runner that accepts an executable provided by each library
+which exercises its runtime behavior. The test runner is responsible for
+performing a matrix of hundreds of runtime tests against a local
+server in order to validate behaviors with various permutations of
+protocols, codecs, etc. Connect-Swift's executable which is compatible with
+the conformance runner can be found under
+[`Tests/ConformanceClient`](../Tests/ConformanceClient).
+To install the runner and run the conformance test suite:
 
-To start the server and run tests using the command line:
+```sh
+make installconformancerunner
+make testconformance
+```
+
+### Unit Tests
+
+Unit tests live in the [`UnitTests` directory](../Tests/UnitTests)
+and can be run using the following command which starts up a local server
+and runs the tests:
 
 ```sh
 make test
-```
-
-If you prefer to run the tests using Xcode, you can manually start the server:
-
-```sh
-make conformanceserverrun
 ```
 
 ## Linting

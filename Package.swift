@@ -78,17 +78,17 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "ConnectClientConformance",
+            name: "ConnectConformanceClient",
             dependencies: [
                 "Connect",
                 "ConnectNIO",
-                .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "Tests/ConnectClientConformance",
+            path: "Tests/ConformanceClient",
             exclude: [
                 "buf.gen.yaml",
                 "InvocationConfigs",
+                "README.md",
             ]
         ),
         .testTarget(
@@ -98,7 +98,7 @@ let package = Package(
                 "ConnectMocks",
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
-            path: "Tests/ConnectLibraryTests",
+            path: "Tests/UnitTests/ConnectLibraryTests",
             exclude: [
                 "buf.gen.yaml",
             ],
@@ -154,7 +154,7 @@ let package = Package(
             dependencies: [
                 "ConnectPluginUtilities",
             ],
-            path: "Tests/ConnectPluginUtilitiesTests"
+            path: "Tests/UnitTests/ConnectPluginUtilitiesTests"
         ),
         .executableTarget(
             name: "ConnectSwiftPlugin",

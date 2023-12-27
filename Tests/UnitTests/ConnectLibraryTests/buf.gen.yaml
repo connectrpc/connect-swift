@@ -9,11 +9,11 @@ plugins:
       - GenerateCallbackMethods=true
       - Visibility=Internal
     out: ./Generated
-    path: ../../.tmp/bin/protoc-gen-connect-swift
+    path: ../../../.tmp/bin/protoc-gen-connect-swift
   - name: connect-swift-mocks
     opt:
       - GenerateAsyncMethods=true
       - GenerateCallbackMethods=true
       - Visibility=Internal
     out: ./Generated
-    path: ../../.tmp/bin/protoc-gen-connect-swift-mocks
+    path: ../../../.tmp/bin/protoc-gen-connect-swift-mocks

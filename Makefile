@@ -15,9 +15,9 @@ LICENSE_HEADER_VERSION := v1.12.0
 LICENSE_IGNORE := -e Package.swift \
     -e $(BIN)\/ \
     -e Examples/ElizaSharedSources/GeneratedSources\/ \
-    -e Libraries/Connect/Internal/Generated\/ \
-    -e Tests/ConnectLibraryTests/proto/grpc\/ \
-    -e Tests/ConnectLibraryTests/Generated\/
+    -e Libraries/Connect/Internal/GeneratedSources\/ \
+    -e Tests/ConformanceClient/GeneratedSources\/ \
+    -e Tests/UnitTests/ConnectLibraryTests/GeneratedSources\/
 
 .PHONY: buildpackage
 buildpackage: ## Build all targets in the Swift package
@@ -39,16 +39,16 @@ clean: cleangenerated ## Delete all plugins and generated outputs
 .PHONY: cleangenerated
 cleangenerated: ## Delete all generated outputs
 	rm -rf ./Examples/ElizaSharedSources/GeneratedSources/*
-	rm -rf ./Libraries/Connect/Implementation/Generated/*
-	rm -rf ./Tests/ConnectClientConformance/Generated/*
-	rm -rf ./Tests/ConnectLibraryTests/Generated/*
+	rm -rf ./Libraries/Connect/Internal/GeneratedSources/*
+	rm -rf ./Tests/ConformanceClient/GeneratedSources/*
+	rm -rf ./Tests/UnitTests/ConnectLibraryTests/GeneratedSources/*
 
 .PHONY: generate
 generate: cleangenerated ## Regenerate outputs for all .proto files
 	cd Examples; buf generate https://github.com/connectrpc/examples-go.git#ref=$(EXAMPLES_PROTO_REF),subdir=proto
 	cd Libraries/Connect; buf generate
-	cd Tests/ConnectClientConformance; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
-	cd Tests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
+	cd Tests/ConformanceClient; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
+	cd Tests/UnitTests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
 
 .PHONY: installconformancerunner
 installconformancerunner: ## Install the Connect conformance test runner
@@ -76,10 +76,10 @@ $(BIN)/license-headers: Makefile
 
 .PHONY: testconformance
 testconformance: ## Run all conformance tests
-	swift build -c release --product ConnectClientConformance
-	mv ./.build/release/ConnectClientConformance $(BIN)
-	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/InvocationConfigs/urlsession.yaml --known-failing ./Tests/ConnectClientConformance/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectClientConformance httpclient=urlsession
-	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConnectClientConformance/InvocationConfigs/nio.yaml --known-failing ./Tests/ConnectClientConformance/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectClientConformance httpclient=nio
+	swift build -c release --product ConnectConformanceClient
+	mv ./.build/release/ConnectConformanceClient $(BIN)
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConformanceClient/InvocationConfigs/urlsession.yaml --known-failing ./Tests/ConformanceClient/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectConformanceClient httpclient=urlsession
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConformanceClient/InvocationConfigs/nio.yaml --known-failing ./Tests/ConformanceClient/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectConformanceClient httpclient=nio
 
 .PHONY: testunit
 testunit: ## Run all unit tests
