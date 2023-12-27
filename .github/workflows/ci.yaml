@@ -112,6 +112,7 @@ jobs:
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
       - name: Select Xcode version
         # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
         run: sudo xcode-select --switch /Applications/Xcode_15.1.app
