@@ -29,6 +29,7 @@ open class MockBidirectionalAsyncStream<
     Input: ProtobufMessage,
     Output: ProtobufMessage
 >: BidirectionalAsyncStreamInterface, @unchecked Sendable {
+    /// Used to store cancellables from the stream.
     private var cancellables = [AnyCancellable]()
 
     /// Closure that is called when `close()` is invoked.

@@ -29,6 +29,7 @@ open class MockServerOnlyAsyncStream<
     Input: ProtobufMessage,
     Output: ProtobufMessage
 >: ServerOnlyAsyncStreamInterface, @unchecked Sendable {
+    /// Used to store cancellables from the stream.
     private var cancellables = [AnyCancellable]()
 
     /// Closure that is called when `send()` is invoked.
