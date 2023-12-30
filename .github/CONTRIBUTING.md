@@ -95,7 +95,7 @@ the conformance runner can be found under
 To install the runner and run the conformance test suite:
 
 ```sh
-make installconformancerunner ARCH=arm64 # or x86_64 if not using Apple Silicon
+make installconformancerunner
 make testconformance
 ```
 
