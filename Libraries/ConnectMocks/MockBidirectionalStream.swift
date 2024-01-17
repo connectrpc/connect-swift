@@ -27,7 +27,7 @@ import SwiftProtobuf
 open class MockBidirectionalStream<
     Input: ProtobufMessage,
     Output: ProtobufMessage
->: BidirectionalStreamInterface {
+>: BidirectionalStreamInterface, @unchecked Sendable {
     /// Closure that is called when `close()` is invoked.
     public var onClose: (() -> Void)?
     /// Closure that is called when `send()` is invoked.
@@ -59,4 +59,6 @@ open class MockBidirectionalStream<
         self.isClosed = true
         self.onClose?()
     }
+
+    open func cancel() {}
 }

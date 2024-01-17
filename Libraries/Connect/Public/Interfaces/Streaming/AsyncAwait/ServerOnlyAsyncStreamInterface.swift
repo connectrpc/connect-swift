@@ -37,4 +37,8 @@ public protocol ServerOnlyAsyncStreamInterface<Input, Output> {
     ///
     /// - returns: An `AsyncStream` that contains all outputs/results from the stream.
     func results() -> AsyncStream<StreamResult<Output>>
+
+    /// Cancel the stream and return a canceled code.
+    /// No calls to `send()` are valid after calling `cancel()`.
+    func cancel()
 }

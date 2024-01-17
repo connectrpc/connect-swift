@@ -1,0 +1,21 @@
+features:
+  codecs:
+    - CODEC_PROTO
+    - CODEC_JSON
+  compressions:
+    - COMPRESSION_IDENTITY
+    - COMPRESSION_GZIP
+  protocols:
+    - PROTOCOL_CONNECT
+    - PROTOCOL_GRPC_WEB
+    - PROTOCOL_GRPC
+  requires_connect_version_header: false
+  supports_connect_get: true
+  supports_half_duplex_bidi_over_http1: true
+  supports_message_receive_limit: false
+  supports_h2c: true
+  supports_tls: false
+  supports_tls_client_certs: false
+  supports_trailers: true
+  versions:
+    - HTTP_VERSION_2

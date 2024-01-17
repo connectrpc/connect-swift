@@ -44,7 +44,9 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage>: Sendable {
         return await withTaskCancellationHandler(operation: {
             return await withCheckedContinuation { continuation in
                 if Task.isCancelled {
-                    continuation.resume(returning: .canceled())
+                    continuation.resume(
+                        returning: .init(code: .canceled, result: .failure(.canceled()))
+                    )
                 } else {
                     self.cancelable = self.sendUnary { response in
                         continuation.resume(returning: response)
@@ -54,14 +56,5 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage>: Sendable {
         }, onCancel: {
             Task { await self.cancelable?.cancel() }
         })
-    }
-}
-
-private extension ResponseMessage {
-    static func canceled() -> Self {
-        return .init(
-            code: .canceled,
-            result: .failure(.from(code: .canceled, headers: [:], source: nil))
-        )
     }
 }

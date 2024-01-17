@@ -8,15 +8,16 @@ MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-print-directory
 BIN := .tmp/bin
 LICENSE_HEADER_YEAR_RANGE := 2022-2023
-CONFORMANCE_VERSION := 0d0d9b5556613468d5120c0da14570ebcf4a5f3b
-EXAMPLES_VERSION := e74547031f662f81a62f5e95ebaa9f7037e0c41b
+CONFORMANCE_PROTO_REF := 8ab24b156f5d3f8e7824b85732fa9765ab084879
+CONFORMANCE_RUNNER_TAG := v1.0.0-rc2
+EXAMPLES_PROTO_REF := e74547031f662f81a62f5e95ebaa9f7037e0c41b
 LICENSE_HEADER_VERSION := v1.12.0
 LICENSE_IGNORE := -e Package.swift \
     -e $(BIN)\/ \
     -e Examples/ElizaSharedSources/GeneratedSources\/ \
-    -e Libraries/Connect/Internal/Generated\/ \
-    -e Tests/ConnectLibraryTests/proto/grpc\/ \
-    -e Tests/ConnectLibraryTests/Generated\/
+    -e Libraries/Connect/Internal/GeneratedSources\/ \
+    -e Tests/ConformanceClient/GeneratedSources\/ \
+    -e Tests/UnitTests/ConnectLibraryTests/GeneratedSources\/
 
 .PHONY: buildpackage
 buildpackage: ## Build all targets in the Swift package
@@ -38,27 +39,22 @@ clean: cleangenerated ## Delete all plugins and generated outputs
 .PHONY: cleangenerated
 cleangenerated: ## Delete all generated outputs
 	rm -rf ./Examples/ElizaSharedSources/GeneratedSources/*
-	rm -rf ./Libraries/Connect/Implementation/Generated/*
-	rm -rf ./Tests/ConnectLibraryTests/Generated/*
-
-.PHONY: conformanceserverstop
-conformanceserverstop: ## Stop the conformance server
-	-docker container stop serverconnect servergrpc
-
-.PHONY: conformanceserverrun
-conformanceserverrun: conformanceserverstop ## Start the conformance server
-	docker run --rm --name serverconnect -p 8080:8080 -p 8081:8081 -d \
-		connectrpc/conformance:$(CONFORMANCE_VERSION) \
-		/usr/local/bin/serverconnect --h1port "8080" --h2port "8081" --cert "cert/localhost.crt" --key "cert/localhost.key"
-	docker run --rm --name servergrpc -p 8083:8083 -d \
-		connectrpc/conformance:$(CONFORMANCE_VERSION) \
-		/usr/local/bin/servergrpc --port "8083" --cert "cert/localhost.crt" --key "cert/localhost.key"
+	rm -rf ./Libraries/Connect/Internal/GeneratedSources/*
+	rm -rf ./Tests/ConformanceClient/GeneratedSources/*
+	rm -rf ./Tests/UnitTests/ConnectLibraryTests/GeneratedSources/*
 
 .PHONY: generate
 generate: cleangenerated ## Regenerate outputs for all .proto files
-	cd Examples; buf generate https://github.com/connectrpc/examples-go.git#ref=$(EXAMPLES_VERSION),subdir=proto
+	cd Examples; buf generate https://github.com/connectrpc/examples-go.git#ref=$(EXAMPLES_PROTO_REF),subdir=proto
 	cd Libraries/Connect; buf generate
-	cd Tests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_VERSION),subdir=proto
+	cd Tests/ConformanceClient; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
+	cd Tests/UnitTests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
+
+.PHONY: installconformancerunner
+installconformancerunner: ## Install the Connect conformance test runner
+	mkdir -p $(BIN)
+	curl -L "https://github.com/connectrpc/conformance/releases/download/$(CONFORMANCE_RUNNER_TAG)/connectconformance-$(CONFORMANCE_RUNNER_TAG)-$(shell uname -s)-$(shell uname -m).tar.gz" > $(BIN)/connectconformance.tar.gz
+	tar -xvzf $(BIN)/connectconformance.tar.gz -C $(BIN)
 
 .PHONY: help
 help: ## Describe useful make targets
@@ -78,7 +74,15 @@ $(BIN)/license-headers: Makefile
 	mkdir -p $(@D)
 	GOBIN=$(abspath $(BIN)) go install github.com/bufbuild/buf/private/pkg/licenseheader/cmd/license-header@$(LICENSE_HEADER_VERSION)
 
-.PHONY: test
-test: conformanceserverrun ## Run all tests
+.PHONY: testconformance
+testconformance: ## Run all conformance tests
+	swift build -c release --product ConnectConformanceClient
+	mv ./.build/release/ConnectConformanceClient $(BIN)
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConformanceClient/InvocationConfigs/urlsession.yaml --known-failing ./Tests/ConformanceClient/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectConformanceClient httpclient=urlsession
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConformanceClient/InvocationConfigs/nio.yaml --known-failing ./Tests/ConformanceClient/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectConformanceClient httpclient=nio
+
+.PHONY: testunit
+testunit: ## Run all unit tests
+	go install connectrpc.com/conformance/cmd/referenceserver@$(CONFORMANCE_RUNNER_TAG)
+	echo "{\"protocol\": \"PROTOCOL_CONNECT\", \"httpVersion\": \"HTTP_VERSION_1\"}" | go run connectrpc.com/conformance/cmd/referenceserver@$(CONFORMANCE_RUNNER_TAG) -port 52107 -json &
 	swift test
-	$(MAKE) conformanceserverstop

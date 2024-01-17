@@ -30,4 +30,8 @@ extension ServerOnlyStream: ServerOnlyStreamInterface {
         self.bidirectionalStream.send(input)
         self.bidirectionalStream.close()
     }
+
+    func cancel() {
+        self.bidirectionalStream.cancel()
+    }
 }

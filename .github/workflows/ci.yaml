@@ -97,21 +97,29 @@ jobs:
         run: |
           git update-index --refresh --add --remove
           git diff-index --quiet HEAD --
-  run-connect-tests:
+  run-conformance-tests:
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
         run: sudo xcode-select --switch /Applications/Xcode_15.1.app
-      - name: Set up docker (missing on macOS GitHub runners)
-        # https://github.com/actions/runner-images/issues/2150
-        run: |
-          brew unlink python@3.12 && brew link --overwrite python@3.12
-          brew install docker colima
-          colima delete && colima start
-      - name: Run tests
-        run: make test
+      - name: Install conformance runner
+        run: make installconformancerunner
+      - name: Run conformance tests
+        run: make testconformance
+  run-unit-tests:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.21.x
+      - name: Select Xcode version
+        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
+        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+      - name: Run unit tests
+        run: make testunit
   run-swiftlint:
     runs-on: ubuntu-latest
     container:

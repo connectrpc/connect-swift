@@ -30,4 +30,8 @@ public protocol ClientOnlyStreamInterface<Input> {
 
     /// Close the stream. No calls to `send()` are valid after calling `close()`.
     func close()
+
+    /// Cancel the stream and return a canceled code.
+    /// No calls to `send()` are valid after calling `cancel()`.
+    func cancel()
 }

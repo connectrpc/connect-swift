@@ -361,7 +361,11 @@ extension ProtocolClient: ProtocolClientInterface {
                 }
             }
         )
-        return RequestCallbacks<Input> { requestMessage in
+        return RequestCallbacks<Input>(cancel: {
+            pendingRequestCallbacks.enqueue { requestCallbacks in
+                requestCallbacks.cancel()
+            }
+        }, sendData: { requestMessage in
             // Wait for the stream to be established before sending data.
             pendingRequestCallbacks.enqueue { requestCallbacks in
                 interceptorChain.executeLinkedInterceptors(
@@ -383,11 +387,11 @@ extension ProtocolClient: ProtocolClientInterface {
                     finish: requestCallbacks.sendData
                 )
             }
-        } sendClose: {
+        }, sendClose: {
             pendingRequestCallbacks.enqueue { requestCallbacks in
                 requestCallbacks.sendClose()
             }
-        }
+        })
     }
 }
 

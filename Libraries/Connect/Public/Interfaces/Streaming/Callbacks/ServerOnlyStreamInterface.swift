@@ -26,4 +26,8 @@ public protocol ServerOnlyStreamInterface<Input> {
     ///
     /// - parameter input: The request message to send.
     func send(_ input: Input)
+
+    /// Cancel the stream and return a canceled code.
+    /// No calls to `send()` are valid after calling `cancel()`.
+    func cancel()
 }

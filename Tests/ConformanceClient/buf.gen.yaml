@@ -1,0 +1,11 @@
+version: v1
+plugins:
+  - plugin: buf.build/apple/swift:v1.25.2
+    opt: Visibility=Internal
+    out: ./GeneratedSources
+  - name: connect-swift
+    opt:
+      - GenerateServiceMetadata=false
+      - Visibility=Internal
+    out: ./GeneratedSources
+    path: ../../.tmp/bin/protoc-gen-connect-swift

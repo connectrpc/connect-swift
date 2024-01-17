@@ -14,15 +14,19 @@
 
 /// Set of closures that are used for wiring outbound request data through to HTTP clients.
 public final class RequestCallbacks<T: Sendable>: Sendable {
+    /// Closure to cancel the request from the client.
+    public let cancel: @Sendable () -> Void
     /// Closure to send data through to the server.
     public let sendData: @Sendable (T) -> Void
     /// Closure to initiate a close for a stream.
     public let sendClose: @Sendable () -> Void
 
     public init(
+        cancel: @escaping @Sendable () -> Void,
         sendData: @escaping @Sendable (T) -> Void,
         sendClose: @escaping @Sendable () -> Void
     ) {
+        self.cancel = cancel
         self.sendData = sendData
         self.sendClose = sendClose
     }

@@ -63,9 +63,7 @@ extension GRPCWebInterceptor: UnaryInterceptor {
                 headers: response.headers,
                 message: response.message,
                 trailers: response.trailers,
-                error: response.error ?? ConnectError.fromGRPCTrailers(
-                    response.headers, code: code
-                ),
+                error: ConnectError.fromGRPCTrailers(response.headers, code: code),
                 tracingInfo: response.tracingInfo
             ))
             return
@@ -212,13 +210,12 @@ private extension Trailers {
                 }
 
                 let trailerName = String(line.prefix(upTo: separatorIndex)).lowercased()
-                var trailerValue = String(line.suffix(from: separatorIndex + 1))
-                if trailerValue.hasPrefix(" ") {
-                    trailerValue.removeFirst()
+                let trailerValues = String(line.suffix(from: separatorIndex + 1))
+                for value in trailerValues.components(separatedBy: ",") {
+                    trailers[trailerName, default: []].append(
+                        value.trimmingCharacters(in: .whitespaces)
+                    )
                 }
-                trailers[trailerName] = trailerValue
-                    .split(separator: ",")
-                    .map { String($0) }
             }
     }
 }

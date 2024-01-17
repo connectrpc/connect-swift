@@ -1,0 +1,19 @@
+version: v1
+plugins:
+  - plugin: buf.build/apple/swift:v1.25.2
+    opt: Visibility=Internal
+    out: ./GeneratedSources
+  - name: connect-swift
+    opt:
+      - GenerateAsyncMethods=true
+      - GenerateCallbackMethods=true
+      - Visibility=Internal
+    out: ./GeneratedSources
+    path: ../../../.tmp/bin/protoc-gen-connect-swift
+  - name: connect-swift-mocks
+    opt:
+      - GenerateAsyncMethods=true
+      - GenerateCallbackMethods=true
+      - Visibility=Internal
+    out: ./GeneratedSources
+    path: ../../../.tmp/bin/protoc-gen-connect-swift-mocks

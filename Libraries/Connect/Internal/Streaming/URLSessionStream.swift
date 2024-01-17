@@ -86,6 +86,10 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
         }
     }
 
+    func cancel() {
+        self.task.cancel()
+    }
+
     func close() {
         self.writeStream.close()
     }
@@ -114,10 +118,17 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
 
         self.closedByServer.value = true
         if let error = error {
+            let code = Code.fromURLSessionCode((error as NSError).code)
             self.responseCallbacks.receiveClose(
-                Code.fromURLSessionCode((error as NSError).code),
+                code,
                 [:],
-                error
+                ConnectError(
+                    code: code,
+                    message: error.localizedDescription,
+                    exception: nil,
+                    details: [],
+                    metadata: [:]
+                )
             )
         } else {
             self.responseCallbacks.receiveClose(.ok, [:], nil)

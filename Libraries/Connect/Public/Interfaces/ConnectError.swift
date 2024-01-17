@@ -75,19 +75,8 @@ public struct ConnectError: Swift.Error, Sendable {
 
         public init(from decoder: Swift.Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
-
-            // Read the base64-encoded payload and then pad it if needed:
-            // Base64-encoded strings should be a length that is a multiple of four. If the
-            // original string is not, it should be padded with "=" to guard against a
-            // corrupted string.
             let encodedPayload = try container.decodeIfPresent(String.self, forKey: .payload) ?? ""
-            let paddedPayload = encodedPayload.padding(
-                // Calculate the nearest multiple of 4 that is >= the length of encodedPayload,
-                // then pad the string to that length.
-                toLength: ((encodedPayload.count + 3) / 4) * 4,
-                withPad: "=",
-                startingAt: 0
-            )
+            let paddedPayload = encodedPayload.addingBase64PaddingIfNeeded()
             self.init(
                 type: try container.decodeIfPresent(String.self, forKey: .type) ?? "",
                 payload: Data(base64Encoded: paddedPayload)
@@ -143,5 +132,27 @@ extension ConnectError {
                 exception: error, details: [], metadata: headers
             )
         }
+    }
+
+    public static func canceled() -> Self {
+        return .init(
+            code: .canceled, message: "request canceled by client",
+            exception: nil, details: [], metadata: [:]
+        )
+    }
+}
+
+extension String {
+    func addingBase64PaddingIfNeeded() -> Self {
+        // Base64-encoded strings should be a length that is a multiple of four. If the
+        // original string is not, it should be padded with "=" to guard against a
+        // corrupted string.
+        return self.padding(
+            // Calculate the nearest multiple of 4 that is >= the length of the string,
+            // then pad the string to that length.
+            toLength: ((self.count + 3) / 4) * 4,
+            withPad: "=",
+            startingAt: 0
+        )
     }
 }

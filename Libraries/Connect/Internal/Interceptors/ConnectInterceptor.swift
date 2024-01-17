@@ -199,7 +199,7 @@ private extension ProtocolClientConfig {
             URLQueryItem(name: "base64", value: "1"),
             URLQueryItem(
                 name: "compression",
-                value: request.headers[HeaderConstants.contentEncoding]?.first
+                value: request.headers[HeaderConstants.contentEncoding]?.first ?? "identity"
             ),
             URLQueryItem(name: "connect", value: "v\(ConnectInterceptor.protocolVersion)"),
             URLQueryItem(name: "encoding", value: self.codec.name()),

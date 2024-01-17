@@ -34,4 +34,8 @@ extension ServerOnlyAsyncStream: ServerOnlyAsyncStreamInterface {
     func results() -> AsyncStream<StreamResult<Output>> {
         return self.bidirectionalStream.results()
     }
+
+    func cancel() {
+        self.bidirectionalStream.cancel()
+    }
 }

@@ -108,6 +108,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
             self.metricsClosures[urlSessionStream.taskID] = responseCallbacks.receiveResponseMetrics
         }
         return RequestCallbacks(
+            cancel: { urlSessionStream.cancel() },
             sendData: { data in
                 do {
                     try urlSessionStream.sendData(data)
@@ -184,8 +185,10 @@ extension HTTPURLResponse {
                 return
             }
 
-            let headerValue = current.value as? String ?? String(describing: current.value)
-            headers[headerName] = headerValue.components(separatedBy: ",")
+            let headerValues = current.value as? String ?? String(describing: current.value)
+            for value in headerValues.components(separatedBy: ",") {
+                headers[headerName, default: []].append(value.trimmingCharacters(in: .whitespaces))
+            }
         }
     }
 }

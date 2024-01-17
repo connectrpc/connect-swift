@@ -59,27 +59,16 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     }
 
     /// Close the stream.
-    ///
-    /// - parameter trailers: Optional trailers to send when closing the stream.
-    func close(trailers: Connect.Trailers?) {
+    func close() {
         self.runOnEventLoop {
             if self.isClosed {
                 return
             }
 
-            let end: NIOHTTP1.HTTPClientRequestPart
-            if let trailers = trailers {
-                var nioTrailers = NIOHTTP1.HTTPHeaders()
-                nioTrailers.addNIOHeadersFromConnect(trailers)
-                end = .end(nioTrailers)
-            } else {
-                end = .end(nil)
-            }
-
             if let context = self.context {
-                context.writeAndFlush(self.wrapOutboundOut(end)).cascade(to: nil)
+                context.writeAndFlush(self.wrapOutboundOut(.end(nil))).cascade(to: nil)
             } else {
-                self.pendingClose = end
+                self.pendingClose = .end(nil)
             }
         }
     }
@@ -93,7 +82,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
 
             self.isClosed = true
             self.context?.close(promise: nil)
-            self.responseCallbacks.receiveClose(.canceled, [:], nil)
+            self.responseCallbacks.receiveClose(.canceled, [:], ConnectError.canceled())
         }
     }
 

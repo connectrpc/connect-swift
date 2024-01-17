@@ -98,6 +98,10 @@ extension BidirectionalAsyncStream: BidirectionalAsyncStreamInterface {
     func close() {
         self.requestCallbacks?.sendClose()
     }
+
+    func cancel() {
+        self.requestCallbacks?.cancel()
+    }
 }
 
 // Conforms to the client-only interface since it matches exactly and the implementation is internal

@@ -26,4 +26,6 @@ import SwiftProtobuf
 open class MockClientOnlyStream<
     Input: ProtobufMessage,
     Output: ProtobufMessage
->: MockBidirectionalStream<Input, Output>, ClientOnlyStreamInterface {}
+>: MockBidirectionalStream<Input, Output>,
+    ClientOnlyStreamInterface,
+   @unchecked Sendable {}

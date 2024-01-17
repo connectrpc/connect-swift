@@ -34,8 +34,10 @@ public enum Envelope {
         _ source: Data, using compression: ProtocolClientConfig.RequestCompression?
     ) -> Data {
         var buffer = Data()
-        if let compression = compression, compression.shouldCompress(source),
-           let compressedSource = try? compression.pool.compress(data: source)
+        if !source.isEmpty,
+            let compression = compression,
+            compression.shouldCompress(source),
+            let compressedSource = try? compression.pool.compress(data: source)
         {
             buffer.append(0b00000001) // 1 byte with the compression bit active
             self.write(lengthOf: compressedSource, to: &buffer)
