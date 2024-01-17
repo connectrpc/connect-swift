@@ -106,7 +106,7 @@ and can be run using the following command which starts up a local server
 and runs the tests:
 
 ```sh
-make test
+make testunit
 ```
 
 ## Linting
