@@ -21,7 +21,7 @@ extension ConnectError {
     /// Parses gRPC headers and/or trailers to obtain the status and any potential error.
     ///
     /// - parameter headers: Headers received from the server.
-    /// - parameter trailers: Trailers received from the server. Note that this could be trailers 
+    /// - parameter trailers: Trailers received from the server. Note that this could be trailers
     ///                       passed in the headers block for gRPC-Web.
     ///
     /// - returns: A tuple containing the gRPC status code and an optional error.
