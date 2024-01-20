@@ -196,24 +196,18 @@ extension HTTPURLResponse {
 extension Code {
     static func fromURLSessionCode(_ code: Int) -> Self {
         // https://developer.apple.com/documentation/cfnetwork/cfnetworkerrors?language=swift
-        switch Int32(code) {
-        // CFNetworkErrors.cfurlErrorUnknown.rawValue
-        case -998:
+        switch code {
+        case URLError.unknown.rawValue:
             return .unknown
-        // CFNetworkErrors.cfurlErrorCancelled.rawValue
-        case -999:
+        case URLError.cancelled.rawValue:
             return .canceled
-        // CFNetworkErrors.cfurlErrorBadURL.rawValue
-        case -1_000:
+        case URLError.badURL.rawValue:
             return .invalidArgument
-        // CFNetworkErrors.cfurlErrorTimedOut.rawValue
-        case -1_001:
+        case URLError.timedOut.rawValue:
             return .deadlineExceeded
-        // CFNetworkErrors.cfurlErrorUnsupportedURL.rawValue
-        case -1_002:
+        case URLError.unsupportedURL.rawValue:
             return .unimplemented
-        // URLSession can return errors in this range
-        case ...100:
+        case ...100: // URLSession can return errors in this range
             return .unknown
         default:
             return Code.fromHTTPStatus(code)
