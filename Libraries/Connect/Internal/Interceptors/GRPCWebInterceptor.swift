@@ -169,7 +169,9 @@ extension GRPCWebInterceptor: StreamInterceptor {
                 let isTrailers = 0b10000000 & headerByte != 0
                 if isTrailers {
                     let trailers = try Trailers.fromGRPCHeadersBlock(unpackedData)
-                    let (grpcCode, error) = ConnectError.parseGRPCHeaders(nil, trailers: trailers)
+                    let (grpcCode, error) = ConnectError.parseGRPCHeaders(
+                        self.streamResponseHeaders.value, trailers: trailers
+                    )
                     if grpcCode == .ok {
                         proceed(.complete(code: .ok, error: nil, trailers: trailers))
                     } else {
