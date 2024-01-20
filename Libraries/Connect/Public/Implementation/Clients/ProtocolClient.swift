@@ -428,6 +428,7 @@ private extension ResponseMessage where Output: ProtobufMessage {
             ?? ConnectError.from(
                 code: response.code,
                 headers: response.headers,
+                trailers: response.trailers,
                 source: response.message
             )
             self.init(

@@ -54,6 +54,7 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertEqual(error.unpackedDetails(), [expectedDetails1, expectedDetails2])
         XCTAssertTrue(error.metadata.isEmpty)
     }
+
     func testDeserializingErrorUsingHelperFunctionLowercasesHeaderKeys() throws {
         let expectedDetails = Connectrpc_Conformance_V1_RawHTTPRequest.with { $0.uri = "a/b/c" }
         let errorData = try self.errorData(expectedDetails: [expectedDetails])
@@ -63,6 +64,7 @@ final class ConnectErrorTests: XCTestCase {
                 "sOmEkEy": ["foo"],
                 "otherKey1": ["BAR", "bAz"],
             ],
+            trailers: nil,
             source: errorData
         )
         XCTAssertEqual(error.code, .unavailable) // Respects the code from the error body
@@ -71,6 +73,33 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertEqual(error.details.count, 1)
         XCTAssertEqual(error.unpackedDetails(), [expectedDetails])
         XCTAssertEqual(error.metadata, ["somekey": ["foo"], "otherkey1": ["BAR", "bAz"]])
+    }
+
+    func testDeserializingErrorUsingHelperFunctionCombinesHeadersAndTrailers() throws {
+        let expectedDetails = Connectrpc_Conformance_V1_RawHTTPRequest.with { $0.uri = "a/b/c" }
+        let errorData = try self.errorData(expectedDetails: [expectedDetails])
+        let error = ConnectError.from(
+            code: .aborted,
+            headers: [
+                "duPlIcaTedKey": ["headers"],
+                "otherKey1": ["BAR", "bAz"],
+            ],
+            trailers: [
+                "duPlIcaTedKey": ["trailers"],
+                "anOthErKey": ["foo"],
+            ],
+            source: errorData
+        )
+        XCTAssertEqual(error.code, .unavailable) // Respects the code from the error body
+        XCTAssertEqual(error.message, "overloaded: back off and retry")
+        XCTAssertNil(error.exception)
+        XCTAssertEqual(error.details.count, 1)
+        XCTAssertEqual(error.unpackedDetails(), [expectedDetails])
+        XCTAssertEqual(error.metadata, [
+            "duplicatedkey": ["trailers"],
+            "otherkey1": ["BAR", "bAz"],
+            "anotherkey": ["foo"],
+        ])
     }
 
     func testDeserializingSimpleError() throws {

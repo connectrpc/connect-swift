@@ -59,8 +59,9 @@ extension GRPCInterceptor: UnaryInterceptor {
             return
         }
 
-        let (grpcCode, connectError) = self.grpcResult(
-            fromHeaders: response.headers, trailers: response.trailers
+        let (grpcCode, connectError) = ConnectError.parseGRPCHeaders(
+            response.headers,
+            trailers: response.trailers
         )
         guard grpcCode == .ok, let rawData = response.message, !rawData.isEmpty else {
             proceed(HTTPResponse(
@@ -154,8 +155,9 @@ extension GRPCInterceptor: StreamInterceptor {
                 return
             }
 
-            let (grpcCode, connectError) = self.grpcResult(
-                fromHeaders: self.streamResponseHeaders.value, trailers: trailers
+            let (grpcCode, connectError) = ConnectError.parseGRPCHeaders(
+                self.streamResponseHeaders.value,
+                trailers: trailers
             )
             if grpcCode == .ok {
                 proceed(.complete(
@@ -170,20 +172,6 @@ extension GRPCInterceptor: StreamInterceptor {
                     trailers: trailers
                 ))
             }
-        }
-    }
-
-    private func grpcResult(
-        fromHeaders headers: Headers?, trailers: Trailers?
-    ) -> (code: Code, error: ConnectError?) {
-        // "Trailers-only" responses can be sent in the headers or trailers block.
-        // Check for a valid gRPC status in the headers first, then in the trailers.
-        if let headers = headers, let grpcCode = headers.grpcStatus() {
-            return (grpcCode, .fromGRPCTrailers(headers, code: grpcCode))
-        } else if let trailers = trailers, let grpcCode = trailers.grpcStatus() {
-            return (grpcCode, .fromGRPCTrailers(trailers, code: grpcCode))
-        } else {
-            return (.unknown, nil)
         }
     }
 }

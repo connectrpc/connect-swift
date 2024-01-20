@@ -110,26 +110,34 @@ extension ConnectError: Swift.Decodable {
 }
 
 extension ConnectError {
-    public static func from(code: Code, headers: Headers, source: Data?) -> Self {
-        let headers = headers.reduce(into: Headers(), { headers, current in
-            headers[current.key.lowercased()] = current.value
-        })
+    public static func from(
+        code: Code, headers: Headers?, trailers: Trailers?, source: Data?
+    ) -> Self {
+        // Combine headers + trailers into metadata to make error parsing easier for consumers,
+        // since gRPC can include error information in both headers and trailers.
+        var metadata = Headers()
+        for (headerName, headerValue) in headers ?? [:] {
+            metadata[headerName.lowercased()] = headerValue
+        }
+        for (trailerName, trailerValue) in trailers ?? [:] {
+            metadata[trailerName.lowercased()] = trailerValue
+        }
 
         guard let source = source else {
             return .init(
                 code: code, message: "empty error message from source", exception: nil,
-                details: [], metadata: headers
+                details: [], metadata: metadata
             )
         }
 
         do {
             var connectError = try Foundation.JSONDecoder().decode(ConnectError.self, from: source)
-            connectError.metadata = headers
+            connectError.metadata = metadata
             return connectError
         } catch let error {
             return .init(
                 code: code, message: String(data: source, encoding: .utf8),
-                exception: error, details: [], metadata: headers
+                exception: error, details: [], metadata: metadata
             )
         }
     }
