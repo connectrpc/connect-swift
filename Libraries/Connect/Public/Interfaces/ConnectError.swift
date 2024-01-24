@@ -114,7 +114,7 @@ extension ConnectError {
         code: Code, headers: Headers?, trailers: Trailers?, source: Data?
     ) -> Self {
         // Combine headers + trailers into metadata to make error parsing easier for consumers,
-        // since gRPC can include error information in both headers and trailers.
+        // since gRPC can include error information in either headers or trailers.
         var metadata = Headers()
         for (headerName, headerValue) in headers ?? [:] {
             metadata[headerName.lowercased()] = headerValue

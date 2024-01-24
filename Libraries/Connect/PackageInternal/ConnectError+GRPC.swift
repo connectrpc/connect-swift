@@ -31,7 +31,10 @@ extension ConnectError {
         // "Trailers-only" responses can be sent in the headers or trailers block.
         // Check for a valid gRPC status in the headers first, then in the trailers.
         guard let grpcCode = headers?.grpcStatus() ?? trailers?.grpcStatus() else {
-            return (.unknown, nil)
+            return (.unknown, ConnectError(
+                code: .unknown, message: "RPC response missing status", exception: nil,
+                details: [], metadata: [:]
+            ))
         }
 
         if grpcCode == .ok {
@@ -39,7 +42,7 @@ extension ConnectError {
         }
 
         // Combine headers + trailers into metadata to make error parsing easier for consumers,
-        // since gRPC can include error information in both headers and trailers.
+        // since gRPC can include error information in either headers or trailers.
         let metadata = (headers ?? [:]).merging(trailers ?? [:]) { $1 }
         return (grpcCode, .init(
             code: grpcCode,
