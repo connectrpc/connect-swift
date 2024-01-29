@@ -14,7 +14,7 @@ jobs:
       - name: Select Xcode version
         # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
         run: sudo xcode-select --switch /Applications/Xcode_15.1.app
-      - uses: bufbuild/buf-setup-action@v1.28.1
+      - uses: bufbuild/buf-setup-action@v1.29.0
         with:
           github_token: ${{ github.token }}
       - name: Build plugins
