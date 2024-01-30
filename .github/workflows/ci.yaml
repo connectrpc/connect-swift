@@ -45,7 +45,7 @@ jobs:
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Connect iOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.3' | xcbeautify
   build-library-macos:
     runs-on: macos-14
     steps:
@@ -67,7 +67,7 @@ jobs:
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Connect tvOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=17.2' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=17.3' | xcbeautify
   build-library-watchos:
     runs-on: macos-14
     steps:
@@ -78,7 +78,7 @@ jobs:
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Connect watchOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm),OS=10.2' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm),OS=10.3' | xcbeautify
   build-plugin-and-generate:
     runs-on: macos-14
     steps:
