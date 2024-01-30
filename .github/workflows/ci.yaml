@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   build-eliza-cocoapods-example:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
@@ -23,7 +23,7 @@ jobs:
           pod install
           set -o pipefail && xcodebuild -workspace ElizaCocoaPodsApp.xcworkspace -scheme ElizaCocoaPodsApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
   build-eliza-swiftpm-example:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
@@ -36,7 +36,7 @@ jobs:
           cd Examples/ElizaSwiftPackageApp
           set -o pipefail && xcodebuild -scheme ElizaSwiftPackageApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
   build-library-ios:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
@@ -47,7 +47,7 @@ jobs:
       - name: Build Connect iOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' | xcbeautify
   build-library-macos:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
@@ -58,7 +58,7 @@ jobs:
       - name: Build Connect macOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS' | xcbeautify
   build-library-tvos:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
@@ -69,7 +69,7 @@ jobs:
       - name: Build Connect tvOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=17.2' | xcbeautify
   build-library-watchos:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
@@ -80,7 +80,7 @@ jobs:
       - name: Build Connect watchOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm),OS=10.2' | xcbeautify
   build-plugin-and-generate:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
@@ -98,7 +98,7 @@ jobs:
           git update-index --refresh --add --remove
           git diff-index --quiet HEAD --
   run-conformance-tests:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
@@ -109,7 +109,7 @@ jobs:
       - name: Run conformance tests
         run: make testconformance
   run-unit-tests:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
