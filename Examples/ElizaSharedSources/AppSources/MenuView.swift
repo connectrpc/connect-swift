@@ -70,7 +70,7 @@ struct MenuView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 15) {
-                Text("Buf Demo")
+                Text("Connect Demo")
                     .font(.title)
 
                 Text("Select a protocol to use for chatting with Eliza, a conversational bot.")
