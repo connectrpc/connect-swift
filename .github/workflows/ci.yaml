@@ -9,12 +9,12 @@ permissions:
   contents: read
 jobs:
   build-eliza-cocoapods-example:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
-        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
+        run: sudo xcode-select --switch /Applications/Xcode_15.2.app
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Eliza CocoaPods example
@@ -23,12 +23,12 @@ jobs:
           pod install
           set -o pipefail && xcodebuild -workspace ElizaCocoaPodsApp.xcworkspace -scheme ElizaCocoaPodsApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
   build-eliza-swiftpm-example:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
-        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
+        run: sudo xcode-select --switch /Applications/Xcode_15.2.app
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Eliza Swift PM example
@@ -36,56 +36,56 @@ jobs:
           cd Examples/ElizaSwiftPackageApp
           set -o pipefail && xcodebuild -scheme ElizaSwiftPackageApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
   build-library-ios:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
-        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
+        run: sudo xcode-select --switch /Applications/Xcode_15.2.app
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Connect iOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.3' | xcbeautify
   build-library-macos:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
-        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
+        run: sudo xcode-select --switch /Applications/Xcode_15.2.app
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Connect macOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS' | xcbeautify
   build-library-tvos:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
-        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
+        run: sudo xcode-select --switch /Applications/Xcode_15.2.app
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Connect tvOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=17.2' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=17.3' | xcbeautify
   build-library-watchos:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
-        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
+        run: sudo xcode-select --switch /Applications/Xcode_15.2.app
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Connect watchOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm),OS=10.2' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm),OS=10.3' | xcbeautify
   build-plugin-and-generate:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
-        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
+        run: sudo xcode-select --switch /Applications/Xcode_15.2.app
       - uses: bufbuild/buf-setup-action@v1.29.0
         with:
           github_token: ${{ github.token }}
@@ -98,26 +98,26 @@ jobs:
           git update-index --refresh --add --remove
           git diff-index --quiet HEAD --
   run-conformance-tests:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
-        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
+        run: sudo xcode-select --switch /Applications/Xcode_15.2.app
       - name: Install conformance runner
         run: make installconformancerunner
       - name: Run conformance tests
         run: make testconformance
   run-unit-tests:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: 1.21.x
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/releases/tag/macos-13%2F20231218.2
-        run: sudo xcode-select --switch /Applications/Xcode_15.1.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
+        run: sudo xcode-select --switch /Applications/Xcode_15.2.app
       - name: Run unit tests
         run: make testunit
   run-swiftlint:
