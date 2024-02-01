@@ -84,7 +84,7 @@ struct MessagingView<ViewModel: MessagingViewModel>: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("End Chat") {
-                    Task { await self.viewModel.endChat() }
+                    self.viewModel.endChat()
                     self.presentationMode.wrappedValue.dismiss()
                 }
             }

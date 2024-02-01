@@ -35,7 +35,7 @@ protocol MessagingViewModel: ObservableObject {
     func send(_ message: String) async
 
     /// End the chat session (and close connections if needed).
-    func endChat() async
+    func endChat()
 }
 
 /// View model that uses unary requests for messaging.
@@ -60,7 +60,7 @@ final class UnaryMessagingViewModel: MessagingViewModel {
         ))
      }
 
-    func endChat() async {}
+    func endChat() {}
 }
 
 /// View model that uses bidirectional streaming for messaging.
