@@ -18,24 +18,39 @@ extension ConnectError {
     /// This should not be considered part of Connect's public/stable interface, and is subject
     /// to change. When the compiler supports it, this should be package-internal.
     ///
-    /// Creates an error using gRPC trailers.
+    /// Parses gRPC headers and/or trailers to obtain the status and any potential error.
     ///
-    /// - parameter trailers: The trailers (or headers, for gRPC-Web) from which to parse the error.
-    /// - parameter code: The status code received from the server.
+    /// - parameter headers: Headers received from the server.
+    /// - parameter trailers: Trailers received from the server. Note that this could be trailers
+    ///                       passed in the headers block for gRPC-Web.
     ///
-    /// - returns: An error, if the status indicated an error.
-    public static func fromGRPCTrailers(_ trailers: Trailers, code: Code) -> Self? {
-        if code == .ok {
-            return nil
+    /// - returns: A tuple containing the gRPC status code and an optional error.
+    public static func parseGRPCHeaders(
+        _ headers: Headers?, trailers: Trailers?
+    ) -> (grpcCode: Code, error: ConnectError?) {
+        // "Trailers-only" responses can be sent in the headers or trailers block.
+        // Check for a valid gRPC status in the headers first, then in the trailers.
+        guard let grpcCode = headers?.grpcStatus() ?? trailers?.grpcStatus() else {
+            return (.unknown, ConnectError(
+                code: .unknown, message: "RPC response missing status", exception: nil,
+                details: [], metadata: [:]
+            ))
         }
 
-        return .init(
-            code: code,
-            message: trailers.grpcMessage(),
+        if grpcCode == .ok {
+            return (.ok, nil)
+        }
+
+        // Combine headers + trailers into metadata to make error parsing easier for consumers,
+        // since gRPC can include error information in either headers or trailers.
+        let metadata = (headers ?? [:]).merging(trailers ?? [:]) { $1 }
+        return (grpcCode, .init(
+            code: grpcCode,
+            message: metadata.grpcMessage(),
             exception: nil,
-            details: trailers.connectErrorDetailsFromGRPC(),
-            metadata: trailers
-        )
+            details: metadata.connectErrorDetailsFromGRPC(),
+            metadata: metadata
+        ))
     }
 }
 

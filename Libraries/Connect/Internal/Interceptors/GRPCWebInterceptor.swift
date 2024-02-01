@@ -57,13 +57,16 @@ extension GRPCWebInterceptor: UnaryInterceptor {
         }
 
         guard let responseData = response.message, !responseData.isEmpty else {
-            let code = response.headers.grpcStatus() ?? response.code
+            let (grpcCode, connectError) = ConnectError.parseGRPCHeaders(
+                response.headers,
+                trailers: response.trailers
+            )
             proceed(HTTPResponse(
-                code: code,
+                code: grpcCode,
                 headers: response.headers,
                 message: response.message,
                 trailers: response.trailers,
-                error: ConnectError.fromGRPCTrailers(response.headers, code: code),
+                error: connectError,
                 tracingInfo: response.tracingInfo
             ))
             return
@@ -147,7 +150,7 @@ extension GRPCWebInterceptor: StreamInterceptor {
                 // Headers-only response.
                 proceed(.complete(
                     code: grpcCode,
-                    error: ConnectError.fromGRPCTrailers(headers, code: grpcCode),
+                    error: ConnectError.parseGRPCHeaders(nil, trailers: headers).error,
                     trailers: headers
                 ))
             } else {
@@ -166,13 +169,15 @@ extension GRPCWebInterceptor: StreamInterceptor {
                 let isTrailers = 0b10000000 & headerByte != 0
                 if isTrailers {
                     let trailers = try Trailers.fromGRPCHeadersBlock(unpackedData)
-                    let grpcCode = trailers.grpcStatus() ?? .unknown
+                    let (grpcCode, error) = ConnectError.parseGRPCHeaders(
+                        self.streamResponseHeaders.value, trailers: trailers
+                    )
                     if grpcCode == .ok {
                         proceed(.complete(code: .ok, error: nil, trailers: trailers))
                     } else {
                         proceed(.complete(
                             code: grpcCode,
-                            error: ConnectError.fromGRPCTrailers(trailers, code: grpcCode),
+                            error: error,
                             trailers: trailers
                         ))
                     }
@@ -222,10 +227,10 @@ private extension Trailers {
 
 private extension HTTPResponse {
     func withHandledGRPCWebTrailers(_ trailers: Trailers, message: Data?) -> Self {
-        let grpcStatus = trailers.grpcStatus() ?? .unknown
-        if grpcStatus == .ok {
+        let (grpcCode, error) = ConnectError.parseGRPCHeaders(self.headers, trailers: trailers)
+        if grpcCode == .ok {
             return HTTPResponse(
-                code: grpcStatus,
+                code: grpcCode,
                 headers: self.headers,
                 message: message,
                 trailers: trailers,
@@ -234,11 +239,11 @@ private extension HTTPResponse {
             )
         } else {
             return HTTPResponse(
-                code: grpcStatus,
+                code: grpcCode,
                 headers: self.headers,
                 message: message,
                 trailers: trailers,
-                error: ConnectError.fromGRPCTrailers(trailers, code: grpcStatus),
+                error: error,
                 tracingInfo: self.tracingInfo
             )
         }

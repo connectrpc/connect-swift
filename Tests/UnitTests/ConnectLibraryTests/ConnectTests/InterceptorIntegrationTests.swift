@@ -374,7 +374,7 @@ extension StepTrackingInterceptor: UnaryInterceptor {
     ) {
         self.trackStep(.unaryRequest(id: self.id))
         if self.failOutboundRequests {
-            proceed(.failure(.from(code: .aborted, headers: Headers(), source: nil)))
+            proceed(.failure(.from(code: .aborted, headers: nil, trailers: nil, source: nil)))
         } else if self.requestDelay != .never {
             DispatchQueue.global().asyncAfter(deadline: .now() + self.requestDelay) {
                 proceed(.success(request))
@@ -420,7 +420,7 @@ extension StepTrackingInterceptor: StreamInterceptor {
     ) {
         self.trackStep(.streamStart(id: self.id))
         if self.failOutboundRequests {
-            proceed(.failure(.from(code: .aborted, headers: Headers(), source: nil)))
+            proceed(.failure(.from(code: .aborted, headers: nil, trailers: nil, source: nil)))
         } else if self.requestDelay != .never {
             DispatchQueue.global().asyncAfter(deadline: .now() + self.requestDelay) {
                 proceed(.success(request))

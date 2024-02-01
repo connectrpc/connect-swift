@@ -104,7 +104,9 @@ final class InterceptorChainIterationTests: XCTestCase {
         chain.executeInterceptorsAndStopOnFailure(
             [
                 { _, proceed in
-                    proceed(.failure(.from(code: .unknown, headers: Headers(), source: nil)))
+                    proceed(.failure(.from(
+                        code: .unknown, headers: nil, trailers: nil, source: nil
+                    )))
                 },
                 { value, proceed in proceed(.success(value + "b")) },
             ],
@@ -141,7 +143,9 @@ final class InterceptorChainIterationTests: XCTestCase {
         chain.executeLinkedInterceptorsAndStopOnFailure(
             [
                 { _, proceed in
-                    proceed(.failure(.from(code: .unknown, headers: Headers(), source: nil)))
+                    proceed(.failure(.from(
+                        code: .unknown, headers: nil, trailers: nil, source: nil
+                    )))
                 },
                 { value, proceed in proceed(.success(value + "2")) },
             ],
@@ -168,7 +172,9 @@ final class InterceptorChainIterationTests: XCTestCase {
             firstInFirstOut: true,
             initial: "",
             transform: { _, proceed in
-                proceed(.failure(.from(code: .unknown, headers: Headers(), source: nil)))
+                proceed(.failure(.from(
+                    code: .unknown, headers: nil, trailers: nil, source: nil
+                )))
             },
             then: [
                 { value, proceed in proceed(.success(value + 1)) },
@@ -192,7 +198,9 @@ final class InterceptorChainIterationTests: XCTestCase {
             transform: { value1, proceed in proceed(.success(Int(value1)!)) },
             then: [
                 { _, proceed in
-                    proceed(.failure(.from(code: .unknown, headers: Headers(), source: nil)))
+                    proceed(.failure(.from(
+                        code: .unknown, headers: nil, trailers: nil, source: nil
+                    )))
                 },
                 { value, proceed in proceed(.success(value + 3)) },
             ],

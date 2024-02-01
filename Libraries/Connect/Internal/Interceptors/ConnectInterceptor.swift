@@ -176,7 +176,8 @@ extension ConnectInterceptor: StreamInterceptor {
                     code: code,
                     error: ConnectError.from(
                         code: code,
-                        headers: self.streamResponseHeaders.value ?? [:],
+                        headers: self.streamResponseHeaders.value,
+                        trailers: trailers,
                         source: nil
                     ),
                     trailers: trailers
