@@ -123,7 +123,11 @@ private func registerAnyTypes() {
         messageType: Connectrpc_Conformance_V1_ServerStreamRequest.self
     )
     Google_Protobuf_Any.register(
-        messageType: Connectrpc_Conformance_V1_UnaryRequest.self)
+        messageType: Connectrpc_Conformance_V1_UnaryRequest.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_WireDetails.self
+    )
 }
 
 extension String: Swift.Error {}

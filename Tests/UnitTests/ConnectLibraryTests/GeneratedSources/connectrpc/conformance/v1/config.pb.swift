@@ -7,7 +7,7 @@
 // For information on using the generated types, please see the documentation:
 //   https://github.com/apple/swift-protobuf/
 
-// Copyright 2023 The Connect Authors
+// Copyright 2023-2024 The Connect Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -298,6 +298,106 @@ extension Connectrpc_Conformance_V1_StreamType: CaseIterable {
 
 #endif  // swift(>=4.2)
 
+enum Connectrpc_Conformance_V1_Code: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+  case unspecified // = 0
+  case canceled // = 1
+  case unknown // = 2
+  case invalidArgument // = 3
+  case deadlineExceeded // = 4
+  case notFound // = 5
+  case alreadyExists // = 6
+  case permissionDenied // = 7
+  case resourceExhausted // = 8
+  case failedPrecondition // = 9
+  case aborted // = 10
+  case outOfRange // = 11
+  case unimplemented // = 12
+  case `internal` // = 13
+  case unavailable // = 14
+  case dataLoss // = 15
+  case unauthenticated // = 16
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .unspecified
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .canceled
+    case 2: self = .unknown
+    case 3: self = .invalidArgument
+    case 4: self = .deadlineExceeded
+    case 5: self = .notFound
+    case 6: self = .alreadyExists
+    case 7: self = .permissionDenied
+    case 8: self = .resourceExhausted
+    case 9: self = .failedPrecondition
+    case 10: self = .aborted
+    case 11: self = .outOfRange
+    case 12: self = .unimplemented
+    case 13: self = .internal
+    case 14: self = .unavailable
+    case 15: self = .dataLoss
+    case 16: self = .unauthenticated
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .canceled: return 1
+    case .unknown: return 2
+    case .invalidArgument: return 3
+    case .deadlineExceeded: return 4
+    case .notFound: return 5
+    case .alreadyExists: return 6
+    case .permissionDenied: return 7
+    case .resourceExhausted: return 8
+    case .failedPrecondition: return 9
+    case .aborted: return 10
+    case .outOfRange: return 11
+    case .unimplemented: return 12
+    case .internal: return 13
+    case .unavailable: return 14
+    case .dataLoss: return 15
+    case .unauthenticated: return 16
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Connectrpc_Conformance_V1_Code: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static let allCases: [Connectrpc_Conformance_V1_Code] = [
+    .unspecified,
+    .canceled,
+    .unknown,
+    .invalidArgument,
+    .deadlineExceeded,
+    .notFound,
+    .alreadyExists,
+    .permissionDenied,
+    .resourceExhausted,
+    .failedPrecondition,
+    .aborted,
+    .outOfRange,
+    .unimplemented,
+    .internal,
+    .unavailable,
+    .dataLoss,
+    .unauthenticated,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
 /// Config defines the configuration for running conformance tests.
 /// This enumerates all of the "flavors" of the test suite to run.
 struct Connectrpc_Conformance_V1_Config {
@@ -333,31 +433,39 @@ struct Connectrpc_Conformance_V1_Config {
   fileprivate var _features: Connectrpc_Conformance_V1_Features? = nil
 }
 
-/// TODO: we could probably model some of the constraints on what are valid vs.
-///       invalid (i.e. conflicting/impossible) features using protovalidate rules
+/// Features define the feature set that a client or server supports. They are
+/// used to determine the server configurations and test cases that
+/// will be run. They are defined in YAML files and are specified as part of the
+/// --conf flag to the test runner.
 struct Connectrpc_Conformance_V1_Features {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// Supported HTTP versions.
   /// If empty, HTTP 1.1 and HTTP/2 are assumed.
   var versions: [Connectrpc_Conformance_V1_HTTPVersion] = []
 
+  /// Supported protocols.
   /// If empty, all three are assumed: Connect, gRPC, and gRPC-Web.
   var protocols: [Connectrpc_Conformance_V1_Protocol] = []
 
+  /// Supported codecs.
   /// If empty, "proto" and "json" are assumed.
   var codecs: [Connectrpc_Conformance_V1_Codec] = []
 
+  /// Supported compression algorithms.
   /// If empty, "identity" and "gzip" are assumed.
   var compressions: [Connectrpc_Conformance_V1_Compression] = []
 
+  /// Supported stream types.
   /// If empty, all stream types are assumed. This is usually for
   /// clients, since some client environments may not be able to
   /// support certain kinds of streaming operations, especially
   /// bidirectional streams.
   var streamTypes: [Connectrpc_Conformance_V1_StreamType] = []
 
+  /// Whether H2C (unencrypted, non-TLS HTTP/2 over cleartext) is supported.
   /// If absent, true is assumed.
   var supportsH2C: Bool {
     get {return _supportsH2C ?? false}
@@ -368,6 +476,7 @@ struct Connectrpc_Conformance_V1_Features {
   /// Clears the value of `supportsH2C`. Subsequent reads from it will return its default value.
   mutating func clearSupportsH2C() {self._supportsH2C = nil}
 
+  /// Whether TLS is supported.
   /// If absent, true is assumed.
   var supportsTls: Bool {
     get {return _supportsTls ?? false}
@@ -378,6 +487,7 @@ struct Connectrpc_Conformance_V1_Features {
   /// Clears the value of `supportsTls`. Subsequent reads from it will return its default value.
   mutating func clearSupportsTls() {self._supportsTls = nil}
 
+  /// Whether the client supports TLS certificates.
   /// If absent, false is assumed. This should not be set if
   /// supports_tls is false.
   var supportsTlsClientCerts: Bool {
@@ -389,6 +499,7 @@ struct Connectrpc_Conformance_V1_Features {
   /// Clears the value of `supportsTlsClientCerts`. Subsequent reads from it will return its default value.
   mutating func clearSupportsTlsClientCerts() {self._supportsTlsClientCerts = nil}
 
+  /// Whether trailers are supported.
   /// If absent, true is assumed. If false, implies that gRPC protocol is not allowed.
   var supportsTrailers: Bool {
     get {return _supportsTrailers ?? false}
@@ -399,6 +510,7 @@ struct Connectrpc_Conformance_V1_Features {
   /// Clears the value of `supportsTrailers`. Subsequent reads from it will return its default value.
   mutating func clearSupportsTrailers() {self._supportsTrailers = nil}
 
+  /// Whether half duplex bidi streams are supported over HTTP/1.1.
   /// If absent, false is assumed.
   var supportsHalfDuplexBidiOverHTTP1: Bool {
     get {return _supportsHalfDuplexBidiOverHTTP1 ?? false}
@@ -409,6 +521,7 @@ struct Connectrpc_Conformance_V1_Features {
   /// Clears the value of `supportsHalfDuplexBidiOverHTTP1`. Subsequent reads from it will return its default value.
   mutating func clearSupportsHalfDuplexBidiOverHTTP1() {self._supportsHalfDuplexBidiOverHTTP1 = nil}
 
+  /// Whether Connect via GET is supported.
   /// If absent, true is assumed.
   var supportsConnectGet: Bool {
     get {return _supportsConnectGet ?? false}
@@ -419,16 +532,7 @@ struct Connectrpc_Conformance_V1_Features {
   /// Clears the value of `supportsConnectGet`. Subsequent reads from it will return its default value.
   mutating func clearSupportsConnectGet() {self._supportsConnectGet = nil}
 
-  /// If absent, false is assumed.
-  var requiresConnectVersionHeader: Bool {
-    get {return _requiresConnectVersionHeader ?? false}
-    set {_requiresConnectVersionHeader = newValue}
-  }
-  /// Returns true if `requiresConnectVersionHeader` has been explicitly set.
-  var hasRequiresConnectVersionHeader: Bool {return self._requiresConnectVersionHeader != nil}
-  /// Clears the value of `requiresConnectVersionHeader`. Subsequent reads from it will return its default value.
-  mutating func clearRequiresConnectVersionHeader() {self._requiresConnectVersionHeader = nil}
-
+  /// Whether a message receive limit is supported.
   /// If absent, true is assumed.
   var supportsMessageReceiveLimit: Bool {
     get {return _supportsMessageReceiveLimit ?? false}
@@ -449,12 +553,13 @@ struct Connectrpc_Conformance_V1_Features {
   fileprivate var _supportsTrailers: Bool? = nil
   fileprivate var _supportsHalfDuplexBidiOverHTTP1: Bool? = nil
   fileprivate var _supportsConnectGet: Bool? = nil
-  fileprivate var _requiresConnectVersionHeader: Bool? = nil
   fileprivate var _supportsMessageReceiveLimit: Bool? = nil
 }
 
-/// TODO: we could probably model some of the constraints on what is a valid
-///       vs. invalid config case using protovalidate rules
+/// ConfigCase represents a single resolved configuration case. When tests are
+/// run, the Config and the supported features therein are used to compute all
+/// of the cases relevant to the implementation under test. These configuration
+/// cases are then used to select which test cases are applicable.
 struct Connectrpc_Conformance_V1_ConfigCase {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -524,6 +629,7 @@ extension Connectrpc_Conformance_V1_Protocol: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_Codec: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_Compression: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_StreamType: @unchecked Sendable {}
+extension Connectrpc_Conformance_V1_Code: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_Config: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_Features: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_ConfigCase: @unchecked Sendable {}
@@ -580,6 +686,28 @@ extension Connectrpc_Conformance_V1_StreamType: SwiftProtobuf._ProtoNameProvidin
     3: .same(proto: "STREAM_TYPE_SERVER_STREAM"),
     4: .same(proto: "STREAM_TYPE_HALF_DUPLEX_BIDI_STREAM"),
     5: .same(proto: "STREAM_TYPE_FULL_DUPLEX_BIDI_STREAM"),
+  ]
+}
+
+extension Connectrpc_Conformance_V1_Code: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "CODE_UNSPECIFIED"),
+    1: .same(proto: "CODE_CANCELED"),
+    2: .same(proto: "CODE_UNKNOWN"),
+    3: .same(proto: "CODE_INVALID_ARGUMENT"),
+    4: .same(proto: "CODE_DEADLINE_EXCEEDED"),
+    5: .same(proto: "CODE_NOT_FOUND"),
+    6: .same(proto: "CODE_ALREADY_EXISTS"),
+    7: .same(proto: "CODE_PERMISSION_DENIED"),
+    8: .same(proto: "CODE_RESOURCE_EXHAUSTED"),
+    9: .same(proto: "CODE_FAILED_PRECONDITION"),
+    10: .same(proto: "CODE_ABORTED"),
+    11: .same(proto: "CODE_OUT_OF_RANGE"),
+    12: .same(proto: "CODE_UNIMPLEMENTED"),
+    13: .same(proto: "CODE_INTERNAL"),
+    14: .same(proto: "CODE_UNAVAILABLE"),
+    15: .same(proto: "CODE_DATA_LOSS"),
+    16: .same(proto: "CODE_UNAUTHENTICATED"),
   ]
 }
 
@@ -645,8 +773,7 @@ extension Connectrpc_Conformance_V1_Features: SwiftProtobuf.Message, SwiftProtob
     9: .standard(proto: "supports_trailers"),
     10: .standard(proto: "supports_half_duplex_bidi_over_http1"),
     11: .standard(proto: "supports_connect_get"),
-    12: .standard(proto: "requires_connect_version_header"),
-    13: .standard(proto: "supports_message_receive_limit"),
+    12: .standard(proto: "supports_message_receive_limit"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -666,8 +793,7 @@ extension Connectrpc_Conformance_V1_Features: SwiftProtobuf.Message, SwiftProtob
       case 9: try { try decoder.decodeSingularBoolField(value: &self._supportsTrailers) }()
       case 10: try { try decoder.decodeSingularBoolField(value: &self._supportsHalfDuplexBidiOverHTTP1) }()
       case 11: try { try decoder.decodeSingularBoolField(value: &self._supportsConnectGet) }()
-      case 12: try { try decoder.decodeSingularBoolField(value: &self._requiresConnectVersionHeader) }()
-      case 13: try { try decoder.decodeSingularBoolField(value: &self._supportsMessageReceiveLimit) }()
+      case 12: try { try decoder.decodeSingularBoolField(value: &self._supportsMessageReceiveLimit) }()
       default: break
       }
     }
@@ -711,11 +837,8 @@ extension Connectrpc_Conformance_V1_Features: SwiftProtobuf.Message, SwiftProtob
     try { if let v = self._supportsConnectGet {
       try visitor.visitSingularBoolField(value: v, fieldNumber: 11)
     } }()
-    try { if let v = self._requiresConnectVersionHeader {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 12)
-    } }()
     try { if let v = self._supportsMessageReceiveLimit {
-      try visitor.visitSingularBoolField(value: v, fieldNumber: 13)
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 12)
     } }()
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -732,7 +855,6 @@ extension Connectrpc_Conformance_V1_Features: SwiftProtobuf.Message, SwiftProtob
     if lhs._supportsTrailers != rhs._supportsTrailers {return false}
     if lhs._supportsHalfDuplexBidiOverHTTP1 != rhs._supportsHalfDuplexBidiOverHTTP1 {return false}
     if lhs._supportsConnectGet != rhs._supportsConnectGet {return false}
-    if lhs._requiresConnectVersionHeader != rhs._requiresConnectVersionHeader {return false}
     if lhs._supportsMessageReceiveLimit != rhs._supportsMessageReceiveLimit {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

@@ -239,7 +239,7 @@ final class ConformanceInvoker {
                     conformanceResult.error = connectError.toConformanceError()
                 } else if let error = error as NSError? {
                     conformanceResult.error = .with { conformanceError in
-                        conformanceError.code = Int32(error.code)
+                        conformanceError.code = .init(rawValue: error.code)!
                         conformanceError.message = error.localizedDescription
                     }
                 }
@@ -289,7 +289,7 @@ final class ConformanceInvoker {
                     conformanceResult.error = connectError.toConformanceError()
                 } else if let error = error as NSError? {
                     conformanceResult.error = .with { conformanceError in
-                        conformanceError.code = Int32(error.code)
+                        conformanceError.code = .init(rawValue: error.code)!
                         conformanceError.message = error.localizedDescription
                     }
                 }
@@ -324,7 +324,7 @@ final class ConformanceInvoker {
                         conformanceResult.error = connectError.toConformanceError()
                     } else if let error = error as NSError? {
                         conformanceResult.error = .with { conformanceError in
-                            conformanceError.code = Int32(error.code)
+                            conformanceError.code = .init(rawValue: error.code)!
                             conformanceError.message = error.localizedDescription
                         }
                     }
@@ -418,7 +418,7 @@ private extension Connect.Headers {
 private extension Connect.ConnectError {
     func toConformanceError() -> Connectrpc_Conformance_V1_Error {
         return .with { conformanceError in
-            conformanceError.code = Int32(self.code.rawValue)
+            conformanceError.code = .init(rawValue: self.code.rawValue)!
             conformanceError.message = self.message ?? ""
             for detail in self.details {
                 guard let payload = detail.payload else {

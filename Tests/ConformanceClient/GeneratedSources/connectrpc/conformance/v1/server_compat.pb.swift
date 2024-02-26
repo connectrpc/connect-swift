@@ -7,7 +7,7 @@
 // For information on using the generated types, please see the documentation:
 //   https://github.com/apple/swift-protobuf/
 
-// Copyright 2023 The Connect Authors
+// Copyright 2023-2024 The Connect Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,12 +53,17 @@ struct Connectrpc_Conformance_V1_ServerCompatRequest {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// The protocol that will be used.
   var `protocol`: Connectrpc_Conformance_V1_Protocol = .unspecified
 
+  /// The HTTP version that will be used.
   var httpVersion: Connectrpc_Conformance_V1_HTTPVersion = .unspecified
 
-  /// if true, generate a self-signed cert and include it in the
-  /// ServerCompatResponse along with the actual port
+  /// If true, generate a self-signed cert and include it in the
+  /// ServerCompatResponse along with the actual port. Clients
+  /// will be configured to trust this cert when connecting.
+  /// If false, the server should not use TLS and instead use
+  /// a plain-text/unencrypted socket.
   var useTls: Bool = false
 
   /// If non-empty, the clients will use certificates to authenticate
@@ -85,8 +90,10 @@ struct Connectrpc_Conformance_V1_ServerCompatResponse {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// The host where the server is running.
   var host: String = String()
 
+  /// The port where the server is listening.
   var port: UInt32 = 0
 
   /// The server's PEM-encoded certificate, so the
@@ -98,24 +105,9 @@ struct Connectrpc_Conformance_V1_ServerCompatResponse {
   init() {}
 }
 
-/// The server doesn't support the requested protocol, or had a runtime error
-/// while starting up.
-struct Connectrpc_Conformance_V1_ServerErrorResult {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  var message: String = String()
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Connectrpc_Conformance_V1_ServerCompatRequest: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_ServerCompatResponse: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_ServerErrorResult: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -217,38 +209,6 @@ extension Connectrpc_Conformance_V1_ServerCompatResponse: SwiftProtobuf.Message,
     if lhs.host != rhs.host {return false}
     if lhs.port != rhs.port {return false}
     if lhs.pemCert != rhs.pemCert {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Connectrpc_Conformance_V1_ServerErrorResult: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".ServerErrorResult"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "message"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self.message) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.message.isEmpty {
-      try visitor.visitSingularStringField(value: self.message, fieldNumber: 1)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Connectrpc_Conformance_V1_ServerErrorResult, rhs: Connectrpc_Conformance_V1_ServerErrorResult) -> Bool {
-    if lhs.message != rhs.message {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

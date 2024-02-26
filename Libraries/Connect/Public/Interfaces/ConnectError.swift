@@ -100,7 +100,9 @@ extension ConnectError: Swift.Decodable {
     public init(from decoder: Swift.Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.init(
-            code: Code.fromName(try container.decode(String.self, forKey: .code)),
+            code: try container
+                .decodeIfPresent(String.self, forKey: .code)
+                .map(Code.fromName) ?? .unknown,
             message: try container.decodeIfPresent(String.self, forKey: .message),
             exception: nil,
             details: try container.decodeIfPresent([Detail].self, forKey: .details) ?? [],
