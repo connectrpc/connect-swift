@@ -27,7 +27,7 @@ public struct ConnectError: Swift.Error, Sendable {
     /// List of typed errors that were provided by the server. See `unpackedDetails()`.
     public let details: [Detail]
     /// Additional key-values that were provided by the server.
-    public private(set) var metadata: Headers
+    public let metadata: Headers
 
     /// Unpacks values from `self.details` and returns all matching errors.
     ///
@@ -90,24 +90,10 @@ public struct ConnectError: Swift.Error, Sendable {
     }
 }
 
-extension ConnectError: Swift.Decodable {
-    private enum CodingKeys: String, CodingKey {
-        case code = "code"
-        case message = "message"
-        case details = "details"
-    }
-
+extension ConnectError: Decodable {
     public init(from decoder: Swift.Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.init(
-            code: try container
-                .decodeIfPresent(String.self, forKey: .code)
-                .map(Code.fromName) ?? .unknown,
-            message: try container.decodeIfPresent(String.self, forKey: .message),
-            exception: nil,
-            details: try container.decodeIfPresent([Detail].self, forKey: .details) ?? [],
-            metadata: [:]
-        )
+        let decodedError = try DecodableConnectError(from: decoder)
+        self.init(decodedError: decodedError, code: .unknown, metadata: [:])
     }
 }
 
@@ -133,9 +119,7 @@ extension ConnectError {
         }
 
         do {
-            var connectError = try Foundation.JSONDecoder().decode(ConnectError.self, from: source)
-            connectError.metadata = metadata
-            return connectError
+            return try ConnectError.decode(from: source, code: code, metadata: metadata)
         } catch let error {
             return .init(
                 code: code, message: String(data: source, encoding: .utf8),
@@ -149,6 +133,38 @@ extension ConnectError {
             code: .canceled, message: "request canceled by client",
             exception: nil, details: [], metadata: [:]
         )
+    }
+}
+
+// MARK: - Internal
+
+private extension ConnectError {
+    struct DecodableConnectError: Decodable {
+        let code: String?
+        let message: String?
+        let details: [Detail]?
+
+        private enum CodingKeys: String, CodingKey {
+            case code = "code"
+            case message = "message"
+            case details = "details"
+        }
+    }
+
+    init(decodedError: DecodableConnectError, code: Code, metadata: Headers) {
+        self.init(
+            code: decodedError.code.map(Code.fromName) ?? code,
+            message: decodedError.message,
+            exception: nil,
+            details: decodedError.details ?? [],
+            metadata: metadata
+        )
+    }
+
+    static func decode(from data: Data, code: Code, metadata: Headers) throws -> Self {
+        let decodedError = try Foundation.JSONDecoder()
+            .decode(DecodableConnectError.self, from: data)
+        return .init(decodedError: decodedError, code: code, metadata: metadata)
     }
 }
 

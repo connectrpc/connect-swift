@@ -81,9 +81,6 @@ private func registerAnyTypes() {
         messageType: Connectrpc_Conformance_V1_ClientCompatRequest.self
     )
     Google_Protobuf_Any.register(
-        messageType: Connectrpc_Conformance_V1_ClientCompatRequest.TLSCreds.self
-    )
-    Google_Protobuf_Any.register(
         messageType: Connectrpc_Conformance_V1_ClientCompatResponse.self
     )
     Google_Protobuf_Any.register(
@@ -121,6 +118,9 @@ private func registerAnyTypes() {
     )
     Google_Protobuf_Any.register(
         messageType: Connectrpc_Conformance_V1_ServerStreamRequest.self
+    )
+    Google_Protobuf_Any.register(
+        messageType: Connectrpc_Conformance_V1_TLSCreds.self
     )
     Google_Protobuf_Any.register(
         messageType: Connectrpc_Conformance_V1_UnaryRequest.self

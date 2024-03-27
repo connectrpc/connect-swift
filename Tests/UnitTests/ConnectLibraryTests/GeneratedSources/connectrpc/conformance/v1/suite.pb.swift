@@ -267,6 +267,13 @@ struct Connectrpc_Conformance_V1_TestCase {
   /// Clears the value of `expectedResponse`. Subsequent reads from it will return its default value.
   mutating func clearExpectedResponse() {self._expectedResponse = nil}
 
+  /// When expected_response indicates that an error is expected, in some cases, the
+  /// actual error code returned may be flexible. In that case, this field provides
+  /// other acceptable error codes, in addition to the one indicated in the
+  /// expected_response. As long as the actual error's code matches any of these, the
+  /// error is considered conformant, and the test case can pass.
+  var otherAllowedErrorCodes: [Connectrpc_Conformance_V1_Code] = []
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   struct ExpandedSize {
@@ -432,6 +439,7 @@ extension Connectrpc_Conformance_V1_TestCase: SwiftProtobuf.Message, SwiftProtob
     1: .same(proto: "request"),
     2: .standard(proto: "expand_requests"),
     3: .standard(proto: "expected_response"),
+    4: .standard(proto: "other_allowed_error_codes"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -443,6 +451,7 @@ extension Connectrpc_Conformance_V1_TestCase: SwiftProtobuf.Message, SwiftProtob
       case 1: try { try decoder.decodeSingularMessageField(value: &self._request) }()
       case 2: try { try decoder.decodeRepeatedMessageField(value: &self.expandRequests) }()
       case 3: try { try decoder.decodeSingularMessageField(value: &self._expectedResponse) }()
+      case 4: try { try decoder.decodeRepeatedEnumField(value: &self.otherAllowedErrorCodes) }()
       default: break
       }
     }
@@ -462,6 +471,9 @@ extension Connectrpc_Conformance_V1_TestCase: SwiftProtobuf.Message, SwiftProtob
     try { if let v = self._expectedResponse {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
     } }()
+    if !self.otherAllowedErrorCodes.isEmpty {
+      try visitor.visitPackedEnumField(value: self.otherAllowedErrorCodes, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -469,6 +481,7 @@ extension Connectrpc_Conformance_V1_TestCase: SwiftProtobuf.Message, SwiftProtob
     if lhs._request != rhs._request {return false}
     if lhs.expandRequests != rhs.expandRequests {return false}
     if lhs._expectedResponse != rhs._expectedResponse {return false}
+    if lhs.otherAllowedErrorCodes != rhs.otherAllowedErrorCodes {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

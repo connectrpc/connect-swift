@@ -623,6 +623,23 @@ struct Connectrpc_Conformance_V1_ConfigCase {
   fileprivate var _useMessageReceiveLimit: Bool? = nil
 }
 
+/// TLSCreds represents credentials for TLS. It includes both a
+/// certificate and corresponding private key. Both are encoded
+/// in PEM format.
+struct Connectrpc_Conformance_V1_TLSCreds {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var cert: Data = Data()
+
+  var key: Data = Data()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Connectrpc_Conformance_V1_HTTPVersion: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_Protocol: @unchecked Sendable {}
@@ -633,6 +650,7 @@ extension Connectrpc_Conformance_V1_Code: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_Config: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_Features: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_ConfigCase: @unchecked Sendable {}
+extension Connectrpc_Conformance_V1_TLSCreds: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -934,6 +952,44 @@ extension Connectrpc_Conformance_V1_ConfigCase: SwiftProtobuf.Message, SwiftProt
     if lhs._useTls != rhs._useTls {return false}
     if lhs._useTlsClientCerts != rhs._useTlsClientCerts {return false}
     if lhs._useMessageReceiveLimit != rhs._useMessageReceiveLimit {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Connectrpc_Conformance_V1_TLSCreds: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".TLSCreds"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "cert"),
+    2: .same(proto: "key"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBytesField(value: &self.cert) }()
+      case 2: try { try decoder.decodeSingularBytesField(value: &self.key) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.cert.isEmpty {
+      try visitor.visitSingularBytesField(value: self.cert, fieldNumber: 1)
+    }
+    if !self.key.isEmpty {
+      try visitor.visitSingularBytesField(value: self.key, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Connectrpc_Conformance_V1_TLSCreds, rhs: Connectrpc_Conformance_V1_TLSCreds) -> Bool {
+    if lhs.cert != rhs.cert {return false}
+    if lhs.key != rhs.key {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

@@ -96,8 +96,10 @@ extension ConnectInterceptor: UnaryInterceptor {
                 tracingInfo: response.tracingInfo
             ))
         } else {
+            let hasUnexpectedEncoding = response.headers[HeaderConstants.contentEncoding]?
+                .first.map { $0 != self.config.codec.name() } ?? false
             proceed(HTTPResponse(
-                code: response.code,
+                code: hasUnexpectedEncoding ? .internalError : response.code,
                 headers: headers,
                 message: response.message,
                 trailers: trailers,

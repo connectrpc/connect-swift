@@ -78,28 +78,14 @@ public enum Code: Int, CaseIterable, Equatable, Sendable {
         case 200:
             return .ok
         case 400:
-            return .invalidArgument
+            return .internalError
         case 401:
             return .unauthenticated
         case 403:
             return .permissionDenied
         case 404:
             return .unimplemented
-        case 408:
-            return .deadlineExceeded
-        case 409:
-            return .aborted
-        case 412:
-            return .failedPrecondition
-        case 413:
-            return .resourceExhausted
-        case 415:
-            return .internalError
-        case 429:
-            return .unavailable
-        case 431:
-            return .resourceExhausted
-        case 502, 503, 504:
+        case 429, 502, 503, 504:
             return .unavailable
         default:
             return .unknown

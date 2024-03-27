@@ -53,15 +53,23 @@ struct Connectrpc_Conformance_V1_ServerCompatRequest {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// The protocol that will be used.
+  /// Signals to the server that it must support at least this protocol. Note
+  /// that it is fine to support others.
+  /// For example if `PROTOCOL_CONNECT` is specified, the server _must_ support
+  /// at least Connect, but _may_ also support gRPC or gRPC-web.
   var `protocol`: Connectrpc_Conformance_V1_Protocol = .unspecified
 
-  /// The HTTP version that will be used.
+  /// Signals to the server the minimum HTTP version to support. As with
+  /// `protocol`, it is fine to support other versions. For example, if
+  /// `HTTP_VERSION_2` is specified, the server _must_ support HTTP/2, but _may_ also
+  /// support HTTP/1.1 or HTTP/3.
   var httpVersion: Connectrpc_Conformance_V1_HTTPVersion = .unspecified
 
-  /// If true, generate a self-signed cert and include it in the
-  /// ServerCompatResponse along with the actual port. Clients
-  /// will be configured to trust this cert when connecting.
+  /// If true, generate a certificate that clients will be configured to trust
+  /// when connecting and return it in the `pem_cert` field of the `ServerCompatResponse`.
+  /// The certificate can be any TLS certificate where the subject matches the
+  /// value sent back in the `host` field of the `ServerCompatResponse`.
+  /// Self-signed certificates (and `localhost` as the subject) are allowed.
   /// If false, the server should not use TLS and instead use
   /// a plain-text/unencrypted socket.
   var useTls: Bool = false
@@ -79,9 +87,36 @@ struct Connectrpc_Conformance_V1_ServerCompatRequest {
   /// If the client sends anything larger, the server should reject it.
   var messageReceiveLimit: UInt32 = 0
 
+  /// If use_tls is true, this provides details for a self-signed TLS
+  /// cert that the server may use.
+  ///
+  /// The provided certificate is only good for loopback communication:
+  /// it uses "localhost" and "127.0.0.1" as the IP and DNS names in
+  /// the certificate's subject. If the server needs a different subject
+  /// or the client is in an environment where configuring trust of a
+  /// self-signed certificate is difficult or infeasible.
+  ///
+  /// If the server implementation chooses to use these credentials,
+  /// it must echo back the certificate in the ServerCompatResponse and
+  /// should also leave the host field empty or explicitly set to
+  /// "127.0.0.1".
+  ///
+  /// If it chooses to use a different certificate and key, it must send
+  /// back the corresponding certificate in the ServerCompatResponse.
+  var serverCreds: Connectrpc_Conformance_V1_TLSCreds {
+    get {return _serverCreds ?? Connectrpc_Conformance_V1_TLSCreds()}
+    set {_serverCreds = newValue}
+  }
+  /// Returns true if `serverCreds` has been explicitly set.
+  var hasServerCreds: Bool {return self._serverCreds != nil}
+  /// Clears the value of `serverCreds`. Subsequent reads from it will return its default value.
+  mutating func clearServerCreds() {self._serverCreds = nil}
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
+
+  fileprivate var _serverCreds: Connectrpc_Conformance_V1_TLSCreds? = nil
 }
 
 /// The outcome of one ServerCompatRequest.
@@ -90,14 +125,17 @@ struct Connectrpc_Conformance_V1_ServerCompatResponse {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// The host where the server is running.
+  /// The host where the server is running. This should usually be `127.0.0.1`,
+  /// unless your program actually starts a remote server to which the client
+  /// should connect.
   var host: String = String()
 
   /// The port where the server is listening.
   var port: UInt32 = 0
 
-  /// The server's PEM-encoded certificate, so the
-  /// client can verify it when connecting via TLS.
+  /// The TLS certificate, in PEM format, if `use_tls` was set
+  /// to `true`. Clients will verify this certificate when connecting via TLS.
+  /// If `use_tls` was set to `false`, this should always be empty.
   var pemCert: Data = Data()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -122,6 +160,7 @@ extension Connectrpc_Conformance_V1_ServerCompatRequest: SwiftProtobuf.Message, 
     4: .standard(proto: "use_tls"),
     5: .standard(proto: "client_tls_cert"),
     6: .standard(proto: "message_receive_limit"),
+    7: .standard(proto: "server_creds"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -135,12 +174,17 @@ extension Connectrpc_Conformance_V1_ServerCompatRequest: SwiftProtobuf.Message, 
       case 4: try { try decoder.decodeSingularBoolField(value: &self.useTls) }()
       case 5: try { try decoder.decodeSingularBytesField(value: &self.clientTlsCert) }()
       case 6: try { try decoder.decodeSingularUInt32Field(value: &self.messageReceiveLimit) }()
+      case 7: try { try decoder.decodeSingularMessageField(value: &self._serverCreds) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if self.`protocol` != .unspecified {
       try visitor.visitSingularEnumField(value: self.`protocol`, fieldNumber: 1)
     }
@@ -156,6 +200,9 @@ extension Connectrpc_Conformance_V1_ServerCompatRequest: SwiftProtobuf.Message, 
     if self.messageReceiveLimit != 0 {
       try visitor.visitSingularUInt32Field(value: self.messageReceiveLimit, fieldNumber: 6)
     }
+    try { if let v = self._serverCreds {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -165,6 +212,7 @@ extension Connectrpc_Conformance_V1_ServerCompatRequest: SwiftProtobuf.Message, 
     if lhs.useTls != rhs.useTls {return false}
     if lhs.clientTlsCert != rhs.clientTlsCert {return false}
     if lhs.messageReceiveLimit != rhs.messageReceiveLimit {return false}
+    if lhs._serverCreds != rhs._serverCreds {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

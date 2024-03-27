@@ -14,6 +14,13 @@ import SwiftProtobuf
 /// Test servers must implement the service as described.
 internal protocol Connectrpc_Conformance_V1_ConformanceServiceClientInterface: Sendable {
 
+    /// A unary operation. The request indicates the response headers and trailers
+    /// and also indicates either a response message or an error to send back.
+    ///
+    /// Response message data is specified as bytes. The service should echo back
+    /// request properties in the ConformancePayload and then include the message
+    /// data in the data field.
+    ///
     /// If the response_delay_ms duration is specified, the server should wait the
     /// given duration after reading the request before sending the corresponding
     /// response.
@@ -24,6 +31,13 @@ internal protocol Connectrpc_Conformance_V1_ConformanceServiceClientInterface: S
     @discardableResult
     func `unary`(request: Connectrpc_Conformance_V1_UnaryRequest, headers: Connect.Headers, completion: @escaping @Sendable (ResponseMessage<Connectrpc_Conformance_V1_UnaryResponse>) -> Void) -> Connect.Cancelable
 
+    /// A unary operation. The request indicates the response headers and trailers
+    /// and also indicates either a response message or an error to send back.
+    ///
+    /// Response message data is specified as bytes. The service should echo back
+    /// request properties in the ConformancePayload and then include the message
+    /// data in the data field.
+    ///
     /// If the response_delay_ms duration is specified, the server should wait the
     /// given duration after reading the request before sending the corresponding
     /// response.
