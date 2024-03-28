@@ -76,8 +76,6 @@ final class ProtocolClientConfigTests: XCTestCase {
                 .createURL(forPath: rpcPath).absoluteString,
             "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
         )
-        print(ProtocolClientConfig(host: "https://connectrpc.com/a/b/c/")
-            .createURL(forPath: rpcPath))
         XCTAssertEqual(
             ProtocolClientConfig(host: "connectrpc.com/a/b/c")
                 .createURL(forPath: rpcPath).absoluteString,
