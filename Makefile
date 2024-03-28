@@ -45,10 +45,10 @@ cleangenerated: ## Delete all generated outputs
 
 .PHONY: generate
 generate: cleangenerated ## Regenerate outputs for all .proto files
-	cd Examples; buf generate https://github.com/connectrpc/examples-go.git#ref=$(EXAMPLES_PROTO_REF),subdir=proto
+	cd Examples; buf generate https://github.com/connectrpc/examples-go.git#tag=$(EXAMPLES_PROTO_REF),subdir=proto
 	cd Libraries/Connect; buf generate
-	cd Tests/ConformanceClient; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
-	cd Tests/UnitTests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#ref=$(CONFORMANCE_PROTO_REF),subdir=proto
+	cd Tests/ConformanceClient; buf generate https://github.com/connectrpc/conformance.git#tag=$(CONFORMANCE_PROTO_REF),subdir=proto
+	cd Tests/UnitTests/ConnectLibraryTests; buf generate https://github.com/connectrpc/conformance.git#tag=$(CONFORMANCE_PROTO_REF),subdir=proto
 
 .PHONY: installconformancerunner
 installconformancerunner: ## Install the Connect conformance test runner
