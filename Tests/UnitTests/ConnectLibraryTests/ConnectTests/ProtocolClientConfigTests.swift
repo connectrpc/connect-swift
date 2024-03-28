@@ -57,29 +57,31 @@ final class ProtocolClientConfigTests: XCTestCase {
             "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
         )
         XCTAssertEqual(
-            ProtocolClientConfig(host: "https://connectrpc.com/api")
+            ProtocolClientConfig(host: "https://connectrpc.com/a")
                 .createURL(forPath: rpcPath).absoluteString,
-            "https://connectrpc.com/api/connectrpc.conformance.v1.ConformanceService/Unary"
+            "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
         )
         XCTAssertEqual(
-            ProtocolClientConfig(host: "https://connectrpc.com/api/")
+            ProtocolClientConfig(host: "https://connectrpc.com/a/")
                 .createURL(forPath: rpcPath).absoluteString,
-            "https://connectrpc.com/api/connectrpc.conformance.v1.ConformanceService/Unary"
+            "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
         )
         XCTAssertEqual(
-            ProtocolClientConfig(host: "https://connectrpc.com/api/ext")
+            ProtocolClientConfig(host: "https://connectrpc.com/a/b/c")
                 .createURL(forPath: rpcPath).absoluteString,
-            "https://connectrpc.com/api/ext/connectrpc.conformance.v1.ConformanceService/Unary"
+            "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
         )
         XCTAssertEqual(
-            ProtocolClientConfig(host: "https://connectrpc.com/api/ext/")
+            ProtocolClientConfig(host: "https://connectrpc.com/a/b/c/")
                 .createURL(forPath: rpcPath).absoluteString,
-            "https://connectrpc.com/api/ext/connectrpc.conformance.v1.ConformanceService/Unary"
+            "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
         )
+        print(ProtocolClientConfig(host: "https://connectrpc.com/a/b/c/")
+            .createURL(forPath: rpcPath))
         XCTAssertEqual(
-            ProtocolClientConfig(host: "connectrpc.com/api/ext")
+            ProtocolClientConfig(host: "connectrpc.com/a/b/c")
                 .createURL(forPath: rpcPath).absoluteString,
-            "connectrpc.com/api/ext/connectrpc.conformance.v1.ConformanceService/Unary"
+            "connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
         )
     }
 
