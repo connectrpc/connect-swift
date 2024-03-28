@@ -167,11 +167,16 @@ final class ConformanceInvoker {
             headers: .fromConformanceHeaders(self.context.requestHeaders)
         )
         return .with { responseResult in
-            responseResult.responseHeaders = response.headers.toConformanceHeaders()
-            responseResult.responseTrailers = response.trailers.toConformanceHeaders()
             if let error = response.error {
+                // TODO: Try switching to setting headers and trailers separately after
+                // https://github.com/connectrpc/conformance/pull/840 is released
+                responseResult.responseTrailers = response.headers
+                    .merging(response.trailers, uniquingKeysWith: { $0 + $1 })
+                    .toConformanceHeaders()
                 responseResult.error = error.toConformanceError()
             } else if let payload = response.message?.payload {
+                responseResult.responseHeaders = response.headers.toConformanceHeaders()
+                responseResult.responseTrailers = response.trailers.toConformanceHeaders()
                 responseResult.payloads = [payload]
             }
         }
