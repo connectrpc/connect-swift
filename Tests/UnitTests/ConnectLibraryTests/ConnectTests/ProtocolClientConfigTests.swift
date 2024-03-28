@@ -43,6 +43,46 @@ final class ProtocolClientConfigTests: XCTestCase {
         XCTAssertFalse(compression.shouldCompress(data))
     }
 
+    func testCreatingURLsWithVariousHosts() {
+        let rpcPath = Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.unary.path
+
+        XCTAssertEqual(
+            ProtocolClientConfig(host: "https://connectrpc.com")
+                .createURL(forPath: rpcPath).absoluteString,
+            "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
+        )
+        XCTAssertEqual(
+            ProtocolClientConfig(host: "https://connectrpc.com/")
+                .createURL(forPath: rpcPath).absoluteString,
+            "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
+        )
+        XCTAssertEqual(
+            ProtocolClientConfig(host: "https://connectrpc.com/api")
+                .createURL(forPath: rpcPath).absoluteString,
+            "https://connectrpc.com/api/connectrpc.conformance.v1.ConformanceService/Unary"
+        )
+        XCTAssertEqual(
+            ProtocolClientConfig(host: "https://connectrpc.com/api/")
+                .createURL(forPath: rpcPath).absoluteString,
+            "https://connectrpc.com/api/connectrpc.conformance.v1.ConformanceService/Unary"
+        )
+        XCTAssertEqual(
+            ProtocolClientConfig(host: "https://connectrpc.com/api/ext")
+                .createURL(forPath: rpcPath).absoluteString,
+            "https://connectrpc.com/api/ext/connectrpc.conformance.v1.ConformanceService/Unary"
+        )
+        XCTAssertEqual(
+            ProtocolClientConfig(host: "https://connectrpc.com/api/ext/")
+                .createURL(forPath: rpcPath).absoluteString,
+            "https://connectrpc.com/api/ext/connectrpc.conformance.v1.ConformanceService/Unary"
+        )
+        XCTAssertEqual(
+            ProtocolClientConfig(host: "connectrpc.com/api/ext")
+                .createURL(forPath: rpcPath).absoluteString,
+            "connectrpc.com/api/ext/connectrpc.conformance.v1.ConformanceService/Unary"
+        )
+    }
+
     func testAddsConnectInterceptorLastWhenUsingConnectProtocol() {
         let config = ProtocolClientConfig(
             host: "https://connectrpc.com",
