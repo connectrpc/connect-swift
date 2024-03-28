@@ -153,7 +153,7 @@ private extension ConnectError {
 
     init(decodedError: DecodableConnectError, code: Code, metadata: Headers) {
         self.init(
-            code: decodedError.code.map(Code.fromName) ?? code,
+            code: decodedError.code.flatMap(Code.fromName) ?? code,
             message: decodedError.message,
             exception: nil,
             details: decodedError.details ?? [],

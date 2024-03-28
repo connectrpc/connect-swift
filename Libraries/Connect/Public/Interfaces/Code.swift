@@ -92,7 +92,7 @@ public enum Code: Int, CaseIterable, Equatable, Sendable {
         }
     }
 
-    public static func fromName(_ name: String) -> Self {
-        return Self.allCases.first { $0.name == name } ?? .unknown
+    public static func fromName(_ name: String) -> Self? {
+        return Self.allCases.first { $0.name == name }
     }
 }
