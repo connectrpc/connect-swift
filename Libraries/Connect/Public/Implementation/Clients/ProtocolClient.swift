@@ -50,7 +50,7 @@ extension ProtocolClient: ProtocolClientInterface {
         var headers = headers
         headers[HeaderConstants.contentType] = ["application/\(config.codec.name())"]
         let request = HTTPRequest<Input>(
-            url: URL(string: path, relativeTo: URL(string: config.host))!,
+            url: config.createURL(forPath: path),
             headers: headers,
             message: request,
             method: .post,
@@ -330,7 +330,7 @@ extension ProtocolClient: ProtocolClientInterface {
         var headers = headers
         headers[HeaderConstants.contentType] = ["application/connect+\(codec.name())"]
         let request = HTTPRequest<Void>(
-            url: URL(string: path, relativeTo: URL(string: self.config.host))!,
+            url: config.createURL(forPath: path),
             headers: headers,
             message: (),
             method: .post,
