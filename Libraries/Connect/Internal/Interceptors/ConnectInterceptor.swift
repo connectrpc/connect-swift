@@ -36,6 +36,9 @@ extension ConnectInterceptor: UnaryInterceptor {
         var headers = request.headers
         headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
         headers[HeaderConstants.acceptEncoding] = self.config.acceptCompressionPoolNames()
+        if let timeout = self.config.timeout {
+            headers[HeaderConstants.connectTimeoutMs] = ["\(Int(timeout * 1_000))"]
+        }
 
         let requestBody = request.message ?? Data()
         let finalRequestBody: Data
@@ -93,8 +96,10 @@ extension ConnectInterceptor: UnaryInterceptor {
                 tracingInfo: response.tracingInfo
             ))
         } else {
+            let hasUnexpectedEncoding = response.headers[HeaderConstants.contentEncoding]?
+                .first.map { $0 != self.config.codec.name() } ?? false
             proceed(HTTPResponse(
-                code: response.code,
+                code: hasUnexpectedEncoding ? .internalError : response.code,
                 headers: headers,
                 message: response.message,
                 trailers: trailers,
@@ -117,6 +122,9 @@ extension ConnectInterceptor: StreamInterceptor {
             .requestCompression.map { [$0.pool.name()] }
         headers[HeaderConstants.connectStreamingAcceptEncoding] = self.config
             .acceptCompressionPoolNames()
+        if let timeout = self.config.timeout {
+            headers[HeaderConstants.connectTimeoutMs] = ["\(Int(timeout * 1_000))"]
+        }
         proceed(.success(HTTPRequest(
             url: request.url,
             headers: headers,

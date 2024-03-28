@@ -8,7 +8,6 @@ features:
   protocols:
     - PROTOCOL_CONNECT
     - PROTOCOL_GRPC_WEB
-  requires_connect_version_header: false
   supports_connect_get: true
   supports_half_duplex_bidi_over_http1: true
   supports_message_receive_limit: false
