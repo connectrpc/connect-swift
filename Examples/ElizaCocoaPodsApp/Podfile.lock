@@ -1,7 +1,7 @@
 PODS:
   - Connect-Swift (0.12.0):
-    - SwiftProtobuf (~> 1.25.2)
-  - SwiftProtobuf (1.25.2)
+    - SwiftProtobuf (~> 1.26.0)
+  - SwiftProtobuf (1.26.0)
 
 DEPENDENCIES:
   - Connect-Swift (from `../..`)
@@ -15,8 +15,8 @@ EXTERNAL SOURCES:
     :path: "../.."
 
 SPEC CHECKSUMS:
-  Connect-Swift: 1de2ef4a548c59ecaeb9120812dfe0d6e07a0d47
-  SwiftProtobuf: 407a385e97fd206c4fbe880cc84123989167e0d1
+  Connect-Swift: e95a0cf0aa6b368c279e8807f054cbecbaee0e5c
+  SwiftProtobuf: 5e8349171e7c2f88f5b9e683cb3cb79d1dc780b3
 
 PODFILE CHECKSUM: b598f373a6ab5add976b09c2ac79029bf2200d48
 
