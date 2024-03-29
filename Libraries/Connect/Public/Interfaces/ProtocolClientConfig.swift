@@ -125,4 +125,8 @@ extension ProtocolClientConfig {
     func createStreamInterceptorChain() -> InterceptorChain<any StreamInterceptor> {
         return .init(self.interceptors.compactMap { $0.createStream(with: self) })
     }
+
+    func createURL(forPath path: String) -> URL {
+        return URL(string: self.host)!.appendingPathComponent(path)
+    }
 }
