@@ -93,7 +93,7 @@ public struct ConnectError: Swift.Error, Sendable {
 extension ConnectError: Decodable {
     public init(from decoder: Swift.Decoder) throws {
         let decodedError = try DecodableConnectError(from: decoder)
-        self.init(decodedError: decodedError, code: .unknown, metadata: [:])
+        self.init(decodedError: decodedError, defaultCode: .unknown, metadata: [:])
     }
 }
 
@@ -119,7 +119,7 @@ extension ConnectError {
         }
 
         do {
-            return try ConnectError.decode(from: source, code: code, metadata: metadata)
+            return try ConnectError.decode(from: source, defaultCode: code, metadata: metadata)
         } catch let error {
             return .init(
                 code: code, message: String(data: source, encoding: .utf8),
@@ -138,22 +138,23 @@ extension ConnectError {
 
 // MARK: - Internal
 
-private extension ConnectError {
-    struct DecodableConnectError: Decodable {
-        let code: String?
-        let message: String?
-        let details: [Detail]?
+/// Allows for decoding all fields as optionals using `Swift.Decodable`.
+private struct DecodableConnectError: Decodable {
+    let code: String?
+    let message: String?
+    let details: [ConnectError.Detail]?
 
-        private enum CodingKeys: String, CodingKey {
-            case code = "code"
-            case message = "message"
-            case details = "details"
-        }
+    private enum CodingKeys: String, CodingKey {
+        case code = "code"
+        case message = "message"
+        case details = "details"
     }
+}
 
-    init(decodedError: DecodableConnectError, code: Code, metadata: Headers) {
+private extension ConnectError {
+    init(decodedError: DecodableConnectError, defaultCode: Code, metadata: Headers) {
         self.init(
-            code: decodedError.code.flatMap(Code.fromName) ?? code,
+            code: decodedError.code.flatMap(Code.fromName) ?? defaultCode,
             message: decodedError.message,
             exception: nil,
             details: decodedError.details ?? [],
@@ -161,10 +162,10 @@ private extension ConnectError {
         )
     }
 
-    static func decode(from data: Data, code: Code, metadata: Headers) throws -> Self {
+    static func decode(from data: Data, defaultCode: Code, metadata: Headers) throws -> Self {
         let decodedError = try Foundation.JSONDecoder()
             .decode(DecodableConnectError.self, from: data)
-        return .init(decodedError: decodedError, code: code, metadata: metadata)
+        return .init(decodedError: decodedError, defaultCode: defaultCode, metadata: metadata)
     }
 }
 
