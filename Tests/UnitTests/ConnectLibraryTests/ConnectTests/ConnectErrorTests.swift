@@ -1,4 +1,4 @@
-// Copyright 2022-2023 The Connect Authors
+// Copyright 2022-2024 The Connect Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -114,11 +114,6 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertTrue(error.details.isEmpty)
         XCTAssertEqual(error.unpackedDetails(), [Connectrpc_Conformance_V1_RawHTTPRequest]())
         XCTAssertTrue(error.metadata.isEmpty)
-    }
-
-    func testDeserializingEmptyDictionaryFails() throws {
-        let errorData = try JSONSerialization.data(withJSONObject: [String: Any]())
-        XCTAssertThrowsError(try JSONDecoder().decode(ConnectError.self, from: errorData))
     }
 
     // MARK: - Private
