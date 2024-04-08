@@ -7,7 +7,7 @@
 // For information on using the generated types, please see the documentation:
 //   https://github.com/apple/swift-protobuf/
 
-// Copyright 2023 The Connect Authors
+// Copyright 2023-2024 The Connect Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,36 +43,50 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// The name of the test that this request is performing.
+  /// When writing test cases, this is a required field.
   var testName: String {
     get {return _storage._testName}
     set {_uniqueStorage()._testName = newValue}
   }
 
+  /// Test suite YAML definitions should NOT set values for these next
+  /// nine fields (fields 2 - 10). They are automatically populated by the test
+  /// runner. If a test is specific to one of these values, it should instead be
+  /// indicated in the test suite itself (where it defines the required
+  /// features and relevant values for these fields).
+  ///
+  /// The HTTP version to use for the test (i.e. HTTP/1.1, HTTP/2, HTTP/3).
   var httpVersion: Connectrpc_Conformance_V1_HTTPVersion {
     get {return _storage._httpVersion}
     set {_uniqueStorage()._httpVersion = newValue}
   }
 
+  /// The protocol to use for the test (i.e. Connect, gRPC, gRPC-web).
   var `protocol`: Connectrpc_Conformance_V1_Protocol {
     get {return _storage._protocol}
     set {_uniqueStorage()._protocol = newValue}
   }
 
+  /// The codec to use for the test (i.e. JSON, proto/binary).
   var codec: Connectrpc_Conformance_V1_Codec {
     get {return _storage._codec}
     set {_uniqueStorage()._codec = newValue}
   }
 
+  /// The compression to use for the test (i.e. brotli, gzip, identity).
   var compression: Connectrpc_Conformance_V1_Compression {
     get {return _storage._compression}
     set {_uniqueStorage()._compression = newValue}
   }
 
+  /// The server host that this request will be sent to.
   var host: String {
     get {return _storage._host}
     set {_uniqueStorage()._host = newValue}
   }
 
+  /// The server port that this request will be sent to.
   var port: UInt32 {
     get {return _storage._port}
     set {_uniqueStorage()._port = newValue}
@@ -89,8 +103,8 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest {
   /// If present, the client certificate credentials to use to
   /// authenticate with the server. This will only be present
   /// when server_tls_cert is non-empty.
-  var clientTlsCreds: Connectrpc_Conformance_V1_ClientCompatRequest.TLSCreds {
-    get {return _storage._clientTlsCreds ?? Connectrpc_Conformance_V1_ClientCompatRequest.TLSCreds()}
+  var clientTlsCreds: Connectrpc_Conformance_V1_TLSCreds {
+    get {return _storage._clientTlsCreds ?? Connectrpc_Conformance_V1_TLSCreds()}
     set {_uniqueStorage()._clientTlsCreds = newValue}
   }
   /// Returns true if `clientTlsCreds` has been explicitly set.
@@ -105,16 +119,32 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest {
     set {_uniqueStorage()._messageReceiveLimit = newValue}
   }
 
+  /// The fully-qualified name of the service this test will interact with.
+  /// If specified, method must also be specified.
+  /// If not specified, defaults to "connectrpc.conformance.v1.ConformanceService".
   var service: String {
-    get {return _storage._service}
+    get {return _storage._service ?? String()}
     set {_uniqueStorage()._service = newValue}
   }
+  /// Returns true if `service` has been explicitly set.
+  var hasService: Bool {return _storage._service != nil}
+  /// Clears the value of `service`. Subsequent reads from it will return its default value.
+  mutating func clearService() {_uniqueStorage()._service = nil}
 
+  /// The method on `service` that will be called.
+  /// If specified, service must also be specified.
+  /// If not specified, the test runner will auto-populate this field based on the stream_type.
   var method: String {
-    get {return _storage._method}
+    get {return _storage._method ?? String()}
     set {_uniqueStorage()._method = newValue}
   }
+  /// Returns true if `method` has been explicitly set.
+  var hasMethod: Bool {return _storage._method != nil}
+  /// Clears the value of `method`. Subsequent reads from it will return its default value.
+  mutating func clearMethod() {_uniqueStorage()._method = nil}
 
+  /// The stream type of `method` (i.e. Unary, Client-Streaming, Server-Streaming, Full Duplex Bidi, or Half Duplex Bidi).
+  /// When writing test cases, this is a required field.
   var streamType: Connectrpc_Conformance_V1_StreamType {
     get {return _storage._streamType}
     set {_uniqueStorage()._streamType = newValue}
@@ -128,19 +158,29 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest {
     set {_uniqueStorage()._useGetHTTPMethod = newValue}
   }
 
+  /// Any request headers that should be sent as part of the request.
+  /// These include only custom header metadata. Headers that are
+  /// part of the relevant protocol (such as "content-type", etc) should
+  /// not be stated here.
   var requestHeaders: [Connectrpc_Conformance_V1_Header] {
     get {return _storage._requestHeaders}
     set {_uniqueStorage()._requestHeaders = newValue}
   }
 
-  /// There will be exactly one for unary and server-stream methods.
+  /// The actual request messages that will sent to the server.
+  /// The type URL for all entries should be equal to the request type of the
+  /// method.
+  /// There must be exactly one for unary and server-stream methods but
+  /// can be zero or more for client- and bidi-stream methods.
   /// For client- and bidi-stream methods, all entries will have the
-  /// same type URL (which matches the request type of the method).
+  /// same type URL.
   var requestMessages: [SwiftProtobuf.Google_Protobuf_Any] {
     get {return _storage._requestMessages}
     set {_uniqueStorage()._requestMessages = newValue}
   }
 
+  /// The timeout, in milliseconds, for the request. This is equivalent to a
+  /// deadline for the request. If unset, there will be no timeout.
   var timeoutMs: UInt32 {
     get {return _storage._timeoutMs ?? 0}
     set {_uniqueStorage()._timeoutMs = newValue}
@@ -188,20 +228,6 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest {
   mutating func clearRawRequest() {_uniqueStorage()._rawRequest = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  struct TLSCreds {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var cert: Data = Data()
-
-    var key: Data = Data()
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-  }
 
   struct Cancel {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -309,8 +335,18 @@ struct Connectrpc_Conformance_V1_ClientCompatResponse {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// The test name that this response applies to.
   var testName: String = String()
 
+  /// These fields determine the outcome of the request.
+  ///
+  /// With regards to errors, any unexpected errors that prevent the client from
+  /// issuing the RPC and following the instructions implied by the request can
+  /// be reported as an error. These would be errors creating an RPC client from
+  /// the request parameters or unsupported/illegal values in the request
+  /// (e.g. a unary request that defines zero or multiple request messages).
+  ///
+  /// However, once the RPC is issued, any resulting error should instead be encoded in response.
   var result: Connectrpc_Conformance_V1_ClientCompatResponse.OneOf_Result? = nil
 
   var response: Connectrpc_Conformance_V1_ClientResponseResult {
@@ -329,14 +365,17 @@ struct Connectrpc_Conformance_V1_ClientCompatResponse {
     set {result = .error(newValue)}
   }
 
-  /// This field is used only by the reference client, and it can be used
-  /// to provide additional feedback about problems observed in the server
-  /// response. If non-empty, the test case is considered failed even if
-  /// the result above matches all expectations.
-  var feedback: [String] = []
-
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
+  /// These fields determine the outcome of the request.
+  ///
+  /// With regards to errors, any unexpected errors that prevent the client from
+  /// issuing the RPC and following the instructions implied by the request can
+  /// be reported as an error. These would be errors creating an RPC client from
+  /// the request parameters or unsupported/illegal values in the request
+  /// (e.g. a unary request that defines zero or multiple request messages).
+  ///
+  /// However, once the RPC is issued, any resulting error should instead be encoded in response.
   enum OneOf_Result: Equatable {
     case response(Connectrpc_Conformance_V1_ClientResponseResult)
     case error(Connectrpc_Conformance_V1_ClientErrorResult)
@@ -365,17 +404,24 @@ struct Connectrpc_Conformance_V1_ClientCompatResponse {
 }
 
 /// The result of a ClientCompatRequest, which may or may not be successful.
+/// The client will build this message and return it back to the test runner.
 struct Connectrpc_Conformance_V1_ClientResponseResult {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// All response headers read from the response.
   var responseHeaders: [Connectrpc_Conformance_V1_Header] = []
 
+  /// Servers should echo back payloads that they received as part of the request.
+  /// This field should contain all the payloads the server echoed back. Note that
+  /// There will be zero-to-one for unary and client-stream methods and
+  /// zero-to-many for server- and bidi-stream methods.
   var payloads: [Connectrpc_Conformance_V1_ConformancePayload] = []
 
   /// The error received from the actual RPC invocation. Note this is not representative
-  /// of a runtime error and should always be the proto equivalent of a Connect error.
+  /// of a runtime error and should always be the proto equivalent of a Connect
+  /// or gRPC error.
   var error: Connectrpc_Conformance_V1_Error {
     get {return _error ?? Connectrpc_Conformance_V1_Error()}
     set {_error = newValue}
@@ -385,11 +431,67 @@ struct Connectrpc_Conformance_V1_ClientResponseResult {
   /// Clears the value of `error`. Subsequent reads from it will return its default value.
   mutating func clearError() {self._error = nil}
 
+  /// All response headers read from the response.
   var responseTrailers: [Connectrpc_Conformance_V1_Header] = []
 
   /// The number of messages that were present in the request but that could not be
   /// sent because an error occurred before finishing the upload.
   var numUnsentRequests: Int32 = 0
+
+  /// The following field is only set by the reference client. It communicates
+  /// the underlying HTTP status code of the server's response.
+  /// If you are implementing a client-under-test, you should ignore this field
+  /// and leave it unset.
+  var httpStatusCode: Int32 {
+    get {return _httpStatusCode ?? 0}
+    set {_httpStatusCode = newValue}
+  }
+  /// Returns true if `httpStatusCode` has been explicitly set.
+  var hasHTTPStatusCode: Bool {return self._httpStatusCode != nil}
+  /// Clears the value of `httpStatusCode`. Subsequent reads from it will return its default value.
+  mutating func clearHTTPStatusCode() {self._httpStatusCode = nil}
+
+  /// This field is used only by the reference client, and it can be used
+  /// to provide additional feedback about problems observed in the server
+  /// response or in client processing of the response. If non-empty, the test
+  /// case is considered failed even if the result above matches all expectations.
+  /// If you are implementing a client-under-test, you should ignore this field
+  /// and leave it unset.
+  var feedback: [String] = []
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _error: Connectrpc_Conformance_V1_Error? = nil
+  fileprivate var _httpStatusCode: Int32? = nil
+}
+
+/// The client is not able to fulfill the ClientCompatRequest. This may be due
+/// to a runtime error or an unexpected internal error such as the requested protocol
+/// not being supported. This is completely independent of the actual RPC invocation.
+struct Connectrpc_Conformance_V1_ClientErrorResult {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// A message describing the error that occurred. This string will be shown to
+  /// users running conformance tests so it should include any relevant details
+  /// that may help troubleshoot or remedy the error.
+  var message: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// Details about various values as observed on the wire. This message is used
+/// only by the reference client when reporting results and should not be populated
+/// by clients under test.
+struct Connectrpc_Conformance_V1_WireDetails {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
 
   /// The HTTP status code of the response.
   var actualStatusCode: Int32 = 0
@@ -410,38 +512,39 @@ struct Connectrpc_Conformance_V1_ClientResponseResult {
   /// and Connect streaming protocols.
   var actualHTTPTrailers: [Connectrpc_Conformance_V1_Header] = []
 
+  /// Any trailers that were transmitted in the final message of the
+  /// response body for a gRPC-Web response. This could differ from the
+  /// ClientResponseResult.response_trailers field since the RPC client
+  /// library might canonicalize keys and it might choose to remove
+  /// "grpc-status" et al from the set of metadata. This field will
+  /// capture all of the entries and their exact on-the-wire spelling
+  /// and formatting.
+  var actualGrpcwebTrailers: String {
+    get {return _actualGrpcwebTrailers ?? String()}
+    set {_actualGrpcwebTrailers = newValue}
+  }
+  /// Returns true if `actualGrpcwebTrailers` has been explicitly set.
+  var hasActualGrpcwebTrailers: Bool {return self._actualGrpcwebTrailers != nil}
+  /// Clears the value of `actualGrpcwebTrailers`. Subsequent reads from it will return its default value.
+  mutating func clearActualGrpcwebTrailers() {self._actualGrpcwebTrailers = nil}
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
-  fileprivate var _error: Connectrpc_Conformance_V1_Error? = nil
   fileprivate var _connectErrorRaw: SwiftProtobuf.Google_Protobuf_Struct? = nil
-}
-
-/// The client is not able to fulfill the ClientCompatRequest. This may be due
-/// to a runtime error or an unexpected internal error such as the requested protocol
-/// not being supported. This is completely independent of the actual RPC invocation.
-struct Connectrpc_Conformance_V1_ClientErrorResult {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  var message: String = String()
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
+  fileprivate var _actualGrpcwebTrailers: String? = nil
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_ClientCompatRequest.TLSCreds: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_ClientCompatRequest.Cancel: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_ClientCompatRequest.Cancel.OneOf_CancelTiming: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_ClientCompatResponse: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_ClientCompatResponse.OneOf_Result: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_ClientResponseResult: @unchecked Sendable {}
 extension Connectrpc_Conformance_V1_ClientErrorResult: @unchecked Sendable {}
+extension Connectrpc_Conformance_V1_WireDetails: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -482,10 +585,10 @@ extension Connectrpc_Conformance_V1_ClientCompatRequest: SwiftProtobuf.Message, 
     var _host: String = String()
     var _port: UInt32 = 0
     var _serverTlsCert: Data = Data()
-    var _clientTlsCreds: Connectrpc_Conformance_V1_ClientCompatRequest.TLSCreds? = nil
+    var _clientTlsCreds: Connectrpc_Conformance_V1_TLSCreds? = nil
     var _messageReceiveLimit: UInt32 = 0
-    var _service: String = String()
-    var _method: String = String()
+    var _service: String? = nil
+    var _method: String? = nil
     var _streamType: Connectrpc_Conformance_V1_StreamType = .unspecified
     var _useGetHTTPMethod: Bool = false
     var _requestHeaders: [Connectrpc_Conformance_V1_Header] = []
@@ -608,12 +711,12 @@ extension Connectrpc_Conformance_V1_ClientCompatRequest: SwiftProtobuf.Message, 
       if _storage._messageReceiveLimit != 0 {
         try visitor.visitSingularUInt32Field(value: _storage._messageReceiveLimit, fieldNumber: 10)
       }
-      if !_storage._service.isEmpty {
-        try visitor.visitSingularStringField(value: _storage._service, fieldNumber: 11)
-      }
-      if !_storage._method.isEmpty {
-        try visitor.visitSingularStringField(value: _storage._method, fieldNumber: 12)
-      }
+      try { if let v = _storage._service {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 11)
+      } }()
+      try { if let v = _storage._method {
+        try visitor.visitSingularStringField(value: v, fieldNumber: 12)
+      } }()
       if _storage._streamType != .unspecified {
         try visitor.visitSingularEnumField(value: _storage._streamType, fieldNumber: 13)
       }
@@ -671,44 +774,6 @@ extension Connectrpc_Conformance_V1_ClientCompatRequest: SwiftProtobuf.Message, 
       }
       if !storagesAreEqual {return false}
     }
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
-
-extension Connectrpc_Conformance_V1_ClientCompatRequest.TLSCreds: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = Connectrpc_Conformance_V1_ClientCompatRequest.protoMessageName + ".TLSCreds"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "cert"),
-    2: .same(proto: "key"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularBytesField(value: &self.cert) }()
-      case 2: try { try decoder.decodeSingularBytesField(value: &self.key) }()
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.cert.isEmpty {
-      try visitor.visitSingularBytesField(value: self.cert, fieldNumber: 1)
-    }
-    if !self.key.isEmpty {
-      try visitor.visitSingularBytesField(value: self.key, fieldNumber: 2)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Connectrpc_Conformance_V1_ClientCompatRequest.TLSCreds, rhs: Connectrpc_Conformance_V1_ClientCompatRequest.TLSCreds) -> Bool {
-    if lhs.cert != rhs.cert {return false}
-    if lhs.key != rhs.key {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -798,7 +863,6 @@ extension Connectrpc_Conformance_V1_ClientCompatResponse: SwiftProtobuf.Message,
     1: .standard(proto: "test_name"),
     2: .same(proto: "response"),
     3: .same(proto: "error"),
-    4: .same(proto: "feedback"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -834,7 +898,6 @@ extension Connectrpc_Conformance_V1_ClientCompatResponse: SwiftProtobuf.Message,
           self.result = .error(v)
         }
       }()
-      case 4: try { try decoder.decodeRepeatedStringField(value: &self.feedback) }()
       default: break
       }
     }
@@ -859,16 +922,12 @@ extension Connectrpc_Conformance_V1_ClientCompatResponse: SwiftProtobuf.Message,
     }()
     case nil: break
     }
-    if !self.feedback.isEmpty {
-      try visitor.visitRepeatedStringField(value: self.feedback, fieldNumber: 4)
-    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Connectrpc_Conformance_V1_ClientCompatResponse, rhs: Connectrpc_Conformance_V1_ClientCompatResponse) -> Bool {
     if lhs.testName != rhs.testName {return false}
     if lhs.result != rhs.result {return false}
-    if lhs.feedback != rhs.feedback {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -882,9 +941,8 @@ extension Connectrpc_Conformance_V1_ClientResponseResult: SwiftProtobuf.Message,
     3: .same(proto: "error"),
     4: .standard(proto: "response_trailers"),
     5: .standard(proto: "num_unsent_requests"),
-    6: .standard(proto: "actual_status_code"),
-    7: .standard(proto: "connect_error_raw"),
-    8: .standard(proto: "actual_http_trailers"),
+    6: .standard(proto: "http_status_code"),
+    7: .same(proto: "feedback"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -898,9 +956,8 @@ extension Connectrpc_Conformance_V1_ClientResponseResult: SwiftProtobuf.Message,
       case 3: try { try decoder.decodeSingularMessageField(value: &self._error) }()
       case 4: try { try decoder.decodeRepeatedMessageField(value: &self.responseTrailers) }()
       case 5: try { try decoder.decodeSingularInt32Field(value: &self.numUnsentRequests) }()
-      case 6: try { try decoder.decodeSingularInt32Field(value: &self.actualStatusCode) }()
-      case 7: try { try decoder.decodeSingularMessageField(value: &self._connectErrorRaw) }()
-      case 8: try { try decoder.decodeRepeatedMessageField(value: &self.actualHTTPTrailers) }()
+      case 6: try { try decoder.decodeSingularInt32Field(value: &self._httpStatusCode) }()
+      case 7: try { try decoder.decodeRepeatedStringField(value: &self.feedback) }()
       default: break
       }
     }
@@ -926,14 +983,11 @@ extension Connectrpc_Conformance_V1_ClientResponseResult: SwiftProtobuf.Message,
     if self.numUnsentRequests != 0 {
       try visitor.visitSingularInt32Field(value: self.numUnsentRequests, fieldNumber: 5)
     }
-    if self.actualStatusCode != 0 {
-      try visitor.visitSingularInt32Field(value: self.actualStatusCode, fieldNumber: 6)
-    }
-    try { if let v = self._connectErrorRaw {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+    try { if let v = self._httpStatusCode {
+      try visitor.visitSingularInt32Field(value: v, fieldNumber: 6)
     } }()
-    if !self.actualHTTPTrailers.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.actualHTTPTrailers, fieldNumber: 8)
+    if !self.feedback.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.feedback, fieldNumber: 7)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -944,9 +998,8 @@ extension Connectrpc_Conformance_V1_ClientResponseResult: SwiftProtobuf.Message,
     if lhs._error != rhs._error {return false}
     if lhs.responseTrailers != rhs.responseTrailers {return false}
     if lhs.numUnsentRequests != rhs.numUnsentRequests {return false}
-    if lhs.actualStatusCode != rhs.actualStatusCode {return false}
-    if lhs._connectErrorRaw != rhs._connectErrorRaw {return false}
-    if lhs.actualHTTPTrailers != rhs.actualHTTPTrailers {return false}
+    if lhs._httpStatusCode != rhs._httpStatusCode {return false}
+    if lhs.feedback != rhs.feedback {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -979,6 +1032,60 @@ extension Connectrpc_Conformance_V1_ClientErrorResult: SwiftProtobuf.Message, Sw
 
   static func ==(lhs: Connectrpc_Conformance_V1_ClientErrorResult, rhs: Connectrpc_Conformance_V1_ClientErrorResult) -> Bool {
     if lhs.message != rhs.message {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Connectrpc_Conformance_V1_WireDetails: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".WireDetails"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "actual_status_code"),
+    2: .standard(proto: "connect_error_raw"),
+    3: .standard(proto: "actual_http_trailers"),
+    4: .standard(proto: "actual_grpcweb_trailers"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularInt32Field(value: &self.actualStatusCode) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._connectErrorRaw) }()
+      case 3: try { try decoder.decodeRepeatedMessageField(value: &self.actualHTTPTrailers) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self._actualGrpcwebTrailers) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.actualStatusCode != 0 {
+      try visitor.visitSingularInt32Field(value: self.actualStatusCode, fieldNumber: 1)
+    }
+    try { if let v = self._connectErrorRaw {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    if !self.actualHTTPTrailers.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.actualHTTPTrailers, fieldNumber: 3)
+    }
+    try { if let v = self._actualGrpcwebTrailers {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 4)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Connectrpc_Conformance_V1_WireDetails, rhs: Connectrpc_Conformance_V1_WireDetails) -> Bool {
+    if lhs.actualStatusCode != rhs.actualStatusCode {return false}
+    if lhs._connectErrorRaw != rhs._connectErrorRaw {return false}
+    if lhs.actualHTTPTrailers != rhs.actualHTTPTrailers {return false}
+    if lhs._actualGrpcwebTrailers != rhs._actualGrpcwebTrailers {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

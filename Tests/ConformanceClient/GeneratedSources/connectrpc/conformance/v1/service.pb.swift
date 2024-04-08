@@ -7,7 +7,7 @@
 // For information on using the generated types, please see the documentation:
 //   https://github.com/apple/swift-protobuf/
 
-// Copyright 2023 The Connect Authors
+// Copyright 2023-2024 The Connect Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -456,6 +456,8 @@ struct Connectrpc_Conformance_V1_ConformancePayload {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// Any response data specified in the response definition to the server should be
+  /// echoed back here.
   var data: Data = Data()
 
   /// Echoes back information about the request stream observed so far.
@@ -526,6 +528,7 @@ struct Connectrpc_Conformance_V1_ConformancePayload {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
+    /// The query params observed in the request URL.
     var queryParams: [Connectrpc_Conformance_V1_Header] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -544,7 +547,9 @@ struct Connectrpc_Conformance_V1_Error {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var code: Int32 = 0
+  /// The error code.
+  /// For a list of Connect error codes see: https://connectrpc.com/docs/protocol#error-codes
+  var code: Connectrpc_Conformance_V1_Code = .unspecified
 
   /// If this value is absent in a test case response definition, the contents of the
   /// actual error message will not be checked. This is useful for certain kinds of
@@ -559,6 +564,8 @@ struct Connectrpc_Conformance_V1_Error {
   /// Clears the value of `message`. Subsequent reads from it will return its default value.
   mutating func clearMessage() {self._message = nil}
 
+  /// Errors in Connect and gRPC protocols can have arbitrary messages
+  /// attached to them, which are known as error details.
   var details: [SwiftProtobuf.Google_Protobuf_Any] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -574,8 +581,12 @@ struct Connectrpc_Conformance_V1_Header {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// Header/trailer name (key).
   var name: String = String()
 
+  /// Header/trailer value. This is repeated to explicitly support headers and
+  /// trailers where a key is repeated. In such a case, these values must be in
+  /// the same order as which values appeared in the header or trailer block.
   var value: [String] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -591,16 +602,21 @@ struct Connectrpc_Conformance_V1_RawHTTPRequest {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// The HTTP verb (i.e. GET , POST).
   var verb: String = String()
 
+  /// The URI to send the request to.
   var uri: String = String()
 
+  /// Any headers to set on the request.
   var headers: [Connectrpc_Conformance_V1_Header] = []
 
   /// These query params will be encoded and added to the uri before
   /// the request is sent.
   var rawQueryParams: [Connectrpc_Conformance_V1_Header] = []
 
+  /// This provides an easier way to define a complex binary query param
+  /// than having to write literal base64-encoded bytes in raw_query_params.
   var encodedQueryParams: [Connectrpc_Conformance_V1_RawHTTPRequest.EncodedQueryParam] = []
 
   var body: Connectrpc_Conformance_V1_RawHTTPRequest.OneOf_Body? = nil
@@ -653,15 +669,15 @@ struct Connectrpc_Conformance_V1_RawHTTPRequest {
   #endif
   }
 
-  /// This provides an easier way to define a complex binary query param
-  /// than having to write literal base64-encoded bytes in raw_query_params.
   struct EncodedQueryParam {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
+    /// Query param name.
     var name: String = String()
 
+    /// Query param value.
     var value: Connectrpc_Conformance_V1_MessageContents {
       get {return _value ?? Connectrpc_Conformance_V1_MessageContents()}
       set {_value = newValue}
@@ -773,6 +789,7 @@ struct Connectrpc_Conformance_V1_StreamContents {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// The messages in the stream.
   var items: [Connectrpc_Conformance_V1_StreamContents.StreamItem] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -823,8 +840,10 @@ struct Connectrpc_Conformance_V1_RawHTTPResponse {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// If status code is not specified, it will default to a 200 response code.
   var statusCode: UInt32 = 0
 
+  /// Headers to be set on the response.
   var headers: [Connectrpc_Conformance_V1_Header] = []
 
   var body: Connectrpc_Conformance_V1_RawHTTPResponse.OneOf_Body? = nil
@@ -848,6 +867,7 @@ struct Connectrpc_Conformance_V1_RawHTTPResponse {
     set {body = .stream(newValue)}
   }
 
+  /// Trailers to be set on the response.
   var trailers: [Connectrpc_Conformance_V1_Header] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -1649,7 +1669,7 @@ extension Connectrpc_Conformance_V1_Error: SwiftProtobuf.Message, SwiftProtobuf.
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularInt32Field(value: &self.code) }()
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.code) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self._message) }()
       case 3: try { try decoder.decodeRepeatedMessageField(value: &self.details) }()
       default: break
@@ -1662,8 +1682,8 @@ extension Connectrpc_Conformance_V1_Error: SwiftProtobuf.Message, SwiftProtobuf.
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    if self.code != 0 {
-      try visitor.visitSingularInt32Field(value: self.code, fieldNumber: 1)
+    if self.code != .unspecified {
+      try visitor.visitSingularEnumField(value: self.code, fieldNumber: 1)
     }
     try { if let v = self._message {
       try visitor.visitSingularStringField(value: v, fieldNumber: 2)

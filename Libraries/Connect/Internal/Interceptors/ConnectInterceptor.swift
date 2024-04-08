@@ -36,6 +36,9 @@ extension ConnectInterceptor: UnaryInterceptor {
         var headers = request.headers
         headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
         headers[HeaderConstants.acceptEncoding] = self.config.acceptCompressionPoolNames()
+        if let timeout = self.config.timeout {
+            headers[HeaderConstants.connectTimeoutMs] = ["\(Int(timeout * 1_000))"]
+        }
 
         let requestBody = request.message ?? Data()
         let finalRequestBody: Data
@@ -117,6 +120,9 @@ extension ConnectInterceptor: StreamInterceptor {
             .requestCompression.map { [$0.pool.name()] }
         headers[HeaderConstants.connectStreamingAcceptEncoding] = self.config
             .acceptCompressionPoolNames()
+        if let timeout = self.config.timeout {
+            headers[HeaderConstants.connectTimeoutMs] = ["\(Int(timeout * 1_000))"]
+        }
         proceed(.success(HTTPRequest(
             url: request.url,
             headers: headers,

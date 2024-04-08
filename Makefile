@@ -8,8 +8,8 @@ MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-print-directory
 BIN := .tmp/bin
 LICENSE_HEADER_YEAR_RANGE := 2022-2024
-CONFORMANCE_PROTO_REF := 8ab24b156f5d3f8e7824b85732fa9765ab084879
-CONFORMANCE_RUNNER_TAG := v1.0.0-rc2
+CONFORMANCE_PROTO_REF := 33aff469e6358823e925f2ef3f915b9b809e8124
+CONFORMANCE_RUNNER_TAG := v1.0.1
 EXAMPLES_PROTO_REF := e74547031f662f81a62f5e95ebaa9f7037e0c41b
 LICENSE_HEADER_VERSION := v1.30.0
 LICENSE_IGNORE := -e Package.swift \
@@ -78,8 +78,8 @@ $(BIN)/license-headers: Makefile
 testconformance: ## Run all conformance tests
 	swift build -c release --product ConnectConformanceClient
 	mv ./.build/release/ConnectConformanceClient $(BIN)
-	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConformanceClient/InvocationConfigs/urlsession.yaml --known-failing ./Tests/ConformanceClient/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectConformanceClient httpclient=urlsession
-	PATH="$(abspath $(BIN)):$(PATH)" connectconformance -v --conf ./Tests/ConformanceClient/InvocationConfigs/nio.yaml --known-failing ./Tests/ConformanceClient/InvocationConfigs/opt-outs.txt --mode client $(BIN)/ConnectConformanceClient httpclient=nio
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance --trace --conf ./Tests/ConformanceClient/InvocationConfigs/urlsession.yaml --known-failing @./Tests/ConformanceClient/InvocationConfigs/urlsession-opt-outs.txt --mode client $(BIN)/ConnectConformanceClient httpclient=urlsession
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance --trace --conf ./Tests/ConformanceClient/InvocationConfigs/nio.yaml --known-failing @./Tests/ConformanceClient/InvocationConfigs/nio-opt-outs.txt --mode client $(BIN)/ConnectConformanceClient httpclient=nio
 
 .PHONY: testunit
 testunit: ## Run all unit tests

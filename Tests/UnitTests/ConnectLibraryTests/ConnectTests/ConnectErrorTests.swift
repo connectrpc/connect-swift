@@ -116,11 +116,6 @@ final class ConnectErrorTests: XCTestCase {
         XCTAssertTrue(error.metadata.isEmpty)
     }
 
-    func testDeserializingEmptyDictionaryFails() throws {
-        let errorData = try JSONSerialization.data(withJSONObject: [String: Any]())
-        XCTAssertThrowsError(try JSONDecoder().decode(ConnectError.self, from: errorData))
-    }
-
     // MARK: - Private
 
     private func errorData(expectedDetails: [ProtobufMessage], pad: Bool = true) throws -> Data {

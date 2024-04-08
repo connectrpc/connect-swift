@@ -18,6 +18,7 @@ public enum HeaderConstants {
     public static let contentType = "content-type"
 
     public static let connectProtocolVersion = "connect-protocol-version"
+    public static let connectTimeoutMs = "connect-timeout-ms"
 
     public static let connectStreamingAcceptEncoding = "connect-accept-encoding"
     public static let connectStreamingContentEncoding = "connect-content-encoding"
@@ -29,5 +30,6 @@ public enum HeaderConstants {
     public static let grpcMessage = "grpc-message"
     public static let grpcStatus = "grpc-status"
     public static let grpcStatusDetails = "grpc-status-details-bin"
+    public static let grpcTimeout = "grpc-timeout"
     public static let grpcTE = "te"
 }
