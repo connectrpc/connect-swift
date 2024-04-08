@@ -31,6 +31,8 @@ public struct ProtocolClientConfig: Sendable {
     public let responseCompressionPools: [CompressionPool]
     /// List of interceptor factories that should be used to produce interceptor chains.
     public let interceptors: [InterceptorFactory]
+    /// Timeout that should be given to the server for requests to complete.
+    public let timeout: TimeInterval?
 
     /// Configuration used to specify if/how requests should be compressed.
     public struct RequestCompression: Sendable {
@@ -79,6 +81,7 @@ public struct ProtocolClientConfig: Sendable {
         networkProtocol: NetworkProtocol = .connect,
         codec: Codec = JSONCodec(),
         unaryGET: UnaryGET = .disabled,
+        timeout: TimeInterval? = nil,
         requestCompression: RequestCompression? = nil,
         responseCompressionPools: [CompressionPool] = [GzipCompressionPool()],
         interceptors: [InterceptorFactory] = []
@@ -87,6 +90,7 @@ public struct ProtocolClientConfig: Sendable {
         self.host = host
         self.networkProtocol = networkProtocol
         self.codec = codec
+        self.timeout = timeout
         self.requestCompression = requestCompression
         self.responseCompressionPools = responseCompressionPools
 

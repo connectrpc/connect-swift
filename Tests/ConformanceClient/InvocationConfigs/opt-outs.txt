@@ -1,2 +1,0 @@
-Idempotency/*/Codec:CODEC_JSON/TLS:false/idempotent unary success proto
-Idempotency/*/Codec:CODEC_PROTO/TLS:false/idempotent unary success proto

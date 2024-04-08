@@ -7,7 +7,7 @@
 // For information on using the generated types, please see the documentation:
 //   https://github.com/apple/swift-protobuf/
 
-// Copyright 2023 The Connect Authors
+// Copyright 2023-2024 The Connect Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,10 +44,17 @@ struct Connectrpc_Conformance_V1_TestSuite {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// Test suite name. When writing test suites, this is a required field.
   var name: String = String()
 
+  /// The mode (client or server) that this test suite applies to. This is used
+  /// in conjunction with the `--mode` flag passed to the conformance runner
+  /// binary. If the mode on the suite is set to client, the tests will only be
+  /// run if `--mode client` is set on the command to the test runner.
+  /// Likewise if mode is server. If this is unset, the test case will be run in both modes.
   var mode: Connectrpc_Conformance_V1_TestSuite.TestMode = .unspecified
 
+  /// The actual test cases in the suite.
   var testCases: [Connectrpc_Conformance_V1_TestCase] = []
 
   /// If non-empty, the protocols to which this suite applies. If empty,
@@ -70,7 +77,8 @@ struct Connectrpc_Conformance_V1_TestSuite {
   /// relies on.
   var connectVersionMode: Connectrpc_Conformance_V1_TestSuite.ConnectVersionMode = .unspecified
 
-  /// If true, the cases in this suite rely on TLS.
+  /// If true, the cases in this suite rely on TLS and will only be run against
+  /// TLS server configurations.
   var reliesOnTls: Bool = false
 
   /// If true, the cases in this suite rely on the client using TLS
@@ -231,7 +239,25 @@ struct Connectrpc_Conformance_V1_TestCase {
   /// padded as needed to reach that size.
   var expandRequests: [Connectrpc_Conformance_V1_TestCase.ExpandedSize] = []
 
-  /// Defines the expected response to the above RPC. Many
+  /// Defines the expected response to the above RPC. The expected response for
+  /// a test is auto-generated based on the request details. The conformance runner
+  /// will determine what the response should be according to the values specified
+  /// in the test suite and individual test cases.
+  ///
+  /// This value can also be specified explicitly in the test case YAML. However,
+  /// this is typically only needed for exception test cases. If the expected
+  /// response is mostly re-stating the response definition that appears in the
+  /// requests, test cases should rely on the auto-generation if possible.
+  /// Otherwise, specifying an expected response can make the test YAML overly
+  /// verbose and harder to read, write, and maintain.
+  ///
+  /// If the test induces behavior that prevents the server from sending or client
+  /// from receiving the full response definition, it will be necessary to define
+  /// the expected response explicitly. Timeouts, cancellations, and exceeding
+  /// message size limits are good examples of this.
+  ///
+  /// Specifying an expected response explicitly in test definitions will override
+  /// the auto-generation of the test runner.
   var expectedResponse: Connectrpc_Conformance_V1_ClientResponseResult {
     get {return _expectedResponse ?? Connectrpc_Conformance_V1_ClientResponseResult()}
     set {_expectedResponse = newValue}
@@ -241,6 +267,13 @@ struct Connectrpc_Conformance_V1_TestCase {
   /// Clears the value of `expectedResponse`. Subsequent reads from it will return its default value.
   mutating func clearExpectedResponse() {self._expectedResponse = nil}
 
+  /// When expected_response indicates that an error is expected, in some cases, the
+  /// actual error code returned may be flexible. In that case, this field provides
+  /// other acceptable error codes, in addition to the one indicated in the
+  /// expected_response. As long as the actual error's code matches any of these, the
+  /// error is considered conformant, and the test case can pass.
+  var otherAllowedErrorCodes: [Connectrpc_Conformance_V1_Code] = []
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   struct ExpandedSize {
@@ -248,6 +281,10 @@ struct Connectrpc_Conformance_V1_TestCase {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
+    /// The size, in bytes, relative to the limit. For example, to expand to a
+    /// size that is exactly equal to the limit, this should be set to zero.
+    /// Any value greater than zero indicates that the request size will be that
+    /// many bytes over the limit.
     var sizeRelativeToLimit: Int32 {
       get {return _sizeRelativeToLimit ?? 0}
       set {_sizeRelativeToLimit = newValue}
@@ -402,6 +439,7 @@ extension Connectrpc_Conformance_V1_TestCase: SwiftProtobuf.Message, SwiftProtob
     1: .same(proto: "request"),
     2: .standard(proto: "expand_requests"),
     3: .standard(proto: "expected_response"),
+    4: .standard(proto: "other_allowed_error_codes"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -413,6 +451,7 @@ extension Connectrpc_Conformance_V1_TestCase: SwiftProtobuf.Message, SwiftProtob
       case 1: try { try decoder.decodeSingularMessageField(value: &self._request) }()
       case 2: try { try decoder.decodeRepeatedMessageField(value: &self.expandRequests) }()
       case 3: try { try decoder.decodeSingularMessageField(value: &self._expectedResponse) }()
+      case 4: try { try decoder.decodeRepeatedEnumField(value: &self.otherAllowedErrorCodes) }()
       default: break
       }
     }
@@ -432,6 +471,9 @@ extension Connectrpc_Conformance_V1_TestCase: SwiftProtobuf.Message, SwiftProtob
     try { if let v = self._expectedResponse {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
     } }()
+    if !self.otherAllowedErrorCodes.isEmpty {
+      try visitor.visitPackedEnumField(value: self.otherAllowedErrorCodes, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -439,6 +481,7 @@ extension Connectrpc_Conformance_V1_TestCase: SwiftProtobuf.Message, SwiftProtob
     if lhs._request != rhs._request {return false}
     if lhs.expandRequests != rhs.expandRequests {return false}
     if lhs._expectedResponse != rhs._expectedResponse {return false}
+    if lhs.otherAllowedErrorCodes != rhs.otherAllowedErrorCodes {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
