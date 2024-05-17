@@ -20,7 +20,6 @@ import NIOHTTP1
 import NIOHTTP2
 import NIOPosix
 import NIOSSL
-import os.log
 
 /// HTTP client powered by Swift NIO which supports trailers (unlike URLSession).
 open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
@@ -213,7 +212,6 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                         self?.flushOrFailPendingRequests(using: multiplexer)
                     }
                 case .failure(let error):
-                    os_log(.error, "NIOHTTPClient disconnected: %@", "\(error)")
                     self?.lock.withLock {
                         self?.state = .disconnected
                         self?.flushOrFailPendingRequests(using: nil)

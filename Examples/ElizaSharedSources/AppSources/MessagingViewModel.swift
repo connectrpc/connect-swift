@@ -14,7 +14,6 @@
 
 import Combine
 import Connect
-import os.log
 
 private typealias ConverseRequest = Connectrpc_Eliza_V1_ConverseRequest
 private typealias ConverseResponse = Connectrpc_Eliza_V1_ConverseResponse
@@ -54,7 +53,7 @@ final class UnaryMessagingViewModel: MessagingViewModel {
         self.messages.append(Message(message: sentence, author: .user))
 
         let response = await self.client.say(request: request, headers: [:])
-        os_log(.debug, "Eliza unary response: %@", String(describing: response))
+        print("Eliza unary response: %@", String(describing: response))
         self.messages.append(Message(
             message: response.message?.sentence ?? "No response", author: .eliza
         ))
@@ -82,9 +81,7 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
             self.messages.append(Message(message: sentence, author: .user))
             try self.elizaStream.send(request)
         } catch let error {
-            os_log(
-                .error, "Failed to write message to stream: %@", error.localizedDescription
-            )
+            print("Failed to write message to stream: \(error.localizedDescription)")
         }
     }
 
@@ -97,17 +94,17 @@ final class BidirectionalStreamingMessagingViewModel: MessagingViewModel {
             for await result in self.elizaStream.results() {
                 switch result {
                 case .headers(let headers):
-                    os_log(.debug, "Eliza headers: %@", headers)
+                    print("Eliza headers: \(headers)")
 
                 case .message(let message):
-                    os_log(.debug, "Eliza message: %@", String(describing: message))
+                    print("Eliza message: %@", String(describing: message))
                     self.messages.append(Message(message: message.sentence, author: .eliza))
 
                 case .complete(_, let error, let trailers):
-                    os_log(.debug, "Eliza completed with trailers: %@", trailers ?? [:])
+                    print("Eliza completed with trailers: \(trailers ?? [:])")
                     let sentence: String
                     if let error = error {
-                        os_log(.error, "Eliza error: %@", error.localizedDescription)
+                        print("Eliza error: \(error.localizedDescription)")
                         sentence = "[Error: \(error)]"
                     } else {
                         sentence = "[Conversation ended]"

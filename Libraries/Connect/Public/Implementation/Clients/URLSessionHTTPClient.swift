@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import Foundation
-import os.log
 
 /// Concrete implementation of `HTTPClientInterface` backed by `URLSession`.
 ///
@@ -113,11 +112,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
                 do {
                     try urlSessionStream.sendData(data)
                 } catch let error {
-                    os_log(
-                        .error,
-                        "Failed to write data to stream - closing connection: %@",
-                        error.localizedDescription
-                    )
+                    assertionFailure("Failed to write data, closing stream: \(error)")
                     urlSessionStream.close()
                 }
             },

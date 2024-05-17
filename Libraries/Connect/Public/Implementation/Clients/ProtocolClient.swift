@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import Foundation
-import os.log
 import SwiftProtobuf
 
 /// Concrete implementation of the `ProtocolClientInterface`.
@@ -376,11 +375,7 @@ extension ProtocolClient: ProtocolClientInterface {
                         do {
                             proceed(try codec.serialize(message: interceptedMessage))
                         } catch let error {
-                            os_log(
-                                .error,
-                                "Failed to send request message which could not be serialized: %@",
-                                error.localizedDescription
-                            )
+                            assertionFailure("Failed to serialize message: \(error)")
                         }
                     },
                     then: interceptorChain.interceptors.map { $0.handleStreamRawInput },
@@ -477,14 +472,9 @@ private extension StreamResult<Data> {
         case .headers(let headers):
             return .headers(headers)
         case .message(let data):
-            do {
-                return .message(try codec.deserialize(source: data))
-            } catch let error {
-                os_log(
-                    .error,
-                    "Stream result failed to deserialize: %@",
-                    error.localizedDescription
-                )
+            if let deserializedData: Message = try? codec.deserialize(source: data) {
+                return .message(deserializedData)
+            } else {
                 return nil
             }
         }
