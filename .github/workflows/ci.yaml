@@ -57,6 +57,13 @@ jobs:
         run: brew install xcbeautify
       - name: Build Connect macOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS' | xcbeautify
+  build-library-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        # Swift 5.10: https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2204-Readme.md#language-and-runtime
+      - name: Build Connect Linux library
+        run: swift build
   build-library-tvos:
     runs-on: macos-14
     steps:
@@ -121,7 +128,7 @@ jobs:
       - name: Run unit tests
         run: make testunit
   run-swiftlint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     container:
       image: ghcr.io/realm/swiftlint:0.53.0
     steps:
@@ -129,7 +136,7 @@ jobs:
       - name: Run SwiftLint
         run: swiftlint lint --strict
   validate-license-headers:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Validate license headers
