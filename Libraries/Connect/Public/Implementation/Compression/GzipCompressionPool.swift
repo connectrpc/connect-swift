@@ -13,7 +13,11 @@
 // limitations under the License.
 
 import Foundation
+#if os(linux)
+import ZlibLinux
+#else
 import zlib
+#endif
 
 /// Compression pool that handles gzip compression/decompression.
 public struct GzipCompressionPool: Sendable {

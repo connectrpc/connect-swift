@@ -61,8 +61,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: Install zlib
-        run: sudo apt-get install zlib1g-dev
         # Swift 5.10: https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2204-Readme.md#language-and-runtime
       - name: Build Connect Linux library
         run: swift build

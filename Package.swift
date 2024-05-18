@@ -69,6 +69,7 @@ let package = Package(
             name: "Connect",
             dependencies: [
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+                "ZlibLinux",
             ],
             path: "Libraries/Connect",
             exclude: [
@@ -148,6 +149,13 @@ let package = Package(
                 .product(name: "SwiftProtobufPluginLibrary", package: "swift-protobuf"),
             ],
             path: "Plugins/ConnectPluginUtilities"
+        ),
+        .target(
+            name: "ZlibLinux",
+            dependencies: [],
+            linkerSettings: [
+                .linkedLibrary("z")
+            ]
         ),
         .testTarget(
             name: "ConnectPluginUtilitiesTests",
