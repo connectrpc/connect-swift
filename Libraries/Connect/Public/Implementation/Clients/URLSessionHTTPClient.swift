@@ -22,7 +22,9 @@ import FoundationNetworking
 /// This class is thread-safe as-is through the use of an internal lock. It is marked as
 /// `open` and `@unchecked Sendable` so that consumers can subclass it if necessary, but
 /// subclasses must handle their own thread safety for added functionality.
-open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Sendable {
+open class URLSessionHTTPClient: NSObject, @unchecked Sendable,
+    URLSessionDataDelegate, URLSessionTaskDelegate, HTTPClientInterface
+{
     /// Lock used for safely accessing stream storage.
     private let lock = Lock()
     /// Closures stored for notifying when metrics are available.
@@ -122,10 +124,9 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
             sendClose: { urlSessionStream.close() }
         )
     }
-}
 
-extension URLSessionHTTPClient: URLSessionDataDelegate {
-    @objc
+    // MARK: - URLSessionDataDelegate
+
     open func urlSession(
         _ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
         completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
@@ -140,7 +141,6 @@ extension URLSessionHTTPClient: URLSessionDataDelegate {
         stream?.handleResponse(httpURLResponse)
     }
 
-    @objc
     open func urlSession(
         _ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data
     ) {
@@ -148,7 +148,6 @@ extension URLSessionHTTPClient: URLSessionDataDelegate {
         stream?.handleResponseData(data)
     }
 
-    @objc
     open func urlSession(
         _ session: URLSession, task: URLSessionTask,
         needNewBodyStream completionHandler: @escaping (InputStream?) -> Void
@@ -157,10 +156,9 @@ extension URLSessionHTTPClient: URLSessionDataDelegate {
             self.lock.perform { self.streams[task.taskIdentifier]?.requestBodyStream }
         )
     }
-}
 
-extension URLSessionHTTPClient: URLSessionTaskDelegate {
-    @objc
+    // MARK: - URLSessionTaskDelegate
+
     open func urlSession(
         _ session: URLSession, task: URLSessionTask, didCompleteWithError error: Swift.Error?
     ) {
@@ -168,7 +166,6 @@ extension URLSessionHTTPClient: URLSessionTaskDelegate {
         stream?.handleCompletion(error: error)
     }
 
-    @objc
     open func urlSession(
         _ session: URLSession, task: URLSessionTask,
         didFinishCollecting metrics: URLSessionTaskMetrics
