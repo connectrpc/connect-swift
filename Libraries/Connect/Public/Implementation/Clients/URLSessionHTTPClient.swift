@@ -13,6 +13,9 @@
 // limitations under the License.
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Concrete implementation of `HTTPClientInterface` backed by `URLSession`.
 ///

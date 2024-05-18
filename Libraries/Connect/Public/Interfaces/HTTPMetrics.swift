@@ -13,6 +13,9 @@
 // limitations under the License.
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Contains metrics collected during the span of an HTTP request.
 public struct HTTPMetrics: Sendable {

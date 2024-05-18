@@ -13,6 +13,9 @@
 // limitations under the License.
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 import SwiftProtobuf
 
 /// Concrete implementation of the `ProtocolClientInterface`.
