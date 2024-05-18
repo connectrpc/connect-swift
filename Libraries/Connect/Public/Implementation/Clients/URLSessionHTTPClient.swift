@@ -125,6 +125,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
 }
 
 extension URLSessionHTTPClient: URLSessionDataDelegate {
+    @objc
     open func urlSession(
         _ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
         completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
@@ -139,6 +140,7 @@ extension URLSessionHTTPClient: URLSessionDataDelegate {
         stream?.handleResponse(httpURLResponse)
     }
 
+    @objc
     open func urlSession(
         _ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data
     ) {
@@ -146,6 +148,7 @@ extension URLSessionHTTPClient: URLSessionDataDelegate {
         stream?.handleResponseData(data)
     }
 
+    @objc
     open func urlSession(
         _ session: URLSession, task: URLSessionTask,
         needNewBodyStream completionHandler: @escaping (InputStream?) -> Void
@@ -157,6 +160,7 @@ extension URLSessionHTTPClient: URLSessionDataDelegate {
 }
 
 extension URLSessionHTTPClient: URLSessionTaskDelegate {
+    @objc
     open func urlSession(
         _ session: URLSession, task: URLSessionTask, didCompleteWithError error: Swift.Error?
     ) {
@@ -164,6 +168,7 @@ extension URLSessionHTTPClient: URLSessionTaskDelegate {
         stream?.handleCompletion(error: error)
     }
 
+    @objc
     open func urlSession(
         _ session: URLSession, task: URLSessionTask,
         didFinishCollecting metrics: URLSessionTaskMetrics
