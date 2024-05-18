@@ -153,6 +153,7 @@ let package = Package(
         .target(
             name: "ZlibLinux",
             dependencies: [],
+            path: "Libraries/ZlibLinux",
             linkerSettings: [
                 .linkedLibrary("z")
             ]

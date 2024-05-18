@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import Foundation
-#if os(linux)
+#if os(Linux)
 import ZlibLinux
 #else
 import zlib
