@@ -57,6 +57,7 @@ extension ProtocolClient: ProtocolClientInterface {
             trailers: nil,
             idempotencyLevel: idempotencyLevel
         )
+        let timeoutTimer = TimeoutTimer(config: config)
         let interceptorChain = self.config.createUnaryInterceptorChain()
         interceptorChain.executeLinkedInterceptorsAndStopOnFailure(
             interceptorChain.interceptors.map { $0.handleUnaryRequest },
@@ -115,14 +116,32 @@ extension ProtocolClient: ProtocolClientInterface {
                                 finish: { _ in }
                             )
                         },
-                        onResponse: { interceptedResponse in
+                        onResponse: { initialResponse in
+                            var initialResponse = initialResponse
+                            if initialResponse.code == .canceled && timeoutTimer?.timedOut == true {
+                                initialResponse = .init(
+                                    code: .deadlineExceeded,
+                                    headers: initialResponse.headers,
+                                    message: nil,
+                                    trailers: initialResponse.trailers,
+                                    error: ConnectError(
+                                        code: .deadlineExceeded,
+                                        message: "request exceeded allowed timeout",
+                                        exception: nil, details: [], metadata: [:]
+                                    ),
+                                    tracingInfo: nil
+                                )
+                            } else {
+                                timeoutTimer?.cancel()
+                            }
+
                             interceptorChain.executeLinkedInterceptors(
                                 interceptorChain.interceptors.map { $0.handleUnaryRawResponse },
                                 firstInFirstOut: false,
-                                initial: interceptedResponse,
-                                transform: { response, proceed in
+                                initial: initialResponse,
+                                transform: { interceptedResponse, proceed in
                                     proceed(ResponseMessage<Output>(
-                                        response: response, codec: config.codec
+                                        response: interceptedResponse, codec: config.codec
                                     ))
                                 },
                                 then: interceptorChain.interceptors.map { $0.handleUnaryResponse },
@@ -130,6 +149,10 @@ extension ProtocolClient: ProtocolClientInterface {
                             )
                         }
                     )
+
+                    timeoutTimer?.start(onTimeout: { [cancelation] in
+                        cancelation.cancelable?.cancel()
+                    })
                 }
             }
         )
