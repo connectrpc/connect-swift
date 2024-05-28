@@ -17,7 +17,7 @@ import Foundation
 final class TimeoutTimer: @unchecked Sendable {
     private var hasTimedOut = false
     private var onTimeout: (() -> Void)?
-    private let queue = DispatchQueue(label: "rpc.connect.Timeout")
+    private let queue = DispatchQueue(label: "connectrpc.Timeout")
     private let timeout: TimeInterval
     private var workItem: DispatchWorkItem! // Force-unwrapped to allow capturing self in init
 
