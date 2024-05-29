@@ -59,6 +59,19 @@ extension GRPCInterceptor: UnaryInterceptor {
             return
         }
 
+        let contentType = response.headers[HeaderConstants.contentType]?.first ?? ""
+        if !self.contentTypeIsExpectedGRPC(contentType) {
+            // If content-type looks like it could be a gRPC server's response, consider
+            // this an internal error.
+            let code: Code = self.contentTypeIsGRPC(contentType) ? .internalError : .unknown
+            proceed(HTTPResponse(
+                code: code, headers: response.headers, message: nil, trailers: response.trailers,
+                error: ConnectError(code: code, message: "unexpected content-type: \(contentType)"),
+                tracingInfo: response.tracingInfo
+            ))
+            return
+        }
+
         let (grpcCode, connectError) = ConnectError.parseGRPCHeaders(
             response.headers,
             trailers: response.trailers
@@ -172,6 +185,20 @@ extension GRPCInterceptor: StreamInterceptor {
         switch result {
         case .headers(let headers):
             self.streamResponseHeaders.value = headers
+
+            let contentType = headers[HeaderConstants.contentType]?.first ?? ""
+            if !self.contentTypeIsExpectedGRPC(contentType) {
+                // If content-type looks like it could be a gRPC server's response, consider
+                // this an internal error.
+                let code: Code = self.contentTypeIsGRPC(contentType) ? .internalError : .unknown
+                proceed(.complete(
+                    code: code, error: ConnectError(
+                        code: code, message: "unexpected content-type: \(contentType)"
+                    ), trailers: headers
+                ))
+                return
+            }
+
             proceed(result)
 
         case .message(let rawData):
@@ -215,6 +242,19 @@ extension GRPCInterceptor: StreamInterceptor {
                 ))
             }
         }
+    }
+
+    // MARK: - Private
+
+    private func contentTypeIsGRPC(_ contentType: String) -> Bool {
+        return contentType == "application/grpc"
+        || contentType.hasPrefix("application/grpc+")
+    }
+
+    private func contentTypeIsExpectedGRPC(_ contentType: String) -> Bool {
+        let codecName = self.config.codec.name()
+        return (codecName == "proto" && contentType == "application/grpc")
+        || contentType == "application/grpc+\(codecName)"
     }
 }
 

@@ -85,7 +85,9 @@ extension ConnectInterceptor: UnaryInterceptor {
 
         let finalResponse: HTTPResponse
         let contentType = response.headers[HeaderConstants.contentType]?.first ?? ""
-        if response.code == .ok && !contentType.hasPrefix("application/\(config.codec.name())") {
+        if response.code == .ok
+            && !contentType.hasPrefix("application/\(self.config.codec.name())")
+        {
             // If content-type looks like it could be an RPC server's response, consider
             // this an internal error.
             let code: Code = contentType.hasPrefix("application/") ? .internalError : .unknown

@@ -84,9 +84,7 @@ extension GRPCWebInterceptor: UnaryInterceptor {
         }
 
         let contentType = response.headers[HeaderConstants.contentType]?.first ?? ""
-        if response.code == .ok
-            && !self.contentTypeIsExpectedGRPCWeb(contentType, expectedCodec: config.codec)
-        {
+        if response.code == .ok && !self.contentTypeIsExpectedGRPCWeb(contentType) {
             // If content-type looks like it could be a gRPC server's response, consider
             // this an internal error.
             let code: Code = self.contentTypeIsGRPCWeb(contentType) ? .internalError : .unknown
@@ -173,7 +171,7 @@ extension GRPCWebInterceptor: StreamInterceptor {
         switch result {
         case .headers(let headers):
             let contentType = headers[HeaderConstants.contentType]?.first ?? ""
-            if !self.contentTypeIsExpectedGRPCWeb(contentType, expectedCodec: self.config.codec) {
+            if !self.contentTypeIsExpectedGRPCWeb(contentType) {
                 // If content-type looks like it could be a gRPC server's response, consider
                 // this an internal error.
                 let code: Code = self.contentTypeIsGRPCWeb(contentType) ? .internalError : .unknown
@@ -240,8 +238,8 @@ extension GRPCWebInterceptor: StreamInterceptor {
         || contentType.hasPrefix("application/grpc-web+")
     }
 
-    private func contentTypeIsExpectedGRPCWeb(_ contentType: String, expectedCodec: Codec) -> Bool {
-        let codecName = expectedCodec.name()
+    private func contentTypeIsExpectedGRPCWeb(_ contentType: String) -> Bool {
+        let codecName = self.config.codec.name()
         return (codecName == "proto" && contentType == "application/grpc-web")
         || contentType == "application/grpc-web+\(codecName)"
     }
