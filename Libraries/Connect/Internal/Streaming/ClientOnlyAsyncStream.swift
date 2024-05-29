@@ -17,6 +17,9 @@ import Foundation
 /// Concrete implementation of `ClientOnlyAsyncStreamInterface`.
 /// Provides the necessary wiring to bridge from closures/callbacks to Swift's `AsyncStream`
 /// to work with async/await.
+///
+/// This subclasses `BidirectionalAsyncStream` since its behavior is purely additive (it overlays
+/// some additional validation) and both types are internal to the package, not public.
 @available(iOS 13, *)
 final class ClientOnlyAsyncStream<
     Input: ProtobufMessage, Output: ProtobufMessage
@@ -34,6 +37,7 @@ final class ClientOnlyAsyncStream<
     }
 }
 
+@available(iOS 13, *)
 extension ClientOnlyAsyncStream: ClientOnlyAsyncStreamInterface {
     func closeAndReceive() {
         self.close()

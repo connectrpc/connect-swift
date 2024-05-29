@@ -76,7 +76,9 @@ extension GRPCWebInterceptor: UnaryInterceptor {
                     headers: response.headers,
                     message: response.message,
                     trailers: response.trailers,
-                    error: ConnectError.unaryResponseHasNoMessage(),
+                    error: ConnectError(
+                        code: .unimplemented, message: "unary response has no message"
+                    ),
                     tracingInfo: response.tracingInfo
                 ))
             }
@@ -303,7 +305,7 @@ private extension HTTPResponse {
                 headers: self.headers,
                 message: nil,
                 trailers: trailers,
-                error: ConnectError.unaryResponseHasNoMessage(),
+                error: ConnectError(code: .unimplemented, message: "unary response has no message"),
                 tracingInfo: self.tracingInfo
             )
         } else {
@@ -316,13 +318,5 @@ private extension HTTPResponse {
                 tracingInfo: self.tracingInfo
             )
         }
-    }
-}
-
-private extension ConnectError {
-    static func unaryResponseHasNoMessage() -> Self {
-        return ConnectError(
-            code: .unimplemented, message: "unary response has no message"
-        )
     }
 }

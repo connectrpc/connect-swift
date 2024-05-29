@@ -15,6 +15,9 @@
 import SwiftProtobuf
 
 /// Concrete implementation of `ClientOnlyStreamInterface`.
+///
+/// The complexity around configuring callbacks on this type is an artifact of the library
+/// supporting both callbacks and async/await. This is internal to the package, and not public.
 final class ClientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>: @unchecked Sendable {
     private let onResult: @Sendable (StreamResult<Output>) -> Void
     private let receivedMessageCount = Locked(0)

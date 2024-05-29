@@ -23,18 +23,6 @@ extension StreamResult {
     /// - returns: The validated stream result, which may have been transformed into an error.
     func validatedForClientStream(receivedMessageCount: Int) -> Self {
         switch self {
-        case .complete(let code, _, _):
-            if code == .ok && receivedMessageCount < 1 {
-                return .complete(
-                    code: .internalError,
-                    error: ConnectError(
-                        code: .unimplemented, message: "unary stream has no messages"
-                    ),
-                    trailers: nil
-                )
-            } else {
-                return self
-            }
         case .headers:
             return self
         case .message:
@@ -43,6 +31,18 @@ extension StreamResult {
                     code: .internalError,
                     error: ConnectError(
                         code: .unimplemented, message: "unary stream has multiple messages"
+                    ),
+                    trailers: nil
+                )
+            } else {
+                return self
+            }
+        case .complete(let code, _, _):
+            if code == .ok && receivedMessageCount < 1 {
+                return .complete(
+                    code: .internalError,
+                    error: ConnectError(
+                        code: .unimplemented, message: "unary stream has no messages"
                     ),
                     trailers: nil
                 )

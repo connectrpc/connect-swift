@@ -17,6 +17,9 @@ import SwiftProtobuf
 /// Concrete implementation of `BidirectionalAsyncStreamInterface`.
 /// Provides the necessary wiring to bridge from closures/callbacks to Swift's `AsyncStream`
 /// to work with async/await.
+///
+/// If the library removes callback support in favor of only supporting async/await in the future,
+/// this class can be simplified.
 @available(iOS 13, *)
 class BidirectionalAsyncStream<
     Input: ProtobufMessage, Output: ProtobufMessage

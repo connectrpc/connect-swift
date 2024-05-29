@@ -125,23 +125,21 @@ extension GRPCInterceptor: UnaryInterceptor {
                 ), tracingInfo: response.tracingInfo
             ))
             return
+        } else if Envelope.containsMultipleMessages(rawData) {
+            proceed(HTTPResponse(
+                code: .unimplemented,
+                headers: response.headers,
+                message: nil,
+                trailers: response.trailers,
+                error: ConnectError(
+                    code: .unimplemented, message: "unary response has multiple messages"
+                ),
+                tracingInfo: response.tracingInfo
+            ))
+            return
         }
 
         do {
-            guard Envelope.containsMultipleMessages(rawData) == false else {
-                proceed(HTTPResponse(
-                    code: .unimplemented,
-                    headers: response.headers,
-                    message: nil,
-                    trailers: response.trailers,
-                    error: ConnectError(
-                        code: .unimplemented, message: "unary response has multiple messages"
-                    ),
-                    tracingInfo: response.tracingInfo
-                ))
-                return
-            }
-
             let messageData = try Envelope.unpackMessage(
                 rawData, compressionPool: compressionPool
             ).unpacked
