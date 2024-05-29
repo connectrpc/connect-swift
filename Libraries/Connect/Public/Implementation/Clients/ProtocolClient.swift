@@ -183,9 +183,11 @@ extension ProtocolClient: ProtocolClientInterface {
         headers: Headers,
         onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> any ClientOnlyStreamInterface<Input> {
-        return BidirectionalStream(requestCallbacks: self.createRequestCallbacks(
-            path: path, headers: headers, onResult: onResult
-        ))
+        let clientOnly = ClientOnlyStream<Input, Output>(onResult: onResult)
+        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
+            path: path, headers: headers, onResult: { clientOnly.receive($0) }
+        )
+        return clientOnly.configureForSending(with: callbacks)
     }
 
     public func serverOnlyStream<
@@ -236,11 +238,11 @@ extension ProtocolClient: ProtocolClientInterface {
         path: String,
         headers: Headers
     ) -> any ClientOnlyAsyncStreamInterface<Input, Output> {
-        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let clientOnlyAsync = ClientOnlyAsyncStream<Input, Output>()
         let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
-            path: path, headers: headers, onResult: { bidirectionalAsync.receive($0) }
+            path: path, headers: headers, onResult: { clientOnlyAsync.receive($0) }
         )
-        return bidirectionalAsync.configureForSending(with: callbacks)
+        return clientOnlyAsync.configureForSending(with: callbacks)
     }
 
     @available(iOS 13, *)

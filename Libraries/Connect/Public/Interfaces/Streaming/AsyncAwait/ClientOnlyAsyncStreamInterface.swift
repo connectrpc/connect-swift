@@ -39,8 +39,9 @@ public protocol ClientOnlyAsyncStreamInterface<Input, Output> {
     /// - returns: An `AsyncStream` that contains all outputs/results from the stream.
     func results() -> AsyncStream<StreamResult<Output>>
 
-    /// Close the stream. No calls to `send()` are valid after calling `close()`.
-    func close()
+    /// Close the stream and await a response.
+    /// No calls to `send()` are valid after calling `closeAndReceive()`.
+    func closeAndReceive()
 
     /// Cancel the stream and return a canceled code.
     /// No calls to `send()` are valid after calling `cancel()`.

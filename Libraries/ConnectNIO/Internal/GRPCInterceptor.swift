@@ -64,14 +64,39 @@ extension GRPCInterceptor: UnaryInterceptor {
             trailers: response.trailers
         )
         guard grpcCode == .ok, let rawData = response.message, !rawData.isEmpty else {
-            proceed(HTTPResponse(
-                code: grpcCode,
-                headers: response.headers,
-                message: response.message,
-                trailers: response.trailers,
-                error: connectError ?? response.error,
-                tracingInfo: response.tracingInfo
-            ))
+            if response.trailers.grpcStatus() == nil && response.message?.isEmpty == false {
+                proceed(HTTPResponse(
+                    code: .internalError,
+                    headers: response.headers,
+                    message: response.message,
+                    trailers: response.trailers,
+                    error: ConnectError(
+                        code: .internalError,
+                        message: "unary response message should be followed by trailers"
+                    ),
+                    tracingInfo: response.tracingInfo
+                ))
+            } else if grpcCode == .ok {
+                proceed(HTTPResponse(
+                    code: .unimplemented,
+                    headers: response.headers,
+                    message: response.message,
+                    trailers: response.trailers,
+                    error: ConnectError(
+                        code: .unimplemented, message: "unary response has no message"
+                    ),
+                    tracingInfo: response.tracingInfo
+                ))
+            } else {
+                proceed(HTTPResponse(
+                    code: grpcCode,
+                    headers: response.headers,
+                    message: response.message,
+                    trailers: response.trailers,
+                    error: connectError ?? response.error,
+                    tracingInfo: response.tracingInfo
+                ))
+            }
             return
         }
 
@@ -80,6 +105,20 @@ extension GRPCInterceptor: UnaryInterceptor {
             .first
             .flatMap { self.config.responseCompressionPool(forName: $0) }
         do {
+            guard Envelope.containsMultipleMessages(rawData) == false else {
+                proceed(HTTPResponse(
+                    code: .unimplemented,
+                    headers: response.headers,
+                    message: nil,
+                    trailers: response.trailers,
+                    error: ConnectError(
+                        code: .unimplemented, message: "unary response has multiple messages"
+                    ),
+                    tracingInfo: response.tracingInfo
+                ))
+                return
+            }
+
             let messageData = try Envelope.unpackMessage(
                 rawData, compressionPool: compressionPool
             ).unpacked
@@ -140,9 +179,12 @@ extension GRPCInterceptor: StreamInterceptor {
                 let responseCompressionPool = self.streamResponseHeaders.value?[
                     HeaderConstants.grpcContentEncoding
                 ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
-                proceed(.message(try Envelope.unpackMessage(
+                let unpackedMessage = try Envelope.unpackMessage(
                     rawData, compressionPool: responseCompressionPool
-                ).unpacked))
+                ).unpacked
+                if !unpackedMessage.isEmpty {
+                    proceed(.message(unpackedMessage))
+                }
             } catch let error {
                 // TODO: Close the stream here?
                 proceed(.complete(code: .unknown, error: error, trailers: nil))

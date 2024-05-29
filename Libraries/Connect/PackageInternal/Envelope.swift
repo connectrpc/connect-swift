@@ -85,6 +85,16 @@ public enum Envelope {
         }
     }
 
+    /// Determines whether the specified data contains more than 1 message.
+    ///
+    /// - parameter packedData: The packed data to analyze.
+    ///
+    /// - returns: True if the data contains more than 1 message.
+    public static func containsMultipleMessages(_ packedData: Data) -> Bool {
+        let messageLength = self.messageLength(forPackedData: packedData)
+        return packedData.count > messageLength + self.prefixLength
+    }
+
     // MARK: - Internal
 
     enum Error: Swift.Error {
