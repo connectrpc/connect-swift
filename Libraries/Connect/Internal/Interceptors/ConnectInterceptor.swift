@@ -194,11 +194,8 @@ extension ConnectInterceptor: StreamInterceptor {
                 if responseCompressionPool == nil && Envelope.isCompressed(data) {
                     proceed(.complete(
                         code: .internalError,
-                        error: ConnectError(
-                            code: .internalError,
-                            message: "unexpectedly received compressed message"
-                        ),
-                        trailers: [:]
+                        error: ConnectError(code: .internalError, message: "unexpected encoding"),
+                        trailers: nil
                     ))
                     return
                 }

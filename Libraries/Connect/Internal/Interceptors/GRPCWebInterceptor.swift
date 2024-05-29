@@ -99,6 +99,16 @@ extension GRPCWebInterceptor: UnaryInterceptor {
         let compressionPool = response.headers[HeaderConstants.grpcContentEncoding]?
             .first
             .flatMap { self.config.responseCompressionPool(forName: $0) }
+        if compressionPool == nil && Envelope.isCompressed(responseData) {
+            proceed(HTTPResponse(
+                code: .internalError, headers: response.headers, message: nil,
+                trailers: response.trailers,
+                error: ConnectError(code: .internalError, message: "unexpected encoding"),
+                tracingInfo: response.tracingInfo
+            ))
+            return
+        }
+
         do {
             // gRPC Web returns data in 2 chunks (either/both of which may be compressed):
             // 1. OPTIONAL (when not trailers-only): The (headers and length prefixed)

@@ -117,6 +117,16 @@ extension GRPCInterceptor: UnaryInterceptor {
             .headers[HeaderConstants.grpcContentEncoding]?
             .first
             .flatMap { self.config.responseCompressionPool(forName: $0) }
+        if compressionPool == nil && Envelope.isCompressed(rawData) {
+            proceed(HTTPResponse(
+                code: .internalError, headers: response.headers, message: nil,
+                trailers: response.trailers,
+                error: ConnectError(code: .internalError, message: "unexpected encoding"),
+                tracingInfo: response.tracingInfo
+            ))
+            return
+        }
+
         do {
             guard Envelope.containsMultipleMessages(rawData) == false else {
                 proceed(HTTPResponse(
@@ -206,6 +216,15 @@ extension GRPCInterceptor: StreamInterceptor {
                 let responseCompressionPool = self.streamResponseHeaders.value?[
                     HeaderConstants.grpcContentEncoding
                 ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
+                if responseCompressionPool == nil && Envelope.isCompressed(rawData) {
+                    proceed(.complete(
+                        code: .internalError,
+                        error: ConnectError(code: .internalError, message: "unexpected encoding"),
+                        trailers: [:]
+                    ))
+                    return
+                }
+
                 let unpackedMessage = try Envelope.unpackMessage(
                     rawData, compressionPool: responseCompressionPool
                 ).unpacked
