@@ -103,7 +103,9 @@ extension GRPCWebInterceptor: UnaryInterceptor {
             proceed(HTTPResponse(
                 code: .internalError, headers: response.headers, message: nil,
                 trailers: response.trailers,
-                error: ConnectError(code: .internalError, message: "unexpected encoding"),
+                error: ConnectError(
+                    code: .internalError, message: "received unexpected compressed message"
+                ),
                 tracingInfo: response.tracingInfo
             ))
             return

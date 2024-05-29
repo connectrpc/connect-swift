@@ -120,9 +120,9 @@ extension GRPCInterceptor: UnaryInterceptor {
         if compressionPool == nil && Envelope.isCompressed(rawData) {
             proceed(HTTPResponse(
                 code: .internalError, headers: response.headers, message: nil,
-                trailers: response.trailers,
-                error: ConnectError(code: .internalError, message: "unexpected encoding"),
-                tracingInfo: response.tracingInfo
+                trailers: response.trailers, error: ConnectError(
+                    code: .internalError, message: "received unexpected compressed message"
+                ), tracingInfo: response.tracingInfo
             ))
             return
         }
@@ -218,9 +218,9 @@ extension GRPCInterceptor: StreamInterceptor {
                 ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
                 if responseCompressionPool == nil && Envelope.isCompressed(rawData) {
                     proceed(.complete(
-                        code: .internalError,
-                        error: ConnectError(code: .internalError, message: "unexpected encoding"),
-                        trailers: [:]
+                        code: .internalError, error: ConnectError(
+                            code: .internalError, message: "received unexpected compressed message"
+                        ), trailers: [:]
                     ))
                     return
                 }

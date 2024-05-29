@@ -85,8 +85,7 @@ extension ConnectInterceptor: UnaryInterceptor {
 
         let finalResponse: HTTPResponse
         let contentType = response.headers[HeaderConstants.contentType]?.first ?? ""
-        if response.code == .ok
-            && !contentType.hasPrefix("application/\(self.config.codec.name())")
+        if response.code == .ok && !contentType.hasPrefix("application/\(self.config.codec.name())")
         {
             // If content-type looks like it could be an RPC server's response, consider
             // this an internal error.
@@ -193,9 +192,9 @@ extension ConnectInterceptor: StreamInterceptor {
                 ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
                 if responseCompressionPool == nil && Envelope.isCompressed(data) {
                     proceed(.complete(
-                        code: .internalError,
-                        error: ConnectError(code: .internalError, message: "unexpected encoding"),
-                        trailers: nil
+                        code: .internalError, error: ConnectError(
+                            code: .internalError, message: "received unexpected compressed message"
+                        ), trailers: nil
                     ))
                     return
                 }

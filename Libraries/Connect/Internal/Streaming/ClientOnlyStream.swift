@@ -17,10 +17,10 @@ import SwiftProtobuf
 /// Concrete implementation of `ClientOnlyStreamInterface`.
 final class ClientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>: @unchecked Sendable {
     private let onResult: @Sendable (StreamResult<Output>) -> Void
+    private let receivedMessageCount = Locked(0)
     /// Callbacks used to send outbound data and close the stream.
     /// Optional because these callbacks are not available until the stream is initialized.
     private var requestCallbacks: RequestCallbacks<Input>?
-    private let receivedMessageCount = Locked(0)
 
     private struct NotConfiguredForSendingError: Swift.Error {}
 
