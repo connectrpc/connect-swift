@@ -15,7 +15,7 @@
 import Foundation
 
 /// Internal implementation of a lock. Wraps usage of `os_unfair_lock`.
-final class Lock: Sendable {
+final class Lock: @unchecked Sendable {
     private let underlyingLock: UnsafeMutablePointer<os_unfair_lock>
 
     init() {
