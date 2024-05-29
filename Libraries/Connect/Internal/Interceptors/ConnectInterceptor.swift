@@ -191,6 +191,18 @@ extension ConnectInterceptor: StreamInterceptor {
                 let responseCompressionPool = self.streamResponseHeaders.value?[
                     HeaderConstants.connectStreamingContentEncoding
                 ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
+                if responseCompressionPool == nil && Envelope.isCompressed(data) {
+                    proceed(.complete(
+                        code: .internalError,
+                        error: ConnectError(
+                            code: .internalError,
+                            message: "unexpectedly received compressed message"
+                        ),
+                        trailers: [:]
+                    ))
+                    return
+                }
+
                 let (headerByte, message) = try Envelope.unpackMessage(
                     data, compressionPool: responseCompressionPool
                 )

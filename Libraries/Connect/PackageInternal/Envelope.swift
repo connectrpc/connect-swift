@@ -95,6 +95,16 @@ public enum Envelope {
         return packedData.count > messageLength + self.prefixLength
     }
 
+    /// Determines whether the specified data is compressed
+    /// by assessing its compression prefix flag.
+    ///
+    /// - parameter packedData: The packed data to analyze.
+    ///
+    /// - returns: True if the data is compressed.
+    public static func isCompressed(_ packedData: Data) -> Bool {
+        return !packedData.isEmpty && (0b00000001 & packedData[0] != 0)
+    }
+
     // MARK: - Internal
 
     enum Error: Swift.Error {
