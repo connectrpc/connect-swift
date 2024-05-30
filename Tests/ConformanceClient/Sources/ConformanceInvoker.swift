@@ -70,12 +70,12 @@ final class ConformanceInvoker {
             return NIOHTTPClient(
                 host: "http://\(request.host)",
                 port: Int(request.port),
-                timeout: timeout
+                timeout: nil //timeout
             )
         case .urlSession:
             let configuration = URLSessionConfiguration.default
-            configuration.timeoutIntervalForRequest = timeout
-            configuration.timeoutIntervalForResource = timeout
+//            configuration.timeoutIntervalForRequest = timeout
+//            configuration.timeoutIntervalForResource = timeout
             return URLSessionHTTPClient(configuration: configuration)
         }
     }

@@ -31,9 +31,9 @@ extension Headers {
             .acceptCompressionPoolNames()
         headers[HeaderConstants.grpcContentEncoding] = config.requestCompression
             .map { [$0.pool.name()] }
-        if let timeout = config.timeout {
-            headers[HeaderConstants.grpcTimeout] = ["\(Int(timeout * 1_000))m"]
-        }
+//        if let timeout = config.timeout {
+//            headers[HeaderConstants.grpcTimeout] = ["\(Int(timeout * 1_000))m"]
+//        }
         if grpcWeb {
             headers[HeaderConstants.contentType] = [
                 "application/grpc-web+\(config.codec.name())",
