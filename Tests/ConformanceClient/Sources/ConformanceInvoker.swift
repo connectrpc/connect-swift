@@ -62,21 +62,14 @@ final class ConformanceInvoker {
     private static func httpClient(
         for request: ConformanceRequest, clientType: ClientTypeArg
     ) -> HTTPClientInterface {
-        let timeout: TimeInterval = request.hasTimeoutMs
-        ? Double(request.timeoutMs) / 1_000.0
-        : 60.0
         switch clientType {
         case .swiftNIO:
             return NIOHTTPClient(
                 host: "http://\(request.host)",
-                port: Int(request.port),
-                timeout: nil //timeout
+                port: Int(request.port)
             )
         case .urlSession:
-            let configuration = URLSessionConfiguration.default
-//            configuration.timeoutIntervalForRequest = timeout
-//            configuration.timeoutIntervalForResource = timeout
-            return URLSessionHTTPClient(configuration: configuration)
+            return URLSessionHTTPClient()
         }
     }
 

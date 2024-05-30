@@ -267,6 +267,7 @@ extension ProtocolClient: ProtocolClientInterface {
         let codec = self.config.codec
         let responseBuffer = Locked(Data())
         let hasCompleted = Locked(false)
+        let timeoutTimer = TimeoutTimer(config: self.config)
         let interceptorChain = self.config.createStreamInterceptorChain()
         let onResult: @Sendable (StreamResult<Output>) -> Void = { output in
             if case .complete = output {
@@ -334,6 +335,20 @@ extension ProtocolClient: ProtocolClientInterface {
                 if hasCompleted.value {
                     return
                 }
+                
+                var code = code
+                var error = error
+                if code == .canceled && timeoutTimer?.timedOut == true {
+                    code = .deadlineExceeded
+                    error = ConnectError(
+                        code: .deadlineExceeded,
+                        message: "request exceeded allowed timeout",
+                        exception: nil, details: [], metadata: [:]
+                    )
+                } else {
+                    timeoutTimer?.cancel()
+                }
+
                 interceptorChain.executeLinkedInterceptors(
                     interceptorChain.interceptors.map { $0.handleStreamRawResult },
                     firstInFirstOut: false,
@@ -378,6 +393,9 @@ extension ProtocolClient: ProtocolClientInterface {
                         ),
                         responseCallbacks: responseCallbacks
                     ))
+                    timeoutTimer?.start(onTimeout: {
+                        pendingRequestCallbacks.enqueue { $0.cancel() }
+                    })
                 case .failure(let error):
                     hasCompleted.value = true
                     onResult(.complete(code: error.code, error: error, trailers: error.metadata))

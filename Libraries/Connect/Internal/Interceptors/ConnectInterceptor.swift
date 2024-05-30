@@ -120,9 +120,9 @@ extension ConnectInterceptor: StreamInterceptor {
             .requestCompression.map { [$0.pool.name()] }
         headers[HeaderConstants.connectStreamingAcceptEncoding] = self.config
             .acceptCompressionPoolNames()
-//        if let timeout = self.config.timeout {
-//            headers[HeaderConstants.connectTimeoutMs] = ["\(Int(timeout * 1_000))"]
-//        }
+        if let timeout = self.config.timeout {
+            headers[HeaderConstants.connectTimeoutMs] = ["\(Int(timeout * 1_000))"]
+        }
         proceed(.success(HTTPRequest(
             url: request.url,
             headers: headers,
