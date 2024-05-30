@@ -335,7 +335,7 @@ extension ProtocolClient: ProtocolClientInterface {
                 if hasCompleted.value {
                     return
                 }
-                
+
                 var code = code
                 var error = error
                 if code == .canceled && timeoutTimer?.timedOut == true {
