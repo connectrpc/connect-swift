@@ -125,7 +125,7 @@ extension GRPCInterceptor: UnaryInterceptor {
                 ), tracingInfo: response.tracingInfo
             ))
             return
-        } else if Envelope.containsMultipleMessages(rawData) {
+        } else if Envelope.containsMultipleGRPCMessages(rawData) {
             proceed(HTTPResponse(
                 code: .unimplemented,
                 headers: response.headers,
@@ -272,6 +272,13 @@ extension GRPCInterceptor: StreamInterceptor {
         let codecName = self.config.codec.name()
         return (codecName == "proto" && contentType == "application/grpc")
         || contentType == "application/grpc+\(codecName)"
+    }
+}
+
+private extension Envelope {
+    static func containsMultipleGRPCMessages(_ packedData: Data) -> Bool {
+        let messageLength = self.messageLength(forPackedData: packedData)
+        return packedData.count > messageLength + self.prefixLength
     }
 }
 

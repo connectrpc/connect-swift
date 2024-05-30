@@ -185,7 +185,7 @@ extension ProtocolClient: ProtocolClientInterface {
     ) -> any ClientOnlyStreamInterface<Input> {
         let clientOnly = ClientOnlyStream<Input, Output>(onResult: onResult)
         let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
-            path: path, headers: headers, onResult: { clientOnly.receive($0) }
+            path: path, headers: headers, onResult: { clientOnly.handleResultFromServer($0) }
         )
         return clientOnly.configureForSending(with: callbacks)
     }
@@ -228,7 +228,8 @@ extension ProtocolClient: ProtocolClientInterface {
     ) -> any BidirectionalAsyncStreamInterface<Input, Output> {
         let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
         let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
-            path: path, headers: headers, onResult: { bidirectionalAsync.receive($0) }
+            path: path, headers: headers,
+            onResult: { bidirectionalAsync.handleResultFromServer($0) }
         )
         return bidirectionalAsync.configureForSending(with: callbacks)
     }
@@ -240,7 +241,7 @@ extension ProtocolClient: ProtocolClientInterface {
     ) -> any ClientOnlyAsyncStreamInterface<Input, Output> {
         let clientOnlyAsync = ClientOnlyAsyncStream<Input, Output>()
         let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
-            path: path, headers: headers, onResult: { clientOnlyAsync.receive($0) }
+            path: path, headers: headers, onResult: { clientOnlyAsync.handleResultFromServer($0) }
         )
         return clientOnlyAsync.configureForSending(with: callbacks)
     }
@@ -252,7 +253,8 @@ extension ProtocolClient: ProtocolClientInterface {
     ) -> any ServerOnlyAsyncStreamInterface<Input, Output> {
         let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
         let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
-            path: path, headers: headers, onResult: { bidirectionalAsync.receive($0) }
+            path: path, headers: headers,
+            onResult: { bidirectionalAsync.handleResultFromServer($0) }
         )
         return ServerOnlyAsyncStream(
             bidirectionalStream: bidirectionalAsync.configureForSending(with: callbacks)

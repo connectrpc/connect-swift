@@ -63,7 +63,8 @@ extension GRPCWebInterceptor: UnaryInterceptor {
             )
             if grpcCode != .ok || connectError != nil {
                 proceed(HTTPResponse(
-                    code: grpcCode,
+                    // Rewrite the gRPC code if it is "ok" but `connectError` is non-nil.
+                    code: grpcCode == .ok ? .unknown : grpcCode,
                     headers: response.headers,
                     message: response.message,
                     trailers: response.trailers,
@@ -292,7 +293,8 @@ private extension HTTPResponse {
         let (grpcCode, error) = ConnectError.parseGRPCHeaders(self.headers, trailers: trailers)
         if grpcCode != .ok || error != nil {
             return HTTPResponse(
-                code: grpcCode,
+                // Rewrite the gRPC code if it is "ok" but `connectError` is non-nil.
+                code: grpcCode == .ok ? .unknown : grpcCode,
                 headers: self.headers,
                 message: nil,
                 trailers: trailers,

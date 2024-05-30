@@ -14,7 +14,7 @@
 
 import Foundation
 
-/// Concrete implementation of `ClientOnlyAsyncStreamInterface`.
+/// Concrete **internal** implementation of `ClientOnlyAsyncStreamInterface`.
 /// Provides the necessary wiring to bridge from closures/callbacks to Swift's `AsyncStream`
 /// to work with async/await.
 ///
@@ -26,14 +26,16 @@ final class ClientOnlyAsyncStream<
 >: BidirectionalAsyncStream<Input, Output> {
     private let receivedMessageCount = Locked(0)
 
-    override func receive(_ result: StreamResult<Output>) {
+    override func handleResultFromServer(_ result: StreamResult<Output>) {
         let receivedMessageCount = self.receivedMessageCount.perform { value in
             if case .message = result {
                 value += 1
             }
             return value
         }
-        super.receive(result.validatedForClientStream(receivedMessageCount: receivedMessageCount))
+        super.handleResultFromServer(
+            result.validatedForClientStream(receivedMessageCount: receivedMessageCount)
+        )
     }
 }
 

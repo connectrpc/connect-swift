@@ -14,7 +14,7 @@
 
 import SwiftProtobuf
 
-/// Concrete implementation of `BidirectionalAsyncStreamInterface`.
+/// Concrete **internal** implementation of `BidirectionalAsyncStreamInterface`.
 /// Provides the necessary wiring to bridge from closures/callbacks to Swift's `AsyncStream`
 /// to work with async/await.
 ///
@@ -74,10 +74,10 @@ class BidirectionalAsyncStream<
     }
 
     /// Send a result to the consumer over the `results()` `AsyncStream`.
-    /// Should be called by the protocol client when a result is received.
+    /// Should be called by the protocol client when a result is received from the network.
     ///
     /// - parameter result: The new result that was received.
-    func receive(_ result: StreamResult<Output>) {
+    func handleResultFromServer(_ result: StreamResult<Output>) {
         self.receiveResult(result)
     }
 }

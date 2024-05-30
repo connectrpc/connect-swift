@@ -15,11 +15,16 @@
 import Foundation
 import SwiftProtobuf
 
-/// Provides functionality for packing and unpacking (headers and length prefixed) messages.
+/// **This should not be considered part of Connect's public/stable interface, and is subject
+/// to change. When the compiler supports it, this should be package-internal.**
 ///
-/// This should not be considered part of Connect's public/stable interface, and is subject
-/// to change. When the compiler supports it, this should be package-internal.
+/// Provides functionality for packing and unpacking (headers and length prefixed) messages.
 public enum Envelope {
+    /// The total number of bytes that will prefix a message.
+    public static var prefixLength: Int {
+        return 5 // Header flags (1 byte) + message length (4 bytes)
+    }
+
     /// Packs a message into an "envelope", adding required header bytes and optionally
     /// applying compression.
     ///
@@ -85,16 +90,6 @@ public enum Envelope {
         }
     }
 
-    /// Determines whether the specified data contains more than 1 message.
-    ///
-    /// - parameter packedData: The packed data to analyze.
-    ///
-    /// - returns: True if the data contains more than 1 message.
-    public static func containsMultipleMessages(_ packedData: Data) -> Bool {
-        let messageLength = self.messageLength(forPackedData: packedData)
-        return packedData.count > messageLength + self.prefixLength
-    }
-
     /// Determines whether the specified data is compressed
     /// by assessing its compression prefix flag.
     ///
@@ -103,17 +98,6 @@ public enum Envelope {
     /// - returns: True if the data is compressed.
     public static func isCompressed(_ packedData: Data) -> Bool {
         return !packedData.isEmpty && (0b00000001 & packedData[0] != 0)
-    }
-
-    // MARK: - Internal
-
-    enum Error: Swift.Error {
-        case missingExpectedCompressionPool
-    }
-
-    /// The total number of bytes that will prefix a message.
-    static var prefixLength: Int {
-        return 5 // Header flags (1 byte) + message length (4 bytes)
     }
 
     /// Computes the length of the message contained by a packed chunk of data.
@@ -127,7 +111,7 @@ public enum Envelope {
     /// - returns: The length of the next expected message in the packed data. If multiple chunks
     ///            are specified, this will return the length of the first. Returns -1 if there is
     ///            not enough prefix data to determine the message length.
-    static func messageLength(forPackedData data: Data) -> Int {
+    public static func messageLength(forPackedData data: Data) -> Int {
         guard data.count >= self.prefixLength else {
             return -1
         }
@@ -137,6 +121,12 @@ public enum Envelope {
         (data[1...4] as NSData).getBytes(&messageLength, length: 4)
         messageLength = UInt32(bigEndian: messageLength)
         return Int(messageLength)
+    }
+
+    // MARK: - Internal
+
+    enum Error: Swift.Error {
+        case missingExpectedCompressionPool
     }
 
     // MARK: - Private

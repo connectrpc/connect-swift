@@ -14,7 +14,7 @@
 
 import SwiftProtobuf
 
-/// Concrete implementation of `ClientOnlyStreamInterface`.
+/// Concrete **internal** implementation of `ClientOnlyStreamInterface`.
 ///
 /// The complexity around configuring callbacks on this type is an artifact of the library
 /// supporting both callbacks and async/await. This is internal to the package, and not public.
@@ -45,10 +45,10 @@ final class ClientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>: @
     }
 
     /// Send a result to the consumer after doing additional validations for client-only streams.
-    /// Should be called by the protocol client when a result is received.
+    /// Should be called by the protocol client when a result is received from the network.
     ///
     /// - parameter result: The new result that was received.
-    func receive(_ result: StreamResult<Output>) {
+    func handleResultFromServer(_ result: StreamResult<Output>) {
         let receivedMessageCount = self.receivedMessageCount.perform { value in
             if case .message = result {
                 value += 1

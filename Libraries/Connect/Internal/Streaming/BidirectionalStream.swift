@@ -14,7 +14,7 @@
 
 import SwiftProtobuf
 
-/// Concrete implementation of `BidirectionalStreamInterface`.
+/// Concrete **internal** implementation of `BidirectionalStreamInterface`.
 final class BidirectionalStream<Message: ProtobufMessage>: Sendable {
     private let requestCallbacks: RequestCallbacks<Message>
 

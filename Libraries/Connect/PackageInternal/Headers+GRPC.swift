@@ -15,8 +15,8 @@
 import Foundation
 
 extension Headers {
-    /// This should not be considered part of Connect's public/stable interface, and is subject
-    /// to change. When the compiler supports it, this should be package-internal.
+    /// **This should not be considered part of Connect's public/stable interface, and is subject
+    /// to change. When the compiler supports it, this should be package-internal.**
     ///
     /// Adds required headers to gRPC and gRPC-Web requests/streams.
     ///
