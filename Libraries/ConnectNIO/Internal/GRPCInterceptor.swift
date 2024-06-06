@@ -226,9 +226,7 @@ extension GRPCInterceptor: StreamInterceptor {
                 let unpackedMessage = try Envelope.unpackMessage(
                     rawData, compressionPool: responseCompressionPool
                 ).unpacked
-                if !unpackedMessage.isEmpty {
-                    proceed(.message(unpackedMessage))
-                }
+                proceed(.message(unpackedMessage))
             } catch let error {
                 // TODO: Close the stream here?
                 proceed(.complete(code: .unknown, error: error, trailers: nil))

@@ -214,7 +214,7 @@ extension ConnectInterceptor: StreamInterceptor {
                         error: response.error,
                         trailers: response.metadata
                     ))
-                } else if !message.isEmpty {
+                } else {
                     proceed(.message(message))
                 }
             } catch let error {

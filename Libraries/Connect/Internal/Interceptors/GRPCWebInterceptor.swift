@@ -233,7 +233,7 @@ extension GRPCWebInterceptor: StreamInterceptor {
                             trailers: trailers
                         ))
                     }
-                } else if !unpackedData.isEmpty {
+                } else {
                     proceed(.message(unpackedData))
                 }
             } catch let error {
