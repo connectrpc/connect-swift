@@ -24,18 +24,21 @@ import Foundation
 final class ClientOnlyAsyncStream<
     Input: ProtobufMessage, Output: ProtobufMessage
 >: BidirectionalAsyncStream<Input, Output> {
-    private let receivedMessageCount = Locked(0)
+    private let receivedResults = Locked([StreamResult<Output>]())
 
     override func handleResultFromServer(_ result: StreamResult<Output>) {
-        let receivedMessageCount = self.receivedMessageCount.perform { value in
-            if case .message = result {
-                value += 1
+        let (isComplete, results) = self.receivedResults.perform { results in
+            results.append(result)
+            if case .complete = result {
+                return (true, ClientOnlyStreamValidation.validatedFinalClientStreamResults(results))
+            } else {
+                return (false, [])
             }
-            return value
         }
-        super.handleResultFromServer(
-            result.validatedForClientStream(receivedMessageCount: receivedMessageCount)
-        )
+        guard isComplete else {
+            return
+        }
+        results.forEach(super.handleResultFromServer)
     }
 }
 

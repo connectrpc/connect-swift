@@ -20,7 +20,7 @@ import SwiftProtobuf
 /// supporting both callbacks and async/await. This is internal to the package, and not public.
 final class ClientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>: @unchecked Sendable {
     private let onResult: @Sendable (StreamResult<Output>) -> Void
-    private let receivedMessageCount = Locked(0)
+    private let receivedResults = Locked([StreamResult<Output>]())
     /// Callbacks used to send outbound data and close the stream.
     /// Optional because these callbacks are not available until the stream is initialized.
     private var requestCallbacks: RequestCallbacks<Input>?
@@ -49,13 +49,18 @@ final class ClientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>: @
     ///
     /// - parameter result: The new result that was received.
     func handleResultFromServer(_ result: StreamResult<Output>) {
-        let receivedMessageCount = self.receivedMessageCount.perform { value in
-            if case .message = result {
-                value += 1
+        let (isComplete, results) = self.receivedResults.perform { results in
+            results.append(result)
+            if case .complete = result {
+                return (true, ClientOnlyStreamValidation.validatedFinalClientStreamResults(results))
+            } else {
+                return (false, [])
             }
-            return value
         }
-        self.onResult(result.validatedForClientStream(receivedMessageCount: receivedMessageCount))
+        guard isComplete else {
+            return
+        }
+        results.forEach(self.onResult)
     }
 }
 
