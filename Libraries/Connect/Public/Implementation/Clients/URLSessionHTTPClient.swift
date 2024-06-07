@@ -67,7 +67,11 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
                     headers: [:],
                     message: data,
                     trailers: [:],
-                    error: ConnectError(code: code, message: error.localizedDescription),
+                    error: ConnectError(
+                        code: code,
+                        message: error.localizedDescription,
+                        exception: error
+                    ),
                     tracingInfo: nil
                 ))
             } else {
