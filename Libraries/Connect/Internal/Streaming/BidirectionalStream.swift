@@ -14,7 +14,7 @@
 
 import SwiftProtobuf
 
-/// Concrete implementation of `BidirectionalStreamInterface`.
+/// Concrete **internal** implementation of `BidirectionalStreamInterface`.
 final class BidirectionalStream<Message: ProtobufMessage>: Sendable {
     private let requestCallbacks: RequestCallbacks<Message>
 
@@ -40,6 +40,3 @@ extension BidirectionalStream: BidirectionalStreamInterface {
         self.requestCallbacks.cancel()
     }
 }
-
-// Conforms to the client-only interface since it matches exactly and the implementation is internal
-extension BidirectionalStream: ClientOnlyStreamInterface {}

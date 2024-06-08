@@ -16,12 +16,6 @@ import Connect
 
 extension ConnectError {
     static func deadlineExceeded() -> Self {
-        return .init(
-            code: .deadlineExceeded,
-            message: "timed out",
-            exception: nil,
-            details: [],
-            metadata: [:]
-        )
+        return .init(code: .deadlineExceeded, message: "timed out")
     }
 }

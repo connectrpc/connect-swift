@@ -16,12 +16,12 @@ import Foundation
 
 /// Class containing an internal lock which can be used to ensure thread-safe access to an
 /// underlying value. Conforms to `Sendable`, making it accessible from `@Sendable` closures.
-final class Locked<T>: @unchecked Sendable {
+final class Locked<Wrapped>: @unchecked Sendable {
     private let lock = Lock()
-    private var wrappedValue: T
+    private var wrappedValue: Wrapped
 
     /// Thread-safe access to the underlying value.
-    var value: T {
+    var value: Wrapped {
         get { self.lock.perform { self.wrappedValue } }
         set { self.lock.perform { self.wrappedValue = newValue } }
     }
@@ -29,13 +29,16 @@ final class Locked<T>: @unchecked Sendable {
     /// Perform an action with the underlying value, potentially updating that value.
     ///
     /// - parameter action: Closure to perform with the underlying value.
-    func perform(action: @escaping (inout T) -> Void) {
-        self.lock.perform {
+    ///
+    /// - returns: The value returned by the closure.
+    @discardableResult
+    func perform<Result>(action: @escaping (inout Wrapped) -> Result) -> Result {
+        return self.lock.perform {
             action(&self.wrappedValue)
         }
     }
 
-    init(_ value: T) {
+    init(_ value: Wrapped) {
         self.wrappedValue = value
     }
 }

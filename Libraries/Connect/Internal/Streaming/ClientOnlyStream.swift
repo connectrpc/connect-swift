@@ -14,50 +14,21 @@
 
 import SwiftProtobuf
 
-/// Concrete **internal** implementation of `BidirectionalAsyncStreamInterface`.
-/// Provides the necessary wiring to bridge from closures/callbacks to Swift's `AsyncStream`
-/// to work with async/await.
+/// Concrete **internal** implementation of `ClientOnlyStreamInterface`.
 ///
-/// If the library removes callback support in favor of only supporting async/await in the future,
-/// this class can be simplified.
-@available(iOS 13, *)
-class BidirectionalAsyncStream<
-    Input: ProtobufMessage, Output: ProtobufMessage
->: @unchecked Sendable {
-    /// The underlying async stream that will be exposed to the consumer.
-    /// Force unwrapped because it captures `self` on `init`.
-    private var asyncStream: AsyncStream<StreamResult<Output>>!
-    /// Stored closure to provide access to the `AsyncStream.Continuation` so that result data
-    /// can be passed through to the `AsyncStream` when received.
-    /// Force unwrapped because it must be set within the context of the `AsyncStream.Continuation`.
-    private var receiveResult: ((StreamResult<Output>) -> Void)!
+/// The complexity around configuring callbacks on this type is an artifact of the library
+/// supporting both callbacks and async/await. This is internal to the package, and not public.
+final class ClientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>: @unchecked Sendable {
+    private let onResult: @Sendable (StreamResult<Output>) -> Void
+    private let receivedResults = Locked([StreamResult<Output>]())
     /// Callbacks used to send outbound data and close the stream.
     /// Optional because these callbacks are not available until the stream is initialized.
     private var requestCallbacks: RequestCallbacks<Input>?
 
     private struct NotConfiguredForSendingError: Swift.Error {}
 
-    /// Initialize a new stream.
-    ///
-    /// Note: `configureForSending()` must be called before using the stream.
-    init() {
-        self.asyncStream = AsyncStream<StreamResult<Output>> { continuation in
-            self.receiveResult = { result in
-                if Task.isCancelled {
-                    return
-                }
-                switch result {
-                case .headers, .message:
-                    continuation.yield(result)
-                case .complete:
-                    continuation.yield(result)
-                    continuation.finish()
-                }
-            }
-            continuation.onTermination = { @Sendable _ in
-                self.requestCallbacks?.sendClose()
-            }
-        }
+    init(onResult: @escaping @Sendable (StreamResult<Output>) -> Void) {
+        self.onResult = onResult
     }
 
     /// Enable sending data over this stream by providing a set of request callbacks to route data
@@ -73,17 +44,27 @@ class BidirectionalAsyncStream<
         return self
     }
 
-    /// Send a result to the consumer over the `results()` `AsyncStream`.
+    /// Send a result to the consumer after doing additional validations for client-only streams.
     /// Should be called by the protocol client when a result is received from the network.
     ///
     /// - parameter result: The new result that was received.
     func handleResultFromServer(_ result: StreamResult<Output>) {
-        self.receiveResult(result)
+        let (isComplete, results) = self.receivedResults.perform { results in
+            results.append(result)
+            if case .complete = result {
+                return (true, ClientOnlyStreamValidation.validatedFinalClientStreamResults(results))
+            } else {
+                return (false, [])
+            }
+        }
+        guard isComplete else {
+            return
+        }
+        results.forEach(self.onResult)
     }
 }
 
-@available(iOS 13, *)
-extension BidirectionalAsyncStream: BidirectionalAsyncStreamInterface {
+extension ClientOnlyStream: ClientOnlyStreamInterface {
     @discardableResult
     func send(_ input: Input) throws -> Self {
         guard let sendData = self.requestCallbacks?.sendData else {
@@ -94,11 +75,7 @@ extension BidirectionalAsyncStream: BidirectionalAsyncStreamInterface {
         return self
     }
 
-    func results() -> AsyncStream<StreamResult<Output>> {
-        return self.asyncStream
-    }
-
-    func close() {
+    func closeAndReceive() {
         self.requestCallbacks?.sendClose()
     }
 

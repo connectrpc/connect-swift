@@ -15,8 +15,8 @@
 import Foundation
 
 extension ConnectError {
-    /// This should not be considered part of Connect's public/stable interface, and is subject
-    /// to change. When the compiler supports it, this should be package-internal.
+    /// **This should not be considered part of Connect's public/stable interface, and is subject
+    /// to change. When the compiler supports it, this should be package-internal.**
     ///
     /// Parses gRPC headers and/or trailers to obtain the status and any potential error.
     ///
@@ -29,12 +29,8 @@ extension ConnectError {
         _ headers: Headers?, trailers: Trailers?
     ) -> (grpcCode: Code, error: ConnectError?) {
         // "Trailers-only" responses can be sent in the headers or trailers block.
-        // Check for a valid gRPC status in the headers first, then in the trailers.
-        guard let grpcCode = headers?.grpcStatus() ?? trailers?.grpcStatus() else {
-            return (.unknown, ConnectError(
-                code: .unknown, message: "RPC response missing status", exception: nil,
-                details: [], metadata: [:]
-            ))
+        guard let grpcCode = trailers?.grpcStatus() ?? headers?.grpcStatus() else {
+            return (.unknown, ConnectError(code: .unknown, message: "RPC response missing status"))
         }
 
         if grpcCode == .ok {

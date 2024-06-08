@@ -70,7 +70,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
                     error: ConnectError(
                         code: code,
                         message: error.localizedDescription,
-                        exception: error, details: [], metadata: [:]
+                        exception: error
                     ),
                     tracingInfo: nil
                 ))
@@ -83,7 +83,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
                     error: ConnectError(
                         code: .unknown,
                         message: "unexpected response type \(type(of: urlResponse))",
-                        exception: error, details: [], metadata: [:]
+                        exception: error
                     ),
                     tracingInfo: nil
                 ))

@@ -23,6 +23,7 @@ final class EnvelopeTests: XCTestCase {
         )
         let compressed = try GzipCompressionPool().compress(data: originalData)
         XCTAssertEqual(packed[0], 1) // Compression flag = true
+        XCTAssertTrue(Envelope.isCompressed(packed))
         XCTAssertEqual(Envelope.messageLength(forPackedData: packed), compressed.count)
         XCTAssertEqual(packed[5...], compressed) // Post-prefix data should match compressed value
 
@@ -35,6 +36,7 @@ final class EnvelopeTests: XCTestCase {
         let originalData = Data(repeating: 0xa, count: 50)
         let packed = Envelope.packMessage(originalData, using: nil)
         XCTAssertEqual(packed[0], 0) // Compression flag = false
+        XCTAssertFalse(Envelope.isCompressed(packed))
         XCTAssertEqual(Envelope.messageLength(forPackedData: packed), originalData.count)
         XCTAssertEqual(packed[5...], originalData) // Post-prefix data should match compressed value
 
@@ -50,6 +52,7 @@ final class EnvelopeTests: XCTestCase {
             originalData, using: .init(minBytes: 100, pool: GzipCompressionPool())
         )
         XCTAssertEqual(packed[0], 0) // Compression flag = false
+        XCTAssertFalse(Envelope.isCompressed(packed))
         XCTAssertEqual(Envelope.messageLength(forPackedData: packed), originalData.count)
         XCTAssertEqual(packed[5...], originalData) // Post-prefix data should match compressed value
 
@@ -66,6 +69,7 @@ final class EnvelopeTests: XCTestCase {
         )
         let compressed = try GzipCompressionPool().compress(data: originalData)
         XCTAssertEqual(packed[0], 1) // Compression flag = true
+        XCTAssertTrue(Envelope.isCompressed(packed))
         XCTAssertEqual(Envelope.messageLength(forPackedData: packed), compressed.count)
         XCTAssertEqual(packed[5...], compressed) // Post-prefix data should match compressed value
 

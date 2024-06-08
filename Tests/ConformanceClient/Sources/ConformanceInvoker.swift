@@ -265,9 +265,9 @@ final class ConformanceInvoker {
                 stream.cancel()
             }
         case .afterNumResponses: // Does not apply to client-only streams.
-            stream.close()
+            stream.closeAndReceive()
         case .none:
-            stream.close()
+            stream.closeAndReceive()
         }
 
         var conformanceResult = ConformanceResult()

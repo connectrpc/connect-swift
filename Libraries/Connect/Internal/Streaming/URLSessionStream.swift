@@ -122,13 +122,7 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
             self.responseCallbacks.receiveClose(
                 code,
                 [:],
-                ConnectError(
-                    code: code,
-                    message: error.localizedDescription,
-                    exception: nil,
-                    details: [],
-                    metadata: [:]
-                )
+                ConnectError(code: code, message: error.localizedDescription)
             )
         } else {
             self.responseCallbacks.receiveClose(.ok, [:], nil)

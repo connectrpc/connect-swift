@@ -13,8 +13,8 @@
 // limitations under the License.
 
 extension Trailers {
-    /// This should not be considered part of Connect's public/stable interface, and is subject
-    /// to change. When the compiler supports it, this should be package-internal.
+    /// **This should not be considered part of Connect's public/stable interface, and is subject
+    /// to change. When the compiler supports it, this should be package-internal.**
     ///
     /// Identifies the status code from gRPC and gRPC-Web trailers.
     ///

@@ -48,7 +48,8 @@ public struct ConnectError: Swift.Error, Sendable {
     }
 
     public init(
-        code: Code, message: String?, exception: Error?, details: [Detail], metadata: Headers
+        code: Code, message: String?,
+        exception: Error? = nil, details: [Detail] = [], metadata: Headers = [:]
     ) {
         self.code = code
         self.message = message
@@ -113,8 +114,7 @@ extension ConnectError {
 
         guard let source = source else {
             return .init(
-                code: code, message: "empty error message from source", exception: nil,
-                details: [], metadata: metadata
+                code: code, message: "empty error message from source", metadata: metadata
             )
         }
 
@@ -123,16 +123,13 @@ extension ConnectError {
         } catch let error {
             return .init(
                 code: code, message: String(data: source, encoding: .utf8),
-                exception: error, details: [], metadata: metadata
+                exception: error, metadata: metadata
             )
         }
     }
 
     public static func canceled() -> Self {
-        return .init(
-            code: .canceled, message: "request canceled by client",
-            exception: nil, details: [], metadata: [:]
-        )
+        return .init(code: .canceled, message: "request canceled by client")
     }
 }
 

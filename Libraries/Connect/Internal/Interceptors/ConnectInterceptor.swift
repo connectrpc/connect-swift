@@ -83,28 +83,51 @@ extension ConnectInterceptor: UnaryInterceptor {
                 ] = current.value
             })
 
-        if let encoding = response.headers[HeaderConstants.contentEncoding]?.first,
-           let compressionPool = self.config.responseCompressionPool(forName: encoding),
-           let message = response.message.flatMap({ try? compressionPool.decompress(data: $0) })
+        let finalResponse: HTTPResponse
+        let contentType = response.headers[HeaderConstants.contentType]?.first ?? ""
+        if response.code == .ok && !contentType.hasPrefix("application/\(self.config.codec.name())")
         {
-            proceed(HTTPResponse(
-                code: response.code,
-                headers: headers,
-                message: message,
-                trailers: trailers,
-                error: response.error,
+            // If content-type looks like it could be an RPC server's response, consider
+            // this an internal error.
+            let code: Code = contentType.hasPrefix("application/") ? .internalError : .unknown
+            finalResponse = HTTPResponse(
+                code: code, headers: headers, message: nil, trailers: trailers,
+                error: ConnectError(code: code, message: "unexpected content-type: \(contentType)"),
                 tracingInfo: response.tracingInfo
-            ))
+            )
+        } else if let encoding = response.headers[HeaderConstants.contentEncoding]?.first {
+            if let compressionPool = self.config.responseCompressionPool(forName: encoding),
+               let message = response.message.flatMap({ try? compressionPool.decompress(data: $0) })
+            {
+                finalResponse = HTTPResponse(
+                    code: response.code,
+                    headers: headers,
+                    message: message,
+                    trailers: trailers,
+                    error: response.error,
+                    tracingInfo: response.tracingInfo
+                )
+            } else {
+                finalResponse = HTTPResponse(
+                    code: .internalError,
+                    headers: headers,
+                    message: nil,
+                    trailers: trailers,
+                    error: ConnectError(code: .internalError, message: "unexpected encoding"),
+                    tracingInfo: response.tracingInfo
+                )
+            }
         } else {
-            proceed(HTTPResponse(
+            finalResponse = HTTPResponse(
                 code: response.code,
                 headers: headers,
                 message: response.message,
                 trailers: trailers,
                 error: response.error,
                 tracingInfo: response.tracingInfo
-            ))
+            )
         }
+        proceed(finalResponse)
     }
 }
 
@@ -146,13 +169,36 @@ extension ConnectInterceptor: StreamInterceptor {
         switch result {
         case .headers(let headers):
             self.streamResponseHeaders.value = headers
-            proceed(result)
 
+            let contentType = headers[HeaderConstants.contentType]?.first ?? ""
+            if contentType != "application/connect+\(self.config.codec.name())" {
+                // If content-type looks like it could be an RPC server's response, consider
+                // this an internal error.
+                let code: Code = contentType.hasPrefix("application/connect+")
+                ? .internalError
+                : .unknown
+                proceed(.complete(
+                    code: code, error: ConnectError(
+                        code: code, message: "unexpected content-type: \(contentType)"
+                    ), trailers: nil
+                ))
+            } else {
+                proceed(result)
+            }
         case .message(let data):
             do {
                 let responseCompressionPool = self.streamResponseHeaders.value?[
                     HeaderConstants.connectStreamingContentEncoding
                 ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
+                if responseCompressionPool == nil && Envelope.isCompressed(data) {
+                    proceed(.complete(
+                        code: .internalError, error: ConnectError(
+                            code: .internalError, message: "received unexpected compressed message"
+                        ), trailers: nil
+                    ))
+                    return
+                }
+
                 let (headerByte, message) = try Envelope.unpackMessage(
                     data, compressionPool: responseCompressionPool
                 )

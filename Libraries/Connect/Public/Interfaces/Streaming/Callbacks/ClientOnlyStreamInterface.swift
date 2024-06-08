@@ -28,8 +28,9 @@ public protocol ClientOnlyStreamInterface<Input> {
     @discardableResult
     func send(_ input: Input) throws -> Self
 
-    /// Close the stream. No calls to `send()` are valid after calling `close()`.
-    func close()
+    /// Close the stream and await a response.
+    /// No calls to `send()` are valid after calling `closeAndReceive()`.
+    func closeAndReceive()
 
     /// Cancel the stream and return a canceled code.
     /// No calls to `send()` are valid after calling `cancel()`.
