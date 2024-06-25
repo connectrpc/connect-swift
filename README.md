@@ -5,6 +5,7 @@ Connect-Swift
 [![Version](https://img.shields.io/cocoapods/v/Connect-Swift.svg?style=flat)](https://cocoapods.org/pods/Connect-Swift)
 [![Platform](https://img.shields.io/cocoapods/p/Connect-Swift.svg?style=flat)](https://cocoapods.org/pods/Connect-Swift)
 [![License](https://img.shields.io/cocoapods/l/Connect-Swift.svg?style=flat)](https://cocoapods.org/pods/Connect-Swift)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fconnectrpc%2Fconnect-swift.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fconnectrpc%2Fconnect-swift?ref=badge_shield)
 
 Connect-Swift is a small library (<200KB!) that provides support for using
 generated,
@@ -186,3 +187,7 @@ Offered under the [Apache 2 license](./LICENSE).
 [streaming]: https://connectrpc.com/docs/swift/using-clients#using-generated-clients
 [swift-pm-integration]: https://connectrpc.com/docs/swift/getting-started#add-the-connect-swift-package
 [testing]: https://connectrpc.com/docs/swift/testing
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fconnectrpc%2Fconnect-swift.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fconnectrpc%2Fconnect-swift?ref=badge_large)
