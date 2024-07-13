@@ -38,7 +38,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 /// these from stdin and, for each one, invokes an RPC as directed
 /// and writes the results (in the form of a ClientCompatResponse
 /// message) to stdout.
-struct Connectrpc_Conformance_V1_ClientCompatRequest {
+struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -229,7 +229,7 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest {
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  struct Cancel {
+  struct Cancel: Sendable {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -282,7 +282,7 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest {
     /// after all request messages are sent and the send side is
     /// closed (as if the after_close_send_ms field were present
     /// and zero).
-    enum OneOf_CancelTiming: Equatable {
+    enum OneOf_CancelTiming: Equatable, Sendable {
       /// When present, the client should cancel *instead of*
       /// closing the send side of the stream, after all requests
       /// have been sent. This applies only to client and bidi
@@ -297,28 +297,6 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest {
       /// This applies only to server and bidi stream RPCs.
       case afterNumResponses(UInt32)
 
-    #if !swift(>=4.1)
-      static func ==(lhs: Connectrpc_Conformance_V1_ClientCompatRequest.Cancel.OneOf_CancelTiming, rhs: Connectrpc_Conformance_V1_ClientCompatRequest.Cancel.OneOf_CancelTiming) -> Bool {
-        // The use of inline closures is to circumvent an issue where the compiler
-        // allocates stack space for every case branch when no optimizations are
-        // enabled. https://github.com/apple/swift-protobuf/issues/1034
-        switch (lhs, rhs) {
-        case (.beforeCloseSend, .beforeCloseSend): return {
-          guard case .beforeCloseSend(let l) = lhs, case .beforeCloseSend(let r) = rhs else { preconditionFailure() }
-          return l == r
-        }()
-        case (.afterCloseSendMs, .afterCloseSendMs): return {
-          guard case .afterCloseSendMs(let l) = lhs, case .afterCloseSendMs(let r) = rhs else { preconditionFailure() }
-          return l == r
-        }()
-        case (.afterNumResponses, .afterNumResponses): return {
-          guard case .afterNumResponses(let l) = lhs, case .afterNumResponses(let r) = rhs else { preconditionFailure() }
-          return l == r
-        }()
-        default: return false
-        }
-      }
-    #endif
     }
 
     init() {}
@@ -330,7 +308,7 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest {
 }
 
 /// The outcome of one ClientCompatRequest.
-struct Connectrpc_Conformance_V1_ClientCompatResponse {
+struct Connectrpc_Conformance_V1_ClientCompatResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -376,28 +354,10 @@ struct Connectrpc_Conformance_V1_ClientCompatResponse {
   /// (e.g. a unary request that defines zero or multiple request messages).
   ///
   /// However, once the RPC is issued, any resulting error should instead be encoded in response.
-  enum OneOf_Result: Equatable {
+  enum OneOf_Result: Equatable, Sendable {
     case response(Connectrpc_Conformance_V1_ClientResponseResult)
     case error(Connectrpc_Conformance_V1_ClientErrorResult)
 
-  #if !swift(>=4.1)
-    static func ==(lhs: Connectrpc_Conformance_V1_ClientCompatResponse.OneOf_Result, rhs: Connectrpc_Conformance_V1_ClientCompatResponse.OneOf_Result) -> Bool {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch (lhs, rhs) {
-      case (.response, .response): return {
-        guard case .response(let l) = lhs, case .response(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
-      case (.error, .error): return {
-        guard case .error(let l) = lhs, case .error(let r) = rhs else { preconditionFailure() }
-        return l == r
-      }()
-      default: return false
-      }
-    }
-  #endif
   }
 
   init() {}
@@ -405,7 +365,7 @@ struct Connectrpc_Conformance_V1_ClientCompatResponse {
 
 /// The result of a ClientCompatRequest, which may or may not be successful.
 /// The client will build this message and return it back to the test runner.
-struct Connectrpc_Conformance_V1_ClientResponseResult {
+struct Connectrpc_Conformance_V1_ClientResponseResult: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -470,7 +430,7 @@ struct Connectrpc_Conformance_V1_ClientResponseResult {
 /// The client is not able to fulfill the ClientCompatRequest. This may be due
 /// to a runtime error or an unexpected internal error such as the requested protocol
 /// not being supported. This is completely independent of the actual RPC invocation.
-struct Connectrpc_Conformance_V1_ClientErrorResult {
+struct Connectrpc_Conformance_V1_ClientErrorResult: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -488,7 +448,7 @@ struct Connectrpc_Conformance_V1_ClientErrorResult {
 /// Details about various values as observed on the wire. This message is used
 /// only by the reference client when reporting results and should not be populated
 /// by clients under test.
-struct Connectrpc_Conformance_V1_WireDetails {
+struct Connectrpc_Conformance_V1_WireDetails: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -535,17 +495,6 @@ struct Connectrpc_Conformance_V1_WireDetails {
   fileprivate var _connectErrorRaw: SwiftProtobuf.Google_Protobuf_Struct? = nil
   fileprivate var _actualGrpcwebTrailers: String? = nil
 }
-
-#if swift(>=5.5) && canImport(_Concurrency)
-extension Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_ClientCompatRequest.Cancel: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_ClientCompatRequest.Cancel.OneOf_CancelTiming: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_ClientCompatResponse: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_ClientCompatResponse.OneOf_Result: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_ClientResponseResult: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_ClientErrorResult: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_WireDetails: @unchecked Sendable {}
-#endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 

@@ -1,6 +1,6 @@
 version: v1
 plugins:
-  - plugin: buf.build/apple/swift:v1.26.0
+  - plugin: buf.build/apple/swift:v1.27.0
     opt: Visibility=Internal
     out: ./ElizaSharedSources/GeneratedSources
   - name: connect-swift

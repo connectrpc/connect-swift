@@ -38,7 +38,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 ///
 /// This struct must remain binary-compatible with
 /// https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto.
-struct Grpc_Status_V1_Status {
+struct Grpc_Status_V1_Status: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -55,10 +55,6 @@ struct Grpc_Status_V1_Status {
 
   init() {}
 }
-
-#if swift(>=5.5) && canImport(_Concurrency)
-extension Grpc_Status_V1_Status: @unchecked Sendable {}
-#endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 

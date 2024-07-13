@@ -42,7 +42,7 @@ private func main() async throws {
         }
 
         let request = try Connectrpc_Conformance_V1_ClientCompatRequest(
-            serializedData: nextRequestData
+            serializedBytes: nextRequestData
         )
         let invoker = try ConformanceInvoker(request: request, clientType: clientTypeArg)
         let response: Connectrpc_Conformance_V1_ClientCompatResponse

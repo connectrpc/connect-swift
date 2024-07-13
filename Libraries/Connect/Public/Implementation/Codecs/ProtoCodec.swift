@@ -13,8 +13,7 @@
 // limitations under the License.
 
 import Foundation
-// TODO: Remove `@preconcurrency` once `SwiftProtobuf.BinaryEncodingOptions` is `Sendable`
-@preconcurrency import SwiftProtobuf
+import SwiftProtobuf
 
 /// Codec providing functionality for serializing to/from Protobuf binary.
 public struct ProtoCodec {
@@ -41,6 +40,6 @@ extension ProtoCodec: Codec {
     }
 
     public func deserialize<Output: ProtobufMessage>(source: Data) throws -> Output {
-        return try Output(serializedData: source)
+        return try Output(serializedBytes: source)
     }
 }

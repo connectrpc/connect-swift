@@ -43,7 +43,7 @@ public struct ConnectError: Swift.Error, Sendable {
                 return nil
             }
 
-            return detail.payload.flatMap { try? Output(serializedData: $0) }
+            return detail.payload.flatMap { try? Output(serializedBytes: $0) }
         }
     }
 

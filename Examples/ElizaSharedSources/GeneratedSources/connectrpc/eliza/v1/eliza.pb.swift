@@ -35,7 +35,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 }
 
 /// SayRequest is a single-sentence request.
-struct Connectrpc_Eliza_V1_SayRequest {
+struct Connectrpc_Eliza_V1_SayRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -48,7 +48,7 @@ struct Connectrpc_Eliza_V1_SayRequest {
 }
 
 /// SayResponse is a single-sentence response.
-struct Connectrpc_Eliza_V1_SayResponse {
+struct Connectrpc_Eliza_V1_SayResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -62,7 +62,7 @@ struct Connectrpc_Eliza_V1_SayResponse {
 
 /// ConverseRequest is a single sentence request sent as part of a
 /// back-and-forth conversation.
-struct Connectrpc_Eliza_V1_ConverseRequest {
+struct Connectrpc_Eliza_V1_ConverseRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -76,7 +76,7 @@ struct Connectrpc_Eliza_V1_ConverseRequest {
 
 /// ConverseResponse is a single sentence response sent in answer to a
 /// ConverseRequest.
-struct Connectrpc_Eliza_V1_ConverseResponse {
+struct Connectrpc_Eliza_V1_ConverseResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -89,7 +89,7 @@ struct Connectrpc_Eliza_V1_ConverseResponse {
 }
 
 /// IntroduceRequest asks Eliza to introduce itself to the named user.
-struct Connectrpc_Eliza_V1_IntroduceRequest {
+struct Connectrpc_Eliza_V1_IntroduceRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -102,7 +102,7 @@ struct Connectrpc_Eliza_V1_IntroduceRequest {
 }
 
 /// IntroduceResponse is one sentence of Eliza's introductory monologue.
-struct Connectrpc_Eliza_V1_IntroduceResponse {
+struct Connectrpc_Eliza_V1_IntroduceResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -113,15 +113,6 @@ struct Connectrpc_Eliza_V1_IntroduceResponse {
 
   init() {}
 }
-
-#if swift(>=5.5) && canImport(_Concurrency)
-extension Connectrpc_Eliza_V1_SayRequest: @unchecked Sendable {}
-extension Connectrpc_Eliza_V1_SayResponse: @unchecked Sendable {}
-extension Connectrpc_Eliza_V1_ConverseRequest: @unchecked Sendable {}
-extension Connectrpc_Eliza_V1_ConverseResponse: @unchecked Sendable {}
-extension Connectrpc_Eliza_V1_IntroduceRequest: @unchecked Sendable {}
-extension Connectrpc_Eliza_V1_IntroduceResponse: @unchecked Sendable {}
-#endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 

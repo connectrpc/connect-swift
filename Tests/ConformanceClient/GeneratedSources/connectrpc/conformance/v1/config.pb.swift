@@ -34,7 +34,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-enum Connectrpc_Conformance_V1_HTTPVersion: SwiftProtobuf.Enum {
+enum Connectrpc_Conformance_V1_HTTPVersion: SwiftProtobuf.Enum, Swift.CaseIterable {
   typealias RawValue = Int
   case unspecified // = 0
   case httpVersion1 // = 1
@@ -66,11 +66,6 @@ enum Connectrpc_Conformance_V1_HTTPVersion: SwiftProtobuf.Enum {
     }
   }
 
-}
-
-#if swift(>=4.2)
-
-extension Connectrpc_Conformance_V1_HTTPVersion: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
   static let allCases: [Connectrpc_Conformance_V1_HTTPVersion] = [
     .unspecified,
@@ -78,11 +73,10 @@ extension Connectrpc_Conformance_V1_HTTPVersion: CaseIterable {
     .httpVersion2,
     .httpVersion3,
   ]
+
 }
 
-#endif  // swift(>=4.2)
-
-enum Connectrpc_Conformance_V1_Protocol: SwiftProtobuf.Enum {
+enum Connectrpc_Conformance_V1_Protocol: SwiftProtobuf.Enum, Swift.CaseIterable {
   typealias RawValue = Int
   case unspecified // = 0
   case connect // = 1
@@ -118,11 +112,6 @@ enum Connectrpc_Conformance_V1_Protocol: SwiftProtobuf.Enum {
     }
   }
 
-}
-
-#if swift(>=4.2)
-
-extension Connectrpc_Conformance_V1_Protocol: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
   static let allCases: [Connectrpc_Conformance_V1_Protocol] = [
     .unspecified,
@@ -130,11 +119,10 @@ extension Connectrpc_Conformance_V1_Protocol: CaseIterable {
     .grpc,
     .grpcWeb,
   ]
+
 }
 
-#endif  // swift(>=4.2)
-
-enum Connectrpc_Conformance_V1_Codec: SwiftProtobuf.Enum {
+enum Connectrpc_Conformance_V1_Codec: SwiftProtobuf.Enum, Swift.CaseIterable {
   typealias RawValue = Int
   case unspecified // = 0
   case proto // = 1
@@ -166,11 +154,6 @@ enum Connectrpc_Conformance_V1_Codec: SwiftProtobuf.Enum {
     }
   }
 
-}
-
-#if swift(>=4.2)
-
-extension Connectrpc_Conformance_V1_Codec: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
   static let allCases: [Connectrpc_Conformance_V1_Codec] = [
     .unspecified,
@@ -178,11 +161,10 @@ extension Connectrpc_Conformance_V1_Codec: CaseIterable {
     .json,
     .text,
   ]
+
 }
 
-#endif  // swift(>=4.2)
-
-enum Connectrpc_Conformance_V1_Compression: SwiftProtobuf.Enum {
+enum Connectrpc_Conformance_V1_Compression: SwiftProtobuf.Enum, Swift.CaseIterable {
   typealias RawValue = Int
   case unspecified // = 0
   case identity // = 1
@@ -223,11 +205,6 @@ enum Connectrpc_Conformance_V1_Compression: SwiftProtobuf.Enum {
     }
   }
 
-}
-
-#if swift(>=4.2)
-
-extension Connectrpc_Conformance_V1_Compression: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
   static let allCases: [Connectrpc_Conformance_V1_Compression] = [
     .unspecified,
@@ -238,11 +215,10 @@ extension Connectrpc_Conformance_V1_Compression: CaseIterable {
     .deflate,
     .snappy,
   ]
+
 }
 
-#endif  // swift(>=4.2)
-
-enum Connectrpc_Conformance_V1_StreamType: SwiftProtobuf.Enum {
+enum Connectrpc_Conformance_V1_StreamType: SwiftProtobuf.Enum, Swift.CaseIterable {
   typealias RawValue = Int
   case unspecified // = 0
   case unary // = 1
@@ -280,11 +256,6 @@ enum Connectrpc_Conformance_V1_StreamType: SwiftProtobuf.Enum {
     }
   }
 
-}
-
-#if swift(>=4.2)
-
-extension Connectrpc_Conformance_V1_StreamType: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
   static let allCases: [Connectrpc_Conformance_V1_StreamType] = [
     .unspecified,
@@ -294,11 +265,10 @@ extension Connectrpc_Conformance_V1_StreamType: CaseIterable {
     .halfDuplexBidiStream,
     .fullDuplexBidiStream,
   ]
+
 }
 
-#endif  // swift(>=4.2)
-
-enum Connectrpc_Conformance_V1_Code: SwiftProtobuf.Enum {
+enum Connectrpc_Conformance_V1_Code: SwiftProtobuf.Enum, Swift.CaseIterable {
   typealias RawValue = Int
   case unspecified // = 0
   case canceled // = 1
@@ -369,11 +339,6 @@ enum Connectrpc_Conformance_V1_Code: SwiftProtobuf.Enum {
     }
   }
 
-}
-
-#if swift(>=4.2)
-
-extension Connectrpc_Conformance_V1_Code: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
   static let allCases: [Connectrpc_Conformance_V1_Code] = [
     .unspecified,
@@ -394,13 +359,12 @@ extension Connectrpc_Conformance_V1_Code: CaseIterable {
     .dataLoss,
     .unauthenticated,
   ]
-}
 
-#endif  // swift(>=4.2)
+}
 
 /// Config defines the configuration for running conformance tests.
 /// This enumerates all of the "flavors" of the test suite to run.
-struct Connectrpc_Conformance_V1_Config {
+struct Connectrpc_Conformance_V1_Config: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -437,7 +401,7 @@ struct Connectrpc_Conformance_V1_Config {
 /// used to determine the server configurations and test cases that
 /// will be run. They are defined in YAML files and are specified as part of the
 /// --conf flag to the test runner.
-struct Connectrpc_Conformance_V1_Features {
+struct Connectrpc_Conformance_V1_Features: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -560,7 +524,7 @@ struct Connectrpc_Conformance_V1_Features {
 /// run, the Config and the supported features therein are used to compute all
 /// of the cases relevant to the implementation under test. These configuration
 /// cases are then used to select which test cases are applicable.
-struct Connectrpc_Conformance_V1_ConfigCase {
+struct Connectrpc_Conformance_V1_ConfigCase: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -626,7 +590,7 @@ struct Connectrpc_Conformance_V1_ConfigCase {
 /// TLSCreds represents credentials for TLS. It includes both a
 /// certificate and corresponding private key. Both are encoded
 /// in PEM format.
-struct Connectrpc_Conformance_V1_TLSCreds {
+struct Connectrpc_Conformance_V1_TLSCreds: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -639,19 +603,6 @@ struct Connectrpc_Conformance_V1_TLSCreds {
 
   init() {}
 }
-
-#if swift(>=5.5) && canImport(_Concurrency)
-extension Connectrpc_Conformance_V1_HTTPVersion: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_Protocol: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_Codec: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_Compression: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_StreamType: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_Code: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_Config: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_Features: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_ConfigCase: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_TLSCreds: @unchecked Sendable {}
-#endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
