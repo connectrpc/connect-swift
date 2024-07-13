@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "635b2589494c97e48c62514bc8b37ced762e0a62",
-        "version" : "2.63.0"
+        "revision" : "fc79798d5a150d61361a27ce0c51169b889e23de",
+        "version" : "2.68.0"
       }
     },
     {
@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-http2.git",
       "state" : {
-        "revision" : "0904bf0feb5122b7e5c3f15db7df0eabe623dd87",
-        "version" : "1.30.0"
+        "revision" : "a0224f3d20438635dd59c9fcc593520d80d131d0",
+        "version" : "1.33.0"
       }
     },
     {
@@ -41,8 +41,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-ssl.git",
       "state" : {
-        "revision" : "7c381eb6083542b124a6c18fae742f55001dc2b5",
-        "version" : "2.26.0"
+        "revision" : "2b09805797f21c380f7dc9bedaab3157c5508efb",
+        "version" : "2.27.0"
       }
     },
     {
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-protobuf.git",
       "state" : {
-        "revision" : "9f0c76544701845ad98716f3f6a774a892152bcb",
-        "version" : "1.26.0"
+        "revision" : "d57a5aecf24a25b32ec4a74be2f5d0a995a47c4b",
+        "version" : "1.27.0"
       }
     },
     {

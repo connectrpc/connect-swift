@@ -14,4 +14,4 @@
 
 import SwiftProtobuf
 
-public typealias ProtobufMessage = SwiftProtobuf.Message & Sendable
+public typealias ProtobufMessage = SwiftProtobuf.Message

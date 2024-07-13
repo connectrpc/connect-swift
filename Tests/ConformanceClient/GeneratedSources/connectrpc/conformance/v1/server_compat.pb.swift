@@ -48,7 +48,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 /// Each test process is expected to start only one RPC server.
 /// When testing multiple configurations, multiple test processes
 /// will be started, each with different properties.
-struct Connectrpc_Conformance_V1_ServerCompatRequest {
+struct Connectrpc_Conformance_V1_ServerCompatRequest: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -120,7 +120,7 @@ struct Connectrpc_Conformance_V1_ServerCompatRequest {
 }
 
 /// The outcome of one ServerCompatRequest.
-struct Connectrpc_Conformance_V1_ServerCompatResponse {
+struct Connectrpc_Conformance_V1_ServerCompatResponse: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -142,11 +142,6 @@ struct Connectrpc_Conformance_V1_ServerCompatResponse {
 
   init() {}
 }
-
-#if swift(>=5.5) && canImport(_Concurrency)
-extension Connectrpc_Conformance_V1_ServerCompatRequest: @unchecked Sendable {}
-extension Connectrpc_Conformance_V1_ServerCompatResponse: @unchecked Sendable {}
-#endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
