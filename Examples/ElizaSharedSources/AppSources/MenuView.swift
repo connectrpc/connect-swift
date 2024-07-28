@@ -41,12 +41,28 @@ struct MenuView: View {
     private func createClient(withProtocol networkProtocol: NetworkProtocol)
         -> Connectrpc_Eliza_V1_ElizaServiceClient
     {
-        let host = "https://demo.connectrpc.com"
+        let host = "https://demo.connectrpc-broken.com"
         let config = ProtocolClientConfig(
             host: host,
             networkProtocol: networkProtocol,
             codec: ProtoCodec(), // Protobuf binary, or JSONCodec() for JSON
-            unaryGET: .disabled // Can enable to use cacheable unary HTTP GET requests
+            unaryGET: .disabled, // Can enable to use cacheable unary HTTP GET requests
+            interceptors: [
+                .init { _ in
+                    UnaryRetryInterceptor(
+                        maxNumberOfRetries: 100,
+                        codesToRetry: Set(Code.allCases).filter { $0 != .ok },
+                        delayForRetryNumber: { _ in 1 }
+                    )
+                },
+                .init { _ in
+                    StreamRetryInterceptor(
+                        maxNumberOfRetries: 100,
+                        codesToRetry: Set(Code.allCases).filter { $0 != .ok },
+                        delayForRetryNumber: { _ in 1 }
+                    )
+                },
+            ]
         )
         #if !COCOAPODS
         // For gRPC (which is not supported by CocoaPods), use the NIO HTTP client:
