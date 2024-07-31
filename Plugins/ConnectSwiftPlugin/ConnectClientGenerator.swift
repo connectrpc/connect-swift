@@ -17,26 +17,27 @@ import Foundation
 import SwiftProtobufPluginLibrary
 
 /// Responsible for generating services and RPCs that are compatible with the Connect library.
+@main
 final class ConnectClientGenerator: Generator {
-    private let visibility: String
+    private var visibility = ""
 
-    required init(_ descriptor: FileDescriptor, options: GeneratorOptions) {
-        switch options.visibility {
+    override var outputFileExtension: String {
+        ".connect.swift"
+    }
+
+    override func printContent(for descriptor: FileDescriptor) {
+        super.printContent(for: descriptor)
+
+        switch self.options.visibility {
         case .internal:
             self.visibility = "internal"
         case .public:
             self.visibility = "public"
         }
-        super.init(descriptor, options: options)
-        self.printContent()
-    }
-
-    private func printContent() {
-        self.printFilePreamble()
 
         self.printModuleImports()
 
-        for service in self.descriptor.services {
+        for service in self.services {
             self.printLine()
             self.printService(service)
         }
@@ -190,7 +191,7 @@ private extension MethodDescriptor {
     }
 
     func idempotencyLevel() -> String {
-        switch self.proto.options.idempotencyLevel {
+        switch self.options.idempotencyLevel {
         case .idempotencyUnknown:
             return "unknown"
         case .noSideEffects:
