@@ -42,33 +42,6 @@ private enum CommandLineParameter: String {
             }
         }
     }
-
-    static func parse(commandLineParameters: String) throws -> [(key: Self, value: String)] {
-        return try commandLineParameters
-            .components(separatedBy: ",")
-            .compactMap { parameter in
-                if parameter.isEmpty {
-                    return nil
-                }
-
-                guard let index = parameter.firstIndex(of: "=") else {
-                    throw Error.unknownParameter(string: parameter)
-                }
-
-                let rawKey = parameter[..<index].trimmingCharacters(in: .whitespacesAndNewlines)
-                guard let key = Self(rawValue: rawKey) else {
-                    throw Error.unknownParameter(string: parameter)
-                }
-
-                let value = parameter[parameter.index(after: index)...]
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
-                if value.isEmpty {
-                    return nil
-                }
-
-                return (key, value)
-            }
-    }
 }
 
 /// A set of options that are used to customize generator outputs.
@@ -94,18 +67,23 @@ public struct GeneratorOptions {
         case `public` = "Public"
     }
 
+    public static func empty() -> Self {
+        return .init()
+    }
+}
+
+extension GeneratorOptions {
     /// Initializes a set of generator options from the raw string representation of command line
     /// parameters (e.g., "Visibility=Internal,KeepMethodCasing=true").
     ///
-    /// Handles trimming whitespace, and some parameters may be specified multiple times.
-    ///
-    /// - parameter commandLineParameters: The raw CLI parameters.
-    public init(commandLineParameters: String) throws {
-        let parsedParameters = try CommandLineParameter.parse(
-            commandLineParameters: commandLineParameters
-        )
-        for (key, rawValue) in parsedParameters {
-            switch key {
+    /// - parameter commandLineParameters: The CLI parameters.
+    public init(commandLineParameters: SwiftProtobufPluginLibrary.CodeGeneratorParameter) throws {
+        for (key, rawValue) in commandLineParameters.parsedPairs {
+            guard let parsedKey = CommandLineParameter(rawValue: key) else {
+                throw CommandLineParameter.Error.unknownParameter(string: key)
+            }
+
+            switch parsedKey {
             case .extraModuleImports:
                 self.extraModuleImports.append(rawValue)
                 continue
@@ -145,9 +123,7 @@ public struct GeneratorOptions {
                     self.protoToModuleMappings = try ProtoFileToModuleMappings(path: rawValue)
                     continue
                 } catch let error {
-                    throw CommandLineParameter.Error.deserializationError(
-                        key: key.rawValue, error: error
-                    )
+                    throw CommandLineParameter.Error.deserializationError(key: key, error: error)
                 }
 
             case .swiftProtobufModuleName:
@@ -161,10 +137,7 @@ public struct GeneratorOptions {
                 }
             }
 
-            throw CommandLineParameter.Error.invalidParameterValue(
-                key: key.rawValue,
-                value: rawValue
-            )
+            throw CommandLineParameter.Error.invalidParameterValue(key: key, value: rawValue)
         }
     }
 }

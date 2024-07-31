@@ -121,6 +121,7 @@ let package = Package(
             name: "ConnectMocksPlugin",
             dependencies: [
                 "ConnectPluginUtilities",
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
                 .product(name: "SwiftProtobufPluginLibrary", package: "swift-protobuf"),
             ],
             path: "Plugins/ConnectMocksPlugin"
