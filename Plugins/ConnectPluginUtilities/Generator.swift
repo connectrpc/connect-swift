@@ -20,24 +20,18 @@ private struct GeneratorError: Swift.Error {
 }
 
 /// Base generator class that can be used to generate Swift files from Protobuf file descriptors.
-///
+/// Not intended to be instantiated directly.
 /// Subclasses must be annotated with `@main` to be properly invoked at runtime.
 open class Generator {
     private var neededModules = [String]()
     private var printer = SwiftProtobufPluginLibrary.CodePrinter()
 
-    /// Used for producing type names when generating code.
-    public private(set) var namer = SwiftProtobufPluginLibrary.SwiftProtobufNamer()
-    /// Options to use when generating code.
-    public private(set) var options = GeneratorOptions.empty()
-    /// List of services specified in the current file.
-    public private(set) var services = [SwiftProtobufPluginLibrary.ServiceDescriptor]()
-
     // MARK: - Overridable
 
-    /// File extension to use for generated file names.
+    /// File extension to use for generated file names (e.g., ".connect.swift").
+    /// Must be overridden by subclasses.
     open var outputFileExtension: String {
-        return ".connect.swift"
+        fatalError("\(#function) must be overridden by subclasses")
     }
 
     /// Initializer required by `SwiftProtobufPluginLibrary.CodeGenerator`.
@@ -57,6 +51,13 @@ open class Generator {
     }
 
     // MARK: - Output helpers
+
+    /// Used for producing type names when generating code.
+    public private(set) var namer = SwiftProtobufPluginLibrary.SwiftProtobufNamer()
+    /// Options to use when generating code.
+    public private(set) var options = GeneratorOptions.empty()
+    /// List of services specified in the current file.
+    public private(set) var services = [SwiftProtobufPluginLibrary.ServiceDescriptor]()
 
     public func indent() {
         self.printer.indent()
@@ -139,7 +140,13 @@ extension Generator: SwiftProtobufPluginLibrary.CodeGenerator {
     }
 
     public var supportedEditionRange: ClosedRange<SwiftProtobuf.Google_Protobuf_Edition> {
-        return SwiftProtobufPluginLibrary.DescriptorSet.bundledEditionsSupport
+        let minEdition = max(
+            DescriptorSet.bundledEditionsSupport.lowerBound, Google_Protobuf_Edition.legacy
+        )
+        let maxEdition = min(
+            DescriptorSet.bundledEditionsSupport.upperBound, Google_Protobuf_Edition.edition2024
+        )
+        return minEdition...maxEdition
     }
 
     public var supportedFeatures: [
