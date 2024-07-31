@@ -67,7 +67,7 @@ public struct GeneratorOptions {
         case `public` = "Public"
     }
 
-    public static func empty() -> Self {
+    static func empty() -> Self {
         return .init()
     }
 }
