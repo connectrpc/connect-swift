@@ -14,7 +14,7 @@ Pod::Spec.new do |spec|
   spec.watchos.deployment_target = '6.0'
 
   spec.dependency 'Connect-Swift', "#{spec.version.to_s}"
-  spec.dependency 'SwiftProtobuf', '~> 1.27.0'
+  spec.dependency 'SwiftProtobuf', '~> 1.27.1'
 
   spec.source_files = 'Libraries/ConnectMocks/**/*.swift'
 
