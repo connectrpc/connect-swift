@@ -73,17 +73,17 @@ public struct GeneratorOptions {
 }
 
 extension GeneratorOptions {
-    /// Initializes a set of generator options from the raw string representation of command line
+    /// Initializes a set of generator options from command line
     /// parameters (e.g., "Visibility=Internal,KeepMethodCasing=true").
     ///
     /// - parameter commandLineParameters: The CLI parameters.
     public init(commandLineParameters: SwiftProtobufPluginLibrary.CodeGeneratorParameter) throws {
         for (key, rawValue) in commandLineParameters.parsedPairs {
-            guard let parsedKey = CommandLineParameter(rawValue: key) else {
+            guard let parsedParameter = CommandLineParameter(rawValue: key) else {
                 throw CommandLineParameter.Error.unknownParameter(string: key)
             }
 
-            switch parsedKey {
+            switch parsedParameter {
             case .extraModuleImports:
                 self.extraModuleImports.append(rawValue)
                 continue

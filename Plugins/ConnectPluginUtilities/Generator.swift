@@ -19,16 +19,15 @@ private struct GeneratorError: Swift.Error {
     let message: String
 }
 
-/// Base generator class that can be used to output files from Protobuf file descriptors.
+/// Base generator class that can be used to generate Swift files from Protobuf file descriptors.
 ///
 /// Subclasses must be annotated with `@main` to be properly invoked at runtime.
 open class Generator {
+    private var neededModules = [String]()
     private var printer = SwiftProtobufPluginLibrary.CodePrinter()
 
     /// Used for producing type names when generating code.
     public private(set) var namer = SwiftProtobufPluginLibrary.SwiftProtobufNamer()
-    /// List of Swift module dependencies required by the current Protobuf file.
-    public private(set) var neededModules = [String]()
     /// Options to use when generating code.
     public private(set) var options = GeneratorOptions.empty()
     /// List of services specified in the current file.
@@ -101,7 +100,7 @@ open class Generator {
 
 extension Generator: SwiftProtobufPluginLibrary.CodeGenerator {
     private func resetAndPrintFile(
-        for descriptor: SwiftProtobufPluginLibrary.FileDescriptor, with options: GeneratorOptions
+        for descriptor: SwiftProtobufPluginLibrary.FileDescriptor
     ) -> String {
         self.namer = SwiftProtobufPluginLibrary.SwiftProtobufNamer(
             currentFile: descriptor,
@@ -109,7 +108,6 @@ extension Generator: SwiftProtobufPluginLibrary.CodeGenerator {
         )
         self.neededModules = self.options.protoToModuleMappings
             .neededModules(forFile: descriptor) ?? []
-        self.options = options
         self.services = descriptor.services
         self.printer = SwiftProtobufPluginLibrary.CodePrinter(indent: "    ".unicodeScalars)
         self.printContent(for: descriptor)
@@ -122,8 +120,8 @@ extension Generator: SwiftProtobufPluginLibrary.CodeGenerator {
         protoCompilerContext _: any SwiftProtobufPluginLibrary.ProtoCompilerContext,
         generatorOutputs: any SwiftProtobufPluginLibrary.GeneratorOutputs
     ) throws {
-        let options = try GeneratorOptions(commandLineParameters: parameter)
-        guard options.generateAsyncMethods || options.generateCallbackMethods else {
+        self.options = try GeneratorOptions(commandLineParameters: parameter)
+        guard self.options.generateAsyncMethods || self.options.generateCallbackMethods else {
             throw GeneratorError(
                 message: "Either async methods or callback methods must be enabled"
             )
@@ -132,9 +130,10 @@ extension Generator: SwiftProtobufPluginLibrary.CodeGenerator {
         for descriptor in files where !descriptor.services.isEmpty {
             try generatorOutputs.add(
                 fileName: FilePathComponents(path: descriptor.name).outputFilePath(
-                    withExtension: self.outputFileExtension, using: options.fileNaming
+                    withExtension: self.outputFileExtension,
+                    using: self.options.fileNaming
                 ),
-                contents: self.resetAndPrintFile(for: descriptor, with: options)
+                contents: self.resetAndPrintFile(for: descriptor)
             )
         }
     }
