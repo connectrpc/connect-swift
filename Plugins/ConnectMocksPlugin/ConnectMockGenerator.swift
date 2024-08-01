@@ -16,13 +16,20 @@ import ConnectPluginUtilities
 import Foundation
 import SwiftProtobufPluginLibrary
 
-/// Responsible for generating services and RPCs that are compatible with the Connect library.
+/// Responsible for generating mocks that are compatible with generated Connect services.
+@main
 final class ConnectMockGenerator: Generator {
-    private let propertyVisibility: String
-    private let typeVisibility: String
+    private var propertyVisibility = ""
+    private var typeVisibility = ""
 
-    required init(_ descriptor: FileDescriptor, options: GeneratorOptions) {
-        switch options.visibility {
+    override var outputFileExtension: String {
+        return ".mock.swift"
+    }
+
+    override func printContent(for descriptor: FileDescriptor) {
+        super.printContent(for: descriptor)
+
+        switch self.options.visibility {
         case .internal:
             self.propertyVisibility = "internal"
             self.typeVisibility = "internal"
@@ -30,12 +37,6 @@ final class ConnectMockGenerator: Generator {
             self.propertyVisibility = "public"
             self.typeVisibility = "open"
         }
-        super.init(descriptor, options: options)
-        self.printContent()
-    }
-
-    private func printContent() {
-        self.printFilePreamble()
 
         if self.options.generateCallbackMethods {
             self.printModuleImports(adding: ["Combine", "ConnectMocks"])
@@ -43,7 +44,7 @@ final class ConnectMockGenerator: Generator {
             self.printModuleImports(adding: ["ConnectMocks"])
         }
 
-        for service in self.descriptor.services {
+        for service in self.services {
             self.printLine()
             self.printMockService(service)
         }
