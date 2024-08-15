@@ -155,10 +155,25 @@ final class ConformanceInvoker {
         let unaryRequest = try Connectrpc_Conformance_V1_UnaryRequest(
             unpackingAny: self.context.requestMessages[0]
         )
-        let response = await self.client.unary(
-            request: unaryRequest,
-            headers: .fromConformanceHeaders(self.context.requestHeaders)
-        )
+        let task = Task { [unowned self] in
+            return await self.client.unary(
+                request: unaryRequest,
+                headers: .fromConformanceHeaders(self.context.requestHeaders)
+            )
+        }
+
+        switch self.context.cancel.cancelTiming {
+        case .beforeCloseSend:
+            task.cancel()
+        case .afterCloseSendMs(let milliseconds):
+            DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(Int(milliseconds))) {
+                task.cancel()
+            }
+        case .afterNumResponses, .none:
+            break
+        }
+
+        let response = await task.value
         return .with { responseResult in
             responseResult.responseHeaders = response.headers.toConformanceHeaders()
             responseResult.responseTrailers = response.trailers.toConformanceHeaders()
@@ -174,10 +189,25 @@ final class ConformanceInvoker {
         let unaryRequest = try Connectrpc_Conformance_V1_IdempotentUnaryRequest(
             unpackingAny: self.context.requestMessages[0]
         )
-        let response = await self.client.idempotentUnary(
-            request: unaryRequest,
-            headers: .fromConformanceHeaders(self.context.requestHeaders)
-        )
+        let task = Task { [unowned self] in
+            return await self.client.idempotentUnary(
+                request: unaryRequest,
+                headers: .fromConformanceHeaders(self.context.requestHeaders)
+            )
+        }
+
+        switch self.context.cancel.cancelTiming {
+        case .beforeCloseSend:
+            task.cancel()
+        case .afterCloseSendMs(let milliseconds):
+            DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(Int(milliseconds))) {
+                task.cancel()
+            }
+        case .afterNumResponses, .none:
+            break
+        }
+
+        let response = await task.value
         return .with { responseResult in
             responseResult.responseHeaders = response.headers.toConformanceHeaders()
             responseResult.responseTrailers = response.trailers.toConformanceHeaders()
