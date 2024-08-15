@@ -139,6 +139,8 @@ enum Connectrpc_Conformance_V1_Codec: SwiftProtobuf.Enum {
   case unspecified // = 0
   case proto // = 1
   case json // = 2
+
+  /// not used; will be ignored
   case text // = 3
   case UNRECOGNIZED(Int)
 

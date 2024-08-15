@@ -143,7 +143,8 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   /// Clears the value of `method`. Subsequent reads from it will return its default value.
   mutating func clearMethod() {_uniqueStorage()._method = nil}
 
-  /// The stream type of `method` (i.e. Unary, Client-Streaming, Server-Streaming, Full Duplex Bidi, or Half Duplex Bidi).
+  /// The stream type of `method` (i.e. unary, client stream, server stream, full-duplex bidi
+  /// stream, or half-duplex bidi stream).
   /// When writing test cases, this is a required field.
   var streamType: Connectrpc_Conformance_V1_StreamType {
     get {return _storage._streamType}
@@ -170,9 +171,9 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   /// The actual request messages that will sent to the server.
   /// The type URL for all entries should be equal to the request type of the
   /// method.
-  /// There must be exactly one for unary and server-stream methods but
-  /// can be zero or more for client- and bidi-stream methods.
-  /// For client- and bidi-stream methods, all entries will have the
+  /// There must be exactly one for unary and server stream methods but
+  /// can be zero or more for client and bidi stream methods.
+  /// For client and bidi stream methods, all entries will have the
   /// same type URL.
   var requestMessages: [SwiftProtobuf.Google_Protobuf_Any] {
     get {return _storage._requestMessages}
@@ -191,7 +192,7 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   mutating func clearTimeoutMs() {_uniqueStorage()._timeoutMs = nil}
 
   /// Wait this many milliseconds before sending a request message.
-  /// For client- or bidi-streaming requests, this delay should be
+  /// For client or bidi stream methods, this delay should be
   /// applied before each request sent.
   var requestDelayMs: UInt32 {
     get {return _storage._requestDelayMs}
@@ -243,8 +244,9 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
 
     /// When present, the client should cancel *instead of*
     /// closing the send side of the stream, after all requests
-    /// have been sent. This applies only to client and bidi
-    /// stream RPCs.
+    /// have been sent.
+    ///
+    /// This applies only to client and bidi stream RPCs.
     var beforeCloseSend: SwiftProtobuf.Google_Protobuf_Empty {
       get {
         if case .beforeCloseSend(let v)? = cancelTiming {return v}
@@ -256,6 +258,20 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
     /// When present, the client should delay for this many
     /// milliseconds after closing the send side of the stream
     /// and then cancel.
+    ///
+    /// This applies to all types of RPCs.
+    ///
+    /// For unary and server stream RPCs, where the API usually
+    /// does not allow explicitly closing the send side, the
+    /// cancellation should be done immediately after invoking
+    /// the RPC (which should implicitly send the one-and-only
+    /// request and then close the send-side).
+    ///
+    /// For APIs where unary RPCs block until the response
+    /// is received, there is no point after the request is
+    /// sent but before a response is received to cancel. So
+    /// the client must arrange for the RPC to be canceled
+    /// asynchronously before invoking the blocking unary call.
     var afterCloseSendMs: UInt32 {
       get {
         if case .afterCloseSendMs(let v)? = cancelTiming {return v}
@@ -266,6 +282,8 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
 
     /// When present, the client should cancel right after
     /// reading this number of response messages from the stream.
+    /// When present, this will be greater than zero.
+    ///
     /// This applies only to server and bidi stream RPCs.
     var afterNumResponses: UInt32 {
       get {
@@ -285,15 +303,32 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
     enum OneOf_CancelTiming: Equatable, Sendable {
       /// When present, the client should cancel *instead of*
       /// closing the send side of the stream, after all requests
-      /// have been sent. This applies only to client and bidi
-      /// stream RPCs.
+      /// have been sent.
+      ///
+      /// This applies only to client and bidi stream RPCs.
       case beforeCloseSend(SwiftProtobuf.Google_Protobuf_Empty)
       /// When present, the client should delay for this many
       /// milliseconds after closing the send side of the stream
       /// and then cancel.
+      ///
+      /// This applies to all types of RPCs.
+      ///
+      /// For unary and server stream RPCs, where the API usually
+      /// does not allow explicitly closing the send side, the
+      /// cancellation should be done immediately after invoking
+      /// the RPC (which should implicitly send the one-and-only
+      /// request and then close the send-side).
+      ///
+      /// For APIs where unary RPCs block until the response
+      /// is received, there is no point after the request is
+      /// sent but before a response is received to cancel. So
+      /// the client must arrange for the RPC to be canceled
+      /// asynchronously before invoking the blocking unary call.
       case afterCloseSendMs(UInt32)
       /// When present, the client should cancel right after
       /// reading this number of response messages from the stream.
+      /// When present, this will be greater than zero.
+      ///
       /// This applies only to server and bidi stream RPCs.
       case afterNumResponses(UInt32)
 
@@ -375,8 +410,8 @@ struct Connectrpc_Conformance_V1_ClientResponseResult: Sendable {
 
   /// Servers should echo back payloads that they received as part of the request.
   /// This field should contain all the payloads the server echoed back. Note that
-  /// There will be zero-to-one for unary and client-stream methods and
-  /// zero-to-many for server- and bidi-stream methods.
+  /// There will be zero-to-one for unary and client stream methods and
+  /// zero-to-many for server and bidi stream methods.
   var payloads: [Connectrpc_Conformance_V1_ConformancePayload] = []
 
   /// The error received from the actual RPC invocation. Note this is not representative
