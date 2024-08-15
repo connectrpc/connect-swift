@@ -16,6 +16,7 @@ disabled_rules:
   - identifier_name
   - opening_brace
   - nesting
+  - non_optional_string_data_conversion
   - redundant_string_enum_value
   - todo
   - type_body_length
