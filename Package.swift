@@ -49,15 +49,15 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/apple/swift-nio.git",
-            from: "2.67.0"
+            from: "2.71.0"
         ),
         .package(
             url: "https://github.com/apple/swift-nio-http2.git",
-            from: "1.32.0"
+            from: "1.34.0"
         ),
         .package(
             url: "https://github.com/apple/swift-nio-ssl.git",
-            from: "2.27.0"
+            from: "2.27.2"
         ),
         .package(
             url: "https://github.com/apple/swift-protobuf.git",
