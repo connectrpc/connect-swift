@@ -301,7 +301,7 @@ private extension HTTPResponse {
                 error: error,
                 tracingInfo: self.tracingInfo
             )
-        } else if message?.isEmpty != false {
+        } else if message == nil {
             return HTTPResponse(
                 code: .unimplemented,
                 headers: self.headers,
