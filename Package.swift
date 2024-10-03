@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version:6.0
 
 // Copyright 2022-2023 Buf Technologies, Inc.
 //
@@ -166,5 +166,5 @@ let package = Package(
             path: "Plugins/ConnectSwiftPlugin"
         ),
     ],
-    swiftLanguageVersions: [.v5]
+    swiftLanguageModes: [.v6]
 )
