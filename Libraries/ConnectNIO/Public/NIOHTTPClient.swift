@@ -15,7 +15,7 @@
 import Connect
 import Foundation
 import NIOConcurrencyHelpers
-import NIOCore
+@preconcurrency import NIOCore // TODO: Convert to normal import once `ChannelHandler` is `Sendable`
 import NIOHTTP1
 import NIOHTTP2
 import NIOPosix

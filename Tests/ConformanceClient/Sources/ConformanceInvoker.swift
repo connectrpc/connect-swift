@@ -19,7 +19,7 @@ import SwiftProtobuf
 
 /// Class responsible for running a specific conformance test case against a service.
 @available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
-final class ConformanceInvoker {
+final class ConformanceInvoker: Sendable {
     private let client: ConformanceClient
     private let context: ConformanceRequest
 
