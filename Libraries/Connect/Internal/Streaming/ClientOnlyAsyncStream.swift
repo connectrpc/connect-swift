@@ -23,7 +23,7 @@ import Foundation
 @available(iOS 13, *)
 final class ClientOnlyAsyncStream<
     Input: ProtobufMessage, Output: ProtobufMessage
->: BidirectionalAsyncStream<Input, Output> {
+>: BidirectionalAsyncStream<Input, Output>, @unchecked Sendable {
     private let receivedResults = Locked([StreamResult<Output>]())
 
     override func handleResultFromServer(_ result: StreamResult<Output>) {
