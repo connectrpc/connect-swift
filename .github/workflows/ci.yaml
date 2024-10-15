@@ -8,132 +8,20 @@ on:
 permissions:
   contents: read
 jobs:
-  build-eliza-cocoapods-example:
+  publish-podspecs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_16.app
-      - name: Install xcbeautify
-        run: brew install xcbeautify
-      - name: Build Eliza CocoaPods example
+      - name: Publish podspecs to CocoaPods
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        # Note that CocoaPods may fail to publish the Mocks spec for some time
+        # after publishing the primary spec because the former depends on the latter.
+        # If this happens, re-run the job after ~20 minutes or wait for the next commit
+        # to land on main.
         run: |
-          cd Examples/ElizaCocoaPodsApp
-          pod install
-          set -o pipefail && xcodebuild -workspace ElizaCocoaPodsApp.xcworkspace -scheme ElizaCocoaPodsApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
-  build-eliza-swiftpm-example:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
-      - name: Install xcbeautify
-        run: brew install xcbeautify
-      - name: Build Eliza Swift PM example
-        run: |
-          cd Examples/ElizaSwiftPackageApp
-          set -o pipefail && xcodebuild -scheme ElizaSwiftPackageApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
-  build-library-ios:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
-      - name: Install xcbeautify
-        run: brew install xcbeautify
-      - name: Build Connect iOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.0' | xcbeautify
-  build-library-macos:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
-      - name: Install xcbeautify
-        run: brew install xcbeautify
-      - name: Build Connect macOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS' | xcbeautify
-  build-library-tvos:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
-      - name: Install xcbeautify
-        run: brew install xcbeautify
-      - name: Build Connect tvOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=18.0' | xcbeautify
-  build-library-watchos:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
-      - name: Install xcbeautify
-        run: brew install xcbeautify
-      - name: Build Connect watchOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 10 (42mm),OS=11.0' | xcbeautify
-  build-plugin-and-generate:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
-        run: sudo xcode-select --switch /Applications/Xcode_15.2.app
-      - uses: bufbuild/buf-setup-action@v1.45.0
-        with:
-          github_token: ${{ github.token }}
-      - name: Build plugins
-        run: make buildplugins
-      - name: Generate outputs
-        run: make generate
-      - name: Ensure no generated diff
-        run: |
-          git update-index --refresh --add --remove
-          git diff-index --quiet HEAD --
-  run-conformance-tests:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
-      - name: Install conformance runner
-        run: make installconformancerunner
-      - name: Run conformance tests
-        run: make testconformance
-  run-unit-tests:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: 1.21.x
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
-      - name: Run unit tests
-        run: make testunit
-  run-swiftlint:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/realm/swiftlint:0.57.0
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run SwiftLint
-        run: swiftlint lint --strict
-  validate-license-headers:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Validate license headers
-        run: |
-          make licenseheaders
-          git update-index --refresh
-          git diff-index --quiet HEAD --
+          pod trunk push Connect-Swift.podspec
+          pod trunk push Connect-Swift-Mocks.podspec
