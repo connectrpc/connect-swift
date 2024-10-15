@@ -36,15 +36,3 @@ jobs:
           append_body: true
           files: |
             ./.tmp/bin/artifacts/*
-  publish-to-cocoapods:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
-      - name: Publish to CocoaPod register
-        env:
-          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
-        run: |
-          pod trunk push Connect-Swift.podspec
