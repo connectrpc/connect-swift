@@ -1,0 +1,27 @@
+name: cocoapods
+on:
+  push:
+    branches:
+      - main
+  pull_request: # TODO: remove before merging
+  workflow_dispatch: {} # support manual runs
+permissions:
+  contents: read
+jobs:
+  publish-podspecs:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode version
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
+        run: sudo xcode-select --switch /Applications/Xcode_16.app
+      - name: Publish podspecs to CocoaPods
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        # Note that CocoaPods may fail to publish the Mocks spec for some time
+        # after publishing the primary spec because the former depends on the latter.
+        # If this happens, re-run the job after ~20 minutes or wait for the next commit
+        # to land on main.
+        run: |
+          pod trunk push Connect-Swift.podspec
+          pod trunk push Connect-Swift-Mocks.podspec
