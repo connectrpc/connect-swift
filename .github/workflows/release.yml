@@ -12,8 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
-        run: sudo xcode-select --switch /Applications/Xcode_15.2.app
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
+        run: sudo xcode-select --switch /Applications/Xcode_16.app
       - uses: bufbuild/buf-setup-action@v1.45.0
         with:
           github_token: ${{ github.token }}
