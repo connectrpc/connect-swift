@@ -173,23 +173,12 @@ To update dependencies such as `SwiftProtobuf` in this repository:
 
 Releases should be tagged in `x.y.z` SemVer format.
 
-1. Create a new GitHub release.
-2. Update both [`Connect-Swift.podspec`](../Connect-Swift.podspec) and
+1. Update both [`Connect-Swift.podspec`](../Connect-Swift.podspec) and
    [`Connect-Swift-Mocks.podspec`](../Connect-Swift-Mocks.podspec) to reflect
-   the newly tagged version.
-3. Run `cd Examples/ElizaCocoaPodsApp && pod update` to update the example CocoaPods app.
-4. Submit a PR with these changes.
-5. Push both specs to CocoaPods:
-
-```sh
-pod trunk push Connect-Swift.podspec
-pod repo update
-pod trunk push Connect-Swift-Mocks.podspec
-```
-
-Note: If pushing the mocks podspec fails because CocoaPods cannot find the new
-`Connect-Swift` podspec in the specs repo, you may have to wait ~30 min
-for it to populate before trying again.
+   the upcoming version on `main`. In the same PR, update the example CocoaPods
+   app by running `cd Examples/ElizaCocoaPodsApp && pod install`.
+2. Create a new GitHub release/tag after merging these changes.
+3. CI will automatically push the updated specs to CocoaPods in its [release job](./workflows/release.yml).
 
 [dco]: https://developercertificate.org
 [commit-message]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html

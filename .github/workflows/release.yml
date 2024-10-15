@@ -36,3 +36,17 @@ jobs:
           append_body: true
           files: |
             ./.tmp/bin/artifacts/*
+  publish-podspecs:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode version
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
+        run: sudo xcode-select --switch /Applications/Xcode_16.app
+      - name: Publish podspecs to CocoaPods
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        # Note that --synchronous is used since Mocks depends on the primary spec.
+        run: |
+          pod trunk push Connect-Swift.podspec --allow-warnings --synchronous
+          pod trunk push Connect-Swift-Mocks.podspec --allow-warnings --synchronous
