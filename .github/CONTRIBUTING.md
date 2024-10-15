@@ -178,7 +178,7 @@ Releases should be tagged in `x.y.z` SemVer format.
    the upcoming version on `main`. In the same PR, update the example CocoaPods
    app by running `cd Examples/ElizaCocoaPodsApp && pod install`.
 2. Create a new GitHub release/tag after merging these changes.
-3. CI will automatically push the updated specs to CocoaPods in its [release job](./workflows/release.yml)
+3. CI will automatically push the updated specs to CocoaPods in its [release job](./workflows/release.yml).
 
 [dco]: https://developercertificate.org
 [commit-message]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
