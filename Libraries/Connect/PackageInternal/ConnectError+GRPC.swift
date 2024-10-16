@@ -25,6 +25,11 @@ extension ConnectError {
     ///                       passed in the headers block for gRPC-Web.
     ///
     /// - returns: A tuple containing the gRPC status code and an optional error.
+    @available(
+        swift,
+        deprecated: 100.0,
+        message: "This is an internal-only API which will be made package-private in Swift 6."
+    )
     public static func parseGRPCHeaders(
         _ headers: Headers?, trailers: Trailers?
     ) -> (grpcCode: Code, error: ConnectError?) {

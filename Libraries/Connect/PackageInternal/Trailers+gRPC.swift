@@ -19,6 +19,11 @@ extension Trailers {
     /// Identifies the status code from gRPC and gRPC-Web trailers.
     ///
     /// - returns: The gRPC status code, if specified.
+    @available(
+        swift,
+        deprecated: 100.0,
+        message: "This is an internal-only API which will be made package-private in Swift 6."
+    )
     public func grpcStatus() -> Code? {
         return self[HeaderConstants.grpcStatus]?
             .first

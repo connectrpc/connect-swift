@@ -19,8 +19,18 @@ import SwiftProtobuf
 /// to change. When the compiler supports it, this should be package-internal.**
 ///
 /// Provides functionality for packing and unpacking (headers and length prefixed) messages.
+@available(
+    swift,
+    deprecated: 100.0,
+    message: "This is an internal-only API which will be made package-private in Swift 6."
+)
 public enum Envelope {
     /// The total number of bytes that will prefix a message.
+    @available(
+        swift,
+        deprecated: 100.0,
+        message: "This is an internal-only API which will be made package-private in Swift 6."
+    )
     public static var prefixLength: Int {
         return 5 // Header flags (1 byte) + message length (4 bytes)
     }
@@ -35,6 +45,11 @@ public enum Envelope {
     /// - parameter compression: Configuration to use for compressing the message.
     ///
     /// - returns: Serialized/enveloped data for transmission.
+    @available(
+        swift,
+        deprecated: 100.0,
+        message: "This is an internal-only API which will be made package-private in Swift 6."
+    )
     public static func packMessage(
         _ source: Data, using compression: ProtocolClientConfig.RequestCompression?
     ) -> Data {
@@ -70,6 +85,11 @@ public enum Envelope {
     ///
     /// - returns: A tuple that includes the header byte and the un-prefixed and decompressed
     ///            message.
+    @available(
+        swift,
+        deprecated: 100.0,
+        message: "This is an internal-only API which will be made package-private in Swift 6."
+    )
     public static func unpackMessage(
         _ source: Data, compressionPool: CompressionPool?
     ) throws -> (headerByte: UInt8, unpacked: Data) {
@@ -96,6 +116,11 @@ public enum Envelope {
     /// - parameter packedData: The packed data to analyze.
     ///
     /// - returns: True if the data is compressed.
+    @available(
+        swift,
+        deprecated: 100.0,
+        message: "This is an internal-only API which will be made package-private in Swift 6."
+    )
     public static func isCompressed(_ packedData: Data) -> Bool {
         return !packedData.isEmpty && (0b00000001 & packedData[0] != 0)
     }
@@ -111,6 +136,11 @@ public enum Envelope {
     /// - returns: The length of the next expected message in the packed data. If multiple chunks
     ///            are specified, this will return the length of the first. Returns -1 if there is
     ///            not enough prefix data to determine the message length.
+    @available(
+        swift,
+        deprecated: 100.0,
+        message: "This is an internal-only API which will be made package-private in Swift 6."
+    )
     public static func messageLength(forPackedData data: Data) -> Int {
         guard data.count >= self.prefixLength else {
             return -1
