@@ -158,7 +158,7 @@ extension ConnectInterceptor: StreamInterceptor {
 
     @Sendable
     func handleStreamRawInput(_ input: Data, proceed: @escaping (Data) -> Void) {
-        proceed(Envelope.packMessage(input, using: self.config.requestCompression))
+        proceed(Envelope._packMessage(input, using: self.config.requestCompression))
     }
 
     @Sendable
@@ -190,7 +190,7 @@ extension ConnectInterceptor: StreamInterceptor {
                 let responseCompressionPool = self.streamResponseHeaders.value?[
                     HeaderConstants.connectStreamingContentEncoding
                 ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
-                if responseCompressionPool == nil && Envelope.isCompressed(data) {
+                if responseCompressionPool == nil && Envelope._isCompressed(data) {
                     proceed(.complete(
                         code: .internalError, error: ConnectError(
                             code: .internalError, message: "received unexpected compressed message"
@@ -199,7 +199,7 @@ extension ConnectInterceptor: StreamInterceptor {
                     return
                 }
 
-                let (headerByte, message) = try Envelope.unpackMessage(
+                let (headerByte, message) = try Envelope._unpackMessage(
                     data, compressionPool: responseCompressionPool
                 )
                 let isEndStream = 0b00000010 & headerByte != 0

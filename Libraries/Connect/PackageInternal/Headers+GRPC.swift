@@ -25,7 +25,12 @@ extension Headers {
     /// - parameter grpcWeb: Should be true if using gRPC-Web, false if gRPC.
     ///
     /// - returns: A set of updated headers.
-    public func addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
+    @available(
+        swift,
+        deprecated: 100.0,
+        message: "This is an internal-only API which will be made package-private in Swift 6."
+    )
+    public func _addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
         var headers = self
         headers[HeaderConstants.grpcAcceptEncoding] = config
             .acceptCompressionPoolNames()
