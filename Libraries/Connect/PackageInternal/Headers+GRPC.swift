@@ -30,7 +30,7 @@ extension Headers {
         deprecated: 100.0,
         message: "This is an internal-only API which will be made package-private in Swift 6."
     )
-    public func addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
+    public func _addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
         var headers = self
         headers[HeaderConstants.grpcAcceptEncoding] = config
             .acceptCompressionPoolNames()

@@ -31,7 +31,7 @@ public enum Envelope {
         deprecated: 100.0,
         message: "This is an internal-only API which will be made package-private in Swift 6."
     )
-    public static var prefixLength: Int {
+    public static var _prefixLength: Int {
         return 5 // Header flags (1 byte) + message length (4 bytes)
     }
 
@@ -50,7 +50,7 @@ public enum Envelope {
         deprecated: 100.0,
         message: "This is an internal-only API which will be made package-private in Swift 6."
     )
-    public static func packMessage(
+    public static func _packMessage(
         _ source: Data, using compression: ProtocolClientConfig.RequestCompression?
     ) -> Data {
         var buffer = Data()
@@ -90,7 +90,7 @@ public enum Envelope {
         deprecated: 100.0,
         message: "This is an internal-only API which will be made package-private in Swift 6."
     )
-    public static func unpackMessage(
+    public static func _unpackMessage(
         _ source: Data, compressionPool: CompressionPool?
     ) throws -> (headerByte: UInt8, unpacked: Data) {
         if source.isEmpty {
@@ -99,7 +99,7 @@ public enum Envelope {
 
         let headerByte = source[0]
         let isCompressed = 0b00000001 & headerByte != 0
-        let messageData = Data(source.dropFirst(self.prefixLength))
+        let messageData = Data(source.dropFirst(self._prefixLength))
         if isCompressed {
             guard let compressionPool = compressionPool else {
                 throw Error.missingExpectedCompressionPool
@@ -121,7 +121,7 @@ public enum Envelope {
         deprecated: 100.0,
         message: "This is an internal-only API which will be made package-private in Swift 6."
     )
-    public static func isCompressed(_ packedData: Data) -> Bool {
+    public static func _isCompressed(_ packedData: Data) -> Bool {
         return !packedData.isEmpty && (0b00000001 & packedData[0] != 0)
     }
 
@@ -141,8 +141,8 @@ public enum Envelope {
         deprecated: 100.0,
         message: "This is an internal-only API which will be made package-private in Swift 6."
     )
-    public static func messageLength(forPackedData data: Data) -> Int {
-        guard data.count >= self.prefixLength else {
+    public static func _messageLength(forPackedData data: Data) -> Int {
+        guard data.count >= self._prefixLength else {
             return -1
         }
 

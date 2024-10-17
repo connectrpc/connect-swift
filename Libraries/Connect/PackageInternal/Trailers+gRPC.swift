@@ -24,7 +24,7 @@ extension Trailers {
         deprecated: 100.0,
         message: "This is an internal-only API which will be made package-private in Swift 6."
     )
-    public func grpcStatus() -> Code? {
+    public func _grpcStatus() -> Code? {
         return self[HeaderConstants.grpcStatus]?
             .first
             .flatMap(Int.init)

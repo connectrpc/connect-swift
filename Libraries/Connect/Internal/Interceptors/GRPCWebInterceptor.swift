@@ -32,12 +32,12 @@ extension GRPCWebInterceptor: UnaryInterceptor {
         proceed: @escaping (Result<HTTPRequest<Data?>, ConnectError>) -> Void
     ) {
         // gRPC-Web unary payloads are enveloped.
-        let envelopedRequestBody = Envelope.packMessage(
+        let envelopedRequestBody = Envelope._packMessage(
             request.message ?? Data(), using: self.config.requestCompression
         )
         proceed(.success(HTTPRequest(
             url: request.url,
-            headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: true),
+            headers: request.headers._addingGRPCHeaders(using: self.config, grpcWeb: true),
             message: envelopedRequestBody,
             method: request.method,
             trailers: nil,
@@ -57,7 +57,7 @@ extension GRPCWebInterceptor: UnaryInterceptor {
         }
 
         guard let responseData = response.message, !responseData.isEmpty else {
-            let (grpcCode, connectError) = ConnectError.parseGRPCHeaders(
+            let (grpcCode, connectError) = ConnectError._parseGRPCHeaders(
                 response.headers,
                 trailers: response.trailers
             )
@@ -102,7 +102,7 @@ extension GRPCWebInterceptor: UnaryInterceptor {
         let compressionPool = response.headers[HeaderConstants.grpcContentEncoding]?
             .first
             .flatMap { self.config.responseCompressionPool(forName: $0) }
-        if compressionPool == nil && Envelope.isCompressed(responseData) {
+        if compressionPool == nil && Envelope._isCompressed(responseData) {
             proceed(HTTPResponse(
                 code: .internalError, headers: response.headers, message: nil,
                 trailers: response.trailers,
@@ -120,9 +120,9 @@ extension GRPCWebInterceptor: UnaryInterceptor {
             //    message data.
             // 2. The (headers and length prefixed) trailers data.
             // https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
-            let firstChunkLength = Envelope.messageLength(forPackedData: responseData)
-            let prefixedFirstChunkLength = Envelope.prefixLength + firstChunkLength
-            let firstChunk = try Envelope.unpackMessage(
+            let firstChunkLength = Envelope._messageLength(forPackedData: responseData)
+            let prefixedFirstChunkLength = Envelope._prefixLength + firstChunkLength
+            let firstChunk = try Envelope._unpackMessage(
                 Data(responseData.prefix(upTo: prefixedFirstChunkLength)),
                 compressionPool: compressionPool
             )
@@ -135,7 +135,7 @@ extension GRPCWebInterceptor: UnaryInterceptor {
             } else {
                 let trailersData = Data(responseData.suffix(from: prefixedFirstChunkLength))
                 let unpackedTrailers = try Trailers.fromGRPCHeadersBlock(
-                    try Envelope.unpackMessage(
+                    try Envelope._unpackMessage(
                         trailersData, compressionPool: compressionPool
                     ).unpacked
                 )
@@ -165,7 +165,7 @@ extension GRPCWebInterceptor: StreamInterceptor {
     ) {
         proceed(.success(HTTPRequest(
             url: request.url,
-            headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: true),
+            headers: request.headers._addingGRPCHeaders(using: self.config, grpcWeb: true),
             message: request.message,
             method: request.method,
             trailers: nil,
@@ -175,7 +175,7 @@ extension GRPCWebInterceptor: StreamInterceptor {
 
     @Sendable
     func handleStreamRawInput(_ input: Data, proceed: @escaping (Data) -> Void) {
-        proceed(Envelope.packMessage(input, using: self.config.requestCompression))
+        proceed(Envelope._packMessage(input, using: self.config.requestCompression))
     }
 
     @Sendable
@@ -198,11 +198,11 @@ extension GRPCWebInterceptor: StreamInterceptor {
                 return
             }
 
-            if let grpcCode = headers.grpcStatus() {
+            if let grpcCode = headers._grpcStatus() {
                 // Headers-only response.
                 proceed(.complete(
                     code: grpcCode,
-                    error: ConnectError.parseGRPCHeaders(nil, trailers: headers).error,
+                    error: ConnectError._parseGRPCHeaders(nil, trailers: headers).error,
                     trailers: headers
                 ))
             } else {
@@ -215,13 +215,13 @@ extension GRPCWebInterceptor: StreamInterceptor {
                 let responseCompressionPool = self.streamResponseHeaders.value?[
                     HeaderConstants.grpcContentEncoding
                 ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
-                let (headerByte, unpackedData) = try Envelope.unpackMessage(
+                let (headerByte, unpackedData) = try Envelope._unpackMessage(
                     data, compressionPool: responseCompressionPool
                 )
                 let isTrailers = 0b10000000 & headerByte != 0
                 if isTrailers {
                     let trailers = try Trailers.fromGRPCHeadersBlock(unpackedData)
-                    let (grpcCode, error) = ConnectError.parseGRPCHeaders(
+                    let (grpcCode, error) = ConnectError._parseGRPCHeaders(
                         self.streamResponseHeaders.value, trailers: trailers
                     )
                     if grpcCode == .ok {
@@ -290,7 +290,7 @@ private extension Trailers {
 
 private extension HTTPResponse {
     func withHandledGRPCWebTrailers(_ trailers: Trailers, message: Data?) -> Self {
-        let (grpcCode, error) = ConnectError.parseGRPCHeaders(self.headers, trailers: trailers)
+        let (grpcCode, error) = ConnectError._parseGRPCHeaders(self.headers, trailers: trailers)
         if grpcCode != .ok || error != nil {
             return HTTPResponse(
                 // Rewrite the gRPC code if it is "ok" but `connectError` is non-nil.
