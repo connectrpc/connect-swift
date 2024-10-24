@@ -119,6 +119,9 @@ final class ConnectClientGenerator: Generator {
     private func printCallbackMethodInterface(for method: MethodDescriptor) {
         self.printLine()
         self.printCommentsIfNeeded(for: method)
+        if let availabilityAnnotation = method.callbackAvailabilityAnnotation() {
+            self.printLine(availabilityAnnotation)
+        }
         if !method.serverStreaming && !method.clientStreaming {
             self.printLine("@discardableResult")
         }
@@ -133,7 +136,7 @@ final class ConnectClientGenerator: Generator {
     private func printAsyncAwaitMethodInterface(for method: MethodDescriptor) {
         self.printLine()
         self.printCommentsIfNeeded(for: method)
-        self.printLine("@available(iOS 13, *)")
+        self.printLine(method.asyncAwaitAvailabilityAnnotation())
         self.printLine(
             method.asyncAwaitSignature(
                 using: self.namer, includeDefaults: false, options: self.options
@@ -143,6 +146,9 @@ final class ConnectClientGenerator: Generator {
 
     private func printCallbackMethodImplementation(for method: MethodDescriptor) {
         self.printLine()
+        if let availabilityAnnotation = method.callbackAvailabilityAnnotation() {
+            self.printLine(availabilityAnnotation)
+        }
         if !method.serverStreaming && !method.clientStreaming {
             self.printLine("@discardableResult")
         }
@@ -162,7 +168,7 @@ final class ConnectClientGenerator: Generator {
 
     private func printAsyncAwaitMethodImplementation(for method: MethodDescriptor) {
         self.printLine()
-        self.printLine("@available(iOS 13, *)")
+        self.printLine(method.asyncAwaitAvailabilityAnnotation())
         self.printLine(
             "\(self.visibility) "
             + method.asyncAwaitSignature(
@@ -198,6 +204,30 @@ private extension MethodDescriptor {
             return "noSideEffects"
         case .idempotent:
             return "idempotent"
+        }
+    }
+
+    func callbackAvailabilityAnnotation() -> String? {
+        if self.options.deprecated {
+            // swiftlint:disable line_length
+            return """
+            @available(iOS, introduced: 12, deprecated: 12, message: "This function has been marked deprecated.")
+            @available(macOS, introduced: 10.15, deprecated: 10.15, message: "This function has been marked deprecated.")
+            @available(tvOS, introduced: 13, deprecated: 13, message: "This function has been marked deprecated.")
+            @available(watchOS, introduced: 6, deprecated: 6, message: "This function has been marked deprecated.")
+            """
+            // swiftlint:enable line_length
+        } else {
+            return nil
+        }
+    }
+
+    func asyncAwaitAvailabilityAnnotation() -> String {
+        if self.options.deprecated {
+            // swiftlint:disable:next line_length
+            return "@available(iOS, introduced: 13, deprecated: 13, message: \"This function has been marked deprecated.\")"
+        } else {
+            return "@available(iOS 13, *)"
         }
     }
 
