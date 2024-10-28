@@ -211,10 +211,10 @@ private extension MethodDescriptor {
         if self.options.deprecated {
             // swiftlint:disable line_length
             return """
-            @available(iOS, introduced: 12, deprecated: 12, message: "This function has been marked deprecated.")
-            @available(macOS, introduced: 10.15, deprecated: 10.15, message: "This function has been marked deprecated.")
-            @available(tvOS, introduced: 13, deprecated: 13, message: "This function has been marked deprecated.")
-            @available(watchOS, introduced: 6, deprecated: 6, message: "This function has been marked deprecated.")
+            @available(iOS, introduced: 12, deprecated: 12, message: "This RPC has been marked as deprecated in its `.proto` file.")
+            @available(macOS, introduced: 10.15, deprecated: 10.15, message: "This RPC has been marked as deprecated in its `.proto` file.")
+            @available(tvOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
+            @available(watchOS, introduced: 6, deprecated: 6, message: "This RPC has been marked as deprecated in its `.proto` file.")
             """
             // swiftlint:enable line_length
         } else {
@@ -225,7 +225,7 @@ private extension MethodDescriptor {
     func asyncAwaitAvailabilityAnnotation() -> String {
         if self.options.deprecated {
             // swiftlint:disable:next line_length
-            return "@available(iOS, introduced: 13, deprecated: 13, message: \"This function has been marked deprecated.\")"
+            return "@available(iOS, introduced: 13, deprecated: 13, message: \"This RPC has been marked as deprecated in its `.proto` file.\")"
         } else {
             return "@available(iOS 13, *)"
         }
