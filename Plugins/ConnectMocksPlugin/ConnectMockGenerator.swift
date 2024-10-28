@@ -117,6 +117,9 @@ final class ConnectMockGenerator: Generator {
 
     private func printCallbackMethodMockImplementation(for method: MethodDescriptor) {
         self.printLine()
+        if let availabilityAnnotation = method.callbackAvailabilityAnnotation() {
+            self.printLine(availabilityAnnotation)
+        }
         if !method.serverStreaming && !method.clientStreaming {
             self.printLine("@discardableResult")
         }
@@ -150,7 +153,9 @@ final class ConnectMockGenerator: Generator {
 
     private func printAsyncAwaitMethodMockImplementation(for method: MethodDescriptor) {
         self.printLine()
-
+        if let availabilityAnnotation = method.asyncAwaitAvailabilityAnnotation() {
+            self.printLine(availabilityAnnotation)
+        }
         self.printLine(
             "\(self.typeVisibility) "
             + method.asyncAwaitSignature(
@@ -217,6 +222,30 @@ private extension MethodDescriptor {
             .init(result: .success(.init())) \
             }
             """
+        }
+    }
+
+    func callbackAvailabilityAnnotation() -> String? {
+        if self.options.deprecated {
+            // swiftlint:disable line_length
+            return """
+            @available(iOS, introduced: 12, deprecated: 12, message: "This RPC has been marked as deprecated in its `.proto` file.")
+            @available(macOS, introduced: 10.15, deprecated: 10.15, message: "This RPC has been marked as deprecated in its `.proto` file.")
+            @available(tvOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
+            @available(watchOS, introduced: 6, deprecated: 6, message: "This RPC has been marked as deprecated in its `.proto` file.")
+            """
+            // swiftlint:enable line_length
+        } else {
+            return nil
+        }
+    }
+
+    func asyncAwaitAvailabilityAnnotation() -> String? {
+        if self.options.deprecated {
+            // swiftlint:disable:next line_length
+            return "@available(iOS, introduced: 13, deprecated: 13, message: \"This RPC has been marked as deprecated in its `.proto` file.\")"
+        } else {
+            return nil
         }
     }
 }
