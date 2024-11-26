@@ -34,7 +34,20 @@ public struct ConnectError: Swift.Error, Sendable {
     /// Any decoding errors are ignored, and the detail will simply be omitted from the list.
     ///
     /// To access only the first error of a specific type:
-    /// `let unpackedError: MyError? = error.unpackedDetails().first`
+    ///
+    /// ```
+    /// let unpackedErrors: [MyError] = error.unpackedDetails()
+    /// let unpackedError = unpackedErrors.first
+    /// // OR
+    /// let unpackedError = (error.unpackedDetails() as [MyError]).first
+    /// ```
+    ///
+    /// When calling this function from Swift 5, the compiler will allow the following
+    /// alternative syntax:
+    ///
+    /// ```
+    /// let unpackedError: MyError? = error.unpackedDetails().first
+    /// ```
     ///
     /// - returns: The matching unpacked typed error details.
     public func unpackedDetails<Output: ProtobufMessage>() -> [Output] {
