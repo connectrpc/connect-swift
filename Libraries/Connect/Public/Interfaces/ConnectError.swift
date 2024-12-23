@@ -111,6 +111,12 @@ extension ConnectError: Decodable {
     }
 }
 
+extension ConnectError: LocalizedError {
+    public var errorDescription: String? {
+        return self.message ?? self.exception.map { "internal error: \($0.localizedDescription)" }
+    }
+}
+
 extension ConnectError {
     public static func from(
         code: Code, headers: Headers?, trailers: Trailers?, source: Data?
