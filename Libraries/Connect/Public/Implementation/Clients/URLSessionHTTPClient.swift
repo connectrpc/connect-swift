@@ -203,7 +203,7 @@ extension Code {
             return .canceled
         case URLError.badURL.rawValue:
             return .invalidArgument
-        case URLError.timedOut.rawValue:
+        case URLError.timedOut.rawValue, NSURLErrorTimedOut:
             return .deadlineExceeded
         case URLError.unsupportedURL.rawValue:
             return .unimplemented
@@ -213,8 +213,7 @@ extension Code {
             NSURLErrorInternationalRoamingOff,
             NSURLErrorNetworkConnectionLost,
             NSURLErrorNotConnectedToInternet,
-            NSURLErrorSecureConnectionFailed,
-            NSURLErrorTimedOut:
+            NSURLErrorSecureConnectionFailed:
             return .unavailable
         case ...100: // URLSession can return errors in this range
             return .unknown
