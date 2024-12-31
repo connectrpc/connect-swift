@@ -41,10 +41,6 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         case connected(channel: NIOCore.Channel, multiplexer: NIOHTTP2.HTTP2StreamMultiplexer)
     }
 
-    private enum Error: Swift.Error {
-        case disconnected
-    }
-
     /// Designated initializer for the client.
     ///
     /// - parameter host: Target host (e.g., `https://connectrpc.com`).
@@ -137,11 +133,11 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 )
             } else {
                 onResponse(.init(
-                    code: .unknown,
+                    code: .unavailable,
                     headers: [:],
                     message: nil,
                     trailers: [:],
-                    error: Error.disconnected,
+                    error: ConnectError.disconnected(),
                     tracingInfo: nil
                 ))
             }
@@ -165,7 +161,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                     for: request.url, on: eventLoop, using: multiplexer, with: handler
                 )
             } else {
-                responseCallbacks.receiveClose(.unknown, [:], Error.disconnected)
+                responseCallbacks.receiveClose(.unavailable, [:], ConnectError.disconnected())
             }
         }
         return .init(
@@ -266,5 +262,11 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
             }
         }
         try? self.loopGroup.syncShutdownGracefully()
+    }
+}
+
+private extension ConnectError {
+    static func disconnected() -> Self {
+        return .init(code: .unavailable, message: "client is not connected")
     }
 }
