@@ -162,8 +162,8 @@ for details.
 
 ## Status
 
-This project is in beta, and we may make a few changes as we gather feedback
-from early adopters. Join us on [Slack][slack]!
+This project is stable and follows semantic versioning, which means any breaking changes will result in a major version increase.
+Our goal is to not make breaking changes unless absolutely necessary.
 
 ## Legal
 
