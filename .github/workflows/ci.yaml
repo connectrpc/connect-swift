@@ -85,7 +85,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
-        run: sudo xcode-select --switch /Applications/Xcode_15.2.app
+        run: sudo xcode-select --switch /Applications/Xcode_16.2.app
       - uses: bufbuild/buf-setup-action@v1.48.0
         with:
           github_token: ${{ github.token }}
