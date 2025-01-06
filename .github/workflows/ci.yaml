@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
+        run: sudo xcode-select --switch /Applications/Xcode_16.1.app
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Eliza CocoaPods example
@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
+        run: sudo xcode-select --switch /Applications/Xcode_16.1.app
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Eliza Swift PM example
@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
+        run: sudo xcode-select --switch /Applications/Xcode_16.1.app
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Connect iOS library
@@ -52,7 +52,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
+        run: sudo xcode-select --switch /Applications/Xcode_16.1.app
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Connect macOS library
@@ -63,7 +63,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
+        run: sudo xcode-select --switch /Applications/Xcode_16.1.app
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Connect tvOS library
@@ -74,7 +74,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
+        run: sudo xcode-select --switch /Applications/Xcode_16.1.app
       - name: Install xcbeautify
         run: brew install xcbeautify
       - name: Build Connect watchOS library
@@ -103,7 +103,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
+        run: sudo xcode-select --switch /Applications/Xcode_16.1.app
       - name: Install conformance runner
         run: make installconformancerunner
       - name: Run conformance tests
@@ -117,7 +117,7 @@ jobs:
           go-version: 1.21.x
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
+        run: sudo xcode-select --switch /Applications/Xcode_16.1.app
       - name: Run unit tests
         run: make testunit
   run-swiftlint:

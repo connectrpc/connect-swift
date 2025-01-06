@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
+        run: sudo xcode-select --switch /Applications/Xcode_16.1.app
       - uses: bufbuild/buf-setup-action@v1.48.0
         with:
           github_token: ${{ github.token }}
@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.app
+        run: sudo xcode-select --switch /Applications/Xcode_16.1.app
       - name: Publish podspecs to CocoaPods
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
