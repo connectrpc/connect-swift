@@ -200,7 +200,7 @@ extension URLSessionDelegateWrapper: URLSessionDataDelegate {
         _ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
         completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
     ) {
-        client?.urlSession(
+        self.client?.urlSession(
             session, dataTask: dataTask, didReceive: response, completionHandler: completionHandler
         )
     }
@@ -208,14 +208,14 @@ extension URLSessionDelegateWrapper: URLSessionDataDelegate {
     func urlSession(
         _ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data
     ) {
-        client?.urlSession(session, dataTask: dataTask, didReceive: data)
+        self.client?.urlSession(session, dataTask: dataTask, didReceive: data)
     }
 
     func urlSession(
         _ session: URLSession, task: URLSessionTask,
         needNewBodyStream completionHandler: @escaping (InputStream?) -> Void
     ) {
-        client?.urlSession(session, task: task, needNewBodyStream: completionHandler)
+        self.client?.urlSession(session, task: task, needNewBodyStream: completionHandler)
     }
 }
 
@@ -223,14 +223,14 @@ extension URLSessionDelegateWrapper: URLSessionTaskDelegate {
     func urlSession(
         _ session: URLSession, task: URLSessionTask, didCompleteWithError error: Swift.Error?
     ) {
-        client?.urlSession(session, task: task, didCompleteWithError: error)
+        self.client?.urlSession(session, task: task, didCompleteWithError: error)
     }
 
     func urlSession(
         _ session: URLSession, task: URLSessionTask,
         didFinishCollecting metrics: URLSessionTaskMetrics
     ) {
-        client?.urlSession(session, task: task, didFinishCollecting: metrics)
+        self.client?.urlSession(session, task: task, didFinishCollecting: metrics)
     }
 }
 
