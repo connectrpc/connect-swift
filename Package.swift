@@ -166,5 +166,5 @@ let package = Package(
             path: "Plugins/ConnectSwiftPlugin"
         ),
     ],
-    swiftLanguageVersions: [.v5]
+    swiftLanguageVersions: [.version("6"), .v5]
 )
