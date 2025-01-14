@@ -14,7 +14,7 @@ jobs:
       - name: Select Xcode version
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
         run: sudo xcode-select --switch /Applications/Xcode_16.2.app
-      - uses: bufbuild/buf-setup-action@v1.48.0
+      - uses: bufbuild/buf-setup-action@v1.49.0
         with:
           github_token: ${{ github.token }}
       - name: Build plugins
