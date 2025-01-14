@@ -25,6 +25,11 @@ final class Lock: @unchecked Sendable {
         self.underlyingLock.initialize(to: os_unfair_lock())
     }
 
+    deinit {
+        self.underlyingLock.deinitialize(count: 1)
+        self.underlyingLock.deallocate()
+    }
+
     /// Perform an action within the context of the lock.
     ///
     /// - parameter action: Closure to be executed in the context of the lock.
