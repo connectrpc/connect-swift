@@ -38,7 +38,7 @@ extension MessagingConnectionType: Identifiable {
 }
 
 struct MenuView: View {
-    private func createClient(withProtocol networkProtocol: NetworkProtocol)
+    private static func createClient(withProtocol networkProtocol: NetworkProtocol)
         -> Connectrpc_Eliza_V1_ElizaServiceClient
     {
         let host = "https://demo.connectrpc.com"
@@ -87,7 +87,7 @@ struct MenuView: View {
                             destination: LazyNavigationView {
                                 MessagingView(
                                     viewModel: UnaryMessagingViewModel(
-                                        client: self.createClient(withProtocol: .connect)
+                                        client: Self.createClient(withProtocol: .connect)
                                     )
                                 )
                             }
@@ -100,7 +100,7 @@ struct MenuView: View {
                             destination: LazyNavigationView {
                                 MessagingView(
                                     viewModel: BidirectionalStreamingMessagingViewModel(
-                                        client: self.createClient(withProtocol: .connect)
+                                        client: Self.createClient(withProtocol: .connect)
                                     )
                                 )
                             }
@@ -114,7 +114,7 @@ struct MenuView: View {
                             destination: LazyNavigationView {
                                 MessagingView(
                                     viewModel: UnaryMessagingViewModel(
-                                        client: self.createClient(withProtocol: .grpc)
+                                        client: Self.createClient(withProtocol: .grpc)
                                     )
                                 )
                             }
@@ -128,7 +128,7 @@ struct MenuView: View {
                             destination: LazyNavigationView {
                                 MessagingView(
                                     viewModel: UnaryMessagingViewModel(
-                                        client: self.createClient(withProtocol: .grpcWeb)
+                                        client: Self.createClient(withProtocol: .grpcWeb)
                                     )
                                 )
                             }
@@ -142,7 +142,7 @@ struct MenuView: View {
                             destination: LazyNavigationView {
                                 MessagingView(
                                     viewModel: BidirectionalStreamingMessagingViewModel(
-                                        client: self.createClient(withProtocol: .grpc)
+                                        client: Self.createClient(withProtocol: .grpc)
                                     )
                                 )
                             }
@@ -156,7 +156,7 @@ struct MenuView: View {
                             destination: LazyNavigationView {
                                 MessagingView(
                                     viewModel: BidirectionalStreamingMessagingViewModel(
-                                        client: self.createClient(withProtocol: .grpcWeb)
+                                        client: Self.createClient(withProtocol: .grpcWeb)
                                     )
                                 )
                             }

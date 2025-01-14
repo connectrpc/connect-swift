@@ -25,8 +25,8 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
     private let lock = Lock()
     /// Closures stored for notifying when metrics are available.
     private var metricsClosures = [Int: @Sendable (HTTPMetrics) -> Void]()
-    /// Force unwrapped to allow using `self` as the delegate.
-    private var session: URLSession!
+    /// Session used for performing requests.
+    private let session: URLSession
     /// List of active streams.
     /// TODO: Remove in favor of simply setting
     /// `URLSessionTask.delegate = <URLSessionStream instance>` once we are able to set iOS 15
@@ -34,12 +34,18 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
     private var streams = [Int: URLSessionStream]()
 
     public init(configuration: URLSessionConfiguration = .default) {
-        super.init()
+        let delegate = URLSessionDelegateWrapper()
         self.session = URLSession(
             configuration: configuration,
-            delegate: self,
+            delegate: delegate,
             delegateQueue: .main
         )
+        super.init()
+        delegate.client = self
+    }
+
+    deinit {
+        self.session.finishTasksAndInvalidate()
     }
 
     @discardableResult
@@ -124,9 +130,9 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
             sendClose: { urlSessionStream.close() }
         )
     }
-}
 
-extension URLSessionHTTPClient: URLSessionDataDelegate {
+    // MARK: - URLSession delegate functions
+
     open func urlSession(
         _ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
         completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
@@ -156,9 +162,7 @@ extension URLSessionHTTPClient: URLSessionDataDelegate {
             self.lock.perform { self.streams[task.taskIdentifier]?.requestBodyStream }
         )
     }
-}
 
-extension URLSessionHTTPClient: URLSessionTaskDelegate {
     open func urlSession(
         _ session: URLSession, task: URLSessionTask, didCompleteWithError error: Swift.Error?
     ) {
@@ -177,6 +181,60 @@ extension URLSessionHTTPClient: URLSessionTaskDelegate {
         }
     }
 }
+
+// MARK: - URLSession delegate wrapper
+
+/// This class exists to avoid a retain cycle between `URLSessionHTTPClient` and its underlying
+/// `URLSession.delegate`. Since `URLSession` retains its `delegate` strongly, setting the
+/// `URLSessionHTTPClient` directly as the `delegate` will cause a retain cycle:
+/// https://developer.apple.com/documentation/foundation/urlsession/1411597-init#parameters
+///
+/// To work around this, `URLSessionDelegateWrapper` maintains a `weak` reference to the
+/// `URLSessionHTTPClient` and passes delegate calls through to it, avoiding the retain cycle.
+private final class URLSessionDelegateWrapper: NSObject, @unchecked Sendable {
+    weak var client: URLSessionHTTPClient?
+}
+
+extension URLSessionDelegateWrapper: URLSessionDataDelegate {
+    func urlSession(
+        _ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
+        completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
+    ) {
+        self.client?.urlSession(
+            session, dataTask: dataTask, didReceive: response, completionHandler: completionHandler
+        )
+    }
+
+    func urlSession(
+        _ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data
+    ) {
+        self.client?.urlSession(session, dataTask: dataTask, didReceive: data)
+    }
+
+    func urlSession(
+        _ session: URLSession, task: URLSessionTask,
+        needNewBodyStream completionHandler: @escaping (InputStream?) -> Void
+    ) {
+        self.client?.urlSession(session, task: task, needNewBodyStream: completionHandler)
+    }
+}
+
+extension URLSessionDelegateWrapper: URLSessionTaskDelegate {
+    func urlSession(
+        _ session: URLSession, task: URLSessionTask, didCompleteWithError error: Swift.Error?
+    ) {
+        self.client?.urlSession(session, task: task, didCompleteWithError: error)
+    }
+
+    func urlSession(
+        _ session: URLSession, task: URLSessionTask,
+        didFinishCollecting metrics: URLSessionTaskMetrics
+    ) {
+        self.client?.urlSession(session, task: task, didFinishCollecting: metrics)
+    }
+}
+
+// MARK: - Extensions
 
 extension HTTPURLResponse {
     func formattedLowercasedHeaders() -> Headers {
