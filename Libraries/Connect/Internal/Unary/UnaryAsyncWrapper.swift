@@ -41,20 +41,28 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage>: Sendable {
     ///
     /// - returns: The response/result of the request.
     func send() async -> ResponseMessage<Output> {
-        return await withTaskCancellationHandler(operation: {
-            return await withCheckedContinuation { continuation in
-                if Task.isCancelled {
-                    continuation.resume(
-                        returning: .init(code: .canceled, result: .failure(.canceled()))
-                    )
-                } else {
-                    self.cancelable = self.sendUnary { response in
-                        continuation.resume(returning: response)
+        await withTaskCancellationHandler {
+            await withCheckedContinuation { continuation in
+                guard !Task.isCancelled else {
+                    continuation.resume(returning: .init(code: .canceled, result: .failure(.canceled())))
+                    return
+                }
+
+                let hasResumed = Locked(false)
+                self.cancelable = self.sendUnary { response in
+                    guard !hasResumed.value else {
+                        return assertionFailure("Attempting to resume continuation twice")
                     }
+                    continuation.resume(returning: response)
+                    hasResumed.perform(action: { $0 = true })
                 }
             }
-        }, onCancel: {
-            Task { await self.cancelable?.cancel() }
-        })
+        } onCancel: {
+            // When `Task.cancel` signals for this function to be canceled, the underlying function will be canceled
+            // as well.
+            Task(priority: .high) {
+                await self.cancelable?.cancel()
+            }
+        }
     }
 }
