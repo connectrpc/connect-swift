@@ -21,7 +21,7 @@ import SwiftProtobuf
 /// https://forums.swift.org/t/how-to-use-withtaskcancellationhandler-properly/54341/37
 /// https://stackoverflow.com/q/71898080
 @available(iOS 13, *)
-actor UnaryAsyncWrapper<Output: ProtobufMessage>: Sendable {
+actor UnaryAsyncWrapper<Output: ProtobufMessage> {
     private var cancelable: Cancelable?
     private let sendUnary: PerformClosure
 
@@ -44,7 +44,12 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage>: Sendable {
         await withTaskCancellationHandler {
             await withCheckedContinuation { continuation in
                 guard !Task.isCancelled else {
-                    continuation.resume(returning: .init(code: .canceled, result: .failure(.canceled())))
+                    continuation.resume(
+                        returning: ResponseMessage(
+                            code: .canceled,
+                            result: .failure(.canceled())
+                        )
+                    )
                     return
                 }
 
@@ -58,8 +63,8 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage>: Sendable {
                 }
             }
         } onCancel: {
-            // When `Task.cancel` signals for this function to be canceled, the underlying function will be canceled
-            // as well.
+            // When `Task.cancel` signals for this function to be canceled,
+            // the underlying function will be canceled as well.
             Task(priority: .high) {
                 await self.cancelable?.cancel()
             }
