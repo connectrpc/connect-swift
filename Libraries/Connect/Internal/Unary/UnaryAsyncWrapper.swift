@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import os.log
 import SwiftProtobuf
 
 /// Internal actor used to wrap closure-based unary API calls in a way that allows them
@@ -21,7 +22,7 @@ import SwiftProtobuf
 /// https://forums.swift.org/t/how-to-use-withtaskcancellationhandler-properly/54341/37
 /// https://stackoverflow.com/q/71898080
 @available(iOS 13, *)
-actor UnaryAsyncWrapper<Output: ProtobufMessage>: Sendable {
+actor UnaryAsyncWrapper<Output: ProtobufMessage> {
     private var cancelable: Cancelable?
     private let sendUnary: PerformClosure
 
@@ -41,20 +42,45 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage>: Sendable {
     ///
     /// - returns: The response/result of the request.
     func send() async -> ResponseMessage<Output> {
-        return await withTaskCancellationHandler(operation: {
-            return await withCheckedContinuation { continuation in
-                if Task.isCancelled {
+        await withTaskCancellationHandler {
+            await withCheckedContinuation { continuation in
+                guard !Task.isCancelled else {
                     continuation.resume(
-                        returning: .init(code: .canceled, result: .failure(.canceled()))
+                        returning: ResponseMessage(
+                            code: .canceled,
+                            result: .failure(.canceled())
+                        )
                     )
-                } else {
-                    self.cancelable = self.sendUnary { response in
-                        continuation.resume(returning: response)
+                    return
+                }
+
+                let hasResumed = Locked(false)
+                self.cancelable = self.sendUnary { response in
+                    // In some circumstances where a request timeout and a server
+                    // error occur at nearly the same moment, the underlying
+                    // `swift-nio` system will trigger this callback twice. This check
+                    // discards the second occurrence to avoid resuming `continuation`
+                    // multiple times, which would result in a crash.
+                    guard !hasResumed.value else {
+                        os_log(
+                            .fault,
+                            """
+                            `sendUnary` received duplicate callback and \
+                            attempted to resume its continuation twice.
+                            """
+                        )
+                        return
                     }
+                    continuation.resume(returning: response)
+                    hasResumed.perform(action: { $0 = true })
                 }
             }
-        }, onCancel: {
-            Task { await self.cancelable?.cancel() }
-        })
+        } onCancel: {
+            // When `Task.cancel` signals for this function to be canceled,
+            // the underlying function will be canceled as well.
+            Task(priority: .high) {
+                await self.cancelable?.cancel()
+            }
+        }
     }
 }
