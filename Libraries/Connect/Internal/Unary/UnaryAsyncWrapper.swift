@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import os.log
 import SwiftProtobuf
 
 /// Internal actor used to wrap closure-based unary API calls in a way that allows them
@@ -55,8 +56,20 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage> {
 
                 let hasResumed = Locked(false)
                 self.cancelable = self.sendUnary { response in
+                    // In some circumstances where a request timeout and a server
+                    // error occur at nearly the same moment, the underlying
+                    // `swift-nio` system will trigger this callback twice. This check
+                    // discards the second occurrence to avoid resuming `continuation`
+                    // multiple times, which would result in a crash.
                     guard !hasResumed.value else {
-                        return assertionFailure("Attempting to resume continuation twice")
+                        os_log(
+                            .fault,
+                            """
+                            `sendUnary` received duplicate callback and \
+                            attempted to resume its continuation twice.
+                            """
+                        )
+                        return
                     }
                     continuation.resume(returning: response)
                     hasResumed.perform(action: { $0 = true })
