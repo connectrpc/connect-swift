@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
   spec.name = 'Connect-Swift-Mocks'
   spec.module_name = 'ConnectMocks'
-  spec.version = '1.0.0'
+  spec.version = '1.0.2'
   spec.license = { :type => 'Apache 2.0', :file => 'LICENSE' }
   spec.summary = 'Mocks for testing with Connect-Swift.'
   spec.homepage = 'https://github.com/connectrpc/connect-swift'
