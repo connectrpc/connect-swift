@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
   spec.name = 'Connect-Swift'
   spec.module_name = 'Connect'
-  spec.version = '1.0.0'
+  spec.version = '1.0.2'
   spec.license = { :type => 'Apache 2.0', :file => 'LICENSE' }
   spec.summary = 'Idiomatic gRPC & Connect RPCs for Swift.'
   spec.homepage = 'https://github.com/connectrpc/connect-swift'
