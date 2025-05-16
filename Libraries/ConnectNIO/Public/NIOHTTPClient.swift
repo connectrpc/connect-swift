@@ -197,8 +197,8 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 do {
                     switch result {
                     case .success(let channel):
-                        let multiplexer = try channel.pipeline
-                            .syncOperations.handler(type: HTTP2StreamMultiplexer.self)
+                        let multiplexer = try channel.pipeline.syncOperations
+                            .handler(type: HTTP2StreamMultiplexer.self)
                         channel.closeFuture.whenComplete { [weak self] _ in
                             self?.lock.withLock { self?.state = .disconnected }
                         }
