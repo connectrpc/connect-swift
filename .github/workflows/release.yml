@@ -4,6 +4,11 @@ on:
     tags:
       - "*"
   workflow_dispatch: {} # support manual runs
+env:
+  # Sets the Xcode version to use for the CI.
+  # Available Versions: https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
+  # Ref: https://www.jessesquires.com/blog/2020/01/06/selecting-an-xcode-version-on-github-ci/
+  DEVELOPER_DIR: /Applications/Xcode_16.3.app/Contents/Developer
 permissions:
   contents: write
 jobs:
@@ -11,9 +16,6 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.2.app
       - uses: bufbuild/buf-setup-action@v1.50.0
         with:
           github_token: ${{ github.token }}
@@ -40,9 +42,6 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.2.app
       - name: Publish podspecs to CocoaPods
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
