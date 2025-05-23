@@ -15,47 +15,51 @@
 @testable import Connect
 import Foundation
 import SwiftProtobuf
-import XCTest
+import Testing
 
-final class ConnectErrorTests: XCTestCase {
-    func testDeserializingFullErrorAndUnpackingDetails() throws {
+struct ConnectErrorTests {
+    @Test("ConnectError correctly deserializes from JSON and unpacks protobuf details")
+    func deserializingFullErrorAndUnpackingDetails() throws {
         let expectedDetails = Connectrpc_Conformance_V1_RawHTTPRequest.with { $0.uri = "foo/bar" }
         let errorData = try self.errorData(expectedDetails: [expectedDetails])
         let error = try JSONDecoder().decode(ConnectError.self, from: errorData)
-        XCTAssertEqual(error.code, .unavailable)
-        XCTAssertEqual(error.message, "overloaded: back off and retry")
-        XCTAssertNil(error.exception)
-        XCTAssertEqual(error.details.count, 1)
-        XCTAssertEqual(error.unpackedDetails(), [expectedDetails])
-        XCTAssertTrue(error.metadata.isEmpty)
+        #expect(error.code == .unavailable)
+        #expect(error.message == "overloaded: back off and retry")
+        #expect(error.exception == nil)
+        #expect(error.details.count == 1)
+        #expect(error.unpackedDetails() == [expectedDetails])
+        #expect(error.metadata.isEmpty)
     }
 
-    func testDeserializingFullErrorAndUnpackingDetailsWithUnpaddedBase64() throws {
+    @Test("ConnectError handles unpadded base64 encoded details correctly")
+    func deserializingFullErrorAndUnpackingDetailsWithUnpaddedBase64() throws {
         let expectedDetails = Connectrpc_Conformance_V1_RawHTTPRequest.with { $0.uri = "foo/bar" }
         let errorData = try self.errorData(expectedDetails: [expectedDetails], pad: false)
         let error = try JSONDecoder().decode(ConnectError.self, from: errorData)
-        XCTAssertEqual(error.code, .unavailable)
-        XCTAssertEqual(error.message, "overloaded: back off and retry")
-        XCTAssertNil(error.exception)
-        XCTAssertEqual(error.details.count, 1)
-        XCTAssertEqual(error.unpackedDetails(), [expectedDetails])
-        XCTAssertTrue(error.metadata.isEmpty)
+        #expect(error.code == .unavailable)
+        #expect(error.message == "overloaded: back off and retry")
+        #expect(error.exception == nil)
+        #expect(error.details.count == 1)
+        #expect(error.unpackedDetails() == [expectedDetails])
+        #expect(error.metadata.isEmpty)
     }
 
-    func testDeserializingFullErrorAndUnpackingMultipleDetails() throws {
+    @Test("ConnectError can unpack multiple protobuf details from a single error")
+    func deserializingFullErrorAndUnpackingMultipleDetails() throws {
         let expectedDetails1 = Connectrpc_Conformance_V1_RawHTTPRequest.with { $0.uri = "foo/bar" }
         let expectedDetails2 = Connectrpc_Conformance_V1_RawHTTPRequest.with { $0.uri = "bar/baz" }
         let errorData = try self.errorData(expectedDetails: [expectedDetails1, expectedDetails2])
         let error = try JSONDecoder().decode(ConnectError.self, from: errorData)
-        XCTAssertEqual(error.code, .unavailable)
-        XCTAssertEqual(error.message, "overloaded: back off and retry")
-        XCTAssertNil(error.exception)
-        XCTAssertEqual(error.details.count, 2)
-        XCTAssertEqual(error.unpackedDetails(), [expectedDetails1, expectedDetails2])
-        XCTAssertTrue(error.metadata.isEmpty)
+        #expect(error.code == .unavailable)
+        #expect(error.message == "overloaded: back off and retry")
+        #expect(error.exception == nil)
+        #expect(error.details.count == 2)
+        #expect(error.unpackedDetails() == [expectedDetails1, expectedDetails2])
+        #expect(error.metadata.isEmpty)
     }
 
-    func testDeserializingErrorUsingHelperFunctionLowercasesHeaderKeys() throws {
+    @Test("ConnectError.from() helper function normalizes header keys to lowercase")
+    func deserializingErrorUsingHelperFunctionLowercasesHeaderKeys() throws {
         let expectedDetails = Connectrpc_Conformance_V1_RawHTTPRequest.with { $0.uri = "a/b/c" }
         let errorData = try self.errorData(expectedDetails: [expectedDetails])
         let error = ConnectError.from(
@@ -67,15 +71,16 @@ final class ConnectErrorTests: XCTestCase {
             trailers: nil,
             source: errorData
         )
-        XCTAssertEqual(error.code, .unavailable) // Respects the code from the error body
-        XCTAssertEqual(error.message, "overloaded: back off and retry")
-        XCTAssertNil(error.exception)
-        XCTAssertEqual(error.details.count, 1)
-        XCTAssertEqual(error.unpackedDetails(), [expectedDetails])
-        XCTAssertEqual(error.metadata, ["somekey": ["foo"], "otherkey1": ["BAR", "bAz"]])
+        #expect(error.code == .unavailable) // Respects the code from the error body
+        #expect(error.message == "overloaded: back off and retry")
+        #expect(error.exception == nil)
+        #expect(error.details.count == 1)
+        #expect(error.unpackedDetails() == [expectedDetails])
+        #expect(error.metadata == ["somekey": ["foo"], "otherkey1": ["BAR", "bAz"]])
     }
 
-    func testDeserializingErrorUsingHelperFunctionCombinesHeadersAndTrailers() throws {
+    @Test("ConnectError.from() helper function combines headers and trailers with trailers taking precedence")
+    func deserializingErrorUsingHelperFunctionCombinesHeadersAndTrailers() throws {
         let expectedDetails = Connectrpc_Conformance_V1_RawHTTPRequest.with { $0.uri = "a/b/c" }
         let errorData = try self.errorData(expectedDetails: [expectedDetails])
         let error = ConnectError.from(
@@ -90,30 +95,31 @@ final class ConnectErrorTests: XCTestCase {
             ],
             source: errorData
         )
-        XCTAssertEqual(error.code, .unavailable) // Respects the code from the error body
-        XCTAssertEqual(error.message, "overloaded: back off and retry")
-        XCTAssertNil(error.exception)
-        XCTAssertEqual(error.details.count, 1)
-        XCTAssertEqual(error.unpackedDetails(), [expectedDetails])
-        XCTAssertEqual(error.metadata, [
+        #expect(error.code == .unavailable) // Respects the code from the error body
+        #expect(error.message == "overloaded: back off and retry")
+        #expect(error.exception == nil)
+        #expect(error.details.count == 1)
+        #expect(error.unpackedDetails() == [expectedDetails])
+        #expect(error.metadata == [
             "duplicatedkey": ["trailers"],
             "otherkey1": ["BAR", "bAz"],
             "anotherkey": ["foo"],
         ])
     }
 
-    func testDeserializingSimpleError() throws {
+    @Test("ConnectError handles minimal JSON with only error code")
+    func deserializingSimpleError() throws {
         let errorDictionary = [
             "code": "unavailable",
         ]
         let errorData = try JSONSerialization.data(withJSONObject: errorDictionary)
         let error = try JSONDecoder().decode(ConnectError.self, from: errorData)
-        XCTAssertEqual(error.code, .unavailable)
-        XCTAssertNil(error.message)
-        XCTAssertNil(error.exception)
-        XCTAssertTrue(error.details.isEmpty)
-        XCTAssertEqual(error.unpackedDetails(), [Connectrpc_Conformance_V1_RawHTTPRequest]())
-        XCTAssertTrue(error.metadata.isEmpty)
+        #expect(error.code == .unavailable)
+        #expect(error.message == nil)
+        #expect(error.exception == nil)
+        #expect(error.details.isEmpty)
+        #expect(error.unpackedDetails() == [Connectrpc_Conformance_V1_RawHTTPRequest]())
+        #expect(error.metadata.isEmpty)
     }
 
     // MARK: - Private

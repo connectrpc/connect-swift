@@ -13,10 +13,11 @@
 // limitations under the License.
 
 import Connect
+import Foundation
 import SwiftProtobuf
-import XCTest
+import Testing
 
-final class ProtoCodecTests: XCTestCase {
+struct ProtoCodecTests {
     private let message: Connectrpc_Conformance_V1_RawHTTPRequest = .with { proto in
         proto.body = .unary(Connectrpc_Conformance_V1_MessageContents.with { message in
             message.binary = Data([0x0, 0x1, 0x2, 0x3])
@@ -30,9 +31,10 @@ final class ProtoCodecTests: XCTestCase {
         ]
     }
 
-    func testSerializingAndDeserializing() throws {
+    @Test("ProtoCodec correctly serializes and deserializes protobuf messages to/from binary format")
+    func serializingAndDeserializing() throws {
         let codec = ProtoCodec()
         let serialized = try codec.serialize(message: self.message)
-        XCTAssertEqual(try codec.deserialize(source: serialized), self.message)
+        #expect(try codec.deserialize(source: serialized) == self.message)
     }
 }

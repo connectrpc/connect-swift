@@ -13,12 +13,14 @@
 // limitations under the License.
 
 @testable import Connect
+import Foundation
 import SwiftProtobuf
-import XCTest
+import Testing
 
-@available(iOS 13, *)
-final class InterceptorIntegrationTests: XCTestCase {
-    func testUnaryInterceptorSuccess() async {
+struct InterceptorIntegrationTests {
+    @available(iOS 13, *)
+    @Test("Interceptors are invoked in correct order for successful unary requests with proper request/response flow")
+    func unaryInterceptorSuccess() async {
         let trackedSteps = Locked([InterceptorStep]())
         let client = self.createClient(interceptors: [
             InterceptorFactory { _ in
@@ -39,8 +41,8 @@ final class InterceptorIntegrationTests: XCTestCase {
                 response.responseData = Data(repeating: 0, count: 10)
             }
         })
-        XCTAssertNil(response.error)
-        XCTAssertEqual(trackedSteps.value, [
+        #expect(response.error == nil)
+        #expect(trackedSteps.value == [
             .unaryRequest(id: "a"),
             .unaryRequest(id: "b"),
             .unaryRawRequest(id: "a"),
@@ -52,7 +54,9 @@ final class InterceptorIntegrationTests: XCTestCase {
         ])
     }
 
-    func testStreamInterceptorSuccess() async throws {
+    @available(iOS 13, *)
+    @Test("Interceptors are invoked in correct order for successful streaming requests with multiple messages")
+    func streamInterceptorSuccess() async throws {
         let trackedSteps = Locked([InterceptorStep]())
         let client = self.createClient(interceptors: [
             InterceptorFactory { _ in
@@ -78,18 +82,18 @@ final class InterceptorIntegrationTests: XCTestCase {
             }
         })
         if let firstResponse = await stream.results().first(where: { $0.messageValue != nil }) {
-            XCTAssertEqual(firstResponse.messageValue?.payload.data.count, 100)
+            #expect(firstResponse.messageValue?.payload.data.count == 100)
         }
         if let secondResponse = await stream.results().first(where: { $0.messageValue != nil }) {
-            XCTAssertEqual(secondResponse.messageValue?.payload.data.count, 200)
+            #expect(secondResponse.messageValue?.payload.data.count == 200)
         }
         for await result in stream.results() {
             if case .complete(let code, _, _) = result {
-                XCTAssertEqual(code, .ok)
+                #expect(code == .ok)
             }
         }
 
-        XCTAssertEqual(trackedSteps.value, [
+        #expect(trackedSteps.value == [
             .streamStart(id: "a"),
             .streamStart(id: "b"),
             .streamInput(id: "a"),
@@ -116,7 +120,8 @@ final class InterceptorIntegrationTests: XCTestCase {
     }
 
     @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *) // Required for .contains()
-    func testUnaryInterceptorIsCalledWithMetrics() async {
+    @Test("Interceptors receive HTTP metrics information for unary requests when metrics are available")
+    func unaryInterceptorIsCalledWithMetrics() async {
         let trackedSteps = Locked([InterceptorStep]())
         let client = self.createClient(interceptors: [
             InterceptorFactory { _ in
@@ -139,16 +144,17 @@ final class InterceptorIntegrationTests: XCTestCase {
                 response.responseData = Data(repeating: 0, count: 10)
             }
         })
-        XCTAssertNil(response.error)
+        #expect(response.error == nil)
 
         // Subset of steps is tested since URLSession does not guarantee metric callback ordering.
-        XCTAssertTrue(trackedSteps.value.contains(
+        #expect(trackedSteps.value.contains(
             [.responseMetrics(id: "b"), .responseMetrics(id: "a")]
         ))
     }
 
     @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *) // Required for .contains()
-    func testStreamInterceptorIsCalledWithMetrics() async throws {
+    @Test("Interceptors receive HTTP metrics information for streaming requests when metrics are available")
+    func streamInterceptorIsCalledWithMetrics() async throws {
         let trackedSteps = Locked([InterceptorStep]())
         let client = self.createClient(interceptors: [
             InterceptorFactory { _ in
@@ -174,18 +180,20 @@ final class InterceptorIntegrationTests: XCTestCase {
         })
         for await result in stream.results() {
             if case .complete(let code, _, _) = result {
-                XCTAssertEqual(code, .ok)
+                #expect(code == .ok)
             }
             sleep(1) // URLSession sometimes produces metrics information late.
         }
 
         // Subset of steps is tested since URLSession does not guarantee metric callback ordering.
-        XCTAssertTrue(trackedSteps.value.contains(
+        #expect(trackedSteps.value.contains(
             [.responseMetrics(id: "b"), .responseMetrics(id: "a")]
         ))
     }
 
-    func testUnaryInterceptorCanFailOutboundRequest() async {
+    @available(iOS 13, *)
+    @Test("Interceptor can fail outbound unary request and prevent subsequent interceptors from executing")
+    func unaryInterceptorCanFailOutboundRequest() async {
         let trackedSteps = Locked([InterceptorStep]())
         let client = self.createClient(interceptors: [
             InterceptorFactory { _ in
@@ -210,14 +218,16 @@ final class InterceptorIntegrationTests: XCTestCase {
                 response.responseData = Data(repeating: 0, count: 10)
             }
         })
-        XCTAssertNotNil(response.error) // Interceptor failed the request.
-        XCTAssertEqual(trackedSteps.value, [
+        #expect(response.error != nil) // Interceptor failed the request.
+        #expect(trackedSteps.value == [
             .unaryRequest(id: "a"),
             // Second interceptor is never called.
         ])
     }
 
-    func testStreamInterceptorCanFailOutboundRequest() async {
+    @available(iOS 13, *)
+    @Test("Interceptor can fail outbound stream request and prevent subsequent interceptors from executing")
+    func streamInterceptorCanFailOutboundRequest() async {
         let trackedSteps = Locked([InterceptorStep]())
         let client = self.createClient(interceptors: [
             InterceptorFactory { _ in
@@ -240,18 +250,20 @@ final class InterceptorIntegrationTests: XCTestCase {
         for await result in client.serverStream().results() {
             switch result {
             case .complete(_, let error, _):
-                XCTAssertNotNil(error) // Interceptor failed the request.
+                #expect(error != nil) // Interceptor failed the request.
             default:
-                XCTFail("Unexpected result")
+                Issue.record("Unexpected result")
             }
         }
-        XCTAssertEqual(trackedSteps.value, [
+        #expect(trackedSteps.value == [
             .streamStart(id: "a"),
             // Second interceptor is never called.
         ])
     }
 
-    func testStreamDoesNotPassRequestDataToInterceptorsUntilRequestHeadersAreSent() async throws {
+    @available(iOS 13, *)
+    @Test("Stream client waits for all interceptors to process headers before passing request data through the chain")
+    func streamDoesNotPassRequestDataToInterceptorsUntilRequestHeadersAreSent() async throws {
         let trackedSteps = Locked([InterceptorStep]())
         let client = self.createClient(interceptors: [
             InterceptorFactory { _ in
@@ -279,13 +291,13 @@ final class InterceptorIntegrationTests: XCTestCase {
         })
         for await result in stream.results() {
             if case .complete(let code, _, _) = result {
-                XCTAssertEqual(code, .ok)
+                #expect(code == .ok)
             }
         }
 
         // The client should wait for all interceptors to finish processing headers before it
         // passes any data through the chain.
-        XCTAssertEqual(trackedSteps.value, [
+        #expect(trackedSteps.value == [
             .streamStart(id: "a"),
             .streamStart(id: "b"),
             .streamInput(id: "a"),

@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.8
 
 // Copyright 2022-2025 The Connect Authors
 //
@@ -19,10 +19,10 @@ import PackageDescription
 let package = Package(
     name: "Connect",
     platforms: [
-        .iOS(.v12),
-        .macOS(.v10_15),
-        .tvOS(.v13),
-        .watchOS(.v6)
+        .iOS(.v15),
+        .macOS(.v12),
+        .tvOS(.v15),
+        .watchOS(.v8)
     ],
     products: [
         .library(
@@ -166,5 +166,5 @@ let package = Package(
             path: "Plugins/ConnectSwiftPlugin"
         ),
     ],
-    swiftLanguageVersions: [.version("6"), .v5]
+    swiftLanguageVersions: [.version("5"), .v5]
 )

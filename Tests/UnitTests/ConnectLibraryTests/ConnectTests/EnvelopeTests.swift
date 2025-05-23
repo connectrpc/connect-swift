@@ -13,76 +13,82 @@
 // limitations under the License.
 
 @testable import Connect
-import XCTest
+import Foundation
+import Testing
 
-final class EnvelopeTests: XCTestCase {
-    func testPackingAndUnpackingCompressedMessage() throws {
+struct EnvelopeTests {
+    @Test("Envelope correctly packs messages with compression and unpacks them back to original data")
+    func packingAndUnpackingCompressedMessage() throws {
         let originalData = Data(repeating: 0xa, count: 50)
         let packed = Envelope._packMessage(
             originalData, using: .init(minBytes: 10, pool: GzipCompressionPool())
         )
         let compressed = try GzipCompressionPool().compress(data: originalData)
-        XCTAssertEqual(packed[0], 1) // Compression flag = true
-        XCTAssertTrue(Envelope._isCompressed(packed))
-        XCTAssertEqual(Envelope._messageLength(forPackedData: packed), compressed.count)
-        XCTAssertEqual(packed[5...], compressed) // Post-prefix data should match compressed value
+        #expect(packed[0] == 1) // Compression flag = true
+        #expect(Envelope._isCompressed(packed))
+        #expect(Envelope._messageLength(forPackedData: packed) == compressed.count)
+        #expect(packed[5...] == compressed) // Post-prefix data should match compressed value
 
         let unpacked = try Envelope._unpackMessage(packed, compressionPool: GzipCompressionPool())
-        XCTAssertEqual(unpacked.unpacked, originalData)
-        XCTAssertEqual(unpacked.headerByte, 1) // Compression flag = true
+        #expect(unpacked.unpacked == originalData)
+        #expect(unpacked.headerByte == 1) // Compression flag = true
     }
 
-    func testPackingAndUnpackingUncompressedMessageBecauseCompressionMinBytesIsNil() throws {
+    @Test("Envelope packs messages without compression when compression configuration is nil")
+    func packingAndUnpackingUncompressedMessageBecauseCompressionMinBytesIsNil() throws {
         let originalData = Data(repeating: 0xa, count: 50)
         let packed = Envelope._packMessage(originalData, using: nil)
-        XCTAssertEqual(packed[0], 0) // Compression flag = false
-        XCTAssertFalse(Envelope._isCompressed(packed))
-        XCTAssertEqual(Envelope._messageLength(forPackedData: packed), originalData.count)
-        XCTAssertEqual(packed[5...], originalData) // Post-prefix data should match compressed value
+        #expect(packed[0] == 0) // Compression flag = false
+        #expect(!Envelope._isCompressed(packed))
+        #expect(Envelope._messageLength(forPackedData: packed) == originalData.count)
+        #expect(packed[5...] == originalData) // Post-prefix data should match compressed value
 
         // Compression pool should be ignored since the message is not compressed
         let unpacked = try Envelope._unpackMessage(packed, compressionPool: GzipCompressionPool())
-        XCTAssertEqual(unpacked.unpacked, originalData)
-        XCTAssertEqual(unpacked.headerByte, 0) // Compression flag = false
+        #expect(unpacked.unpacked == originalData)
+        #expect(unpacked.headerByte == 0) // Compression flag = false
     }
 
-    func testPackingAndUnpackingUncompressedMessageBecauseMessageIsTooSmall() throws {
+    @Test("Envelope skips compression when message size is below minimum compression threshold")
+    func packingAndUnpackingUncompressedMessageBecauseMessageIsTooSmall() throws {
         let originalData = Data(repeating: 0xa, count: 50)
         let packed = Envelope._packMessage(
             originalData, using: .init(minBytes: 100, pool: GzipCompressionPool())
         )
-        XCTAssertEqual(packed[0], 0) // Compression flag = false
-        XCTAssertFalse(Envelope._isCompressed(packed))
-        XCTAssertEqual(Envelope._messageLength(forPackedData: packed), originalData.count)
-        XCTAssertEqual(packed[5...], originalData) // Post-prefix data should match compressed value
+        #expect(packed[0] == 0) // Compression flag = false
+        #expect(!Envelope._isCompressed(packed))
+        #expect(Envelope._messageLength(forPackedData: packed) == originalData.count)
+        #expect(packed[5...] == originalData) // Post-prefix data should match compressed value
 
         // Compression pool should be ignored since the message is not compressed
         let unpacked = try Envelope._unpackMessage(packed, compressionPool: GzipCompressionPool())
-        XCTAssertEqual(unpacked.unpacked, originalData)
-        XCTAssertEqual(unpacked.headerByte, 0) // Compression flag = false
+        #expect(unpacked.unpacked == originalData)
+        #expect(unpacked.headerByte == 0) // Compression flag = false
     }
 
-    func testThrowsWhenUnpackingCompressedMessageWithoutDecompressionPool() throws {
+    @Test("Envelope throws error when trying to unpack compressed message without providing decompression pool")
+    func throwsWhenUnpackingCompressedMessageWithoutDecompressionPool() throws {
         let originalData = Data(repeating: 0xa, count: 50)
         let packed = Envelope._packMessage(
             originalData, using: .init(minBytes: 10, pool: GzipCompressionPool())
         )
         let compressed = try GzipCompressionPool().compress(data: originalData)
-        XCTAssertEqual(packed[0], 1) // Compression flag = true
-        XCTAssertTrue(Envelope._isCompressed(packed))
-        XCTAssertEqual(Envelope._messageLength(forPackedData: packed), compressed.count)
-        XCTAssertEqual(packed[5...], compressed) // Post-prefix data should match compressed value
+        #expect(packed[0] == 1) // Compression flag = true
+        #expect(Envelope._isCompressed(packed))
+        #expect(Envelope._messageLength(forPackedData: packed) == compressed.count)
+        #expect(packed[5...] == compressed) // Post-prefix data should match compressed value
 
-        XCTAssertThrowsError(try Envelope._unpackMessage(packed, compressionPool: nil)) { error in
-            XCTAssertEqual(error as? Envelope.Error, .missingExpectedCompressionPool)
+        #expect(throws: Envelope.Error.missingExpectedCompressionPool) {
+            try Envelope._unpackMessage(packed, compressionPool: nil)
         }
     }
 
-    func testMessageLengthOfIncompleteData() {
+    @Test("Envelope returns -1 for message length when data is too short to contain valid 5-byte header")
+    func messageLengthOfIncompleteData() {
         // Messages are incomplete if they do not contain enough data for the 5-byte prefix
         for length in 0..<5 {
             let data = Data(repeating: 0xa, count: length)
-            XCTAssertEqual(Envelope._messageLength(forPackedData: data), -1)
+            #expect(Envelope._messageLength(forPackedData: data) == -1)
         }
     }
 }

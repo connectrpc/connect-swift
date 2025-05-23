@@ -13,60 +13,61 @@
 // limitations under the License.
 
 import Connect
-import XCTest
+import Testing
 
-final class ServiceMetadataTests: XCTestCase {
-    func testMethodSpecsAreGeneratedCorrectlyForService() {
-        XCTAssertEqual(
-            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.unary,
-            MethodSpec(
+struct ServiceMetadataTests {
+    @Test("Generated service client metadata contains correct method specifications and paths for all RPC types")
+    func methodSpecsAreGeneratedCorrectlyForService() {
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.unary
+            == MethodSpec(
                 name: "Unary",
                 service: "connectrpc.conformance.v1.ConformanceService",
                 type: .unary
             )
         )
-        XCTAssertEqual(
-            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.unary.path,
-            "connectrpc.conformance.v1.ConformanceService/Unary"
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.unary.path
+            == "connectrpc.conformance.v1.ConformanceService/Unary"
         )
 
-        XCTAssertEqual(
-            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.serverStream,
-            MethodSpec(
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.serverStream
+            == MethodSpec(
                 name: "ServerStream",
                 service: "connectrpc.conformance.v1.ConformanceService",
                 type: .serverStream
             )
         )
-        XCTAssertEqual(
-            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.serverStream.path,
-            "connectrpc.conformance.v1.ConformanceService/ServerStream"
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.serverStream.path
+            == "connectrpc.conformance.v1.ConformanceService/ServerStream"
         )
 
-        XCTAssertEqual(
-            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.clientStream,
-            MethodSpec(
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.clientStream
+            == MethodSpec(
                 name: "ClientStream",
                 service: "connectrpc.conformance.v1.ConformanceService",
                 type: .clientStream
             )
         )
-        XCTAssertEqual(
-            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.clientStream.path,
-            "connectrpc.conformance.v1.ConformanceService/ClientStream"
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.clientStream.path
+            == "connectrpc.conformance.v1.ConformanceService/ClientStream"
         )
 
-        XCTAssertEqual(
-            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.bidiStream,
-            MethodSpec(
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.bidiStream
+            == MethodSpec(
                 name: "BidiStream",
                 service: "connectrpc.conformance.v1.ConformanceService",
                 type: .bidirectionalStream
             )
         )
-        XCTAssertEqual(
-            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.bidiStream.path,
-            "connectrpc.conformance.v1.ConformanceService/BidiStream"
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.bidiStream.path
+            == "connectrpc.conformance.v1.ConformanceService/BidiStream"
         )
     }
 }

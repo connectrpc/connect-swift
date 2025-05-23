@@ -14,18 +14,20 @@
 
 @testable import Connect
 import ConnectMocks
+import Foundation
 import SwiftProtobuf
-import XCTest
+import Testing
 
 /// Test suite that validates the behavior of generated mock classes.
-@available(iOS 13, *)
-final class ConnectMocksTests: XCTestCase {
+struct ConnectMocksTests {
     // MARK: - Unary
 
-    func testMockUnaryCallbacks() {
+    @available(iOS 13, *)
+    @Test("ConnectMocks provides mock unary client that supports callback-based testing")
+    func mockUnaryCallbacks() {
         let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
         client.mockUnary = { request in
-            XCTAssertTrue(request.hasResponseDefinition)
+            #expect(request.hasResponseDefinition)
             return ResponseMessage(result: .success(.with { $0.payload.data = Data([0x0]) }))
         }
 
@@ -33,23 +35,27 @@ final class ConnectMocksTests: XCTestCase {
         client.unary(request: .with { $0.responseDefinition = .init() }) { response in
             receivedMessage.value = response.message
         }
-        XCTAssertEqual(receivedMessage.value?.payload.data.count, 1)
+        #expect(receivedMessage.value?.payload.data.count == 1)
     }
 
-    func testMockUnaryAsyncAwait() async {
+    @available(iOS 13, *)
+    @Test("ConnectMocks provides mock unary client that supports async/await testing")
+    func mockUnaryAsyncAwait() async {
         let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
         client.mockAsyncUnary = { request in
-            XCTAssertTrue(request.hasResponseDefinition)
+            #expect(request.hasResponseDefinition)
             return ResponseMessage(result: .success(.with { $0.payload.data = Data([0x0]) }))
         }
 
         let response = await client.unary(request: .with { $0.responseDefinition = .init() })
-        XCTAssertEqual(response.message?.payload.data.count, 1)
+        #expect(response.message?.payload.data.count == 1)
     }
 
     // MARK: - Bidirectional stream
 
-    func testMockBidirectionalStreamCallbacks() {
+    @available(iOS 13, *)
+    @Test("ConnectMocks provides mock bidirectional stream client that supports callback-based testing")
+    func mockBidirectionalStreamCallbacks() {
         let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
         let expectedInputs: [Connectrpc_Conformance_V1_BidiStreamRequest] = [
             .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 123)] },
@@ -62,7 +68,7 @@ final class ConnectMocksTests: XCTestCase {
             .message(.with { $0.payload.data = Data(repeating: 0, count: 456) }),
             .complete(code: .ok, error: nil, trailers: nil),
         ]
-        XCTAssertFalse(client.mockBidiStream.isClosed)
+        #expect(!client.mockBidiStream.isClosed)
 
         var sentInputs = [Connectrpc_Conformance_V1_BidiStreamRequest]()
         var closeCalled = false
@@ -80,14 +86,16 @@ final class ConnectMocksTests: XCTestCase {
         stream.send(expectedInputs[1])
         stream.close()
 
-        XCTAssertEqual(sentInputs, expectedInputs)
-        XCTAssertEqual(client.mockBidiStream.inputs, expectedInputs)
-        XCTAssertEqual(receivedResults.value, expectedResults)
-        XCTAssertTrue(closeCalled)
-        XCTAssertTrue(client.mockBidiStream.isClosed)
+        #expect(sentInputs == expectedInputs)
+        #expect(client.mockBidiStream.inputs == expectedInputs)
+        #expect(receivedResults.value == expectedResults)
+        #expect(closeCalled)
+        #expect(client.mockBidiStream.isClosed)
     }
 
-    func testMockBidirectionalStreamAsyncAwait() async throws {
+    @available(iOS 13, *)
+    @Test("ConnectMocks provides mock bidirectional stream client that supports async/await testing")
+    func mockBidirectionalStreamAsyncAwait() async throws {
         let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
         let expectedInputs: [Connectrpc_Conformance_V1_BidiStreamRequest] = [
             .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 123)] },
@@ -100,7 +108,7 @@ final class ConnectMocksTests: XCTestCase {
             .message(.with { $0.payload.data = Data(repeating: 0, count: 456) }),
             .complete(code: .ok, error: nil, trailers: nil),
         ]
-        XCTAssertFalse(client.mockAsyncBidiStream.isClosed)
+        #expect(!client.mockAsyncBidiStream.isClosed)
 
         var sentInputs = [Connectrpc_Conformance_V1_BidiStreamRequest]()
         var closeCalled = false
@@ -114,19 +122,21 @@ final class ConnectMocksTests: XCTestCase {
         stream.close()
 
         for await result in stream.results() {
-            XCTAssertEqual(result, expectedResults.removeFirst())
+            #expect(result == expectedResults.removeFirst())
         }
 
-        XCTAssertEqual(sentInputs, expectedInputs)
-        XCTAssertEqual(client.mockAsyncBidiStream.inputs, expectedInputs)
-        XCTAssertTrue(expectedResults.isEmpty)
-        XCTAssertTrue(closeCalled)
-        XCTAssertTrue(client.mockAsyncBidiStream.isClosed)
+        #expect(sentInputs == expectedInputs)
+        #expect(client.mockAsyncBidiStream.inputs == expectedInputs)
+        #expect(expectedResults.isEmpty)
+        #expect(closeCalled)
+        #expect(client.mockAsyncBidiStream.isClosed)
     }
 
     // MARK: - Server-only stream
 
-    func testMockServerOnlyStreamCallbacks() {
+    @available(iOS 13, *)
+    @Test("ConnectMocks provides mock server stream client that supports callback-based testing")
+    func mockServerOnlyStreamCallbacks() {
         let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
         let expectedInputs: [Connectrpc_Conformance_V1_ServerStreamRequest] = [
             .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 123)] },
@@ -150,12 +160,14 @@ final class ConnectMocksTests: XCTestCase {
         }
         stream.send(expectedInputs[0])
 
-        XCTAssertEqual(sentInputs, expectedInputs)
-        XCTAssertEqual(client.mockServerStream.inputs, expectedInputs)
-        XCTAssertEqual(receivedResults.value, expectedResults)
+        #expect(sentInputs == expectedInputs)
+        #expect(client.mockServerStream.inputs == expectedInputs)
+        #expect(receivedResults.value == expectedResults)
     }
 
-    func testMockServerOnlyStreamAsyncAwait() async throws {
+    @available(iOS 13, *)
+    @Test("ConnectMocks provides mock server stream client that supports async/await testing")
+    func mockServerOnlyStreamAsyncAwait() async throws {
         let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
         let expectedInputs: [Connectrpc_Conformance_V1_ServerStreamRequest] = [
             .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 123)] },
@@ -176,11 +188,11 @@ final class ConnectMocksTests: XCTestCase {
         try stream.send(expectedInputs[0])
 
         for await result in stream.results() {
-            XCTAssertEqual(result, expectedResults.removeFirst())
+            #expect(result == expectedResults.removeFirst())
         }
 
-        XCTAssertEqual(sentInputs, expectedInputs)
-        XCTAssertEqual(client.mockAsyncServerStream.inputs, expectedInputs)
-        XCTAssertTrue(expectedResults.isEmpty)
+        #expect(sentInputs == expectedInputs)
+        #expect(client.mockAsyncServerStream.inputs == expectedInputs)
+        #expect(expectedResults.isEmpty)
     }
 }

@@ -14,82 +14,82 @@
 
 @testable import ConnectPluginUtilities
 import Foundation
-import XCTest
+import Testing
 
-final class FilePathComponentsTests: XCTestCase {
-    func testProtoFilePathWithLeadingSlash() {
+struct FilePathComponentsTests {
+    @Test func protoFilePathWithLeadingSlash() {
         let components = FilePathComponents(path: "/foo/bar/baz.proto")
-        XCTAssertEqual(components.directory, "/foo/bar")
-        XCTAssertEqual(components.base, "baz")
-        XCTAssertEqual(components.suffix, ".proto")
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .fullPath),
-            "/foo/bar/baz.connect.swift"
+        #expect(components.directory == "/foo/bar")
+        #expect(components.base == "baz")
+        #expect(components.suffix == ".proto")
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .fullPath)
+            == "/foo/bar/baz.connect.swift"
         )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .dropPath),
-            "baz.connect.swift"
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .dropPath)
+            == "baz.connect.swift"
         )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores),
-            "foo_bar_baz.connect.swift"
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores)
+            == "foo_bar_baz.connect.swift"
         )
     }
 
-    func testProtoFilePathWithoutLeadingSlash() {
+    @Test func protoFilePathWithoutLeadingSlash() {
         let components = FilePathComponents(path: "foo/bar/baz.proto")
-        XCTAssertEqual(components.directory, "foo/bar")
-        XCTAssertEqual(components.base, "baz")
-        XCTAssertEqual(components.suffix, ".proto")
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .fullPath),
-            "foo/bar/baz.connect.swift"
+        #expect(components.directory == "foo/bar")
+        #expect(components.base == "baz")
+        #expect(components.suffix == ".proto")
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .fullPath)
+            == "foo/bar/baz.connect.swift"
         )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .dropPath),
-            "baz.connect.swift"
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .dropPath)
+            == "baz.connect.swift"
         )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores),
-            "foo_bar_baz.connect.swift"
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores)
+            == "foo_bar_baz.connect.swift"
         )
     }
 
-    func testProtoFilePathWithoutDirectoryOrLeadingSlash() {
+    @Test func protoFilePathWithoutDirectoryOrLeadingSlash() {
         let components = FilePathComponents(path: "baz.proto")
-        XCTAssertEqual(components.directory, "")
-        XCTAssertEqual(components.base, "baz")
-        XCTAssertEqual(components.suffix, ".proto")
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .fullPath),
-            "baz.connect.swift"
+        #expect(components.directory == "")
+        #expect(components.base == "baz")
+        #expect(components.suffix == ".proto")
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .fullPath)
+            == "baz.connect.swift"
         )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .dropPath),
-            "baz.connect.swift"
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .dropPath)
+            == "baz.connect.swift"
         )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores),
-            "baz.connect.swift"
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores)
+            == "baz.connect.swift"
         )
     }
 
-    func testProtoFilePathWithoutDirectoryButWithLeadingSlash() {
+    @Test func protoFilePathWithoutDirectoryButWithLeadingSlash() {
         let components = FilePathComponents(path: "/baz.proto")
-        XCTAssertEqual(components.directory, "")
-        XCTAssertEqual(components.base, "baz")
-        XCTAssertEqual(components.suffix, ".proto")
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .fullPath),
-            "baz.connect.swift"
+        #expect(components.directory == "")
+        #expect(components.base == "baz")
+        #expect(components.suffix == ".proto")
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .fullPath)
+            == "baz.connect.swift"
         )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .dropPath),
-            "baz.connect.swift"
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .dropPath)
+            == "baz.connect.swift"
         )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores),
-            "baz.connect.swift"
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores)
+            == "baz.connect.swift"
         )
     }
 }
