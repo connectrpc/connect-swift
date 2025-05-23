@@ -5,6 +5,11 @@ on:
       - main
   pull_request:
   workflow_dispatch: {} # support manual runs
+env:
+  # Sets the Xcode version to use for the CI.
+  # Available Versions: https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
+  # Ref: https://www.jessesquires.com/blog/2020/01/06/selecting-an-xcode-version-on-github-ci/
+  DEVELOPER_DIR: /Applications/Xcode_16.3.app/Contents/Developer
 permissions:
   contents: read
 jobs:
@@ -12,11 +17,6 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.2.app
-      - name: Install xcbeautify
-        run: brew install xcbeautify
       - name: Build Eliza CocoaPods example
         run: |
           cd Examples/ElizaCocoaPodsApp
@@ -26,11 +26,6 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.2.app
-      - name: Install xcbeautify
-        run: brew install xcbeautify
       - name: Build Eliza Swift PM example
         run: |
           cd Examples/ElizaSwiftPackageApp
@@ -39,53 +34,30 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.2.app
-      - name: Install xcbeautify
-        run: brew install xcbeautify
       - name: Build Connect iOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.0' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.4' | xcbeautify
   build-library-macos:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.2.app
-      - name: Install xcbeautify
-        run: brew install xcbeautify
       - name: Build Connect macOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS' | xcbeautify
   build-library-tvos:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.2.app
-      - name: Install xcbeautify
-        run: brew install xcbeautify
       - name: Build Connect tvOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=18.0' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=18.4' | xcbeautify
   build-library-watchos:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.2.app
-      - name: Install xcbeautify
-        run: brew install xcbeautify
       - name: Build Connect watchOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 10 (42mm),OS=11.0' | xcbeautify
   build-plugin-and-generate:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
-        run: sudo xcode-select --switch /Applications/Xcode_16.2.app
       - uses: bufbuild/buf-setup-action@v1.50.0
         with:
           github_token: ${{ github.token }}
@@ -101,9 +73,6 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.2.app
       - name: Install conformance runner
         run: make installconformancerunner
       - name: Run conformance tests
@@ -115,9 +84,6 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: 1.21.x
-      - name: Select Xcode version
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
-        run: sudo xcode-select --switch /Applications/Xcode_16.2.app
       - name: Run unit tests
         run: make testunit
   run-swiftlint:
