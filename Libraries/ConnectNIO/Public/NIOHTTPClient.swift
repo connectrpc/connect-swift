@@ -15,11 +15,11 @@
 import Connect
 import Foundation
 import NIOConcurrencyHelpers
-@preconcurrency import NIOCore // TODO: Remove once `ChannelHandler` is `Sendable`
+@preconcurrency import NIOCore
 import NIOHTTP1
-@preconcurrency import NIOHTTP2 // TODO: Remove once `HTTP2StreamMultiplexer` is `Sendable`
+import NIOHTTP2
 import NIOPosix
-import NIOSSL
+@preconcurrency import NIOSSL
 import os.log
 
 /// HTTP client powered by Swift NIO which supports trailers (unlike URLSession).
@@ -193,22 +193,23 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         self.state = .connecting
         self.bootstrap
             .connect(host: self.host, port: self.port)
-            .flatMap { channel -> EventLoopFuture<(Channel, HTTP2StreamMultiplexer)> in
-                return channel.pipeline
-                    .handler(type: HTTP2StreamMultiplexer.self)
-                    .map { (channel, $0) }
-            }
             .whenComplete { [weak self] result in
-                switch result {
-                case .success((let channel, let multiplexer)):
-                    channel.closeFuture.whenComplete { [weak self] _ in
-                        self?.lock.withLock { self?.state = .disconnected }
+                do {
+                    switch result {
+                    case .success(let channel):
+                        let multiplexer = try channel.pipeline.syncOperations
+                            .handler(type: HTTP2StreamMultiplexer.self)
+                        channel.closeFuture.whenComplete { [weak self] _ in
+                            self?.lock.withLock { self?.state = .disconnected }
+                        }
+                        self?.lock.withLock {
+                            self?.state = .connected(channel: channel, multiplexer: multiplexer)
+                            self?.flushOrFailPendingRequests(using: multiplexer)
+                        }
+                    case .failure(let error):
+                        throw error
                     }
-                    self?.lock.withLock {
-                        self?.state = .connected(channel: channel, multiplexer: multiplexer)
-                        self?.flushOrFailPendingRequests(using: multiplexer)
-                    }
-                case .failure(let error):
+                } catch let error {
                     os_log(.error, "NIOHTTPClient disconnected: %@", "\(error)")
                     self?.lock.withLock {
                         self?.state = .disconnected
