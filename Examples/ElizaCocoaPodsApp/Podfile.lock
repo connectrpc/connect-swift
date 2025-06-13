@@ -1,5 +1,5 @@
 PODS:
-  - Connect-Swift (1.0.3):
+  - Connect-Swift (1.0.4):
     - SwiftProtobuf (~> 1.28.2)
   - SwiftProtobuf (1.28.2)
 
@@ -15,9 +15,9 @@ EXTERNAL SOURCES:
     :path: "../.."
 
 SPEC CHECKSUMS:
-  Connect-Swift: 537f3cb4148768054c7310ca0382c4a36011b4af
+  Connect-Swift: 5d888f34286e7aab1652b531503e106cc8bdbbaf
   SwiftProtobuf: 4dbaffec76a39a8dc5da23b40af1a5dc01a4c02d
 
 PODFILE CHECKSUM: b598f373a6ab5add976b09c2ac79029bf2200d48
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
