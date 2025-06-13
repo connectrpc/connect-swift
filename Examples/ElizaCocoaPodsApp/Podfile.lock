@@ -1,7 +1,7 @@
 PODS:
   - Connect-Swift (1.0.4):
-    - SwiftProtobuf (~> 1.28.2)
-  - SwiftProtobuf (1.28.2)
+    - SwiftProtobuf (~> 1.30.0)
+  - SwiftProtobuf (1.30.0)
 
 DEPENDENCIES:
   - Connect-Swift (from `../..`)
