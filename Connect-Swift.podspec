@@ -13,7 +13,7 @@ Pod::Spec.new do |spec|
   spec.tvos.deployment_target = '13.0'
   spec.watchos.deployment_target = '6.0'
 
-  spec.dependency 'SwiftProtobuf', '~> 1.28.2'
+  spec.dependency 'SwiftProtobuf', '~> 1.30.0'
 
   spec.source_files = 'Libraries/Connect/**/*.swift'
 
