@@ -80,8 +80,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
                 return
             }
 
-            self.isClosed = true
-            self.context?.close(promise: nil)
+            self.closeConnection()
             self.responseCallbacks.receiveClose(.canceled, [:], ConnectError.canceled())
         }
     }
@@ -94,13 +93,21 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
         }
     }
 
+    private func closeConnection() {
+        if self.isClosed {
+            return
+        }
+
+        self.isClosed = true
+        self.context?.close(promise: nil)
+    }
+
     // MARK: - ChannelInboundHandler
 
     typealias OutboundOut = NIOHTTP1.HTTPClientRequestPart
     typealias InboundIn = NIOHTTP1.HTTPClientResponsePart
 
     func channelActive(context: NIOCore.ChannelHandlerContext) {
-        self.context = context
         if self.isClosed {
             return
         }
@@ -147,9 +154,21 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
                 trailers.map { .fromNIOHeaders($0) } ?? [:],
                 nil
             )
-            context.close(promise: nil)
-            self.isClosed = true
+            self.closeConnection()
         }
+    }
+
+    func handlerAdded(context: NIOCore.ChannelHandlerContext) {
+      self.context = context
+    }
+
+    func handlerRemoved(context: NIOCore.ChannelHandlerContext) {
+      self.context = nil
+    }
+
+    func channelInactive(context: ChannelHandlerContext) {
+      self.closeConnection()
+      context.fireChannelInactive()
     }
 
     func errorCaught(context: NIOCore.ChannelHandlerContext, error: Swift.Error) {
@@ -162,8 +181,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             [:],
             error
         )
-        context.close(promise: nil)
-        self.isClosed = true
+        self.closeConnection()
     }
 
     func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
@@ -171,8 +189,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             return context.fireUserInboundEventTriggered(event)
         }
 
-        self.isClosed = true
-        context.close(promise: nil)
+        self.closeConnection()
         self.responseCallbacks.receiveClose(.deadlineExceeded, [:], ConnectError.deadlineExceeded())
     }
 }
