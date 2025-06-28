@@ -33,6 +33,8 @@ final class ConnectClientGenerator: Generator {
             self.visibility = "internal"
         case .public:
             self.visibility = "public"
+        case .package:
+            self.visibility = "package"
         }
 
         self.printModuleImports()

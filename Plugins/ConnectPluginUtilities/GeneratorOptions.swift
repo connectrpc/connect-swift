@@ -65,6 +65,7 @@ public struct GeneratorOptions {
     public enum Visibility: String {
         case `internal` = "Internal"
         case `public` = "Public"
+        case `package` = "Package"
     }
 
     static func empty() -> Self {
