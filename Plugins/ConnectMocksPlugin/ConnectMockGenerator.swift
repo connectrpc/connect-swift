@@ -36,6 +36,9 @@ final class ConnectMockGenerator: Generator {
         case .public:
             self.propertyVisibility = "public"
             self.typeVisibility = "open"
+        case .package:
+            self.propertyVisibility = "package"
+            self.typeVisibility = "package"
         }
 
         if self.options.generateCallbackMethods {
