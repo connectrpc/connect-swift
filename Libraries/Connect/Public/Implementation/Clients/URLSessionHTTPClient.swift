@@ -114,20 +114,20 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
             self.metricsClosures[urlSessionStream.taskID] = responseCallbacks.receiveResponseMetrics
         }
         return RequestCallbacks(
-            cancel: { urlSessionStream.cancel() },
-            sendData: { data in
+            cancel: { [weak urlSessionStream] in urlSessionStream?.cancel() },
+            sendData: { [weak urlSessionStream] data in
                 do {
-                    try urlSessionStream.sendData(data)
+                    try urlSessionStream?.sendData(data)
                 } catch let error {
                     os_log(
                         .error,
                         "Failed to write data to stream - closing connection: %@",
                         error.localizedDescription
                     )
-                    urlSessionStream.close()
+                    urlSessionStream?.close()
                 }
             },
-            sendClose: { urlSessionStream.close() }
+            sendClose: { [weak urlSessionStream] in urlSessionStream?.close() }
         )
     }
 
