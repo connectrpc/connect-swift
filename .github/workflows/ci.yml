@@ -16,7 +16,7 @@ jobs:
   build-eliza-cocoapods-example:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build Eliza CocoaPods example
         run: |
           cd Examples/ElizaCocoaPodsApp
@@ -25,7 +25,7 @@ jobs:
   build-eliza-swiftpm-example:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build Eliza Swift PM example
         run: |
           cd Examples/ElizaSwiftPackageApp
@@ -33,31 +33,31 @@ jobs:
   build-library-ios:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build Connect iOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' | xcbeautify
   build-library-macos:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build Connect macOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS' | xcbeautify
   build-library-tvos:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build Connect tvOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=18.5' | xcbeautify
   build-library-watchos:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build Connect watchOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 10 (42mm),OS=11.0' | xcbeautify
   build-plugin-and-generate:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: bufbuild/buf-setup-action@v1.50.0
         with:
           github_token: ${{ github.token }}
@@ -72,7 +72,7 @@ jobs:
   run-conformance-tests:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install conformance runner
         run: make installconformancerunner
       - name: Run conformance tests
@@ -80,7 +80,7 @@ jobs:
   run-unit-tests:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-go@v5
         with:
           go-version: 1.21.x
@@ -91,13 +91,13 @@ jobs:
     container:
       image: ghcr.io/realm/swiftlint:0.58.2
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Run SwiftLint
         run: swiftlint lint --strict
   validate-license-headers:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate license headers
         run: |
           make licenseheaders
