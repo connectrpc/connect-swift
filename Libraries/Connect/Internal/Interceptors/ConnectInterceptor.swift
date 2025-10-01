@@ -241,23 +241,28 @@ extension ConnectInterceptor: StreamInterceptor {
     }
 }
 
-private extension ProtocolClientConfig {
+extension ProtocolClientConfig {
     func transformToGETIfNeeded(_ request: HTTPRequest<Data?>) -> HTTPRequest<Data?> {
         guard self.shouldUseUnaryGET(for: request) else {
             return request
         }
 
         var components = URLComponents(url: request.url, resolvingAgainstBaseURL: true)
-        components?.queryItems = [
+
+        var queryItems: [URLQueryItem] = [
             URLQueryItem(name: "base64", value: "1"),
-            URLQueryItem(
-                name: "compression",
-                value: request.headers[HeaderConstants.contentEncoding]?.first ?? "identity"
-            ),
             URLQueryItem(name: "connect", value: "v\(ConnectInterceptor.protocolVersion)"),
             URLQueryItem(name: "encoding", value: self.codec.name()),
             URLQueryItem(name: "message", value: request.message?.base64EncodedString()),
         ]
+
+        if let contentEncoding = request.headers[HeaderConstants.contentEncoding]?.first {
+            let queryItem = URLQueryItem(name: "compression", value: contentEncoding)
+            queryItems.append(queryItem)
+        }
+
+        components?.queryItems = queryItems
+
         guard let url = components?.url else {
             return request
         }
