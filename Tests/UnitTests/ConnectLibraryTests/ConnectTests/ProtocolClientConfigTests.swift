@@ -213,4 +213,54 @@ final class ProtocolClientConfigTests: XCTestCase {
             unaryGET: .disabled
         ).shouldUseUnaryGET(for: request))
     }
+
+    func testTransformToGETWithoutRequestCompression() {
+        let request = HTTPRequest<Data?>(
+            url: URL(string: "https://connectrpc.com")!,
+            headers: Headers(),
+            message: Data([0x0, 0x1, 0x2]),
+            method: .post,
+            trailers: nil,
+            idempotencyLevel: .noSideEffects
+        )
+
+        let config = ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .alwaysEnabled
+        )
+
+        let requestWithoutCompression = config.transformToGETIfNeeded(request)
+
+        XCTAssertEqual(requestWithoutCompression.method, .get)
+        XCTAssertEqual(
+            requestWithoutCompression.url.absoluteString,
+            "https://connectrpc.com?base64=1&connect=v1&encoding=json&message=AAEC"
+        )
+    }
+
+    func testTransformToGETWithRequestCompression() {
+        let compressedRequest = HTTPRequest<Data?>(
+            url: URL(string: "https://connectrpc.com")!,
+            headers: [HeaderConstants.contentEncoding: ["gzip"]], // mimics inceptor behavior
+            message: Data([0x0, 0x1, 0x2]),
+            method: .post,
+            trailers: nil,
+            idempotencyLevel: .noSideEffects
+        )
+
+        let config = ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .alwaysEnabled
+        )
+
+        let requestWithCompression = config.transformToGETIfNeeded(compressedRequest)
+
+        XCTAssertEqual(requestWithCompression.method, .get)
+        XCTAssertEqual(
+            requestWithCompression.url.absoluteString,
+            "https://connectrpc.com?base64=1&connect=v1&encoding=json&message=AAEC&compression=gzip"
+        )
+    }
 }
