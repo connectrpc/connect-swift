@@ -214,7 +214,7 @@ final class ProtocolClientConfigTests: XCTestCase {
         ).shouldUseUnaryGET(for: request))
     }
 
-    func testTransformToGETIfNeededWithRequestCompression() {
+    func testTransformToGETWithoutRequestCompression() {
         let request = HTTPRequest<Data?>(
             url: URL(string: "https://connectrpc.com")!,
             headers: Headers(),
@@ -237,7 +237,9 @@ final class ProtocolClientConfigTests: XCTestCase {
             requestWithoutCompression.url.absoluteString,
             "https://connectrpc.com?base64=1&connect=v1&encoding=json&message=AAEC"
         )
+    }
 
+    func testTransformToGETWithRequestCompression() {
         let compressedRequest = HTTPRequest<Data?>(
             url: URL(string: "https://connectrpc.com")!,
             headers: [HeaderConstants.contentEncoding: ["gzip"]], // mimics inceptor behavior
@@ -245,6 +247,12 @@ final class ProtocolClientConfigTests: XCTestCase {
             method: .post,
             trailers: nil,
             idempotencyLevel: .noSideEffects
+        )
+
+        let config = ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .alwaysEnabled
         )
 
         let requestWithCompression = config.transformToGETIfNeeded(compressedRequest)
