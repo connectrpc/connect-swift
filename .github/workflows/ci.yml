@@ -14,7 +14,7 @@ permissions:
   contents: read
 jobs:
   build-eliza-cocoapods-example:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Build Eliza CocoaPods example
@@ -23,7 +23,7 @@ jobs:
           pod install
           set -o pipefail && xcodebuild -workspace ElizaCocoaPodsApp.xcworkspace -scheme ElizaCocoaPodsApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
   build-eliza-swiftpm-example:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Build Eliza Swift PM example
@@ -31,31 +31,31 @@ jobs:
           cd Examples/ElizaSwiftPackageApp
           set -o pipefail && xcodebuild -scheme ElizaSwiftPackageApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
   build-library-ios:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Build Connect iOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 16,OS=26.0' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.0' | xcbeautify
   build-library-macos:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Build Connect macOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS' | xcbeautify
   build-library-tvos:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Build Connect tvOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=26.0' | xcbeautify
   build-library-watchos:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Build Connect watchOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 10 (42mm),OS=26.0' | xcbeautify
   build-plugin-and-generate:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - uses: bufbuild/buf-setup-action@v1.50.0
@@ -70,7 +70,7 @@ jobs:
           git update-index --refresh --add --remove
           git diff-index --quiet HEAD --
   run-conformance-tests:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Install conformance runner
@@ -78,7 +78,7 @@ jobs:
       - name: Run conformance tests
         run: make testconformance
   run-unit-tests:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v5
