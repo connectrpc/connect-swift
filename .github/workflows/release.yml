@@ -6,7 +6,7 @@ on:
   workflow_dispatch: {} # support manual runs
 env:
   # Sets the Xcode version to use for the CI.
-  # Available Versions: https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
+  # Available versions: https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md#xcode
   # Ref: https://www.jessesquires.com/blog/2020/01/06/selecting-an-xcode-version-on-github-ci/
   DEVELOPER_DIR: /Applications/Xcode_26.app/Contents/Developer
 permissions:
