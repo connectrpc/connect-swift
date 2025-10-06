@@ -53,7 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Build Connect watchOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 10 (42mm),OS=26.0' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (42mm),OS=26.0' | xcbeautify
   build-plugin-and-generate:
     runs-on: macos-26
     steps:
