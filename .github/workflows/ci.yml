@@ -7,14 +7,14 @@ on:
   workflow_dispatch: {} # support manual runs
 env:
   # Sets the Xcode version to use for the CI.
-  # Available Versions: https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md#xcode
+  # Available versions: https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md#xcode
   # Ref: https://www.jessesquires.com/blog/2020/01/06/selecting-an-xcode-version-on-github-ci/
-  DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+  DEVELOPER_DIR: /Applications/Xcode_26.0.1.app/Contents/Developer
 permissions:
   contents: read
 jobs:
   build-eliza-cocoapods-example:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Build Eliza CocoaPods example
@@ -23,7 +23,7 @@ jobs:
           pod install
           set -o pipefail && xcodebuild -workspace ElizaCocoaPodsApp.xcworkspace -scheme ElizaCocoaPodsApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
   build-eliza-swiftpm-example:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Build Eliza Swift PM example
@@ -31,31 +31,31 @@ jobs:
           cd Examples/ElizaSwiftPackageApp
           set -o pipefail && xcodebuild -scheme ElizaSwiftPackageApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
   build-library-ios:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Build Connect iOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.0' | xcbeautify
   build-library-macos:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Build Connect macOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS' | xcbeautify
   build-library-tvos:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Build Connect tvOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=18.5' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV,OS=26.0' | xcbeautify
   build-library-watchos:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Build Connect watchOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 10 (42mm),OS=11.0' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (42mm),OS=26.0' | xcbeautify
   build-plugin-and-generate:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - uses: bufbuild/buf-setup-action@v1.50.0
@@ -70,7 +70,7 @@ jobs:
           git update-index --refresh --add --remove
           git diff-index --quiet HEAD --
   run-conformance-tests:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Install conformance runner
@@ -78,12 +78,12 @@ jobs:
       - name: Run conformance tests
         run: make testconformance
   run-unit-tests:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v5
         with:
-          go-version: 1.21.x
+          go-version: 1.23.x
       - name: Run unit tests
         run: make testunit
   run-swiftlint:
