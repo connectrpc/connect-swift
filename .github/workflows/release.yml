@@ -15,7 +15,7 @@ jobs:
   release:
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: bufbuild/buf-setup-action@v1.50.0
         with:
           github_token: ${{ github.token }}
@@ -41,7 +41,7 @@ jobs:
   publish-podspecs:
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Publish podspecs to CocoaPods
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
