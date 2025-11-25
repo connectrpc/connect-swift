@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Build Connect iOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=Any iOS Simulator Device' | xcbeautify
   build-library-macos:
     runs-on: macos-26
     steps:
@@ -47,13 +47,13 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Build Connect tvOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Any tvOS Simulator Device' | xcbeautify
   build-library-watchos:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Build Connect watchOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Any watchOS Simulator Device' | xcbeautify
   build-plugin-and-generate:
     runs-on: macos-26
     steps:
