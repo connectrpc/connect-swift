@@ -26,6 +26,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
 
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
+    private var hasResponded = false
     private var pendingClose: NIOHTTP1.HTTPClientRequestPart?
     private var pendingData = Foundation.Data()
     private var receivedStatus: NIOHTTP1.HTTPResponseStatus?
@@ -81,6 +82,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             }
 
             self.closeConnection()
+            self.hasResponded = true
             self.responseCallbacks.receiveClose(.canceled, [:], ConnectError.canceled())
         }
     }
@@ -149,6 +151,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             self.responseCallbacks.receiveResponseData(Data(buffer: byteBuffer))
             context.fireChannelRead(data)
         case .end(let trailers):
+            self.hasResponded = true
             self.responseCallbacks.receiveClose(
                 self.receivedStatus.map { .fromNIOStatus($0) } ?? .ok,
                 trailers.map { .fromNIOHeaders($0) } ?? [:],
@@ -167,7 +170,22 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     }
 
     func channelInactive(context: ChannelHandlerContext) {
+      let shouldNotify = !self.hasResponded
       self.closeConnection()
+      if shouldNotify {
+          self.hasResponded = true
+          self.responseCallbacks.receiveClose(
+              .unavailable,
+              [:],
+              ConnectError(
+                  code: .unavailable,
+                  message: "Channel became inactive",
+                  exception: nil,
+                  details: [],
+                  metadata: [:]
+              )
+          )
+      }
       context.fireChannelInactive()
     }
 
@@ -176,6 +194,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             return
         }
 
+        self.hasResponded = true
         self.responseCallbacks.receiveClose(
             .fromHTTPStatus((error as NSError).code),
             [:],
@@ -190,6 +209,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
         }
 
         self.closeConnection()
+        self.hasResponded = true
         self.responseCallbacks.receiveClose(.deadlineExceeded, [:], ConnectError.deadlineExceeded())
     }
 }
