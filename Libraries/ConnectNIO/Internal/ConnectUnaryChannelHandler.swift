@@ -27,6 +27,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
 
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
+    private var hasResponded = false
     private var receivedHead: NIOHTTP1.HTTPResponseHead?
     private var receivedData: Foundation.Data?
     private var receivedEnd: NIOHTTP1.HTTPHeaders?
@@ -51,6 +52,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
             }
 
             self.closeConnection()
+            self.hasResponded = true
             self.onResponse(HTTPResponse(
                 code: .canceled,
                 headers: [:],
@@ -143,6 +145,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
             context.fireChannelRead(data)
         case .end(let trailers):
             self.receivedEnd = trailers
+            self.hasResponded = true
             self.onResponse(self.createResponse(error: nil))
             self.onMetrics(.init(taskMetrics: nil))
             self.closeConnection()
@@ -158,7 +161,25 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
     }
 
     func channelInactive(context: ChannelHandlerContext) {
+      let shouldNotify = !self.hasResponded
       self.closeConnection()
+        if shouldNotify {
+          self.hasResponded = true
+          self.onResponse(.init(
+              code: .unavailable,
+              headers: [:],
+              message: nil,
+              trailers: [:],
+              error: ConnectError(
+                  code: .unavailable,
+                  message: "Channel became inactive",
+                  exception: nil,
+                  details: [],
+                  metadata: [:]
+              ),
+              tracingInfo: nil
+          ))
+      }
       context.fireChannelInactive()
     }
 
@@ -167,6 +188,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
             return
         }
 
+        self.hasResponded = true
         self.onResponse(self.createResponse(error: error))
         self.closeConnection()
     }
@@ -177,6 +199,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
         }
 
         self.closeConnection()
+        self.hasResponded = true
         self.onResponse(.init(
             code: .deadlineExceeded,
             headers: [:],
