@@ -208,8 +208,8 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             return context.fireUserInboundEventTriggered(event)
         }
 
-        self.closeConnection()
         self.hasResponded = true
+        self.closeConnection()
         self.responseCallbacks.receiveClose(.deadlineExceeded, [:], ConnectError.deadlineExceeded())
     }
 }

@@ -51,8 +51,8 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
                 return
             }
 
-            self.closeConnection()
             self.hasResponded = true
+            self.closeConnection()
             self.onResponse(HTTPResponse(
                 code: .canceled,
                 headers: [:],
