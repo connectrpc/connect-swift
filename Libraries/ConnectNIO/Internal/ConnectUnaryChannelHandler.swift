@@ -51,7 +51,6 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
                 return
             }
 
-            self.hasResponded = true
             self.closeConnection()
             self.onResponse(HTTPResponse(
                 code: .canceled,
@@ -88,6 +87,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
             return
         }
 
+        self.hasResponded = true
         self.isClosed = true
         self.context?.close(promise: nil)
     }
@@ -145,7 +145,6 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
             context.fireChannelRead(data)
         case .end(let trailers):
             self.receivedEnd = trailers
-            self.hasResponded = true
             self.onResponse(self.createResponse(error: nil))
             self.onMetrics(.init(taskMetrics: nil))
             self.closeConnection()
@@ -164,7 +163,6 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
       let shouldNotify = !self.hasResponded
       self.closeConnection()
         if shouldNotify {
-          self.hasResponded = true
           self.onResponse(.init(
               code: .unavailable,
               headers: [:],
@@ -188,7 +186,6 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
             return
         }
 
-        self.hasResponded = true
         self.onResponse(self.createResponse(error: error))
         self.closeConnection()
     }
@@ -199,7 +196,6 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
         }
 
         self.closeConnection()
-        self.hasResponded = true
         self.onResponse(.init(
             code: .deadlineExceeded,
             headers: [:],

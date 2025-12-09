@@ -82,7 +82,6 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             }
 
             self.closeConnection()
-            self.hasResponded = true
             self.responseCallbacks.receiveClose(.canceled, [:], ConnectError.canceled())
         }
     }
@@ -100,6 +99,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             return
         }
 
+        self.hasResponded = true
         self.isClosed = true
         self.context?.close(promise: nil)
     }
@@ -151,7 +151,6 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             self.responseCallbacks.receiveResponseData(Data(buffer: byteBuffer))
             context.fireChannelRead(data)
         case .end(let trailers):
-            self.hasResponded = true
             self.responseCallbacks.receiveClose(
                 self.receivedStatus.map { .fromNIOStatus($0) } ?? .ok,
                 trailers.map { .fromNIOHeaders($0) } ?? [:],
@@ -173,7 +172,6 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
       let shouldNotify = !self.hasResponded
       self.closeConnection()
       if shouldNotify {
-          self.hasResponded = true
           self.responseCallbacks.receiveClose(
               .unavailable,
               [:],
@@ -194,7 +192,6 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             return
         }
 
-        self.hasResponded = true
         self.responseCallbacks.receiveClose(
             .fromHTTPStatus((error as NSError).code),
             [:],
@@ -208,7 +205,6 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             return context.fireUserInboundEventTriggered(event)
         }
 
-        self.hasResponded = true
         self.closeConnection()
         self.responseCallbacks.receiveClose(.deadlineExceeded, [:], ConnectError.deadlineExceeded())
     }
