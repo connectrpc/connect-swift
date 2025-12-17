@@ -27,6 +27,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
 
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
+    private var hasResponded = false
     private var receivedHead: NIOHTTP1.HTTPResponseHead?
     private var receivedData: Foundation.Data?
     private var receivedEnd: NIOHTTP1.HTTPHeaders?
@@ -86,6 +87,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
             return
         }
 
+        self.hasResponded = true
         self.isClosed = true
         self.context?.close(promise: nil)
     }
@@ -158,7 +160,24 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
     }
 
     func channelInactive(context: ChannelHandlerContext) {
+      let shouldNotify = !self.hasResponded
       self.closeConnection()
+        if shouldNotify {
+          self.onResponse(.init(
+              code: .unavailable,
+              headers: [:],
+              message: nil,
+              trailers: [:],
+              error: ConnectError(
+                  code: .unavailable,
+                  message: "Channel became inactive",
+                  exception: nil,
+                  details: [],
+                  metadata: [:]
+              ),
+              tracingInfo: nil
+          ))
+      }
       context.fireChannelInactive()
     }
 
