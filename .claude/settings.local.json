@@ -8,7 +8,10 @@
       "Bash(swift build:*)",
       "Bash(PATH=\"$PWD/.tmp/bin:$PATH\" connectconformance:*)",
       "Bash(timeout 60 bash:*)",
-      "Bash(timeout 120 bash:*)"
+      "Bash(timeout 120 bash:*)",
+      "Bash(for i in {1..3})",
+      "Bash(do echo \"=== Run $i ===\")",
+      "Bash(done)"
     ]
   }
 }
