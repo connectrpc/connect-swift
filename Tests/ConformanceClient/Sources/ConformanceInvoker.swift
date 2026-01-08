@@ -27,26 +27,11 @@ final class ConformanceInvoker: Sendable {
     typealias ConformanceRequest = Connectrpc_Conformance_V1_ClientCompatRequest
     typealias ConformanceResult = Connectrpc_Conformance_V1_ClientResponseResult
 
-    // Cache NIOHTTPClient instances to avoid creating/destroying event loop groups for each test.
-    // This prevents race conditions where event loops are shut down while still in use.
-    private static let nioClientCache = NIOClientCache()
-
-    private final class NIOClientCache: @unchecked Sendable {
-        private var cache: [String: NIOHTTPClient] = [:]
-        private let lock = NSLock()
-
-        func client(host: String, port: Int) -> NIOHTTPClient {
-            let key = "\(host):\(port)"
-            lock.lock()
-            defer { lock.unlock() }
-            if let existing = cache[key] {
-                return existing
-            }
-            let client = NIOHTTPClient(host: host, port: port)
-            cache[key] = client
-            return client
-        }
-    }
+    // Cache NIO clients to avoid event loop shutdown race conditions from rapidly
+    // creating and destroying clients. Each host:port gets a single reused client.
+    // nonisolated(unsafe) is safe here because access is protected by cacheLock.
+    nonisolated(unsafe) private static var nioClientCache: [String: NIOHTTPClient] = [:]
+    private static let cacheLock = NSLock()
 
     // MARK: - Initialization
 
@@ -85,11 +70,18 @@ final class ConformanceInvoker: Sendable {
     ) -> HTTPClientInterface {
         switch clientType {
         case .swiftNIO:
-            // Reuse NIOHTTPClient instances to prevent event loop shutdown race conditions
-            return Self.nioClientCache.client(
+            let key = "\(request.host):\(request.port)"
+            cacheLock.lock()
+            defer { cacheLock.unlock() }
+            if let existing = nioClientCache[key] {
+                return existing
+            }
+            let client = NIOHTTPClient(
                 host: "http://\(request.host)",
                 port: Int(request.port)
             )
+            nioClientCache[key] = client
+            return client
         case .urlSession:
             return URLSessionHTTPClient()
         }

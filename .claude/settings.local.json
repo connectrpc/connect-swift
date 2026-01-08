@@ -5,7 +5,8 @@
       "Bash(connectconformance --help:*)",
       "Bash(.tmp/bin/connectconformance:*)",
       "Bash(make testconformance:*)",
-      "Bash(swift build:*)"
+      "Bash(swift build:*)",
+      "Bash(PATH=\"$PWD/.tmp/bin:$PATH\" connectconformance:*)"
     ]
   }
 }
