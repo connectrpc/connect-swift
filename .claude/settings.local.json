@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr view:*)",
+      "Bash(connectconformance --help:*)",
+      "Bash(.tmp/bin/connectconformance:*)",
+      "Bash(make testconformance:*)",
+      "Bash(swift build:*)"
+    ]
+  }
+}
