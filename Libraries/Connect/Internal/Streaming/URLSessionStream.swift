@@ -30,6 +30,16 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
         case unableToWriteData
     }
 
+    // Shared thread with a run loop for stream scheduling.
+    // Required because .current may not have an active run loop in async contexts.
+    // nonisolated(unsafe) is safe: thread is immutable after initialization.
+    nonisolated(unsafe) private static let streamThread: Thread = {
+        let thread = Thread { RunLoop.current.run() }
+        thread.name = "com.connectrpc.URLSessionStream"
+        thread.start()
+        return thread
+    }()
+
     var requestBodyStream: Foundation.InputStream {
         return self.readStream
     }
@@ -57,9 +67,20 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
         self.task = session.uploadTask(withStreamedRequest: request)
         super.init()
 
-        writeStream.schedule(in: .current, forMode: .default)
-        writeStream.open()
+        // Schedule on dedicated thread with guaranteed run loop.
+        // Using .current fails in async contexts where no run loop is active.
+        self.perform(
+            #selector(scheduleStream),
+            on: Self.streamThread,
+            with: nil,
+            waitUntilDone: true
+        )
         self.task.resume()
+    }
+
+    @objc private func scheduleStream() {
+        self.writeStream.schedule(in: .current, forMode: .default)
+        self.writeStream.open()
     }
 
     // MARK: - Outbound
