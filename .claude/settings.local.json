@@ -6,7 +6,9 @@
       "Bash(.tmp/bin/connectconformance:*)",
       "Bash(make testconformance:*)",
       "Bash(swift build:*)",
-      "Bash(PATH=\"$PWD/.tmp/bin:$PATH\" connectconformance:*)"
+      "Bash(PATH=\"$PWD/.tmp/bin:$PATH\" connectconformance:*)",
+      "Bash(timeout 60 bash:*)",
+      "Bash(timeout 120 bash:*)"
     ]
   }
 }

@@ -57,7 +57,9 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
         self.task = session.uploadTask(withStreamedRequest: request)
         super.init()
 
-        writeStream.schedule(in: .current, forMode: .default)
+        // Use main run loop to ensure the stream works correctly in async contexts.
+        // Using .current can fail if there's no active run loop on the current thread.
+        writeStream.schedule(in: .main, forMode: .common)
         writeStream.open()
         self.task.resume()
     }

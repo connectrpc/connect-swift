@@ -51,7 +51,30 @@ private func main() async throws {
                 throw "Unexpected service specified: \(request.service)"
             }
 
-            let result = try await invoker.invokeRequest()
+            // Add a safety timeout to prevent hanging indefinitely when requests get stuck.
+            // This ensures the conformance runner always gets a response, even on CI where
+            // timing issues can cause URLSession requests to hang.
+            let result: Connectrpc_Conformance_V1_ClientResponseResult
+            if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {
+                result = try await withThrowingTaskGroup(of: Connectrpc_Conformance_V1_ClientResponseResult.self) { group in
+                    group.addTask {
+                        try await invoker.invokeRequest()
+                    }
+                    group.addTask {
+                        // 60 second timeout per test - should be plenty even for slow CI
+                        try await Task.sleep(for: .seconds(60))
+                        throw NSError(domain: "ConformanceTimeout", code: -1, userInfo: [
+                            NSLocalizedDescriptionKey: "Test timed out after 60 seconds"
+                        ])
+                    }
+                    let result = try await group.next()!
+                    group.cancelAll()
+                    return result
+                }
+            } else {
+                result = try await invoker.invokeRequest()
+            }
+
             response = .with { conformanceResponse in
                 conformanceResponse.testName = request.testName
                 conformanceResponse.response = result
