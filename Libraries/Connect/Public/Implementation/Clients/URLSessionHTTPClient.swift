@@ -32,13 +32,21 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
     /// `URLSessionTask.delegate = <URLSessionStream instance>` once we are able to set iOS 15
     /// as the base deployment target.
     private var streams = [Int: URLSessionStream]()
+    /// Dedicated queue for URLSession delegate callbacks.
+    private let delegateQueue: OperationQueue
 
     public init(configuration: URLSessionConfiguration = .default) {
         let delegate = URLSessionDelegateWrapper()
+        // Use a dedicated serial queue instead of .main to avoid run loop dependencies
+        // in async contexts (like CLI tools). This ensures callbacks are delivered reliably.
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
+        queue.name = "com.connectrpc.URLSessionHTTPClient"
+        self.delegateQueue = queue
         self.session = URLSession(
             configuration: configuration,
             delegate: delegate,
-            delegateQueue: .main
+            delegateQueue: queue
         )
         super.init()
         delegate.client = self
