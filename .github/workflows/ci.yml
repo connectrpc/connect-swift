@@ -75,7 +75,15 @@ jobs:
       - uses: actions/checkout@v6
       - name: Install conformance runner
         run: make installconformancerunner
-      - name: Run conformance tests
+      - name: Run conformance tests (1)
+        run: make testconformance
+      - name: Run conformance tests (2)
+        run: make testconformance
+      - name: Run conformance tests (3)
+        run: make testconformance
+      - name: Run conformance tests (4)
+        run: make testconformance
+      - name: Run conformance tests (5)
         run: make testconformance
   run-unit-tests:
     runs-on: macos-26

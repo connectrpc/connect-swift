@@ -78,8 +78,8 @@ $(BIN)/license-headers: Makefile
 testconformance: ## Run all conformance tests
 	swift build -c release --product ConnectConformanceClient
 	mv ./.build/release/ConnectConformanceClient $(BIN)
-	PATH="$(abspath $(BIN)):$(PATH)" connectconformance --trace --conf ./Tests/ConformanceClient/InvocationConfigs/urlsession.yaml --mode client $(BIN)/ConnectConformanceClient httpclient=urlsession
-	PATH="$(abspath $(BIN)):$(PATH)" connectconformance --trace --conf ./Tests/ConformanceClient/InvocationConfigs/nio.yaml --mode client $(BIN)/ConnectConformanceClient httpclient=nio
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance --trace -vv --conf ./Tests/ConformanceClient/InvocationConfigs/urlsession.yaml --mode client $(BIN)/ConnectConformanceClient httpclient=urlsession
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance --trace -vv --conf ./Tests/ConformanceClient/InvocationConfigs/nio.yaml --mode client $(BIN)/ConnectConformanceClient httpclient=nio
 
 .PHONY: testunit
 testunit: ## Run all unit tests
