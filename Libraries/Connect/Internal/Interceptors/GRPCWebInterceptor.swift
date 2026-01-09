@@ -238,6 +238,7 @@ extension GRPCWebInterceptor: StreamInterceptor {
                 }
             } catch let error {
                 // TODO: Close the stream here?
+                print("*****Not closing stream on error: \(error)")
                 proceed(.complete(code: .unknown, error: error, trailers: nil))
             }
 
