@@ -168,12 +168,14 @@ extension ConnectInterceptor: StreamInterceptor {
     ) {
         switch result {
         case .headers(let headers):
+            Self.logToStderr("[Connect] Received headers")
             self.streamResponseHeaders.value = headers
 
             let contentType = headers[HeaderConstants.contentType]?.first ?? ""
             if contentType != "application/connect+\(self.config.codec.name())" {
                 // If content-type looks like it could be an RPC server's response, consider
                 // this an internal error.
+                Self.logToStderr("[Connect] Unexpected content-type: \(contentType)")
                 let code: Code = contentType.hasPrefix("application/connect+")
                 ? .internalError
                 : .unknown
@@ -183,14 +185,17 @@ extension ConnectInterceptor: StreamInterceptor {
                     ), trailers: nil
                 ))
             } else {
+                Self.logToStderr("[Connect] Storing response headers")
                 proceed(result)
             }
         case .message(let data):
+            Self.logToStderr("[Connect] Received message data of \(data.count) bytes")
             do {
                 let responseCompressionPool = self.streamResponseHeaders.value?[
                     HeaderConstants.connectStreamingContentEncoding
                 ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
                 if responseCompressionPool == nil && Envelope._isCompressed(data) {
+                    Self.logToStderr("[Connect] ERROR: Unexpected compressed message")
                     proceed(.complete(
                         code: .internalError, error: ConnectError(
                             code: .internalError, message: "received unexpected compressed message"
@@ -203,26 +208,32 @@ extension ConnectInterceptor: StreamInterceptor {
                     data, compressionPool: responseCompressionPool
                 )
                 let isEndStream = 0b00000010 & headerByte != 0
+                Self.logToStderr("[Connect] headerByte=0x\(String(headerByte, radix: 16)), isEndStream=\(isEndStream), messageSize=\(message.count)")
                 if isEndStream {
                     // Expect a valid Connect end stream response, which can simply be {}.
                     // https://connectrpc.com/docs/protocol#error-end-stream
+                    Self.logToStderr("[Connect] Processing end-stream message")
                     let response = try JSONDecoder().decode(
                         ConnectEndStreamResponse.self, from: message
                     )
+                    Self.logToStderr("[Connect] Completing stream with code: \(response.error?.code ?? .ok)")
                     proceed(.complete(
                         code: response.error?.code ?? .ok,
                         error: response.error,
                         trailers: response.metadata
                     ))
                 } else {
+                    Self.logToStderr("[Connect] Processing regular message")
                     proceed(.message(message))
                 }
             } catch let error {
                 // TODO: Close the stream here?
+                Self.logToStderr("[Connect] ERROR unpacking message: \(error)")
                 proceed(.complete(code: .unknown, error: error, trailers: nil))
             }
 
         case .complete(let code, let error, let trailers):
+            Self.logToStderr("[Connect] Received .complete with code: \(code)")
             if code != .ok && error == nil {
                 proceed(.complete(
                     code: code,
@@ -237,6 +248,13 @@ extension ConnectInterceptor: StreamInterceptor {
             } else {
                 proceed(result)
             }
+        }
+    }
+
+    private static func logToStderr(_ message: String) {
+        let line = "\(message)\n"
+        if let data = line.data(using: .utf8) {
+            FileHandle.standardError.write(data)
         }
     }
 }

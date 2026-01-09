@@ -185,10 +185,12 @@ extension GRPCWebInterceptor: StreamInterceptor {
     ) {
         switch result {
         case .headers(let headers):
+            Self.logToStderr("[GRPCWeb] Received headers")
             let contentType = headers[HeaderConstants.contentType]?.first ?? ""
             if !self.contentTypeIsExpectedGRPCWeb(contentType) {
                 // If content-type looks like it could be a gRPC server's response, consider
                 // this an internal error.
+                Self.logToStderr("[GRPCWeb] Unexpected content-type: \(contentType)")
                 let code: Code = self.contentTypeIsGRPCWeb(contentType) ? .internalError : .unknown
                 proceed(.complete(
                     code: code, error: ConnectError(
@@ -200,17 +202,20 @@ extension GRPCWebInterceptor: StreamInterceptor {
 
             if let grpcCode = headers._grpcStatus() {
                 // Headers-only response.
+                Self.logToStderr("[GRPCWeb] Headers-only response with code: \(grpcCode)")
                 proceed(.complete(
                     code: grpcCode,
                     error: ConnectError._parseGRPCHeaders(nil, trailers: headers).error,
                     trailers: headers
                 ))
             } else {
+                Self.logToStderr("[GRPCWeb] Storing response headers")
                 self.streamResponseHeaders.value = headers
                 proceed(result)
             }
 
         case .message(let data):
+            Self.logToStderr("[GRPCWeb] Received message data of \(data.count) bytes")
             do {
                 let responseCompressionPool = self.streamResponseHeaders.value?[
                     HeaderConstants.grpcContentEncoding
@@ -219,11 +224,15 @@ extension GRPCWebInterceptor: StreamInterceptor {
                     data, compressionPool: responseCompressionPool
                 )
                 let isTrailers = 0b10000000 & headerByte != 0
+                Self.logToStderr("[GRPCWeb] headerByte=0x\(String(headerByte, radix: 16)), isTrailers=\(isTrailers), unpackedSize=\(unpackedData.count)")
                 if isTrailers {
+                    Self.logToStderr("[GRPCWeb] Processing trailers")
                     let trailers = try Trailers.fromGRPCHeadersBlock(unpackedData)
+                    Self.logToStderr("[GRPCWeb] Parsed trailers: \(trailers.keys.joined(separator: ", "))")
                     let (grpcCode, error) = ConnectError._parseGRPCHeaders(
                         self.streamResponseHeaders.value, trailers: trailers
                     )
+                    Self.logToStderr("[GRPCWeb] Completing stream with code: \(grpcCode), error: \(String(describing: error))")
                     if grpcCode == .ok {
                         proceed(.complete(code: .ok, error: nil, trailers: trailers))
                     } else {
@@ -234,16 +243,25 @@ extension GRPCWebInterceptor: StreamInterceptor {
                         ))
                     }
                 } else {
+                    Self.logToStderr("[GRPCWeb] Processing regular message")
                     proceed(.message(unpackedData))
                 }
             } catch let error {
                 // TODO: Close the stream here?
-                print("*****Not closing stream on error: \(error)")
+                Self.logToStderr("[GRPCWeb] ERROR unpacking message: \(error)")
                 proceed(.complete(code: .unknown, error: error, trailers: nil))
             }
 
         case .complete:
+            Self.logToStderr("[GRPCWeb] Received .complete")
             proceed(result)
+        }
+    }
+
+    private static func logToStderr(_ message: String) {
+        let line = "\(message)\n"
+        if let data = line.data(using: .utf8) {
+            FileHandle.standardError.write(data)
         }
     }
 

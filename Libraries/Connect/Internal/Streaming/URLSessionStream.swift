@@ -97,9 +97,11 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
     // MARK: - Inbound
 
     func handleResponse(_ response: HTTPURLResponse) {
+        Self.logToStderr("[URLSessionStream] Response status: \(response.statusCode)")
         let code = Code.fromURLSessionCode(response.statusCode)
         self.responseCallbacks.receiveResponseHeaders(response.formattedLowercasedHeaders())
         if code != .ok {
+            Self.logToStderr("[URLSessionStream] Non-OK code, closing stream")
             self.closedByServer.value = true
             self.responseCallbacks.receiveClose(code, [:], nil)
         }
@@ -107,17 +109,22 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
 
     func handleResponseData(_ data: Data) {
         if !self.closedByServer.value {
+            Self.logToStderr("[URLSessionStream] Received \(data.count) bytes")
             self.responseCallbacks.receiveResponseData(data)
+        } else {
+            Self.logToStderr("[URLSessionStream] Ignoring \(data.count) bytes (already closed)")
         }
     }
 
     func handleCompletion(error: Swift.Error?) {
         if self.closedByServer.value {
+            Self.logToStderr("[URLSessionStream] Completion ignored (already closed)")
             return
         }
 
         self.closedByServer.value = true
         if let error = error {
+            Self.logToStderr("[URLSessionStream] Completion with error: \(error)")
             let code = Code.fromURLSessionCode((error as NSError).code)
             self.responseCallbacks.receiveClose(
                 code,
@@ -125,7 +132,15 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
                 ConnectError(code: code, message: error.localizedDescription)
             )
         } else {
+            Self.logToStderr("[URLSessionStream] Completion with no error (success)")
             self.responseCallbacks.receiveClose(.ok, [:], nil)
+        }
+    }
+
+    private static func logToStderr(_ message: String) {
+        let line = "\(message)\n"
+        if let data = line.data(using: .utf8) {
+            FileHandle.standardError.write(data)
         }
     }
 }
