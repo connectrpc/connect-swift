@@ -262,7 +262,13 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 channel.close(mode: .all, promise: nil)
             }
         }
-        try? self.loopGroup.syncShutdownGracefully()
+        // Use async shutdown to avoid blocking the caller's thread.
+        // syncShutdownGracefully() can block indefinitely if there are pending
+        // tasks that never complete (e.g., streams waiting for responses).
+        let loopGroup = self.loopGroup
+        DispatchQueue.global(qos: .background).async {
+            try? loopGroup.syncShutdownGracefully()
+        }
     }
 }
 
