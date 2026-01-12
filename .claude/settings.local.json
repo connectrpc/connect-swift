@@ -3,7 +3,9 @@
     "allow": [
       "Bash(git checkout:*)",
       "Bash(grep:*)",
-      "Bash(swift build:*)"
+      "Bash(swift build:*)",
+      "Bash(ls:*)",
+      "Bash(xargs cat:*)"
     ]
   }
 }
