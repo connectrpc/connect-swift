@@ -57,9 +57,11 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
         self.task = session.uploadTask(withStreamedRequest: request)
         super.init()
 
-        // Use main run loop instead of .current to avoid issues when called from
-        // Swift concurrency tasks that may not have an active run loop
-        writeStream.schedule(in: .main, forMode: .default)
+        // Schedule the write stream on a concurrent queue instead of a run loop.
+        // Using a run loop (even .main) can cause hangs when called from Swift
+        // concurrency contexts where the run loop isn't actively being processed.
+        let cfWriteStream = writeStream as CFWriteStream
+        CFWriteStreamSetDispatchQueue(cfWriteStream, DispatchQueue.global(qos: .userInitiated))
         writeStream.open()
         self.task.resume()
     }
