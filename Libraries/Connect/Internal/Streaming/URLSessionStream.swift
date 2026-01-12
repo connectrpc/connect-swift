@@ -19,6 +19,14 @@ import Foundation
 /// Note: This class is `@unchecked Sendable` because the `Foundation.{Input|Output}Stream`
 /// types do not conform to `Sendable`.
 final class URLSessionStream: NSObject, @unchecked Sendable {
+    /// Shared serial queue for stream event processing.
+    /// Using a shared queue avoids the overhead of creating queues per-stream
+    /// and ensures consistent behavior across all streams.
+    private static let streamQueue = DispatchQueue(
+        label: "com.connectrpc.urlsession.stream",
+        qos: .userInitiated
+    )
+
     private let closedByServer = Locked(false)
     private let readStream: Foundation.InputStream
     private let responseCallbacks: ResponseCallbacks
@@ -57,13 +65,11 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
         self.task = session.uploadTask(withStreamedRequest: request)
         super.init()
 
-        // Schedule the write stream on a serial queue instead of a run loop.
-        // Using a run loop (even .main) can cause hangs when called from Swift
-        // concurrency contexts where the run loop isn't actively being processed.
-        // Use a serial queue to ensure operations are properly serialized.
-        let streamQueue = DispatchQueue(label: "com.connectrpc.stream.\(ObjectIdentifier(self))")
-        CFWriteStreamSetDispatchQueue(writeStream, streamQueue)
-        CFWriteStreamOpen(writeStream)
+        // Schedule the write stream on a shared serial dispatch queue.
+        // Using a run loop can cause hangs when called from Swift concurrency
+        // contexts where the run loop isn't actively being processed.
+        CFWriteStreamSetDispatchQueue(writeStream, Self.streamQueue)
+        writeStream.open()
         self.task.resume()
     }
 
