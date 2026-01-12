@@ -19,6 +19,10 @@ import SwiftProtobuf
 
 private let prefixLength = MemoryLayout<UInt32>.size // 4
 
+private func logToStderr(_ message: String) {
+    FileHandle.standardError.write(Data("\(message)\n".utf8))
+}
+
 private func nextMessageLength(using data: Data) -> Int {
     var messageLength: UInt32 = 0
     (data[0...3] as NSData).getBytes(&messageLength, length: prefixLength)
@@ -44,6 +48,10 @@ private func main() async throws {
         let request = try Connectrpc_Conformance_V1_ClientCompatRequest(
             serializedBytes: nextRequestData
         )
+
+        // Log test case start
+        logToStderr("[TEST START] \(request.testName)")
+
         let invoker = try ConformanceInvoker(request: request, clientType: clientTypeArg)
         let response: Connectrpc_Conformance_V1_ClientCompatResponse
         do {
@@ -52,12 +60,14 @@ private func main() async throws {
             }
 
             let result = try await invoker.invokeRequest()
+            logToStderr("[TEST END] \(request.testName)")
             response = .with { conformanceResponse in
                 conformanceResponse.testName = request.testName
                 conformanceResponse.response = result
             }
         } catch let error {
             // Unexpected local/runtime error (no RPC response).
+            logToStderr("[TEST ERROR] \(request.testName): \(error)")
             response = .with { conformanceResponse in
                 conformanceResponse.testName = request.testName
                 conformanceResponse.error = .with { conformanceError in
