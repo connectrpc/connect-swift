@@ -22,11 +22,6 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
     private let closedByServer = Locked(false)
     private let readStream: Foundation.InputStream
     private let responseCallbacks: ResponseCallbacks
-    /// Serial queue for this stream's write operations.
-    /// Each stream has its own queue to avoid contention with other streams.
-    /// Must be retained as an instance variable because CFWriteStreamSetDispatchQueue
-    /// does not retain the queue.
-    private let streamQueue: DispatchQueue
     private let task: URLSessionUploadTask
     private let writeStream: Foundation.OutputStream
 
@@ -59,16 +54,10 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
         self.responseCallbacks = responseCallbacks
         self.readStream = readStream
         self.writeStream = writeStream
-        self.streamQueue = DispatchQueue(label: "com.connectrpc.urlsession.stream")
         self.task = session.uploadTask(withStreamedRequest: request)
         super.init()
 
-        // Schedule the write stream on a per-stream serial dispatch queue.
-        // Using a run loop can cause hangs when called from Swift concurrency
-        // contexts where the run loop isn't actively being processed.
-        // Each stream needs its own queue to avoid contention when many streams
-        // are active concurrently (as happens in conformance tests on slow CI).
-        CFWriteStreamSetDispatchQueue(writeStream, self.streamQueue)
+        writeStream.schedule(in: .current, forMode: .default)
         writeStream.open()
         self.task.resume()
     }
