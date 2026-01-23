@@ -142,8 +142,8 @@ You can start generating code with `buf` by adding a stanza like the following t
 You can read more about using `buf` as well as read more about the various options
 in the [documentation][generation-docs].
 
-If you use `protoc` instead of `buf`, you would add a `--connect-swift_out` flag to
-your `protoc` invocations, like so:
+To use `protoc` instead of `buf`, add a `--connect-swift_out` flag to
+`protoc` invocations, like so:
 ```diff
 -protoc --swift_out=. --swift_opt=Visibility=Public my.proto
 +protoc --swift_out=. --connect-swift_out=. \
