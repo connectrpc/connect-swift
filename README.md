@@ -117,6 +117,41 @@ func testMessagingViewModel() async {
 }
 ```
 
+## Code Generation
+
+This repo includes a code generator, `protoc-gen-connect-swift`, that works in tandem
+with Apple's [`proto-gen-swift`][swift-protobuf]. The latter generates types that
+correspond to the various message and enum types; the former generates RPC client stubs
+that use this runtime library to implement RPCs.
+
+You can start generating code with `buf` by adding a stanza like the following to your
+`buf.gen.yaml` configuration:
+```diff
+ version: v2
+ plugins:
+   - remote: buf.build/apple/swift
+     out: Generated
+     opt: Visibility=Public
++  - remote: buf.build/connectrpc/swift
++    out: Generated
++    opt:
++      - GenerateAsyncMethods=true
++      - GenerateCallbackMethods=true
++      - Visibility=Public
+```
+You can read more about using `buf` as well as read more about the various options
+in the [documentation][generation-docs].
+
+To use `protoc` instead of `buf`, add a `--connect-swift_out` flag to
+`protoc` invocations, like so:
+```diff
+-protoc --swift_out=. --swift_opt=Visibility=Public my.proto
++protoc --swift_out=. --connect-swift_out=. \
++    --swift_opt=Visibility=Public \
++    --connect-swift_opt=GenerateAsyncMethods=true,GenerateCallbackMethods=true,Visibility=Public \
++    my.proto
+```
+
 ## Quick Start
 
 Head over to our [quick start tutorial][getting-started] to get started.
@@ -177,6 +212,7 @@ Offered under the [Apache 2 license](./LICENSE).
 [connect-protocol]: https://connectrpc.com/docs/protocol
 [connect-es]: https://github.com/connectrpc/connect-es
 [error-handling]: https://connectrpc.com/docs/swift/errors
+[generation-docs]: https://connectrpc.com/docs/swift/generating-code
 [getting-started]: https://connectrpc.com/docs/swift/getting-started
 [grpc-protocol]: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
 [grpc-web-protocol]: https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
@@ -185,4 +221,5 @@ Offered under the [Apache 2 license](./LICENSE).
 [slack]: https://buf.build/links/slack
 [streaming]: https://connectrpc.com/docs/swift/using-clients#using-generated-clients
 [swift-pm-integration]: https://connectrpc.com/docs/swift/getting-started#add-the-connect-swift-package
+[swift-protobuf]: https://github.com/apple/swift-protobuf
 [testing]: https://connectrpc.com/docs/swift/testing
