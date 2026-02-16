@@ -38,7 +38,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
         self.session = URLSession(
             configuration: configuration,
             delegate: delegate,
-            delegateQueue: .main
+            delegateQueue: nil
         )
         super.init()
         delegate.client = self
