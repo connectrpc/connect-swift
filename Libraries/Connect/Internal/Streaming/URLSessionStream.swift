@@ -18,12 +18,13 @@ import Foundation
 ///
 /// Note: This class is `@unchecked Sendable` because the `Foundation.{Input|Output}Stream`
 /// types do not conform to `Sendable`.
-final class URLSessionStream: NSObject, @unchecked Sendable {
+final class URLSessionStream: NSObject, StreamDelegate, @unchecked Sendable {
     private let closedByServer = Locked(false)
     private let readStream: Foundation.InputStream
     private let responseCallbacks: ResponseCallbacks
     private let task: URLSessionUploadTask
     private let writeStream: Foundation.OutputStream
+    private var pendingWriteData = Data()
 
     enum Error: Swift.Error {
         case unableToFindBaseAddress
@@ -57,31 +58,32 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
         self.task = session.uploadTask(withStreamedRequest: request)
         super.init()
 
-        writeStream.schedule(in: .current, forMode: .default)
-        writeStream.open()
+        if Thread.isMainThread {
+            writeStream.schedule(in: .main, forMode: .default)
+            writeStream.open()
+            writeStream.delegate = self
+        } else {
+            DispatchQueue.main.sync {
+                writeStream.schedule(in: .main, forMode: .default)
+                writeStream.open()
+                writeStream.delegate = self
+            }
+        }
         self.task.resume()
     }
 
     // MARK: - Outbound
 
     func sendData(_ data: Data) throws {
-        var remaining = Data(data)
-        while !remaining.isEmpty {
-            let bytesWritten = try remaining.withUnsafeBytes { pointer -> Int in
-                guard let baseAddress = pointer.baseAddress else {
-                    throw Error.unableToFindBaseAddress
-                }
-
-                return self.writeStream.write(
-                    baseAddress.assumingMemoryBound(to: UInt8.self),
-                    maxLength: remaining.count
-                )
-            }
-
-            if bytesWritten >= 0 {
-                remaining = remaining.dropFirst(bytesWritten)
-            } else {
-                throw Error.unableToWriteData
+        if Thread.isMainThread {
+            self.pendingWriteData.append(data)
+            self.drainWriteBuffer()
+        } else {
+            let copied = Data(data) // ensure the buffer outlives this call
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.pendingWriteData.append(copied)
+                self.drainWriteBuffer()
             }
         }
     }
@@ -91,7 +93,41 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
     }
 
     func close() {
-        self.writeStream.close()
+        if Thread.isMainThread {
+            self.writeStream.close()
+        } else {
+            DispatchQueue.main.async { [weak self] in self?.writeStream.close() }
+        }
+    }
+
+    private func drainWriteBuffer() {
+        guard !self.pendingWriteData.isEmpty else { return }
+        while self.writeStream.hasSpaceAvailable && !self.pendingWriteData.isEmpty {
+            let written: Int = self.pendingWriteData.withUnsafeBytes { ptr in
+                guard let base = ptr.baseAddress else { return -1 }
+                return self.writeStream.write(base.assumingMemoryBound(to: UInt8.self), maxLength: self.pendingWriteData.count)
+            }
+            if written > 0 {
+                self.pendingWriteData.removeFirst(written)
+            } else if written == 0 {
+                // Not currently writable; wait for the next .hasSpaceAvailable event.
+                break
+            } else {
+                // Error writing to stream; close and let URLSession surface the failure.
+                self.writeStream.close()
+                break
+            }
+        }
+    }
+
+    func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
+        guard aStream === self.writeStream else { return }
+        switch eventCode {
+        case .hasSpaceAvailable:
+            self.drainWriteBuffer()
+        default:
+            break
+        }
     }
 
     // MARK: - Inbound
@@ -129,3 +165,4 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
         }
     }
 }
+
