@@ -253,7 +253,10 @@ extension ProtocolClientConfig {
             URLQueryItem(name: "base64", value: "1"),
             URLQueryItem(name: "connect", value: "v\(ConnectInterceptor.protocolVersion)"),
             URLQueryItem(name: "encoding", value: self.codec.name()),
-            URLQueryItem(name: "message", value: request.message?.base64EncodedString()),
+            URLQueryItem(name: "message", value: request.message?.base64EncodedString()
+                .replacingOccurrences(of: "+", with: "-")
+                .replacingOccurrences(of: "/", with: "_")
+                .replacingOccurrences(of: "=", with: "")),
         ]
 
         if let contentEncoding = request.headers[HeaderConstants.contentEncoding]?.first {
