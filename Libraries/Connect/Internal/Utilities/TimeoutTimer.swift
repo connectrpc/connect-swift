@@ -50,8 +50,6 @@ final class TimeoutTimer: @unchecked Sendable {
     }
 
     func cancel() {
-        self.queue.sync {
-            self.workItem.cancel()
-        }
+        workItem.cancel()
     }
 }
