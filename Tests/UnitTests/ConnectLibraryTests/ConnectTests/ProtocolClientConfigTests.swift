@@ -239,6 +239,31 @@ final class ProtocolClientConfigTests: XCTestCase {
         )
     }
 
+    func testTransformToGETUsesURLSafeBase64() {
+        // Data bytes [0x3E, 0x3F, 0xBF, 0xFF] produce "+P+//w==" in standard base64
+        // and "Pj-_vw" in raw URL-safe base64 (RFC 4648 §5)
+        let request = HTTPRequest<Data?>(
+            url: URL(string: "https://connectrpc.com")!,
+            headers: Headers(),
+            message: Data([0x3E, 0x3F, 0xBF, 0xFF]),
+            method: .post,
+            trailers: nil,
+            idempotencyLevel: .noSideEffects
+        )
+        let config = ProtocolClientConfig(
+            host: "https://connectrpc.com",
+            networkProtocol: .connect,
+            unaryGET: .alwaysEnabled
+        )
+        let getRequest = config.transformToGETIfNeeded(request)
+        let url = getRequest.url.absoluteString
+        // Must NOT contain + or / (standard base64 chars)
+        XCTAssertFalse(url.contains("+"), "URL must use URL-safe base64, not standard base64")
+        XCTAssertFalse(url.contains("/message/"), "URL must use URL-safe base64")
+        // Must contain the URL-safe base64 encoded message
+        XCTAssertTrue(url.contains("message=Pj-__w"), "Expected raw URL-safe base64 encoding")
+    }
+
     func testTransformToGETWithRequestCompression() {
         let compressedRequest = HTTPRequest<Data?>(
             url: URL(string: "https://connectrpc.com")!,
