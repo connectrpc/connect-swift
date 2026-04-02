@@ -15,14 +15,14 @@
 import Foundation
 
 final class TimeoutTimer: @unchecked Sendable {
-    private var hasTimedOut = false
+    private let hasTimedOut = Locked(false)
     private var onTimeout: (() -> Void)?
     private let queue = DispatchQueue(label: "connectrpc.Timeout")
     private let timeout: TimeInterval
     private var workItem: DispatchWorkItem! // Force-unwrapped to allow capturing self in init
 
     var timedOut: Bool {
-        return self.queue.sync { self.hasTimedOut }
+        return self.hasTimedOut.value
     }
 
     init?(config: ProtocolClientConfig) {
@@ -32,7 +32,7 @@ final class TimeoutTimer: @unchecked Sendable {
 
         self.timeout = timeout
         self.workItem = DispatchWorkItem { [weak self] in
-            self?.hasTimedOut = true
+            self?.hasTimedOut.value = true
             self?.onTimeout?()
         }
     }
@@ -50,8 +50,6 @@ final class TimeoutTimer: @unchecked Sendable {
     }
 
     func cancel() {
-        self.queue.sync {
-            self.workItem.cancel()
-        }
+        workItem.cancel()
     }
 }

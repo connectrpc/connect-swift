@@ -446,22 +446,28 @@ private final class PendingRequestCallbacks: @unchecked Sendable {
     private var queue = [(RequestCallbacks<Data>) -> Void]()
 
     func setCallbacks(_ callbacks: RequestCallbacks<Data>) {
+        var pendingActions: [(RequestCallbacks<Data>) -> Void] = []
         self.lock.perform {
             self.callbacks = callbacks
-            for action in self.queue {
-                action(callbacks)
-            }
+            pendingActions = self.queue
             self.queue = []
+        }
+        for action in pendingActions {
+            action(callbacks)
         }
     }
 
     func enqueue(_ action: @escaping (RequestCallbacks<Data>) -> Void) {
+        var callbacksToCall: RequestCallbacks<Data>?
         self.lock.perform {
             if let callbacks = self.callbacks {
-                action(callbacks)
+                callbacksToCall = callbacks
             } else {
                 self.queue.append(action)
             }
+        }
+        if let callbacks = callbacksToCall {
+            action(callbacks)
         }
     }
 }
