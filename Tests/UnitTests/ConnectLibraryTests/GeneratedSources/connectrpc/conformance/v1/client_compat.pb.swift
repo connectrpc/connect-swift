@@ -538,28 +538,7 @@ fileprivate let _protobuf_package = "connectrpc.conformance.v1"
 
 extension Connectrpc_Conformance_V1_ClientCompatRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientCompatRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "test_name"),
-    2: .standard(proto: "http_version"),
-    3: .same(proto: "protocol"),
-    4: .same(proto: "codec"),
-    5: .same(proto: "compression"),
-    6: .same(proto: "host"),
-    7: .same(proto: "port"),
-    8: .standard(proto: "server_tls_cert"),
-    9: .standard(proto: "client_tls_creds"),
-    10: .standard(proto: "message_receive_limit"),
-    11: .same(proto: "service"),
-    12: .same(proto: "method"),
-    13: .standard(proto: "stream_type"),
-    14: .standard(proto: "use_get_http_method"),
-    15: .standard(proto: "request_headers"),
-    16: .standard(proto: "request_messages"),
-    17: .standard(proto: "timeout_ms"),
-    18: .standard(proto: "request_delay_ms"),
-    19: .same(proto: "cancel"),
-    20: .standard(proto: "raw_request"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}test_name\0\u{3}http_version\0\u{1}protocol\0\u{1}codec\0\u{1}compression\0\u{1}host\0\u{1}port\0\u{3}server_tls_cert\0\u{3}client_tls_creds\0\u{3}message_receive_limit\0\u{1}service\0\u{1}method\0\u{3}stream_type\0\u{3}use_get_http_method\0\u{3}request_headers\0\u{3}request_messages\0\u{3}timeout_ms\0\u{3}request_delay_ms\0\u{1}cancel\0\u{3}raw_request\0")
 
   fileprivate class _StorageClass {
     var _testName: String = String()
@@ -762,11 +741,7 @@ extension Connectrpc_Conformance_V1_ClientCompatRequest: SwiftProtobuf.Message, 
 
 extension Connectrpc_Conformance_V1_ClientCompatRequest.Cancel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = Connectrpc_Conformance_V1_ClientCompatRequest.protoMessageName + ".Cancel"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "before_close_send"),
-    2: .standard(proto: "after_close_send_ms"),
-    3: .standard(proto: "after_num_responses"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}before_close_send\0\u{3}after_close_send_ms\0\u{3}after_num_responses\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -840,11 +815,7 @@ extension Connectrpc_Conformance_V1_ClientCompatRequest.Cancel: SwiftProtobuf.Me
 
 extension Connectrpc_Conformance_V1_ClientCompatResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientCompatResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "test_name"),
-    2: .same(proto: "response"),
-    3: .same(proto: "error"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}test_name\0\u{1}response\0\u{1}error\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -916,15 +887,7 @@ extension Connectrpc_Conformance_V1_ClientCompatResponse: SwiftProtobuf.Message,
 
 extension Connectrpc_Conformance_V1_ClientResponseResult: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientResponseResult"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "response_headers"),
-    2: .same(proto: "payloads"),
-    3: .same(proto: "error"),
-    4: .standard(proto: "response_trailers"),
-    5: .standard(proto: "num_unsent_requests"),
-    6: .standard(proto: "http_status_code"),
-    7: .same(proto: "feedback"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_headers\0\u{1}payloads\0\u{1}error\0\u{3}response_trailers\0\u{3}num_unsent_requests\0\u{3}http_status_code\0\u{1}feedback\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -988,9 +951,7 @@ extension Connectrpc_Conformance_V1_ClientResponseResult: SwiftProtobuf.Message,
 
 extension Connectrpc_Conformance_V1_ClientErrorResult: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientErrorResult"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "message"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}message\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1020,12 +981,7 @@ extension Connectrpc_Conformance_V1_ClientErrorResult: SwiftProtobuf.Message, Sw
 
 extension Connectrpc_Conformance_V1_WireDetails: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".WireDetails"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "actual_status_code"),
-    2: .standard(proto: "connect_error_raw"),
-    3: .standard(proto: "actual_http_trailers"),
-    4: .standard(proto: "actual_grpcweb_trailers"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}actual_status_code\0\u{3}connect_error_raw\0\u{3}actual_http_trailers\0\u{3}actual_grpcweb_trailers\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
