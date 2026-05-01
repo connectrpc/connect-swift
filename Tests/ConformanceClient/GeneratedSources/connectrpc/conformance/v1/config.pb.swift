@@ -595,7 +595,7 @@ struct Connectrpc_Conformance_V1_ConfigCase: Sendable {
 /// TLSCreds represents credentials for TLS. It includes both a
 /// certificate and corresponding private key. Both are encoded
 /// in PEM format.
-struct Connectrpc_Conformance_V1_TLSCreds: @unchecked Sendable {
+struct Connectrpc_Conformance_V1_TLSCreds: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -614,84 +614,32 @@ struct Connectrpc_Conformance_V1_TLSCreds: @unchecked Sendable {
 fileprivate let _protobuf_package = "connectrpc.conformance.v1"
 
 extension Connectrpc_Conformance_V1_HTTPVersion: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "HTTP_VERSION_UNSPECIFIED"),
-    1: .same(proto: "HTTP_VERSION_1"),
-    2: .same(proto: "HTTP_VERSION_2"),
-    3: .same(proto: "HTTP_VERSION_3"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0HTTP_VERSION_UNSPECIFIED\0\u{1}HTTP_VERSION_1\0\u{1}HTTP_VERSION_2\0\u{1}HTTP_VERSION_3\0")
 }
 
 extension Connectrpc_Conformance_V1_Protocol: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "PROTOCOL_UNSPECIFIED"),
-    1: .same(proto: "PROTOCOL_CONNECT"),
-    2: .same(proto: "PROTOCOL_GRPC"),
-    3: .same(proto: "PROTOCOL_GRPC_WEB"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0PROTOCOL_UNSPECIFIED\0\u{1}PROTOCOL_CONNECT\0\u{1}PROTOCOL_GRPC\0\u{1}PROTOCOL_GRPC_WEB\0")
 }
 
 extension Connectrpc_Conformance_V1_Codec: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "CODEC_UNSPECIFIED"),
-    1: .same(proto: "CODEC_PROTO"),
-    2: .same(proto: "CODEC_JSON"),
-    3: .same(proto: "CODEC_TEXT"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0CODEC_UNSPECIFIED\0\u{1}CODEC_PROTO\0\u{1}CODEC_JSON\0\u{1}CODEC_TEXT\0")
 }
 
 extension Connectrpc_Conformance_V1_Compression: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "COMPRESSION_UNSPECIFIED"),
-    1: .same(proto: "COMPRESSION_IDENTITY"),
-    2: .same(proto: "COMPRESSION_GZIP"),
-    3: .same(proto: "COMPRESSION_BR"),
-    4: .same(proto: "COMPRESSION_ZSTD"),
-    5: .same(proto: "COMPRESSION_DEFLATE"),
-    6: .same(proto: "COMPRESSION_SNAPPY"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0COMPRESSION_UNSPECIFIED\0\u{1}COMPRESSION_IDENTITY\0\u{1}COMPRESSION_GZIP\0\u{1}COMPRESSION_BR\0\u{1}COMPRESSION_ZSTD\0\u{1}COMPRESSION_DEFLATE\0\u{1}COMPRESSION_SNAPPY\0")
 }
 
 extension Connectrpc_Conformance_V1_StreamType: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "STREAM_TYPE_UNSPECIFIED"),
-    1: .same(proto: "STREAM_TYPE_UNARY"),
-    2: .same(proto: "STREAM_TYPE_CLIENT_STREAM"),
-    3: .same(proto: "STREAM_TYPE_SERVER_STREAM"),
-    4: .same(proto: "STREAM_TYPE_HALF_DUPLEX_BIDI_STREAM"),
-    5: .same(proto: "STREAM_TYPE_FULL_DUPLEX_BIDI_STREAM"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0STREAM_TYPE_UNSPECIFIED\0\u{1}STREAM_TYPE_UNARY\0\u{1}STREAM_TYPE_CLIENT_STREAM\0\u{1}STREAM_TYPE_SERVER_STREAM\0\u{1}STREAM_TYPE_HALF_DUPLEX_BIDI_STREAM\0\u{1}STREAM_TYPE_FULL_DUPLEX_BIDI_STREAM\0")
 }
 
 extension Connectrpc_Conformance_V1_Code: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "CODE_UNSPECIFIED"),
-    1: .same(proto: "CODE_CANCELED"),
-    2: .same(proto: "CODE_UNKNOWN"),
-    3: .same(proto: "CODE_INVALID_ARGUMENT"),
-    4: .same(proto: "CODE_DEADLINE_EXCEEDED"),
-    5: .same(proto: "CODE_NOT_FOUND"),
-    6: .same(proto: "CODE_ALREADY_EXISTS"),
-    7: .same(proto: "CODE_PERMISSION_DENIED"),
-    8: .same(proto: "CODE_RESOURCE_EXHAUSTED"),
-    9: .same(proto: "CODE_FAILED_PRECONDITION"),
-    10: .same(proto: "CODE_ABORTED"),
-    11: .same(proto: "CODE_OUT_OF_RANGE"),
-    12: .same(proto: "CODE_UNIMPLEMENTED"),
-    13: .same(proto: "CODE_INTERNAL"),
-    14: .same(proto: "CODE_UNAVAILABLE"),
-    15: .same(proto: "CODE_DATA_LOSS"),
-    16: .same(proto: "CODE_UNAUTHENTICATED"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0CODE_UNSPECIFIED\0\u{1}CODE_CANCELED\0\u{1}CODE_UNKNOWN\0\u{1}CODE_INVALID_ARGUMENT\0\u{1}CODE_DEADLINE_EXCEEDED\0\u{1}CODE_NOT_FOUND\0\u{1}CODE_ALREADY_EXISTS\0\u{1}CODE_PERMISSION_DENIED\0\u{1}CODE_RESOURCE_EXHAUSTED\0\u{1}CODE_FAILED_PRECONDITION\0\u{1}CODE_ABORTED\0\u{1}CODE_OUT_OF_RANGE\0\u{1}CODE_UNIMPLEMENTED\0\u{1}CODE_INTERNAL\0\u{1}CODE_UNAVAILABLE\0\u{1}CODE_DATA_LOSS\0\u{1}CODE_UNAUTHENTICATED\0")
 }
 
 extension Connectrpc_Conformance_V1_Config: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Config"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "features"),
-    2: .standard(proto: "include_cases"),
-    3: .standard(proto: "exclude_cases"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}features\0\u{3}include_cases\0\u{3}exclude_cases\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -735,20 +683,7 @@ extension Connectrpc_Conformance_V1_Config: SwiftProtobuf.Message, SwiftProtobuf
 
 extension Connectrpc_Conformance_V1_Features: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Features"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "versions"),
-    2: .same(proto: "protocols"),
-    3: .same(proto: "codecs"),
-    4: .same(proto: "compressions"),
-    5: .standard(proto: "stream_types"),
-    6: .standard(proto: "supports_h2c"),
-    7: .standard(proto: "supports_tls"),
-    8: .standard(proto: "supports_tls_client_certs"),
-    9: .standard(proto: "supports_trailers"),
-    10: .standard(proto: "supports_half_duplex_bidi_over_http1"),
-    11: .standard(proto: "supports_connect_get"),
-    12: .standard(proto: "supports_message_receive_limit"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}versions\0\u{1}protocols\0\u{1}codecs\0\u{1}compressions\0\u{3}stream_types\0\u{3}supports_h2c\0\u{3}supports_tls\0\u{3}supports_tls_client_certs\0\u{3}supports_trailers\0\u{3}supports_half_duplex_bidi_over_http1\0\u{3}supports_connect_get\0\u{3}supports_message_receive_limit\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -837,16 +772,7 @@ extension Connectrpc_Conformance_V1_Features: SwiftProtobuf.Message, SwiftProtob
 
 extension Connectrpc_Conformance_V1_ConfigCase: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ConfigCase"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "version"),
-    2: .same(proto: "protocol"),
-    3: .same(proto: "codec"),
-    4: .same(proto: "compression"),
-    5: .standard(proto: "stream_type"),
-    6: .standard(proto: "use_tls"),
-    7: .standard(proto: "use_tls_client_certs"),
-    8: .standard(proto: "use_message_receive_limit"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}version\0\u{1}protocol\0\u{1}codec\0\u{1}compression\0\u{3}stream_type\0\u{3}use_tls\0\u{3}use_tls_client_certs\0\u{3}use_message_receive_limit\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -915,10 +841,7 @@ extension Connectrpc_Conformance_V1_ConfigCase: SwiftProtobuf.Message, SwiftProt
 
 extension Connectrpc_Conformance_V1_TLSCreds: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".TLSCreds"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "cert"),
-    2: .same(proto: "key"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}cert\0\u{1}key\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {

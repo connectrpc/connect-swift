@@ -305,20 +305,7 @@ fileprivate let _protobuf_package = "connectrpc.conformance.v1"
 
 extension Connectrpc_Conformance_V1_TestSuite: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".TestSuite"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "name"),
-    2: .same(proto: "mode"),
-    3: .standard(proto: "test_cases"),
-    4: .standard(proto: "relevant_protocols"),
-    5: .standard(proto: "relevant_http_versions"),
-    6: .standard(proto: "relevant_codecs"),
-    7: .standard(proto: "relevant_compressions"),
-    8: .standard(proto: "connect_version_mode"),
-    9: .standard(proto: "relies_on_tls"),
-    10: .standard(proto: "relies_on_tls_client_certs"),
-    11: .standard(proto: "relies_on_connect_get"),
-    12: .standard(proto: "relies_on_message_receive_limit"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}mode\0\u{3}test_cases\0\u{3}relevant_protocols\0\u{3}relevant_http_versions\0\u{3}relevant_codecs\0\u{3}relevant_compressions\0\u{3}connect_version_mode\0\u{3}relies_on_tls\0\u{3}relies_on_tls_client_certs\0\u{3}relies_on_connect_get\0\u{3}relies_on_message_receive_limit\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -402,29 +389,16 @@ extension Connectrpc_Conformance_V1_TestSuite: SwiftProtobuf.Message, SwiftProto
 }
 
 extension Connectrpc_Conformance_V1_TestSuite.TestMode: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "TEST_MODE_UNSPECIFIED"),
-    1: .same(proto: "TEST_MODE_CLIENT"),
-    2: .same(proto: "TEST_MODE_SERVER"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0TEST_MODE_UNSPECIFIED\0\u{1}TEST_MODE_CLIENT\0\u{1}TEST_MODE_SERVER\0")
 }
 
 extension Connectrpc_Conformance_V1_TestSuite.ConnectVersionMode: SwiftProtobuf._ProtoNameProviding {
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "CONNECT_VERSION_MODE_UNSPECIFIED"),
-    1: .same(proto: "CONNECT_VERSION_MODE_REQUIRE"),
-    2: .same(proto: "CONNECT_VERSION_MODE_IGNORE"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0CONNECT_VERSION_MODE_UNSPECIFIED\0\u{1}CONNECT_VERSION_MODE_REQUIRE\0\u{1}CONNECT_VERSION_MODE_IGNORE\0")
 }
 
 extension Connectrpc_Conformance_V1_TestCase: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".TestCase"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "request"),
-    2: .standard(proto: "expand_requests"),
-    3: .standard(proto: "expected_response"),
-    4: .standard(proto: "other_allowed_error_codes"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}request\0\u{3}expand_requests\0\u{3}expected_response\0\u{3}other_allowed_error_codes\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -473,9 +447,7 @@ extension Connectrpc_Conformance_V1_TestCase: SwiftProtobuf.Message, SwiftProtob
 
 extension Connectrpc_Conformance_V1_TestCase.ExpandedSize: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = Connectrpc_Conformance_V1_TestCase.protoMessageName + ".ExpandedSize"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "size_relative_to_limit"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}size_relative_to_limit\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {

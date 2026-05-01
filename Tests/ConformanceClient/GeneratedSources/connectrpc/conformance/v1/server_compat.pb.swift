@@ -49,7 +49,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 /// Each test process is expected to start only one RPC server.
 /// When testing multiple configurations, multiple test processes
 /// will be started, each with different properties.
-struct Connectrpc_Conformance_V1_ServerCompatRequest: @unchecked Sendable {
+struct Connectrpc_Conformance_V1_ServerCompatRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -121,7 +121,7 @@ struct Connectrpc_Conformance_V1_ServerCompatRequest: @unchecked Sendable {
 }
 
 /// The outcome of one ServerCompatRequest.
-struct Connectrpc_Conformance_V1_ServerCompatResponse: @unchecked Sendable {
+struct Connectrpc_Conformance_V1_ServerCompatResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -150,14 +150,7 @@ fileprivate let _protobuf_package = "connectrpc.conformance.v1"
 
 extension Connectrpc_Conformance_V1_ServerCompatRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ServerCompatRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "protocol"),
-    2: .standard(proto: "http_version"),
-    4: .standard(proto: "use_tls"),
-    5: .standard(proto: "client_tls_cert"),
-    6: .standard(proto: "message_receive_limit"),
-    7: .standard(proto: "server_creds"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}protocol\0\u{3}http_version\0\u{4}\u{2}use_tls\0\u{3}client_tls_cert\0\u{3}message_receive_limit\0\u{3}server_creds\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -216,11 +209,7 @@ extension Connectrpc_Conformance_V1_ServerCompatRequest: SwiftProtobuf.Message, 
 
 extension Connectrpc_Conformance_V1_ServerCompatResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ServerCompatResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "host"),
-    2: .same(proto: "port"),
-    3: .standard(proto: "pem_cert"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}host\0\u{1}port\0\u{3}pem_cert\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {

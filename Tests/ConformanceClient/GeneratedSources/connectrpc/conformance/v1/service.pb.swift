@@ -37,7 +37,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 
 /// A definition of a response to be sent from a single-response endpoint.
 /// Can be used to define a response for unary or client-streaming calls.
-struct Connectrpc_Conformance_V1_UnaryResponseDefinition: @unchecked Sendable {
+struct Connectrpc_Conformance_V1_UnaryResponseDefinition: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -89,7 +89,7 @@ struct Connectrpc_Conformance_V1_UnaryResponseDefinition: @unchecked Sendable {
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  enum OneOf_Response: Equatable, @unchecked Sendable {
+  enum OneOf_Response: Equatable, Sendable {
     /// Response data to send
     case responseData(Data)
     /// Error to raise instead of response message
@@ -106,7 +106,7 @@ struct Connectrpc_Conformance_V1_UnaryResponseDefinition: @unchecked Sendable {
 
 /// A definition of responses to be sent from a streaming endpoint.
 /// Can be used to define responses for server-streaming or bidi-streaming calls.
-struct Connectrpc_Conformance_V1_StreamResponseDefinition: @unchecked Sendable {
+struct Connectrpc_Conformance_V1_StreamResponseDefinition: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -159,7 +159,7 @@ struct Connectrpc_Conformance_V1_StreamResponseDefinition: @unchecked Sendable {
   fileprivate var _rawResponse: Connectrpc_Conformance_V1_RawHTTPResponse? = nil
 }
 
-struct Connectrpc_Conformance_V1_UnaryRequest: @unchecked Sendable {
+struct Connectrpc_Conformance_V1_UnaryRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -206,7 +206,7 @@ struct Connectrpc_Conformance_V1_UnaryResponse: Sendable {
   fileprivate var _payload: Connectrpc_Conformance_V1_ConformancePayload? = nil
 }
 
-struct Connectrpc_Conformance_V1_IdempotentUnaryRequest: @unchecked Sendable {
+struct Connectrpc_Conformance_V1_IdempotentUnaryRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -253,7 +253,7 @@ struct Connectrpc_Conformance_V1_IdempotentUnaryResponse: Sendable {
   fileprivate var _payload: Connectrpc_Conformance_V1_ConformancePayload? = nil
 }
 
-struct Connectrpc_Conformance_V1_ServerStreamRequest: @unchecked Sendable {
+struct Connectrpc_Conformance_V1_ServerStreamRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -300,7 +300,7 @@ struct Connectrpc_Conformance_V1_ServerStreamResponse: Sendable {
   fileprivate var _payload: Connectrpc_Conformance_V1_ConformancePayload? = nil
 }
 
-struct Connectrpc_Conformance_V1_ClientStreamRequest: @unchecked Sendable {
+struct Connectrpc_Conformance_V1_ClientStreamRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -350,7 +350,7 @@ struct Connectrpc_Conformance_V1_ClientStreamResponse: Sendable {
   fileprivate var _payload: Connectrpc_Conformance_V1_ConformancePayload? = nil
 }
 
-struct Connectrpc_Conformance_V1_BidiStreamRequest: @unchecked Sendable {
+struct Connectrpc_Conformance_V1_BidiStreamRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -434,7 +434,7 @@ struct Connectrpc_Conformance_V1_UnimplementedResponse: Sendable {
   init() {}
 }
 
-struct Connectrpc_Conformance_V1_ConformancePayload: @unchecked Sendable {
+struct Connectrpc_Conformance_V1_ConformancePayload: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -667,7 +667,7 @@ struct Connectrpc_Conformance_V1_RawHTTPRequest: Sendable {
 }
 
 /// MessageContents represents a message in a request body.
-struct Connectrpc_Conformance_V1_MessageContents: @unchecked Sendable {
+struct Connectrpc_Conformance_V1_MessageContents: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -711,7 +711,7 @@ struct Connectrpc_Conformance_V1_MessageContents: @unchecked Sendable {
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   /// The message data can be defined in one of three ways.
-  enum OneOf_Data: Equatable, @unchecked Sendable {
+  enum OneOf_Data: Equatable, Sendable {
     /// Arbitrary bytes.
     case binary(Data)
     /// Arbitrary text.
@@ -833,14 +833,7 @@ fileprivate let _protobuf_package = "connectrpc.conformance.v1"
 
 extension Connectrpc_Conformance_V1_UnaryResponseDefinition: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".UnaryResponseDefinition"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "response_headers"),
-    2: .standard(proto: "response_data"),
-    3: .same(proto: "error"),
-    4: .standard(proto: "response_trailers"),
-    6: .standard(proto: "response_delay_ms"),
-    5: .standard(proto: "raw_response"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_headers\0\u{3}response_data\0\u{1}error\0\u{3}response_trailers\0\u{3}raw_response\0\u{3}response_delay_ms\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -922,14 +915,7 @@ extension Connectrpc_Conformance_V1_UnaryResponseDefinition: SwiftProtobuf.Messa
 
 extension Connectrpc_Conformance_V1_StreamResponseDefinition: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".StreamResponseDefinition"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "response_headers"),
-    2: .standard(proto: "response_data"),
-    3: .standard(proto: "response_delay_ms"),
-    4: .same(proto: "error"),
-    5: .standard(proto: "response_trailers"),
-    6: .standard(proto: "raw_response"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_headers\0\u{3}response_data\0\u{3}response_delay_ms\0\u{1}error\0\u{3}response_trailers\0\u{3}raw_response\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -988,10 +974,7 @@ extension Connectrpc_Conformance_V1_StreamResponseDefinition: SwiftProtobuf.Mess
 
 extension Connectrpc_Conformance_V1_UnaryRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".UnaryRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "response_definition"),
-    2: .standard(proto: "request_data"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_definition\0\u{3}request_data\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1030,9 +1013,7 @@ extension Connectrpc_Conformance_V1_UnaryRequest: SwiftProtobuf.Message, SwiftPr
 
 extension Connectrpc_Conformance_V1_UnaryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".UnaryResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "payload"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}payload\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1066,10 +1047,7 @@ extension Connectrpc_Conformance_V1_UnaryResponse: SwiftProtobuf.Message, SwiftP
 
 extension Connectrpc_Conformance_V1_IdempotentUnaryRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".IdempotentUnaryRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "response_definition"),
-    2: .standard(proto: "request_data"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_definition\0\u{3}request_data\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1108,9 +1086,7 @@ extension Connectrpc_Conformance_V1_IdempotentUnaryRequest: SwiftProtobuf.Messag
 
 extension Connectrpc_Conformance_V1_IdempotentUnaryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".IdempotentUnaryResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "payload"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}payload\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1144,10 +1120,7 @@ extension Connectrpc_Conformance_V1_IdempotentUnaryResponse: SwiftProtobuf.Messa
 
 extension Connectrpc_Conformance_V1_ServerStreamRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ServerStreamRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "response_definition"),
-    2: .standard(proto: "request_data"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_definition\0\u{3}request_data\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1186,9 +1159,7 @@ extension Connectrpc_Conformance_V1_ServerStreamRequest: SwiftProtobuf.Message, 
 
 extension Connectrpc_Conformance_V1_ServerStreamResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ServerStreamResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "payload"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}payload\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1222,10 +1193,7 @@ extension Connectrpc_Conformance_V1_ServerStreamResponse: SwiftProtobuf.Message,
 
 extension Connectrpc_Conformance_V1_ClientStreamRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientStreamRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "response_definition"),
-    2: .standard(proto: "request_data"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_definition\0\u{3}request_data\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1264,9 +1232,7 @@ extension Connectrpc_Conformance_V1_ClientStreamRequest: SwiftProtobuf.Message, 
 
 extension Connectrpc_Conformance_V1_ClientStreamResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientStreamResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "payload"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}payload\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1300,11 +1266,7 @@ extension Connectrpc_Conformance_V1_ClientStreamResponse: SwiftProtobuf.Message,
 
 extension Connectrpc_Conformance_V1_BidiStreamRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".BidiStreamRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "response_definition"),
-    2: .standard(proto: "full_duplex"),
-    3: .standard(proto: "request_data"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_definition\0\u{3}full_duplex\0\u{3}request_data\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1348,9 +1310,7 @@ extension Connectrpc_Conformance_V1_BidiStreamRequest: SwiftProtobuf.Message, Sw
 
 extension Connectrpc_Conformance_V1_BidiStreamResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".BidiStreamResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "payload"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}payload\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1422,10 +1382,7 @@ extension Connectrpc_Conformance_V1_UnimplementedResponse: SwiftProtobuf.Message
 
 extension Connectrpc_Conformance_V1_ConformancePayload: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ConformancePayload"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "data"),
-    2: .standard(proto: "request_info"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}data\0\u{3}request_info\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1464,12 +1421,7 @@ extension Connectrpc_Conformance_V1_ConformancePayload: SwiftProtobuf.Message, S
 
 extension Connectrpc_Conformance_V1_ConformancePayload.RequestInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = Connectrpc_Conformance_V1_ConformancePayload.protoMessageName + ".RequestInfo"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "request_headers"),
-    2: .standard(proto: "timeout_ms"),
-    3: .same(proto: "requests"),
-    4: .standard(proto: "connect_get_info"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}request_headers\0\u{3}timeout_ms\0\u{1}requests\0\u{3}connect_get_info\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1518,9 +1470,7 @@ extension Connectrpc_Conformance_V1_ConformancePayload.RequestInfo: SwiftProtobu
 
 extension Connectrpc_Conformance_V1_ConformancePayload.ConnectGetInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = Connectrpc_Conformance_V1_ConformancePayload.protoMessageName + ".ConnectGetInfo"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "query_params"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}query_params\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1550,11 +1500,7 @@ extension Connectrpc_Conformance_V1_ConformancePayload.ConnectGetInfo: SwiftProt
 
 extension Connectrpc_Conformance_V1_Error: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Error"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "code"),
-    2: .same(proto: "message"),
-    3: .same(proto: "details"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}code\0\u{1}message\0\u{1}details\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1598,10 +1544,7 @@ extension Connectrpc_Conformance_V1_Error: SwiftProtobuf.Message, SwiftProtobuf.
 
 extension Connectrpc_Conformance_V1_Header: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Header"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "name"),
-    2: .same(proto: "value"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}value\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1636,15 +1579,7 @@ extension Connectrpc_Conformance_V1_Header: SwiftProtobuf.Message, SwiftProtobuf
 
 extension Connectrpc_Conformance_V1_RawHTTPRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".RawHTTPRequest"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "verb"),
-    2: .same(proto: "uri"),
-    3: .same(proto: "headers"),
-    4: .standard(proto: "raw_query_params"),
-    5: .standard(proto: "encoded_query_params"),
-    6: .same(proto: "unary"),
-    7: .same(proto: "stream"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}verb\0\u{1}uri\0\u{1}headers\0\u{3}raw_query_params\0\u{3}encoded_query_params\0\u{1}unary\0\u{1}stream\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1736,11 +1671,7 @@ extension Connectrpc_Conformance_V1_RawHTTPRequest: SwiftProtobuf.Message, Swift
 
 extension Connectrpc_Conformance_V1_RawHTTPRequest.EncodedQueryParam: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = Connectrpc_Conformance_V1_RawHTTPRequest.protoMessageName + ".EncodedQueryParam"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "name"),
-    2: .same(proto: "value"),
-    3: .standard(proto: "base64_encode"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}value\0\u{3}base64_encode\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1784,12 +1715,7 @@ extension Connectrpc_Conformance_V1_RawHTTPRequest.EncodedQueryParam: SwiftProto
 
 extension Connectrpc_Conformance_V1_MessageContents: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".MessageContents"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "binary"),
-    2: .same(proto: "text"),
-    3: .standard(proto: "binary_message"),
-    4: .same(proto: "compression"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}binary\0\u{1}text\0\u{3}binary_message\0\u{1}compression\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1868,9 +1794,7 @@ extension Connectrpc_Conformance_V1_MessageContents: SwiftProtobuf.Message, Swif
 
 extension Connectrpc_Conformance_V1_StreamContents: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".StreamContents"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "items"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}items\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1900,11 +1824,7 @@ extension Connectrpc_Conformance_V1_StreamContents: SwiftProtobuf.Message, Swift
 
 extension Connectrpc_Conformance_V1_StreamContents.StreamItem: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = Connectrpc_Conformance_V1_StreamContents.protoMessageName + ".StreamItem"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "flags"),
-    2: .same(proto: "length"),
-    3: .same(proto: "payload"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}flags\0\u{1}length\0\u{1}payload\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1948,13 +1868,7 @@ extension Connectrpc_Conformance_V1_StreamContents.StreamItem: SwiftProtobuf.Mes
 
 extension Connectrpc_Conformance_V1_RawHTTPResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".RawHTTPResponse"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "status_code"),
-    2: .same(proto: "headers"),
-    3: .same(proto: "unary"),
-    4: .same(proto: "stream"),
-    5: .same(proto: "trailers"),
-  ]
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}status_code\0\u{1}headers\0\u{1}unary\0\u{1}stream\0\u{1}trailers\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
