@@ -235,7 +235,7 @@ final class ProtocolClientConfigTests: XCTestCase {
         XCTAssertEqual(requestWithoutCompression.method, .get)
         XCTAssertEqual(
             requestWithoutCompression.url.absoluteString,
-            "https://connectrpc.com?base64=1&connect=v1&encoding=json&message=AAEC"
+            "https://connectrpc.com?connect=v1&base64=1&encoding=json&message=AAEC"
         )
     }
 
@@ -285,7 +285,7 @@ final class ProtocolClientConfigTests: XCTestCase {
         XCTAssertEqual(requestWithCompression.method, .get)
         XCTAssertEqual(
             requestWithCompression.url.absoluteString,
-            "https://connectrpc.com?base64=1&connect=v1&encoding=json&message=AAEC&compression=gzip"
+            "https://connectrpc.com?connect=v1&base64=1&compression=gzip&encoding=json&message=AAEC"
         )
     }
 }
