@@ -258,7 +258,9 @@ extension ProtocolClientConfig {
             queryItems.append(URLQueryItem(name: "compression", value: contentEncoding))
         }
         queryItems.append(URLQueryItem(name: "encoding", value: self.codec.name()))
-        queryItems.append(URLQueryItem(name: "message", value: request.message?.urlSafeBase64EncodedString()))
+        queryItems.append(
+            URLQueryItem(name: "message", value: request.message?.urlSafeBase64EncodedString())
+        )
 
         components?.queryItems = queryItems
 
