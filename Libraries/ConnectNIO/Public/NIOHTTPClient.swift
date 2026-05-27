@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 import Connect
 import Foundation
 import NIOConcurrencyHelpers
@@ -20,7 +19,9 @@ import NIOHTTP1
 import NIOHTTP2
 import NIOPosix
 @preconcurrency import NIOSSL
-import os.log
+#if canImport(OSLog)
+import OSLog
+#endif
 
 /// HTTP client powered by Swift NIO which supports trailers (unlike URLSession).
 open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
@@ -210,7 +211,9 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                         throw error
                     }
                 } catch let error {
+                    #if canImport(OSLog)
                     os_log(.error, "NIOHTTPClient disconnected: %@", "\(error)")
+                    #endif
                     self?.lock.withLock {
                         self?.state = .disconnected
                         self?.flushOrFailPendingRequests(using: nil)

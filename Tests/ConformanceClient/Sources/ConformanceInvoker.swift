@@ -30,12 +30,14 @@ final class ConformanceInvoker: Sendable {
     // MARK: - Initialization
 
     init(request: ConformanceRequest, clientType: ClientTypeArg) throws {
+        #if canImport(Darwin)
         switch (request.protocol, clientType) {
         case (.grpc, .urlSession):
             throw "gRPC is not supported by URLSession"
         default:
             break
         }
+        #endif
 
         self.context = request
         self.client = try ConformanceClient(
@@ -68,8 +70,10 @@ final class ConformanceInvoker: Sendable {
                 host: "http://\(request.host)",
                 port: Int(request.port)
             )
+        #if canImport(Darwin)
         case .urlSession:
             return URLSessionHTTPClient()
+        #endif
         }
     }
 

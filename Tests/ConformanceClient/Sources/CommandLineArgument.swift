@@ -16,7 +16,9 @@
 
 enum ClientTypeArg: String, CaseIterable, CommandLineArgument {
     case swiftNIO = "nio"
+    #if canImport(Darwin)
     case urlSession = "urlsession"
+    #endif
 
     static let key = "httpclient"
 }
