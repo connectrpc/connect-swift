@@ -21,6 +21,7 @@ import Foundation
 final class URLSessionStream: NSObject, @unchecked Sendable {
     private let closedByServer = Locked(false)
     private let readStream: Foundation.InputStream
+    private let requestBodyStreamVended = Locked(false)
     private let responseCallbacks: ResponseCallbacks
     private let task: URLSessionUploadTask
     private let writeStream: Foundation.OutputStream
@@ -30,8 +31,27 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
         case unableToWriteData
     }
 
-    var requestBodyStream: Foundation.InputStream {
-        return self.readStream
+    /// The bound input stream to provide to `URLSession` as the request body.
+    ///
+    /// `URLSession` asks for a body stream via `urlSession(_:task:needNewBodyStream:)` both to
+    /// obtain the initial stream and to resend the request after a recoverable error (for example,
+    /// a dropped connection that is retried when the network path changes). A streamed request body
+    /// cannot be replayed, and the bound input stream may only be opened once. Returning the same,
+    /// already-opened stream on a resend causes `URLSession`/CFNetwork to abort the process with:
+    ///
+    /// `Assertion failed: (CFReadStreamGetStatus(_stream.get()) == kCFStreamStatusNotOpen),`
+    /// `function _onqueue_setupStream_block_invoke, file HTTPRequestBody.cpp`
+    ///
+    /// To avoid the crash, the stream is vended only once. Subsequent requests return `nil`, which
+    /// fails the task with an error that is surfaced through the normal stream-close path instead.
+    var requestBodyStream: Foundation.InputStream? {
+        return self.requestBodyStreamVended.perform { vended in
+            guard !vended else {
+                return nil
+            }
+            vended = true
+            return self.readStream
+        }
     }
 
     var taskID: Int {
