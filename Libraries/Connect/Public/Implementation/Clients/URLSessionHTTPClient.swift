@@ -34,11 +34,15 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
     private var streams = [Int: URLSessionStream]()
 
     public init(configuration: URLSessionConfiguration = .default) {
+        let delegateQueue = OperationQueue()
+        delegateQueue.name = "com.connectrpc.connect.swift.urlsessionhttpclient"
+        delegateQueue.maxConcurrentOperationCount = 1
+        delegateQueue.qualityOfService = .userInitiated
         let delegate = URLSessionDelegateWrapper()
         self.session = URLSession(
             configuration: configuration,
             delegate: delegate,
-            delegateQueue: .main
+            delegateQueue: delegateQueue
         )
         super.init()
         delegate.client = self
