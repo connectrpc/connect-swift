@@ -14,9 +14,8 @@
 
 import Foundation
 
-/// Internal implementation of a lock. Wraps usage of `os_unfair_lock`.
+/// Internal implementation of a lock. Wraps usage of `NSRecursiveLock`.
 final class Lock: @unchecked Sendable {
-    
     private let lock = NSRecursiveLock()
 
     init() {

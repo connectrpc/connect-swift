@@ -67,10 +67,10 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage> {
                         #if canImport(OSLog)
                         os_log(
                             .fault,
-                          """
-                          `sendUnary` received duplicate callback and \
-                          attempted to resume its continuation twice.
-                          """
+                            """
+                            `sendUnary` received duplicate callback and \
+                            attempted to resume its continuation twice.
+                            """
                         )
                         #endif
                         return
