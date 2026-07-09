@@ -5,7 +5,11 @@
 // Source: connectrpc/conformance/v1/service.proto
 //
 
+#if canImport(Combine)
 import Combine
+#else
+import OpenCombine
+#endif
 import Connect
 import ConnectMocks
 import Foundation
@@ -22,7 +26,7 @@ import SwiftProtobuf
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
 @available(iOS 13, *)
 internal class Connectrpc_Conformance_V1_ConformanceServiceClientMock: Connectrpc_Conformance_V1_ConformanceServiceClientInterface, @unchecked Sendable {
-    private var cancellables = [Combine.AnyCancellable]()
+    private var cancellables = [AnyCancellable]()
 
     /// Mocked for calls to `unary()`.
     internal var mockUnary = { (_: Connectrpc_Conformance_V1_UnaryRequest) -> ResponseMessage<Connectrpc_Conformance_V1_UnaryResponse> in .init(result: .success(.init())) }

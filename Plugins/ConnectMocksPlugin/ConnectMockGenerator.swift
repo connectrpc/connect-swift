@@ -42,7 +42,12 @@ final class ConnectMockGenerator: Generator {
         }
 
         if self.options.generateCallbackMethods {
-            self.printModuleImports(adding: ["Combine", "ConnectMocks"])
+            self.printLine("#if canImport(Combine)")
+            self.printLine("import Combine")
+            self.printLine("#else")
+            self.printLine("import OpenCombine")
+            self.printLine("#endif")
+            self.printModuleImports(adding: ["ConnectMocks"])
         } else {
             self.printModuleImports(adding: ["ConnectMocks"])
         }
@@ -73,7 +78,7 @@ final class ConnectMockGenerator: Generator {
         )
         self.indent {
             if self.options.generateCallbackMethods {
-                self.printLine("private var cancellables = [Combine.AnyCancellable]()")
+                self.printLine("private var cancellables = [AnyCancellable]()")
                 self.printLine()
             }
 

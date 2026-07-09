@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import os.log
+#if canImport(OSLog)
+import OSLog
+#endif
 import SwiftProtobuf
 
 /// Internal actor used to wrap closure-based unary API calls in a way that allows them
@@ -62,6 +64,7 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage> {
                     // discards the second occurrence to avoid resuming `continuation`
                     // multiple times, which would result in a crash.
                     guard !hasResumed.value else {
+                        #if canImport(OSLog)
                         os_log(
                             .fault,
                             """
@@ -69,6 +72,7 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage> {
                             attempted to resume its continuation twice.
                             """
                         )
+                        #endif
                         return
                     }
                     continuation.resume(returning: response)

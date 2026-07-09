@@ -13,8 +13,10 @@
 // limitations under the License.
 
 import Foundation
-import os.log
 import SwiftProtobuf
+#if canImport(OSLog)
+import OSLog
+#endif
 
 /// Concrete implementation of the `ProtocolClientInterface`.
 public final class ProtocolClient: Sendable {
@@ -25,10 +27,14 @@ public final class ProtocolClient: Sendable {
     ///
     /// - parameter httpClient: The HTTP client to use for sending requests and starting streams.
     /// - parameter config: The configuration to use for requests and streams.
-    public init(
-        httpClient: HTTPClientInterface = URLSessionHTTPClient(),
-        config: ProtocolClientConfig
-    ) {
+    #if canImport(Darwin)
+    /// Convenience initializer that uses the default URLSession-backed HTTP client.
+    public convenience init(config: ProtocolClientConfig) {
+        self.init(httpClient: URLSessionHTTPClient(), config: config)
+    }
+    #endif
+
+    public init(httpClient: HTTPClientInterface, config: ProtocolClientConfig) {
         self.httpClient = httpClient
         self.config = config
     }
@@ -421,11 +427,13 @@ extension ProtocolClient: ProtocolClientInterface {
                         do {
                             proceed(try codec.serialize(message: interceptedMessage))
                         } catch let error {
+                            #if canImport(OSLog)
                             os_log(
                                 .error,
                                 "Failed to send request message which could not be serialized: %@",
                                 error.localizedDescription
                             )
+                            #endif
                         }
                     },
                     then: interceptorChain.interceptors.map { $0.handleStreamRawInput },
@@ -531,11 +539,13 @@ private extension StreamResult<Data> {
             do {
                 return .message(try codec.deserialize(source: data))
             } catch let error {
+                #if canImport(OSLog)
                 os_log(
                     .error,
                     "Stream result failed to deserialize: %@",
                     error.localizedDescription
                 )
+                #endif
                 return nil
             }
         }

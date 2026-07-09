@@ -138,7 +138,7 @@ registerAnyTypes()
 
 if #available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *) {
     try await main()
-    fflush(stdout)
+    fflush(nil)
     exit(EXIT_SUCCESS)
 } else {
     throw "Unsupported version of macOS"

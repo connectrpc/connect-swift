@@ -14,20 +14,11 @@
 
 import Foundation
 
-/// Internal implementation of a lock. Wraps usage of `os_unfair_lock`.
+/// Internal implementation of a lock. Wraps usage of `NSRecursiveLock`.
 final class Lock: @unchecked Sendable {
-    private let underlyingLock: UnsafeMutablePointer<os_unfair_lock>
+    private let lock = NSRecursiveLock()
 
     init() {
-        // Reasoning for allocating here: http://www.russbishop.net/the-law
-        // When iOS 15 support is dropped, `OSAllocatedUnfairLock` should be used.
-        self.underlyingLock = .allocate(capacity: 1)
-        self.underlyingLock.initialize(to: os_unfair_lock())
-    }
-
-    deinit {
-        self.underlyingLock.deinitialize(count: 1)
-        self.underlyingLock.deallocate()
     }
 
     /// Perform an action within the context of the lock.
@@ -36,8 +27,8 @@ final class Lock: @unchecked Sendable {
     ///
     /// - returns: The result of the closure.
     func perform<T>(action: @escaping () -> T) -> T {
-        os_unfair_lock_lock(self.underlyingLock)
-        defer { os_unfair_lock_unlock(self.underlyingLock) }
-        return action()
+        self.lock.withLock {
+            action()
+        }
     }
 }

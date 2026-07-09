@@ -12,9 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if canImport(Darwin)
 import Foundation
-import os.log
-
+#if canImport(OSLog)
+import OSLog
+#endif
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 /// Concrete implementation of `HTTPClientInterface` backed by `URLSession`.
 ///
 /// This class is thread-safe as-is through the use of an internal lock. It is marked as
@@ -119,11 +124,13 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
                 do {
                     try urlSessionStream?.sendData(data)
                 } catch let error {
+                    #if canImport(OSLog)
                     os_log(
                         .error,
                         "Failed to write data to stream - closing connection: %@",
                         error.localizedDescription
                     )
+                    #endif
                     urlSessionStream?.close()
                 }
             },
@@ -300,3 +307,4 @@ private extension URLRequest {
         }
     }
 }
+#endif
