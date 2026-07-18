@@ -13,10 +13,12 @@
 // limitations under the License.
 
 @testable import Connect
-import XCTest
+import Testing
 
-final class InterceptorChainIterationTests: XCTestCase {
-    func testExecutingNonFailing() {
+struct InterceptorChainIterationTests {
+    @available(iOS 13, *)
+    @Test
+    func executingNonFailing() {
         let initialValue = ""
         let result = Locked(initialValue)
         let chain = InterceptorChain([Void]())
@@ -29,10 +31,12 @@ final class InterceptorChainIterationTests: XCTestCase {
             initial: initialValue,
             finish: { result.value = $0 }
         )
-        XCTAssertEqual(result.value, "ab")
+        #expect(result.value == "ab")
     }
 
-    func testExecutingNonFailingReversed() {
+    @available(iOS 13, *)
+    @Test
+    func executingNonFailingReversed() {
         let initialValue = ""
         let result = Locked(initialValue)
         let chain = InterceptorChain([Void]())
@@ -45,10 +49,12 @@ final class InterceptorChainIterationTests: XCTestCase {
             initial: initialValue,
             finish: { result.value = $0 }
         )
-        XCTAssertEqual(result.value, "ba")
+        #expect(result.value == "ba")
     }
 
-    func testExecutingLinkedNonFailing() {
+    @available(iOS 13, *)
+    @Test
+    func executingLinkedNonFailing() {
         let result = Locked(0)
         let chain = InterceptorChain([Void]())
         chain.executeLinkedInterceptors(
@@ -65,10 +71,12 @@ final class InterceptorChainIterationTests: XCTestCase {
             ],
             finish: { result.value = $0 }
         )
-        XCTAssertEqual(result.value, 12 + 1 + 3)
+        #expect(result.value == 12 + 1 + 3)
     }
 
-    func testExecutingFailableWithoutError() {
+    @available(iOS 13, *)
+    @Test
+    func executingFailableWithoutError() {
         let result = Locked<Result<String, ConnectError>?>(nil)
         let chain = InterceptorChain([Void]())
         chain.executeInterceptorsAndStopOnFailure(
@@ -80,10 +88,12 @@ final class InterceptorChainIterationTests: XCTestCase {
             initial: "",
             finish: { result.value = $0 }
         )
-        XCTAssertEqual(try? result.value?.get(), "ab")
+        #expect((try? result.value?.get()) == "ab")
     }
 
-    func testExecutingFailableWithoutErrorReversed() {
+    @available(iOS 13, *)
+    @Test
+    func executingFailableWithoutErrorReversed() {
         let result = Locked<Result<String, ConnectError>?>(nil)
         let chain = InterceptorChain([Void]())
         chain.executeInterceptorsAndStopOnFailure(
@@ -95,10 +105,12 @@ final class InterceptorChainIterationTests: XCTestCase {
             initial: "",
             finish: { result.value = $0 }
         )
-        XCTAssertEqual(try? result.value?.get(), "ba")
+        #expect((try? result.value?.get()) == "ba")
     }
 
-    func testExecutingFailableWithError() {
+    @available(iOS 13, *)
+    @Test
+    func executingFailableWithError() {
         let result = Locked<Result<String, ConnectError>?>(nil)
         let chain = InterceptorChain([Void]())
         chain.executeInterceptorsAndStopOnFailure(
@@ -114,10 +126,12 @@ final class InterceptorChainIterationTests: XCTestCase {
             initial: "",
             finish: { result.value = $0 }
         )
-        XCTAssertThrowsError(try result.value?.get())
+        #expect(throws: ConnectError.self) { try result.value?.get() }
     }
 
-    func testExecutingLinkedFailableWithoutError() {
+    @available(iOS 13, *)
+    @Test
+    func executingLinkedFailableWithoutError() {
         let result = Locked<Result<Int, ConnectError>?>(nil)
         let chain = InterceptorChain([Void]())
         chain.executeLinkedInterceptorsAndStopOnFailure(
@@ -134,10 +148,12 @@ final class InterceptorChainIterationTests: XCTestCase {
             ],
             finish: { result.value = $0 }
         )
-        XCTAssertEqual(try? result.value?.get(), 12 + 1 + 3)
+        #expect((try? result.value?.get()) == 12 + 1 + 3)
     }
 
-    func testExecutingLinkedFailableWithErrorOnFirstIteration() {
+    @available(iOS 13, *)
+    @Test
+    func executingLinkedFailableWithErrorOnFirstIteration() {
         let result = Locked<Result<Int, ConnectError>?>(nil)
         let chain = InterceptorChain([Void]())
         chain.executeLinkedInterceptorsAndStopOnFailure(
@@ -158,10 +174,12 @@ final class InterceptorChainIterationTests: XCTestCase {
             ],
             finish: { result.value = $0 }
         )
-        XCTAssertThrowsError(try result.value?.get())
+        #expect(throws: ConnectError.self) { try result.value?.get() }
     }
 
-    func testExecutingLinkedFailableWithErrorOnTransform() {
+    @available(iOS 13, *)
+    @Test
+    func executingLinkedFailableWithErrorOnTransform() {
         let result = Locked<Result<Int, ConnectError>?>(nil)
         let chain = InterceptorChain([Void]())
         chain.executeLinkedInterceptorsAndStopOnFailure(
@@ -182,10 +200,12 @@ final class InterceptorChainIterationTests: XCTestCase {
             ],
             finish: { result.value = $0 }
         )
-        XCTAssertThrowsError(try result.value?.get())
+        #expect(throws: ConnectError.self) { try result.value?.get() }
     }
 
-    func testExecutingLinkedFailableWithErrorOnSecondIteration() {
+    @available(iOS 13, *)
+    @Test
+    func executingLinkedFailableWithErrorOnSecondIteration() {
         let result = Locked<Result<Int, ConnectError>?>(nil)
         let chain = InterceptorChain([Void]())
         chain.executeLinkedInterceptorsAndStopOnFailure(
@@ -206,6 +226,6 @@ final class InterceptorChainIterationTests: XCTestCase {
             ],
             finish: { result.value = $0 }
         )
-        XCTAssertThrowsError(try result.value?.get())
+        #expect(throws: ConnectError.self) { try result.value?.get() }
     }
 }
