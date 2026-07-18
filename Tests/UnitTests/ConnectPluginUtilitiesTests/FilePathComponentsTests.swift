@@ -14,82 +14,83 @@
 
 @testable import ConnectPluginUtilities
 import Foundation
-import XCTest
+import Testing
 
-final class FilePathComponentsTests: XCTestCase {
-    func testProtoFilePathWithLeadingSlash() {
-        let components = FilePathComponents(path: "/foo/bar/baz.proto")
-        XCTAssertEqual(components.directory, "/foo/bar")
-        XCTAssertEqual(components.base, "baz")
-        XCTAssertEqual(components.suffix, ".proto")
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .fullPath),
-            "/foo/bar/baz.connect.swift"
-        )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .dropPath),
-            "baz.connect.swift"
-        )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores),
-            "foo_bar_baz.connect.swift"
-        )
+struct FilePathComponentsTests {
+    struct TestCase: Sendable {
+        let path: String
+        let expectedDirectory: String
+        let expectedBase: String
+        let expectedSuffix: String
+        let expectedFullPathOutput: String
+        let expectedDropPathOutput: String
+        let expectedPathToUnderscoresOutput: String
     }
 
-    func testProtoFilePathWithoutLeadingSlash() {
-        let components = FilePathComponents(path: "foo/bar/baz.proto")
-        XCTAssertEqual(components.directory, "foo/bar")
-        XCTAssertEqual(components.base, "baz")
-        XCTAssertEqual(components.suffix, ".proto")
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .fullPath),
-            "foo/bar/baz.connect.swift"
+    static let testCases: [TestCase] = [
+        TestCase(
+            path: "/foo/bar/baz.proto",
+            expectedDirectory: "/foo/bar",
+            expectedBase: "baz",
+            expectedSuffix: ".proto",
+            expectedFullPathOutput: "/foo/bar/baz.connect.swift",
+            expectedDropPathOutput: "baz.connect.swift",
+            expectedPathToUnderscoresOutput: "foo_bar_baz.connect.swift"
+        ),
+        TestCase(
+            path: "foo/bar/baz.proto",
+            expectedDirectory: "foo/bar",
+            expectedBase: "baz",
+            expectedSuffix: ".proto",
+            expectedFullPathOutput: "foo/bar/baz.connect.swift",
+            expectedDropPathOutput: "baz.connect.swift",
+            expectedPathToUnderscoresOutput: "foo_bar_baz.connect.swift"
+        ),
+        TestCase(
+            path: "baz.proto",
+            expectedDirectory: "",
+            expectedBase: "baz",
+            expectedSuffix: ".proto",
+            expectedFullPathOutput: "baz.connect.swift",
+            expectedDropPathOutput: "baz.connect.swift",
+            expectedPathToUnderscoresOutput: "baz.connect.swift"
+        ),
+        TestCase(
+            path: "/baz.proto",
+            expectedDirectory: "",
+            expectedBase: "baz",
+            expectedSuffix: ".proto",
+            expectedFullPathOutput: "baz.connect.swift",
+            expectedDropPathOutput: "baz.connect.swift",
+            expectedPathToUnderscoresOutput: "baz.connect.swift"
+        ),
+    ]
+
+    @available(iOS 13, *)
+    @Test(arguments: Self.testCases)
+    func splitsProtoFilePath(testCase: TestCase) {
+        let components = FilePathComponents(path: testCase.path)
+        #expect(components.directory == testCase.expectedDirectory)
+        #expect(components.base == testCase.expectedBase)
+        #expect(components.suffix == testCase.expectedSuffix)
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .fullPath)
+            == testCase.expectedFullPathOutput
         )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .dropPath),
-            "baz.connect.swift"
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .dropPath)
+            == testCase.expectedDropPathOutput
         )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores),
-            "foo_bar_baz.connect.swift"
+        #expect(
+            components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores)
+            == testCase.expectedPathToUnderscoresOutput
         )
     }
+}
 
-    func testProtoFilePathWithoutDirectoryOrLeadingSlash() {
-        let components = FilePathComponents(path: "baz.proto")
-        XCTAssertEqual(components.directory, "")
-        XCTAssertEqual(components.base, "baz")
-        XCTAssertEqual(components.suffix, ".proto")
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .fullPath),
-            "baz.connect.swift"
-        )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .dropPath),
-            "baz.connect.swift"
-        )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores),
-            "baz.connect.swift"
-        )
-    }
-
-    func testProtoFilePathWithoutDirectoryButWithLeadingSlash() {
-        let components = FilePathComponents(path: "/baz.proto")
-        XCTAssertEqual(components.directory, "")
-        XCTAssertEqual(components.base, "baz")
-        XCTAssertEqual(components.suffix, ".proto")
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .fullPath),
-            "baz.connect.swift"
-        )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .dropPath),
-            "baz.connect.swift"
-        )
-        XCTAssertEqual(
-            components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores),
-            "baz.connect.swift"
-        )
+@available(iOS 13, *)
+extension FilePathComponentsTests.TestCase: CustomTestStringConvertible {
+    var testDescription: String {
+        self.path
     }
 }
