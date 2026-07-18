@@ -14,22 +14,25 @@
 
 @testable import Connect
 import Foundation
-import XCTest
+import Testing
 
-@available(iOS 13, *)
-final class TimeoutTests: XCTestCase {
-    func testUnaryRequestTimesOut() async {
+struct TimeoutTests {
+    @available(iOS 13, *)
+    @Test
+    func unaryRequestTimesOut() async {
         let client = self.makeClient()
         let response = await client.unary(request: .with { request in
             request.responseDefinition = .with { _ in }
         })
 
-        XCTAssertEqual(response.code, .deadlineExceeded)
-        XCTAssertEqual(response.error?.code, .deadlineExceeded)
-        XCTAssertEqual(response.error?.message, "request exceeded allowed timeout")
+        #expect(response.code == .deadlineExceeded)
+        #expect(response.error?.code == .deadlineExceeded)
+        #expect(response.error?.message == "request exceeded allowed timeout")
     }
 
-    func testStreamRequestTimesOut() async throws {
+    @available(iOS 13, *)
+    @Test
+    func streamRequestTimesOut() async throws {
         let client = self.makeClient()
         let stream = client.serverStream()
         try stream.send(.with { request in
@@ -42,12 +45,13 @@ final class TimeoutTests: XCTestCase {
         }
 
         guard case .complete(let code, let error, _) = completion else {
-            return XCTFail("Expected stream to complete with a timeout error.")
+            Issue.record("Expected stream to complete with a timeout error.")
+            return
         }
 
-        XCTAssertEqual(code, .deadlineExceeded)
-        XCTAssertEqual((error as? ConnectError)?.code, .deadlineExceeded)
-        XCTAssertEqual((error as? ConnectError)?.message, "request exceeded allowed timeout")
+        #expect(code == .deadlineExceeded)
+        #expect((error as? ConnectError)?.code == .deadlineExceeded)
+        #expect((error as? ConnectError)?.message == "request exceeded allowed timeout")
     }
 
     private func makeClient() -> Connectrpc_Conformance_V1_ConformanceServiceClient {
