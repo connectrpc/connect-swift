@@ -14,100 +14,114 @@
 
 @testable import Connect
 import Foundation
-import XCTest
+import Testing
 
 private final class NoopInterceptor1: UnaryInterceptor, StreamInterceptor {}
 
 private final class NoopInterceptor2: UnaryInterceptor, StreamInterceptor {}
 
-final class ProtocolClientConfigTests: XCTestCase {
-    func testDefaultResponseCompressionPoolIncludesGzip() {
+struct ProtocolClientConfigTests {
+    @available(iOS 13, *)
+    @Test
+    func defaultResponseCompressionPoolIncludesGzip() {
         let config = ProtocolClientConfig(host: "https://connectrpc.com")
-        XCTAssertTrue(config.responseCompressionPools[0] is GzipCompressionPool)
-        XCTAssertEqual(config.acceptCompressionPoolNames(), ["gzip"])
+        #expect(config.responseCompressionPools[0] is GzipCompressionPool)
+        #expect(config.acceptCompressionPoolNames() == ["gzip"])
     }
 
-    func testShouldCompressDataLargerThanMinBytes() {
+    @available(iOS 13, *)
+    @Test
+    func shouldCompressDataLargerThanMinBytes() {
         let data = Data(repeating: 0xa, count: 50)
         let compression = ProtocolClientConfig.RequestCompression(
             minBytes: 10, pool: GzipCompressionPool()
         )
-        XCTAssertTrue(compression.shouldCompress(data))
+        #expect(compression.shouldCompress(data))
     }
 
-    func testShouldNotCompressDataSmallerThanMinBytes() {
+    @available(iOS 13, *)
+    @Test
+    func shouldNotCompressDataSmallerThanMinBytes() {
         let data = Data(repeating: 0xa, count: 50)
         let compression = ProtocolClientConfig.RequestCompression(
             minBytes: 100, pool: GzipCompressionPool()
         )
-        XCTAssertFalse(compression.shouldCompress(data))
+        #expect(!compression.shouldCompress(data))
     }
 
-    func testCreatingURLsWithVariousHosts() {
+    @available(iOS 13, *)
+    @Test
+    func creatingURLsWithVariousHosts() {
         let rpcPath = Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.unary.path
 
-        XCTAssertEqual(
+        #expect(
             ProtocolClientConfig(host: "https://connectrpc.com")
-                .createURL(forPath: rpcPath).absoluteString,
-            "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
+                .createURL(forPath: rpcPath).absoluteString
+            == "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
         )
-        XCTAssertEqual(
+        #expect(
             ProtocolClientConfig(host: "https://connectrpc.com/")
-                .createURL(forPath: rpcPath).absoluteString,
-            "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
+                .createURL(forPath: rpcPath).absoluteString
+            == "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
         )
-        XCTAssertEqual(
+        #expect(
             ProtocolClientConfig(host: "https://connectrpc.com/a")
-                .createURL(forPath: rpcPath).absoluteString,
-            "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
+                .createURL(forPath: rpcPath).absoluteString
+            == "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
         )
-        XCTAssertEqual(
+        #expect(
             ProtocolClientConfig(host: "https://connectrpc.com/a/")
-                .createURL(forPath: rpcPath).absoluteString,
-            "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
+                .createURL(forPath: rpcPath).absoluteString
+            == "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
         )
-        XCTAssertEqual(
+        #expect(
             ProtocolClientConfig(host: "https://connectrpc.com/a/b/c")
-                .createURL(forPath: rpcPath).absoluteString,
-            "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
+                .createURL(forPath: rpcPath).absoluteString
+            == "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
         )
-        XCTAssertEqual(
+        #expect(
             ProtocolClientConfig(host: "https://connectrpc.com/a/b/c/")
-                .createURL(forPath: rpcPath).absoluteString,
-            "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
+                .createURL(forPath: rpcPath).absoluteString
+            == "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
         )
-        XCTAssertEqual(
+        #expect(
             ProtocolClientConfig(host: "connectrpc.com/a/b/c")
-                .createURL(forPath: rpcPath).absoluteString,
-            "connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
+                .createURL(forPath: rpcPath).absoluteString
+            == "connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
         )
     }
 
-    func testAddsConnectInterceptorLastWhenUsingConnectProtocol() {
+    @available(iOS 13, *)
+    @Test
+    func addsConnectInterceptorLastWhenUsingConnectProtocol() {
         let config = ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             interceptors: [InterceptorFactory { _ in NoopInterceptor1() }]
         )
-        XCTAssertTrue(config.interceptors[0].createUnary(with: config) is NoopInterceptor1)
-        XCTAssertTrue(config.interceptors[1].createUnary(with: config) is ConnectInterceptor)
-        XCTAssertTrue(config.interceptors[0].createStream(with: config) is NoopInterceptor1)
-        XCTAssertTrue(config.interceptors[1].createStream(with: config) is ConnectInterceptor)
+        #expect(config.interceptors[0].createUnary(with: config) is NoopInterceptor1)
+        #expect(config.interceptors[1].createUnary(with: config) is ConnectInterceptor)
+        #expect(config.interceptors[0].createStream(with: config) is NoopInterceptor1)
+        #expect(config.interceptors[1].createStream(with: config) is ConnectInterceptor)
     }
 
-    func testAddsGRPCWebInterceptorLastWhenUsingGRPCWebProtocol() {
+    @available(iOS 13, *)
+    @Test
+    func addsGRPCWebInterceptorLastWhenUsingGRPCWebProtocol() {
         let config = ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .grpcWeb,
             interceptors: [InterceptorFactory { _ in NoopInterceptor1() }]
         )
-        XCTAssertTrue(config.interceptors[0].createUnary(with: config) is NoopInterceptor1)
-        XCTAssertTrue(config.interceptors[1].createUnary(with: config) is GRPCWebInterceptor)
-        XCTAssertTrue(config.interceptors[0].createStream(with: config) is NoopInterceptor1)
-        XCTAssertTrue(config.interceptors[1].createStream(with: config) is GRPCWebInterceptor)
+        #expect(config.interceptors[0].createUnary(with: config) is NoopInterceptor1)
+        #expect(config.interceptors[1].createUnary(with: config) is GRPCWebInterceptor)
+        #expect(config.interceptors[0].createStream(with: config) is NoopInterceptor1)
+        #expect(config.interceptors[1].createStream(with: config) is GRPCWebInterceptor)
     }
 
-    func testAddsProtocolInterceptorLastWhenUsingOtherProtocol() {
+    @available(iOS 13, *)
+    @Test
+    func addsProtocolInterceptorLastWhenUsingOtherProtocol() {
         let config = ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .custom(
@@ -115,13 +129,15 @@ final class ProtocolClientConfigTests: XCTestCase {
             ),
             interceptors: [InterceptorFactory { _ in NoopInterceptor1() }]
         )
-        XCTAssertTrue(config.interceptors[0].createUnary(with: config) is NoopInterceptor1)
-        XCTAssertTrue(config.interceptors[1].createUnary(with: config) is NoopInterceptor2)
-        XCTAssertTrue(config.interceptors[0].createStream(with: config) is NoopInterceptor1)
-        XCTAssertTrue(config.interceptors[1].createStream(with: config) is NoopInterceptor2)
+        #expect(config.interceptors[0].createUnary(with: config) is NoopInterceptor1)
+        #expect(config.interceptors[1].createUnary(with: config) is NoopInterceptor2)
+        #expect(config.interceptors[0].createStream(with: config) is NoopInterceptor1)
+        #expect(config.interceptors[1].createStream(with: config) is NoopInterceptor2)
     }
 
-    func testUnaryGETRequestWithNoSideEffects() {
+    @available(iOS 13, *)
+    @Test
+    func unaryGETRequestWithNoSideEffects() {
         let request = HTTPRequest<Data?>(
             url: URL(string: "https://connectrpc.com")!,
             headers: Headers(),
@@ -130,29 +146,31 @@ final class ProtocolClientConfigTests: XCTestCase {
             trailers: nil,
             idempotencyLevel: .noSideEffects
         )
-        XCTAssertTrue(ProtocolClientConfig(
+        #expect(ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .alwaysEnabled
         ).shouldUseUnaryGET(for: request))
-        XCTAssertTrue(ProtocolClientConfig(
+        #expect(ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
         ).shouldUseUnaryGET(for: request))
-        XCTAssertFalse(ProtocolClientConfig(
+        #expect(!ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
         ).shouldUseUnaryGET(for: request))
-        XCTAssertFalse(ProtocolClientConfig(
+        #expect(!ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .disabled
         ).shouldUseUnaryGET(for: request))
     }
 
-    func testUnaryGETRequestWithIdempotentSideEffects() {
+    @available(iOS 13, *)
+    @Test
+    func unaryGETRequestWithIdempotentSideEffects() {
         let request = HTTPRequest<Data?>(
             url: URL(string: "https://connectrpc.com")!,
             headers: Headers(),
@@ -161,29 +179,31 @@ final class ProtocolClientConfigTests: XCTestCase {
             trailers: nil,
             idempotencyLevel: .idempotent
         )
-        XCTAssertFalse(ProtocolClientConfig(
+        #expect(!ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .alwaysEnabled
         ).shouldUseUnaryGET(for: request))
-        XCTAssertFalse(ProtocolClientConfig(
+        #expect(!ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
         ).shouldUseUnaryGET(for: request))
-        XCTAssertFalse(ProtocolClientConfig(
+        #expect(!ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
         ).shouldUseUnaryGET(for: request))
-        XCTAssertFalse(ProtocolClientConfig(
+        #expect(!ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .disabled
         ).shouldUseUnaryGET(for: request))
     }
 
-    func testUnaryGETRequestWithUnknownSideEffects() {
+    @available(iOS 13, *)
+    @Test
+    func unaryGETRequestWithUnknownSideEffects() {
         let request = HTTPRequest<Data?>(
             url: URL(string: "https://connectrpc.com")!,
             headers: Headers(),
@@ -192,29 +212,31 @@ final class ProtocolClientConfigTests: XCTestCase {
             trailers: nil,
             idempotencyLevel: .unknown
         )
-        XCTAssertFalse(ProtocolClientConfig(
+        #expect(!ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .alwaysEnabled
         ).shouldUseUnaryGET(for: request))
-        XCTAssertFalse(ProtocolClientConfig(
+        #expect(!ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
         ).shouldUseUnaryGET(for: request))
-        XCTAssertFalse(ProtocolClientConfig(
+        #expect(!ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
         ).shouldUseUnaryGET(for: request))
-        XCTAssertFalse(ProtocolClientConfig(
+        #expect(!ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .disabled
         ).shouldUseUnaryGET(for: request))
     }
 
-    func testTransformToGETWithoutRequestCompression() {
+    @available(iOS 13, *)
+    @Test
+    func transformToGETWithoutRequestCompression() {
         let request = HTTPRequest<Data?>(
             url: URL(string: "https://connectrpc.com")!,
             headers: Headers(),
@@ -232,14 +254,16 @@ final class ProtocolClientConfigTests: XCTestCase {
 
         let requestWithoutCompression = config.transformToGETIfNeeded(request)
 
-        XCTAssertEqual(requestWithoutCompression.method, .get)
-        XCTAssertEqual(
-            requestWithoutCompression.url.absoluteString,
-            "https://connectrpc.com?connect=v1&base64=1&encoding=json&message=AAEC"
+        #expect(requestWithoutCompression.method == .get)
+        #expect(
+            requestWithoutCompression.url.absoluteString
+            == "https://connectrpc.com?connect=v1&base64=1&encoding=json&message=AAEC"
         )
     }
 
-    func testTransformToGETUsesURLSafeBase64() {
+    @available(iOS 13, *)
+    @Test
+    func transformToGETUsesURLSafeBase64() {
         // Data bytes [0x3E, 0x3F, 0xBF, 0xFF] produce "+P+//w==" in standard base64
         // and "Pj-_vw" in raw URL-safe base64 (RFC 4648 §5)
         let request = HTTPRequest<Data?>(
@@ -258,13 +282,15 @@ final class ProtocolClientConfigTests: XCTestCase {
         let getRequest = config.transformToGETIfNeeded(request)
         let url = getRequest.url.absoluteString
         // Must NOT contain + or / (standard base64 chars)
-        XCTAssertFalse(url.contains("+"), "URL must use URL-safe base64, not standard base64")
-        XCTAssertFalse(url.contains("/message/"), "URL must use URL-safe base64")
+        #expect(!url.contains("+"), "URL must use URL-safe base64, not standard base64")
+        #expect(!url.contains("/message/"), "URL must use URL-safe base64")
         // Must contain the URL-safe base64 encoded message
-        XCTAssertTrue(url.contains("message=Pj-__w"), "Expected raw URL-safe base64 encoding")
+        #expect(url.contains("message=Pj-__w"), "Expected raw URL-safe base64 encoding")
     }
 
-    func testTransformToGETWithRequestCompression() {
+    @available(iOS 13, *)
+    @Test
+    func transformToGETWithRequestCompression() {
         let compressedRequest = HTTPRequest<Data?>(
             url: URL(string: "https://connectrpc.com")!,
             headers: [HeaderConstants.contentEncoding: ["gzip"]], // mimics inceptor behavior
@@ -282,10 +308,9 @@ final class ProtocolClientConfigTests: XCTestCase {
 
         let requestWithCompression = config.transformToGETIfNeeded(compressedRequest)
 
-        XCTAssertEqual(requestWithCompression.method, .get)
-        XCTAssertEqual(
-            requestWithCompression.url.absoluteString,
+        #expect(requestWithCompression.method == .get)
+        let expectedURL =
             "https://connectrpc.com?connect=v1&base64=1&compression=gzip&encoding=json&message=AAEC"
-        )
+        #expect(requestWithCompression.url.absoluteString == expectedURL)
     }
 }
