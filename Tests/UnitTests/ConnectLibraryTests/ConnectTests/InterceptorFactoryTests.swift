@@ -13,7 +13,7 @@
 // limitations under the License.
 
 @testable import Connect
-import XCTest
+import Testing
 
 private final class MockUnaryInterceptor: UnaryInterceptor {}
 
@@ -21,40 +21,50 @@ private final class MockStreamInterceptor: StreamInterceptor {}
 
 private final class MockUnaryAndStreamInterceptor: UnaryInterceptor, StreamInterceptor {}
 
-final class InterceptorFactoryTests: XCTestCase {
+struct InterceptorFactoryTests {
     private let config = ProtocolClientConfig(host: "localhost")
 
-    func testInstantiatesUnaryInterceptorForUnary() {
+    @available(iOS 13, *)
+    @Test
+    func instantiatesUnaryInterceptorForUnary() {
         let factory = InterceptorFactory { _ in MockUnaryInterceptor() }
-        XCTAssertTrue(
+        #expect(
             factory.createUnary(with: self.config) is MockUnaryInterceptor
         )
     }
 
-    func testInstantiatesStreamInterceptorForStream() {
+    @available(iOS 13, *)
+    @Test
+    func instantiatesStreamInterceptorForStream() {
         let factory = InterceptorFactory { _ in MockStreamInterceptor() }
-        XCTAssertTrue(
+        #expect(
             factory.createStream(with: self.config) is MockStreamInterceptor
         )
     }
 
-    func testInstantiatesCombinedInterceptorForStreamAndUnary() {
+    @available(iOS 13, *)
+    @Test
+    func instantiatesCombinedInterceptorForStreamAndUnary() {
         let factory = InterceptorFactory { _ in MockUnaryAndStreamInterceptor() }
-        XCTAssertTrue(
+        #expect(
             factory.createUnary(with: self.config) is MockUnaryAndStreamInterceptor
         )
-        XCTAssertTrue(
+        #expect(
             factory.createStream(with: self.config) is MockUnaryAndStreamInterceptor
         )
     }
 
-    func testDoesNotInstantiateUnaryInterceptorForStream() {
+    @available(iOS 13, *)
+    @Test
+    func doesNotInstantiateUnaryInterceptorForStream() {
         let factory = InterceptorFactory { _ in MockUnaryInterceptor() }
-        XCTAssertNil(factory.createStream(with: self.config))
+        #expect(factory.createStream(with: self.config) == nil)
     }
 
-    func testDoesNotInstantiateStreamInterceptorForUnary() {
+    @available(iOS 13, *)
+    @Test
+    func doesNotInstantiateStreamInterceptorForUnary() {
         let factory = InterceptorFactory { _ in MockStreamInterceptor() }
-        XCTAssertNil(factory.createUnary(with: self.config))
+        #expect(factory.createUnary(with: self.config) == nil)
     }
 }
