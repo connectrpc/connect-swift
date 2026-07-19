@@ -17,5 +17,5 @@ Pod::Spec.new do |spec|
 
   spec.source_files = 'Libraries/Connect/**/*.swift'
 
-  spec.swift_versions = ['5.0']
+  spec.swift_versions = ['5.0', '6.0']
 end
