@@ -239,31 +239,28 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         using multiplexer: NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer,
         with connectHandler: any NIOCore.ChannelInboundHandler & Sendable
     ) {
+        // The non-Sendable codec/idle-state handlers are created inside the stream
+        // channel initializer closure, which runs on the channel's event loop, so
+        // they never cross an isolation boundary. Only Sendable values are captured.
+        let useSSL = self.useSSL
+        let timeout = self.timeout
         let promise = eventLoop.makePromise(of: NIOCore.Channel.self)
         multiplexer.createStreamChannel(promise: promise) { channel in
-            channel.eventLoop.makeCompletedFuture {
-                try channel.pipeline.syncOperations.addHandlers(
-                    self.createChannelHandlers(with: connectHandler)
-                )
+            return channel.eventLoop.makeCompletedFuture {
+                var handlers: [NIOCore.ChannelHandler] = [
+                    useSSL
+                    ? HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https)
+                    : HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .http),
+                    connectHandler,
+                ]
+                if let timeout = timeout {
+                    handlers.insert(
+                        IdleStateHandler(allTimeout: .milliseconds(Int64(timeout * 1_000.0))), at: 0
+                    )
+                }
+                try channel.pipeline.syncOperations.addHandlers(handlers)
             }
         }
-    }
-
-    private func createChannelHandlers(
-        with connectHandler: any NIOCore.ChannelInboundHandler
-    ) -> [NIOCore.ChannelHandler] {
-        var handlers: [NIOCore.ChannelHandler] = [
-            self.useSSL
-            ? HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https)
-            : HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .http),
-            connectHandler,
-        ]
-        if let timeout = self.timeout {
-            handlers.insert(
-                IdleStateHandler(allTimeout: .milliseconds(Int64(timeout * 1_000.0))), at: 0
-            )
-        }
-        return handlers
     }
 
     deinit {
