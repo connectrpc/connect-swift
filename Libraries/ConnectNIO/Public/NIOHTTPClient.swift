@@ -23,6 +23,20 @@ import NIOSSL
 import os.log
 
 /// HTTP client powered by Swift NIO which supports trailers (unlike URLSession).
+///
+/// Safety: `@unchecked Sendable` because (a) checked `Sendable` requires `final`
+/// and this class is deliberately `open` for subclassing, and (b) its mutable
+/// state (`state`, `pendingRequests`, and the lazy `bootstrap`) is only ever
+/// accessed within `self.lock.withLock`. Subclasses must provide their own
+/// synchronization for any state they add.
+/// `deinit` audit: `deinit` may run on one of `loopGroup`'s own threads (see the
+/// comment in `deinit`); everything it calls is safe from any thread. Any new
+/// `deinit` logic must preserve that property — Swift 6 does not check `deinit`
+/// isolation.
+/// Sharp edge (do not change casually): `sendOrQueueRequest` invokes the `send`
+/// closure while holding `self.lock`; this is safe today because the closure only
+/// enqueues non-blocking NIO work, but it must not block or re-enter
+/// `sendOrQueueRequest`.
 open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     private lazy var bootstrap = self.createBootstrap()
     private let host: String

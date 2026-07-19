@@ -19,6 +19,12 @@ import NIOFoundationCompat
 import NIOHTTP1
 
 /// NIO-based channel handler for unary requests made through the Connect library.
+///
+/// Safety: `@unchecked Sendable` because all mutable state is confined to
+/// `self.eventLoop`: external entry points hop via `runOnEventLoop`, and NIO
+/// invokes the `ChannelInboundHandler` callbacks on the event loop.
+/// Removal plan: wrap state in `NIOLoopBound` (runtime-asserted confinement) or
+/// adopt NIO's async channel APIs if the package's NIO floor rises far enough.
 final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
     private let eventLoop: NIOCore.EventLoop
     private let request: Connect.HTTPRequest<Data?>
