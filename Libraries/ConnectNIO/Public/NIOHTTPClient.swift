@@ -262,7 +262,14 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 channel.close(mode: .all, promise: nil)
             }
         }
-        try? self.loopGroup.syncShutdownGracefully()
+        // `deinit` can run on one of `loopGroup`'s own event loop threads: an `EventLoopFuture`
+        // callback that captures `[weak self]` (such as the connect callback in
+        // `connectChannelAndMultiplexerIfNeeded()`) briefly upgrades it to a strong reference,
+        // and if the client's other owners released it in the meantime, dropping that reference
+        // deallocates the client on the event loop. `syncShutdownGracefully()` traps with a
+        // precondition failure when called from an event loop, so use the asynchronous shutdown,
+        // which is safe to invoke from any thread.
+        self.loopGroup.shutdownGracefully { _ in }
     }
 }
 
