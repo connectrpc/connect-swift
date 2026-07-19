@@ -440,31 +440,35 @@ extension ProtocolClient: ProtocolClientInterface {
     }
 }
 
-private final class PendingRequestCallbacks: @unchecked Sendable {
-    private let lock = Lock()
-    private var callbacks: RequestCallbacks<Data>?
-    private var queue = [(RequestCallbacks<Data>) -> Void]()
+private final class PendingRequestCallbacks: Sendable {
+    private struct State {
+        var callbacks: RequestCallbacks<Data>?
+        var queue = [@Sendable (RequestCallbacks<Data>) -> Void]()
+    }
+
+    private let state = Locked(State())
 
     func setCallbacks(_ callbacks: RequestCallbacks<Data>) {
-        var pendingActions: [(RequestCallbacks<Data>) -> Void] = []
-        self.lock.perform {
-            self.callbacks = callbacks
-            pendingActions = self.queue
-            self.queue = []
+        // Actions run outside the lock to avoid lock-ordering hazards with
+        // locks acquired by the actions themselves.
+        let pendingActions = self.state.perform { state -> [@Sendable (RequestCallbacks<Data>) -> Void] in
+            state.callbacks = callbacks
+            let queued = state.queue
+            state.queue = []
+            return queued
         }
         for action in pendingActions {
             action(callbacks)
         }
     }
 
-    func enqueue(_ action: @escaping (RequestCallbacks<Data>) -> Void) {
-        var callbacksToCall: RequestCallbacks<Data>?
-        self.lock.perform {
-            if let callbacks = self.callbacks {
-                callbacksToCall = callbacks
-            } else {
-                self.queue.append(action)
+    func enqueue(_ action: @escaping @Sendable (RequestCallbacks<Data>) -> Void) {
+        let callbacksToCall = self.state.perform { state -> RequestCallbacks<Data>? in
+            if let callbacks = state.callbacks {
+                return callbacks
             }
+            state.queue.append(action)
+            return nil
         }
         if let callbacks = callbacksToCall {
             action(callbacks)
