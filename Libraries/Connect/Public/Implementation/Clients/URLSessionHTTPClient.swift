@@ -18,8 +18,16 @@ import os.log
 /// Concrete implementation of `HTTPClientInterface` backed by `URLSession`.
 ///
 /// This class is thread-safe as-is through the use of an internal lock. It is marked as
-/// `open` and `@unchecked Sendable` so that consumers can subclass it if necessary, but
-/// subclasses must handle their own thread safety for added functionality.
+/// `open` so that consumers can subclass it if necessary.
+///
+/// Safety: `@unchecked Sendable` because (a) checked `Sendable` requires `final`
+/// and this class is deliberately `open` for subclassing, and (b) its mutable
+/// state (`metricsClosures`, `streams`) is only ever accessed within
+/// `self.lock.perform`. Delegate callbacks are serialized by the dedicated
+/// serial `OperationQueue` passed to `URLSession`, preserving per-task callback
+/// ordering. Subclasses must provide their own synchronization for any state
+/// they add. `deinit` audit: `finishTasksAndInvalidate()` is thread-safe and
+/// callable from any thread.
 open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Sendable {
     /// Lock used for safely accessing stream storage.
     private let lock = Lock()
@@ -198,6 +206,10 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
 ///
 /// To work around this, `URLSessionDelegateWrapper` maintains a `weak` reference to the
 /// `URLSessionHTTPClient` and passes delegate calls through to it, avoiding the retain cycle.
+///
+/// Safety: `@unchecked Sendable` because the only stored property is a `weak var`
+/// (weak refs cannot be `let`), assigned once immediately after the client's
+/// `init` and only read thereafter; reads of a weak reference are atomic.
 private final class URLSessionDelegateWrapper: NSObject, @unchecked Sendable {
     weak var client: URLSessionHTTPClient?
 }
