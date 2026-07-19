@@ -19,6 +19,11 @@ import SwiftProtobuf
 
 private let prefixLength = MemoryLayout<UInt32>.size // 4
 
+private func logToStderr(_ message: String) {
+    let timestamp = ISO8601DateFormatter().string(from: Date())
+    FileHandle.standardError.write(Data("[conformance-client] \(timestamp) \(message)\n".utf8))
+}
+
 private func nextMessageLength(using data: Data) -> Int {
     var messageLength: UInt32 = 0
     (data[0...3] as NSData).getBytes(&messageLength, length: prefixLength)
@@ -44,6 +49,13 @@ private func main() async throws {
         let request = try Connectrpc_Conformance_V1_ClientCompatRequest(
             serializedBytes: nextRequestData
         )
+        logToStderr(
+            "starting \(request.testName) method=\(request.method) " +
+            "protocol=\(request.protocol) codec=\(request.codec) " +
+            "compression=\(request.compression) streamType=\(request.streamType) " +
+            "cancel=\(request.cancel.cancelTiming.map(String.init(describing:)) ?? "none") " +
+            "timeoutMs=\(request.hasTimeoutMs ? String(request.timeoutMs) : "none")"
+        )
         let invoker = try ConformanceInvoker(request: request, clientType: clientTypeArg)
         let response: Connectrpc_Conformance_V1_ClientCompatResponse
         do {
@@ -66,6 +78,7 @@ private func main() async throws {
             }
         }
 
+        logToStderr("finished \(request.testName)")
         let serializedResponse = try response.serializedData()
         var responseLength = UInt32(serializedResponse.count).bigEndian
         let output = Data(bytes: &responseLength, count: prefixLength) + serializedResponse
