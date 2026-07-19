@@ -24,6 +24,10 @@ import SwiftProtobuf
 ///
 /// To return data over the stream, outputs can be specified using `init(outputs: ...)` or by
 /// subclassing and overriding `results()`.
+///
+/// Safety: `@unchecked Sendable` to satisfy `Sendable` protocol requirements in
+/// tests; instances are intended to be confined to a single test's context and
+/// perform no internal synchronization.
 @available(iOS 13, *)
 open class MockServerOnlyAsyncStream<
     Input: ProtobufMessage,

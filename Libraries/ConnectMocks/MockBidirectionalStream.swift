@@ -23,6 +23,10 @@ import SwiftProtobuf
 /// or by subclassing the type and overriding functions such as `send()`.
 ///
 /// To return data over the stream, outputs can be specified using `init(outputs: ...)`.
+///
+/// Safety: `@unchecked Sendable` to satisfy `Sendable` protocol requirements in
+/// tests; instances are intended to be confined to a single test's context and
+/// perform no internal synchronization.
 @available(iOS 13, *)
 open class MockBidirectionalStream<
     Input: ProtobufMessage,

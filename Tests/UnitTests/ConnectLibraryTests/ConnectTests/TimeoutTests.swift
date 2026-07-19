@@ -64,6 +64,7 @@ struct TimeoutTests {
     }
 }
 
+// Safety: @unchecked Sendable — test double confined to a single test invocation.
 private final class TimeoutHTTPClient: HTTPClientInterface, @unchecked Sendable {
     @discardableResult
     func unary(
