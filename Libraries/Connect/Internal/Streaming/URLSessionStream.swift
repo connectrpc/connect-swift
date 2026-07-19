@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import Foundation
+import os.log
 
 /// Stream implementation that wraps a `URLSession` stream.
 ///
@@ -21,6 +22,7 @@ import Foundation
 final class URLSessionStream: NSObject, @unchecked Sendable {
     private let closedByServer = Locked(false)
     private let readStream: Foundation.InputStream
+    private let requestBodyResendRequested = Locked(false)
     private let requestBodyStreamVended = Locked(false)
     private let responseCallbacks: ResponseCallbacks
     private let task: URLSessionUploadTask
@@ -42,11 +44,24 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
     /// `Assertion failed: (CFReadStreamGetStatus(_stream.get()) == kCFStreamStatusNotOpen),`
     /// `function _onqueue_setupStream_block_invoke, file HTTPRequestBody.cpp`
     ///
-    /// To avoid the crash, the stream is vended only once. Subsequent requests return `nil`, which
-    /// fails the task with an error that is surfaced through the normal stream-close path instead.
+    /// To avoid the crash, the stream is vended only once. On subsequent requests the task is
+    /// canceled and `nil` is returned. Cancellation is required in addition to returning `nil`:
+    /// CFNetwork does not treat a `nil` body stream as a failure and can instead leave the task
+    /// parked indefinitely waiting for a body stream, never delivering any delegate callback.
+    /// Canceling guarantees `urlSession(_:task:didCompleteWithError:)` is delivered so the failure
+    /// is surfaced through the normal stream-close path.
     var requestBodyStream: Foundation.InputStream? {
         return self.requestBodyStreamVended.perform { vended in
             guard !vended else {
+                os_log(
+                    .error,
+                    """
+                    URLSession requested a resend of a streamed request body which \
+                    cannot be replayed - canceling the request
+                    """
+                )
+                self.requestBodyResendRequested.value = true
+                self.task.cancel()
                 return nil
             }
             vended = true
@@ -138,11 +153,18 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
 
         self.closedByServer.value = true
         if let error = error {
-            let code = Code.fromURLSessionCode((error as NSError).code)
+            var code = Code.fromURLSessionCode((error as NSError).code)
+            var message = error.localizedDescription
+            if code == .canceled && self.requestBodyResendRequested.value {
+                // The cancelation came from `requestBodyStream` refusing a resend, not from the
+                // caller. Surface it as a retriable connection failure instead.
+                code = .unavailable
+                message = "connection was reset and the streamed request body cannot be replayed"
+            }
             self.responseCallbacks.receiveClose(
                 code,
                 [:],
-                ConnectError(code: code, message: error.localizedDescription)
+                ConnectError(code: code, message: message)
             )
         } else {
             self.responseCallbacks.receiveClose(.ok, [:], nil)
