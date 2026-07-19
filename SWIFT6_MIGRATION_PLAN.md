@@ -374,6 +374,15 @@ final class TimeoutTimer: Sendable {
 }
 ```
 
+**Implementation deviation (discovered during Phase 2, approved 2026-07-19):**
+`DispatchWorkItem` has no `Sendable` conformance in the SDK, so the layout above
+cannot compile as pure checked `Sendable`. Resolution: keep the restructure
+exactly as specified, declare checked `Sendable`, and mark the single
+non-Sendable stored property `nonisolated(unsafe) private let workItem` with a
+safety comment (created once in `init`; only thread-safe `cancel()`/`asyncAfter`
+are invoked on it). This still removes the class-level `@unchecked Sendable`
+site and keeps compiler checking for every other property.
+
 Notes for the implementor:
 - The `queue.sync { self.onTimeout = onTimeout }` call is deleted entirely — the
   `Locked` wrapper is now the only serialization for that state. This removes the

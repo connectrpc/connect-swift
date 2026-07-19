@@ -14,12 +14,16 @@
 
 import Foundation
 
-final class TimeoutTimer: @unchecked Sendable {
-    private let hasTimedOut = Locked(false)
-    private var onTimeout: (() -> Void)?
+final class TimeoutTimer: Sendable {
+    private let hasTimedOut: Locked<Bool>
+    private let onTimeout: Locked<(@Sendable () -> Void)?>
     private let queue = DispatchQueue(label: "connectrpc.Timeout")
     private let timeout: TimeInterval
-    private var workItem: DispatchWorkItem! // Force-unwrapped to allow capturing self in init
+    // Safety: `nonisolated(unsafe)` because `DispatchWorkItem` carries no `Sendable`
+    // conformance in the SDK. The item is created once in `init` and never reassigned;
+    // the only operations performed on it are `cancel()` and a single `asyncAfter`
+    // enqueue, both of which are thread-safe.
+    nonisolated(unsafe) private let workItem: DispatchWorkItem
 
     var timedOut: Bool {
         return self.hasTimedOut.value
@@ -30,10 +34,18 @@ final class TimeoutTimer: @unchecked Sendable {
             return nil
         }
 
+        // Locals are created first and captured by the work item so that it does
+        // not retain `self` (preserving the previous `[weak self]` lifetime
+        // semantics: the timer stops mattering once the last owner cancels it
+        // in `deinit`).
+        let hasTimedOut = Locked(false)
+        let onTimeout = Locked<(@Sendable () -> Void)?>(nil)
         self.timeout = timeout
-        self.workItem = DispatchWorkItem { [weak self] in
-            self?.hasTimedOut.value = true
-            self?.onTimeout?()
+        self.hasTimedOut = hasTimedOut
+        self.onTimeout = onTimeout
+        self.workItem = DispatchWorkItem {
+            hasTimedOut.value = true
+            onTimeout.value?()
         }
     }
 
@@ -41,15 +53,15 @@ final class TimeoutTimer: @unchecked Sendable {
         self.cancel()
     }
 
-    func start(onTimeout: @escaping () -> Void) {
+    func start(onTimeout: @escaping @Sendable () -> Void) {
         let milliseconds = Int(self.timeout * 1_000)
-        self.queue.sync { self.onTimeout = onTimeout }
+        self.onTimeout.value = onTimeout
         self.queue.asyncAfter(
             deadline: .now() + .milliseconds(milliseconds), execute: self.workItem
         )
     }
 
     func cancel() {
-        workItem.cancel()
+        self.workItem.cancel()
     }
 }
