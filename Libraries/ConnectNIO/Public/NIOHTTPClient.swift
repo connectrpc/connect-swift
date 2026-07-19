@@ -76,6 +76,13 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
             .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
             .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .channelInitializer { channel in
+                // The initializer closure runs on the channel's event loop, so the
+                // non-Sendable SSL handler is created and installed on the event
+                // loop via `syncOperations`, and the HTTP/2 pipeline is configured
+                // synchronously via `syncOperations.configureHTTP2Pipeline` instead
+                // of moving non-Sendable state into `@Sendable` future callbacks.
+                // A thrown error fails the connect future, which the failure path
+                // in `connectChannelAndMultiplexerIfNeeded()` already handles.
                 channel.eventLoop.makeCompletedFuture {
                     if let tlsConfiguration = tlsConfiguration {
                         let sslContext = try NIOSSL.NIOSSLContext(configuration: tlsConfiguration)

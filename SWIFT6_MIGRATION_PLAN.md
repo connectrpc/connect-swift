@@ -613,6 +613,16 @@ and `super.createBootstrap()` callers are unaffected (§6). Replace the
 }
 ```
 
+**Implementation deviation (updated after rebase onto the Swift Testing
+branch, 2026-07-22):** upstream already migrated `NIOHTTPClient` off the
+deprecated `HTTP2StreamMultiplexer` to the new-style
+`NIOHTTP2Handler.StreamMultiplexer` API (#411), including the sync
+`syncOperations.configureHTTP2Pipeline` overload this section assumed.
+Resolution: the whole pipeline setup runs synchronously inside a single
+`makeCompletedFuture` block on the channel's event loop — no
+`assumeIsolated()`/`nonisolated()` future-view chaining is needed. Isolation
+design unchanged: everything still happens on the channel's event loop.
+
 Implementor notes:
 - `tlsConfiguration` (`NIOSSL.TLSConfiguration`, a Sendable struct) and `host`
   (`String`) are the only captures — both Sendable, so the closure is clean.
