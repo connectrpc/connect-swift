@@ -208,8 +208,8 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
 /// `URLSessionHTTPClient` and passes delegate calls through to it, avoiding the retain cycle.
 ///
 /// Safety: `@unchecked Sendable` because the only stored property is a `weak var`
-/// (weak refs cannot be `let`), assigned once immediately after the client's
-/// `init` and only read thereafter; reads of a weak reference are atomic.
+/// (weak refs cannot be `let`), assigned once during the client's `init` and
+/// only read thereafter; reads of a weak reference are atomic.
 private final class URLSessionDelegateWrapper: NSObject, @unchecked Sendable {
     weak var client: URLSessionHTTPClient?
 }

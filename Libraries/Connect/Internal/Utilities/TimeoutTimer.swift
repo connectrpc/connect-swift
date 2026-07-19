@@ -35,9 +35,14 @@ final class TimeoutTimer: Sendable {
         }
 
         // Locals are created first and captured by the work item so that it does
-        // not retain `self` (preserving the previous `[weak self]` lifetime
-        // semantics: the timer stops mattering once the last owner cancels it
-        // in `deinit`).
+        // not retain `self` (approximating the previous `[weak self]` lifetime
+        // semantics: `deinit` cancels the not-yet-started work item). One narrow
+        // difference from `[weak self]`: if the work item has already started
+        // executing when the last owner releases the timer, it now still invokes
+        // `onTimeout` (previously the nil weak reference made it a no-op). That
+        // late invocation is safe: the timer is retained by the response-handling
+        // closures until the request completes, and a post-completion cancel is
+        // dropped by the completion guards (`hasCompleted` et al.) downstream.
         let hasTimedOut = Locked(false)
         let onTimeout = Locked<(@Sendable () -> Void)?>(nil)
         self.timeout = timeout
