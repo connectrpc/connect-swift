@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import Foundation
-import os.log
 
 /// Stream implementation that wraps a `URLSession` stream.
 ///
@@ -53,13 +52,6 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
     var requestBodyStream: Foundation.InputStream? {
         return self.requestBodyStreamVended.perform { vended in
             guard !vended else {
-                os_log(
-                    .error,
-                    """
-                    URLSession requested a resend of a streamed request body which \
-                    cannot be replayed - canceling the request
-                    """
-                )
                 self.requestBodyResendRequested.value = true
                 self.task.cancel()
                 return nil

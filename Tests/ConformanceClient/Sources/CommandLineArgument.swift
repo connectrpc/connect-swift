@@ -21,6 +21,13 @@ enum ClientTypeArg: String, CaseIterable, CommandLineArgument {
     static let key = "httpclient"
 }
 
+enum VerboseArg: String, CaseIterable, CommandLineArgument {
+    case disabled = "false"
+    case enabled = "true"
+
+    static let key = "verbose"
+}
+
 // MARK: - Protocol interface
 
 protocol CommandLineArgument: RawRepresentable, CaseIterable {
