@@ -262,7 +262,10 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 channel.close(mode: .all, promise: nil)
             }
         }
-        try? self.loopGroup.syncShutdownGracefully()
+        // An event loop callback can release the client's last reference, running `deinit` on that
+        // event loop. The synchronous `syncShutdownGracefully()` call will trap there because the
+        // loop cannot wait for itself to stop, so initiate shutdown asynchronously.
+        self.loopGroup.shutdownGracefully { _ in }
     }
 }
 

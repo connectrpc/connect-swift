@@ -17,7 +17,19 @@ import SwiftProtobuf
 
 // MARK: - Helpers
 
+nonisolated(unsafe) private let iso8601DateFormatter = ISO8601DateFormatter()
 private let prefixLength = MemoryLayout<UInt32>.size // 4
+
+private func logToStderr(_ message: String) {
+    let date = Date()
+    let timestamp: String
+    if #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) {
+        timestamp = date.formatted(.iso8601)
+    } else {
+        timestamp = iso8601DateFormatter.string(from: date)
+    }
+    FileHandle.standardError.write(Data("[conformance-client] \(timestamp) \(message)\n".utf8))
+}
 
 private func nextMessageLength(using data: Data) -> Int {
     var messageLength: UInt32 = 0
@@ -29,6 +41,11 @@ private func nextMessageLength(using data: Data) -> Int {
 @available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
 private func main() async throws {
     let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLine.arguments)
+    // Setting `verbose=true` logs each test's request details and completion to stderr.
+    let verboseArg = try VerboseArg.fromCommandLineArguments(
+        CommandLine.arguments,
+        defaultingTo: .disabled
+    )
     while let lengthData = try FileHandle.standardInput.read(upToCount: prefixLength) {
         if lengthData.count != prefixLength {
             break
@@ -44,6 +61,15 @@ private func main() async throws {
         let request = try Connectrpc_Conformance_V1_ClientCompatRequest(
             serializedBytes: nextRequestData
         )
+        if verboseArg == .enabled {
+            logToStderr(
+                "starting \(request.testName) method=\(request.method) " +
+                "protocol=\(request.protocol) codec=\(request.codec) " +
+                "compression=\(request.compression) streamType=\(request.streamType) " +
+                "cancel=\(request.cancel.cancelTiming.map(String.init(describing:)) ?? "none") " +
+                "timeoutMs=\(request.hasTimeoutMs ? String(request.timeoutMs) : "none")"
+            )
+        }
         let invoker = try ConformanceInvoker(request: request, clientType: clientTypeArg)
         let response: Connectrpc_Conformance_V1_ClientCompatResponse
         do {
@@ -66,6 +92,9 @@ private func main() async throws {
             }
         }
 
+        if verboseArg == .enabled {
+            logToStderr("finished \(request.testName)")
+        }
         let serializedResponse = try response.serializedData()
         var responseLength = UInt32(serializedResponse.count).bigEndian
         let output = Data(bytes: &responseLength, count: prefixLength) + serializedResponse
