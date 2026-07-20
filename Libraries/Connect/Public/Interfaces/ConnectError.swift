@@ -138,7 +138,7 @@ extension ConnectError {
         }
 
         do {
-            return try ConnectError.decode(from: source, defaultCode: code, metadata: metadata)
+            return try Self.decode(from: source, defaultCode: code, metadata: metadata)
         } catch let error {
             return .init(
                 code: code, message: String(data: source, encoding: .utf8),

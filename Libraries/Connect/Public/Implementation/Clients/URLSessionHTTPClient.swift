@@ -280,7 +280,7 @@ extension Code {
         case ...100: // URLSession can return errors in this range
             return .unknown
         default:
-            return Code.fromHTTPStatus(code)
+            return Self.fromHTTPStatus(code)
         }
     }
 }
