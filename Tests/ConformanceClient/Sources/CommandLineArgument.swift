@@ -37,6 +37,16 @@ protocol CommandLineArgument: RawRepresentable, CaseIterable {
 }
 
 extension CommandLineArgument where RawValue == String {
+    static func fromCommandLineArguments(
+        _ arguments: [String],
+        defaultingTo defaultValue: Self
+    ) throws -> Self {
+        guard arguments.contains(where: { $0.hasPrefix(self.key) }) else {
+            return defaultValue
+        }
+        return try self.fromCommandLineArguments(arguments)
+    }
+
     static func fromCommandLineArguments(_ arguments: [String]) throws -> Self {
         guard let argument = arguments.first(where: { $0.hasPrefix(self.key) }) else {
             throw "'\(self.key)' argument must be specified"

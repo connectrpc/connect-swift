@@ -17,6 +17,7 @@ import SwiftProtobuf
 
 // MARK: - Helpers
 
+nonisolated(unsafe) private let iso8601DateFormatter = ISO8601DateFormatter()
 private let prefixLength = MemoryLayout<UInt32>.size // 4
 
 private func logToStderr(_ message: String) {
@@ -25,10 +26,7 @@ private func logToStderr(_ message: String) {
     if #available(macOS 12, iOS 15, watchOS 8, tvOS 15, *) {
         timestamp = date.formatted(.iso8601)
     } else {
-        // This is a valid path on supported older systems, but the conformance client is not run
-        // on them in practice. If that changes, cache this formatter because it is expensive to
-        // create.
-        timestamp = ISO8601DateFormatter().string(from: date)
+        timestamp = iso8601DateFormatter.string(from: date)
     }
     FileHandle.standardError.write(Data("[conformance-client] \(timestamp) \(message)\n".utf8))
 }
@@ -44,7 +42,10 @@ private func nextMessageLength(using data: Data) -> Int {
 private func main() async throws {
     let clientTypeArg = try ClientTypeArg.fromCommandLineArguments(CommandLine.arguments)
     // Setting `verbose=true` logs each test's request details and completion to stderr.
-    let verboseArg = try VerboseArg.fromCommandLineArguments(CommandLine.arguments)
+    let verboseArg = try VerboseArg.fromCommandLineArguments(
+        CommandLine.arguments,
+        defaultingTo: .disabled
+    )
     while let lengthData = try FileHandle.standardInput.read(upToCount: prefixLength) {
         if lengthData.count != prefixLength {
             break
