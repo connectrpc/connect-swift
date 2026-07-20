@@ -451,7 +451,7 @@ private final class PendingRequestCallbacks: Sendable {
     func setCallbacks(_ callbacks: RequestCallbacks<Data>) {
         // Actions run outside the lock to avoid lock-ordering hazards with
         // locks acquired by the actions themselves.
-        let pendingActions = self.state.perform { state -> [@Sendable (RequestCallbacks<Data>) -> Void] in
+        let pendingActions = self.state.perform { state in
             state.callbacks = callbacks
             let queued = state.queue
             state.queue = []
