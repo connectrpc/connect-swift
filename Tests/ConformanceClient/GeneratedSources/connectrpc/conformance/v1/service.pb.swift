@@ -22,7 +22,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 import SwiftProtobuf
 
 // If the compiler emits an error on this type, it is because this file
@@ -30,14 +34,14 @@ import SwiftProtobuf
 // incompatible with the version of SwiftProtobuf to which you are linking.
 // Please ensure that you are building against the same version of the API
 // that was used to generate this file.
-fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVersionCheck {
+fileprivate nonisolated struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVersionCheck {
   struct _2: SwiftProtobuf.ProtobufAPIVersion_2 {}
   typealias Version = _2
 }
 
 /// A definition of a response to be sent from a single-response endpoint.
 /// Can be used to define a response for unary or client-streaming calls.
-struct Connectrpc_Conformance_V1_UnaryResponseDefinition: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_UnaryResponseDefinition: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -79,17 +83,17 @@ struct Connectrpc_Conformance_V1_UnaryResponseDefinition: Sendable {
   ///
   /// For test definitions, this field should be used instead of the above fields.
   var rawResponse: Connectrpc_Conformance_V1_RawHTTPResponse {
-    get {return _rawResponse ?? Connectrpc_Conformance_V1_RawHTTPResponse()}
+    get {_rawResponse ?? Connectrpc_Conformance_V1_RawHTTPResponse()}
     set {_rawResponse = newValue}
   }
   /// Returns true if `rawResponse` has been explicitly set.
-  var hasRawResponse: Bool {return self._rawResponse != nil}
+  var hasRawResponse: Bool {self._rawResponse != nil}
   /// Clears the value of `rawResponse`. Subsequent reads from it will return its default value.
   mutating func clearRawResponse() {self._rawResponse = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  enum OneOf_Response: Equatable, Sendable {
+  nonisolated enum OneOf_Response: Equatable, Sendable {
     /// Response data to send
     case responseData(Data)
     /// Error to raise instead of response message
@@ -106,7 +110,7 @@ struct Connectrpc_Conformance_V1_UnaryResponseDefinition: Sendable {
 
 /// A definition of responses to be sent from a streaming endpoint.
 /// Can be used to define responses for server-streaming or bidi-streaming calls.
-struct Connectrpc_Conformance_V1_StreamResponseDefinition: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_StreamResponseDefinition: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -126,11 +130,11 @@ struct Connectrpc_Conformance_V1_StreamResponseDefinition: Sendable {
   /// build a RequestInfo message with available information and append that to
   /// the error details.
   var error: Connectrpc_Conformance_V1_Error {
-    get {return _error ?? Connectrpc_Conformance_V1_Error()}
+    get {_error ?? Connectrpc_Conformance_V1_Error()}
     set {_error = newValue}
   }
   /// Returns true if `error` has been explicitly set.
-  var hasError: Bool {return self._error != nil}
+  var hasError: Bool {self._error != nil}
   /// Clears the value of `error`. Subsequent reads from it will return its default value.
   mutating func clearError() {self._error = nil}
 
@@ -143,11 +147,11 @@ struct Connectrpc_Conformance_V1_StreamResponseDefinition: Sendable {
   ///
   /// For test definitions, this field should be used instead of the above fields.
   var rawResponse: Connectrpc_Conformance_V1_RawHTTPResponse {
-    get {return _rawResponse ?? Connectrpc_Conformance_V1_RawHTTPResponse()}
+    get {_rawResponse ?? Connectrpc_Conformance_V1_RawHTTPResponse()}
     set {_rawResponse = newValue}
   }
   /// Returns true if `rawResponse` has been explicitly set.
-  var hasRawResponse: Bool {return self._rawResponse != nil}
+  var hasRawResponse: Bool {self._rawResponse != nil}
   /// Clears the value of `rawResponse`. Subsequent reads from it will return its default value.
   mutating func clearRawResponse() {self._rawResponse = nil}
 
@@ -159,18 +163,18 @@ struct Connectrpc_Conformance_V1_StreamResponseDefinition: Sendable {
   fileprivate var _rawResponse: Connectrpc_Conformance_V1_RawHTTPResponse? = nil
 }
 
-struct Connectrpc_Conformance_V1_UnaryRequest: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_UnaryRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   /// The response definition which should be returned in the conformance payload
   var responseDefinition: Connectrpc_Conformance_V1_UnaryResponseDefinition {
-    get {return _responseDefinition ?? Connectrpc_Conformance_V1_UnaryResponseDefinition()}
+    get {_responseDefinition ?? Connectrpc_Conformance_V1_UnaryResponseDefinition()}
     set {_responseDefinition = newValue}
   }
   /// Returns true if `responseDefinition` has been explicitly set.
-  var hasResponseDefinition: Bool {return self._responseDefinition != nil}
+  var hasResponseDefinition: Bool {self._responseDefinition != nil}
   /// Clears the value of `responseDefinition`. Subsequent reads from it will return its default value.
   mutating func clearResponseDefinition() {self._responseDefinition = nil}
 
@@ -184,18 +188,18 @@ struct Connectrpc_Conformance_V1_UnaryRequest: Sendable {
   fileprivate var _responseDefinition: Connectrpc_Conformance_V1_UnaryResponseDefinition? = nil
 }
 
-struct Connectrpc_Conformance_V1_UnaryResponse: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_UnaryResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   /// The conformance payload to respond with.
   var payload: Connectrpc_Conformance_V1_ConformancePayload {
-    get {return _payload ?? Connectrpc_Conformance_V1_ConformancePayload()}
+    get {_payload ?? Connectrpc_Conformance_V1_ConformancePayload()}
     set {_payload = newValue}
   }
   /// Returns true if `payload` has been explicitly set.
-  var hasPayload: Bool {return self._payload != nil}
+  var hasPayload: Bool {self._payload != nil}
   /// Clears the value of `payload`. Subsequent reads from it will return its default value.
   mutating func clearPayload() {self._payload = nil}
 
@@ -206,18 +210,18 @@ struct Connectrpc_Conformance_V1_UnaryResponse: Sendable {
   fileprivate var _payload: Connectrpc_Conformance_V1_ConformancePayload? = nil
 }
 
-struct Connectrpc_Conformance_V1_IdempotentUnaryRequest: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_IdempotentUnaryRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   /// The response definition which should be returned in the conformance payload
   var responseDefinition: Connectrpc_Conformance_V1_UnaryResponseDefinition {
-    get {return _responseDefinition ?? Connectrpc_Conformance_V1_UnaryResponseDefinition()}
+    get {_responseDefinition ?? Connectrpc_Conformance_V1_UnaryResponseDefinition()}
     set {_responseDefinition = newValue}
   }
   /// Returns true if `responseDefinition` has been explicitly set.
-  var hasResponseDefinition: Bool {return self._responseDefinition != nil}
+  var hasResponseDefinition: Bool {self._responseDefinition != nil}
   /// Clears the value of `responseDefinition`. Subsequent reads from it will return its default value.
   mutating func clearResponseDefinition() {self._responseDefinition = nil}
 
@@ -231,18 +235,18 @@ struct Connectrpc_Conformance_V1_IdempotentUnaryRequest: Sendable {
   fileprivate var _responseDefinition: Connectrpc_Conformance_V1_UnaryResponseDefinition? = nil
 }
 
-struct Connectrpc_Conformance_V1_IdempotentUnaryResponse: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_IdempotentUnaryResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   /// The conformance payload to respond with.
   var payload: Connectrpc_Conformance_V1_ConformancePayload {
-    get {return _payload ?? Connectrpc_Conformance_V1_ConformancePayload()}
+    get {_payload ?? Connectrpc_Conformance_V1_ConformancePayload()}
     set {_payload = newValue}
   }
   /// Returns true if `payload` has been explicitly set.
-  var hasPayload: Bool {return self._payload != nil}
+  var hasPayload: Bool {self._payload != nil}
   /// Clears the value of `payload`. Subsequent reads from it will return its default value.
   mutating func clearPayload() {self._payload = nil}
 
@@ -253,18 +257,18 @@ struct Connectrpc_Conformance_V1_IdempotentUnaryResponse: Sendable {
   fileprivate var _payload: Connectrpc_Conformance_V1_ConformancePayload? = nil
 }
 
-struct Connectrpc_Conformance_V1_ServerStreamRequest: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_ServerStreamRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   /// The response definition which should be returned in the conformance payload.
   var responseDefinition: Connectrpc_Conformance_V1_StreamResponseDefinition {
-    get {return _responseDefinition ?? Connectrpc_Conformance_V1_StreamResponseDefinition()}
+    get {_responseDefinition ?? Connectrpc_Conformance_V1_StreamResponseDefinition()}
     set {_responseDefinition = newValue}
   }
   /// Returns true if `responseDefinition` has been explicitly set.
-  var hasResponseDefinition: Bool {return self._responseDefinition != nil}
+  var hasResponseDefinition: Bool {self._responseDefinition != nil}
   /// Clears the value of `responseDefinition`. Subsequent reads from it will return its default value.
   mutating func clearResponseDefinition() {self._responseDefinition = nil}
 
@@ -278,18 +282,18 @@ struct Connectrpc_Conformance_V1_ServerStreamRequest: Sendable {
   fileprivate var _responseDefinition: Connectrpc_Conformance_V1_StreamResponseDefinition? = nil
 }
 
-struct Connectrpc_Conformance_V1_ServerStreamResponse: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_ServerStreamResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   /// The conformance payload to respond with
   var payload: Connectrpc_Conformance_V1_ConformancePayload {
-    get {return _payload ?? Connectrpc_Conformance_V1_ConformancePayload()}
+    get {_payload ?? Connectrpc_Conformance_V1_ConformancePayload()}
     set {_payload = newValue}
   }
   /// Returns true if `payload` has been explicitly set.
-  var hasPayload: Bool {return self._payload != nil}
+  var hasPayload: Bool {self._payload != nil}
   /// Clears the value of `payload`. Subsequent reads from it will return its default value.
   mutating func clearPayload() {self._payload = nil}
 
@@ -300,7 +304,7 @@ struct Connectrpc_Conformance_V1_ServerStreamResponse: Sendable {
   fileprivate var _payload: Connectrpc_Conformance_V1_ConformancePayload? = nil
 }
 
-struct Connectrpc_Conformance_V1_ClientStreamRequest: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_ClientStreamRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -309,11 +313,11 @@ struct Connectrpc_Conformance_V1_ClientStreamRequest: Sendable {
   /// complete. Required in the first message in the stream, but
   /// should be ignored in subsequent messages.
   var responseDefinition: Connectrpc_Conformance_V1_UnaryResponseDefinition {
-    get {return _responseDefinition ?? Connectrpc_Conformance_V1_UnaryResponseDefinition()}
+    get {_responseDefinition ?? Connectrpc_Conformance_V1_UnaryResponseDefinition()}
     set {_responseDefinition = newValue}
   }
   /// Returns true if `responseDefinition` has been explicitly set.
-  var hasResponseDefinition: Bool {return self._responseDefinition != nil}
+  var hasResponseDefinition: Bool {self._responseDefinition != nil}
   /// Clears the value of `responseDefinition`. Subsequent reads from it will return its default value.
   mutating func clearResponseDefinition() {self._responseDefinition = nil}
 
@@ -328,18 +332,18 @@ struct Connectrpc_Conformance_V1_ClientStreamRequest: Sendable {
   fileprivate var _responseDefinition: Connectrpc_Conformance_V1_UnaryResponseDefinition? = nil
 }
 
-struct Connectrpc_Conformance_V1_ClientStreamResponse: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_ClientStreamResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   /// The conformance payload to respond with
   var payload: Connectrpc_Conformance_V1_ConformancePayload {
-    get {return _payload ?? Connectrpc_Conformance_V1_ConformancePayload()}
+    get {_payload ?? Connectrpc_Conformance_V1_ConformancePayload()}
     set {_payload = newValue}
   }
   /// Returns true if `payload` has been explicitly set.
-  var hasPayload: Bool {return self._payload != nil}
+  var hasPayload: Bool {self._payload != nil}
   /// Clears the value of `payload`. Subsequent reads from it will return its default value.
   mutating func clearPayload() {self._payload = nil}
 
@@ -350,7 +354,7 @@ struct Connectrpc_Conformance_V1_ClientStreamResponse: Sendable {
   fileprivate var _payload: Connectrpc_Conformance_V1_ConformancePayload? = nil
 }
 
-struct Connectrpc_Conformance_V1_BidiStreamRequest: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_BidiStreamRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -358,11 +362,11 @@ struct Connectrpc_Conformance_V1_BidiStreamRequest: Sendable {
   /// Tells the server how to reply; required in the first message
   /// in the stream. Should be ignored in subsequent messages.
   var responseDefinition: Connectrpc_Conformance_V1_StreamResponseDefinition {
-    get {return _responseDefinition ?? Connectrpc_Conformance_V1_StreamResponseDefinition()}
+    get {_responseDefinition ?? Connectrpc_Conformance_V1_StreamResponseDefinition()}
     set {_responseDefinition = newValue}
   }
   /// Returns true if `responseDefinition` has been explicitly set.
-  var hasResponseDefinition: Bool {return self._responseDefinition != nil}
+  var hasResponseDefinition: Bool {self._responseDefinition != nil}
   /// Clears the value of `responseDefinition`. Subsequent reads from it will return its default value.
   mutating func clearResponseDefinition() {self._responseDefinition = nil}
 
@@ -392,18 +396,18 @@ struct Connectrpc_Conformance_V1_BidiStreamRequest: Sendable {
   fileprivate var _responseDefinition: Connectrpc_Conformance_V1_StreamResponseDefinition? = nil
 }
 
-struct Connectrpc_Conformance_V1_BidiStreamResponse: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_BidiStreamResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   /// The conformance payload to respond with
   var payload: Connectrpc_Conformance_V1_ConformancePayload {
-    get {return _payload ?? Connectrpc_Conformance_V1_ConformancePayload()}
+    get {_payload ?? Connectrpc_Conformance_V1_ConformancePayload()}
     set {_payload = newValue}
   }
   /// Returns true if `payload` has been explicitly set.
-  var hasPayload: Bool {return self._payload != nil}
+  var hasPayload: Bool {self._payload != nil}
   /// Clears the value of `payload`. Subsequent reads from it will return its default value.
   mutating func clearPayload() {self._payload = nil}
 
@@ -414,7 +418,7 @@ struct Connectrpc_Conformance_V1_BidiStreamResponse: Sendable {
   fileprivate var _payload: Connectrpc_Conformance_V1_ConformancePayload? = nil
 }
 
-struct Connectrpc_Conformance_V1_UnimplementedRequest: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_UnimplementedRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -424,7 +428,7 @@ struct Connectrpc_Conformance_V1_UnimplementedRequest: Sendable {
   init() {}
 }
 
-struct Connectrpc_Conformance_V1_UnimplementedResponse: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_UnimplementedResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -434,7 +438,7 @@ struct Connectrpc_Conformance_V1_UnimplementedResponse: Sendable {
   init() {}
 }
 
-struct Connectrpc_Conformance_V1_ConformancePayload: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_ConformancePayload: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -445,17 +449,17 @@ struct Connectrpc_Conformance_V1_ConformancePayload: Sendable {
 
   /// Echoes back information about the request stream observed so far.
   var requestInfo: Connectrpc_Conformance_V1_ConformancePayload.RequestInfo {
-    get {return _requestInfo ?? Connectrpc_Conformance_V1_ConformancePayload.RequestInfo()}
+    get {_requestInfo ?? Connectrpc_Conformance_V1_ConformancePayload.RequestInfo()}
     set {_requestInfo = newValue}
   }
   /// Returns true if `requestInfo` has been explicitly set.
-  var hasRequestInfo: Bool {return self._requestInfo != nil}
+  var hasRequestInfo: Bool {self._requestInfo != nil}
   /// Clears the value of `requestInfo`. Subsequent reads from it will return its default value.
   mutating func clearRequestInfo() {self._requestInfo = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  struct RequestInfo: Sendable {
+  nonisolated struct RequestInfo: Sendable {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -467,11 +471,11 @@ struct Connectrpc_Conformance_V1_ConformancePayload: Sendable {
     /// type of uint32, but we want to be lenient here to allow whatever value the RPC
     /// server observes, even if it's outside the range of uint32.
     var timeoutMs: Int64 {
-      get {return _timeoutMs ?? 0}
+      get {_timeoutMs ?? 0}
       set {_timeoutMs = newValue}
     }
     /// Returns true if `timeoutMs` has been explicitly set.
-    var hasTimeoutMs: Bool {return self._timeoutMs != nil}
+    var hasTimeoutMs: Bool {self._timeoutMs != nil}
     /// Clears the value of `timeoutMs`. Subsequent reads from it will return its default value.
     mutating func clearTimeoutMs() {self._timeoutMs = nil}
 
@@ -490,11 +494,11 @@ struct Connectrpc_Conformance_V1_ConformancePayload: Sendable {
     /// server framework, at a minimum, at least expose to application code whether the
     /// request used GET vs. POST.
     var connectGetInfo: Connectrpc_Conformance_V1_ConformancePayload.ConnectGetInfo {
-      get {return _connectGetInfo ?? Connectrpc_Conformance_V1_ConformancePayload.ConnectGetInfo()}
+      get {_connectGetInfo ?? Connectrpc_Conformance_V1_ConformancePayload.ConnectGetInfo()}
       set {_connectGetInfo = newValue}
     }
     /// Returns true if `connectGetInfo` has been explicitly set.
-    var hasConnectGetInfo: Bool {return self._connectGetInfo != nil}
+    var hasConnectGetInfo: Bool {self._connectGetInfo != nil}
     /// Clears the value of `connectGetInfo`. Subsequent reads from it will return its default value.
     mutating func clearConnectGetInfo() {self._connectGetInfo = nil}
 
@@ -506,7 +510,7 @@ struct Connectrpc_Conformance_V1_ConformancePayload: Sendable {
     fileprivate var _connectGetInfo: Connectrpc_Conformance_V1_ConformancePayload.ConnectGetInfo? = nil
   }
 
-  struct ConnectGetInfo: Sendable {
+  nonisolated struct ConnectGetInfo: Sendable {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -525,7 +529,7 @@ struct Connectrpc_Conformance_V1_ConformancePayload: Sendable {
 }
 
 /// An error definition used for specifying a desired error response
-struct Connectrpc_Conformance_V1_Error: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_Error: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -539,11 +543,11 @@ struct Connectrpc_Conformance_V1_Error: Sendable {
   /// error conditions where the exact message to be used is not specified, only the
   /// code.
   var message: String {
-    get {return _message ?? String()}
+    get {_message ?? String()}
     set {_message = newValue}
   }
   /// Returns true if `message` has been explicitly set.
-  var hasMessage: Bool {return self._message != nil}
+  var hasMessage: Bool {self._message != nil}
   /// Clears the value of `message`. Subsequent reads from it will return its default value.
   mutating func clearMessage() {self._message = nil}
 
@@ -559,7 +563,7 @@ struct Connectrpc_Conformance_V1_Error: Sendable {
 }
 
 /// A tuple of name and values (ASCII) for a header or trailer entry.
-struct Connectrpc_Conformance_V1_Header: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_Header: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -580,7 +584,7 @@ struct Connectrpc_Conformance_V1_Header: Sendable {
 /// RawHTTPRequest models a raw HTTP request. This can be used to craft
 /// custom requests with odd properties (including certain kinds of
 /// malformed requests) to test edge cases in servers.
-struct Connectrpc_Conformance_V1_RawHTTPRequest: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_RawHTTPRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -625,7 +629,7 @@ struct Connectrpc_Conformance_V1_RawHTTPRequest: Sendable {
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  enum OneOf_Body: Equatable, Sendable {
+  nonisolated enum OneOf_Body: Equatable, Sendable {
     /// The body is a single message.
     case unary(Connectrpc_Conformance_V1_MessageContents)
     /// The body is a stream, encoded using a five-byte
@@ -634,7 +638,7 @@ struct Connectrpc_Conformance_V1_RawHTTPRequest: Sendable {
 
   }
 
-  struct EncodedQueryParam: Sendable {
+  nonisolated struct EncodedQueryParam: Sendable {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -644,11 +648,11 @@ struct Connectrpc_Conformance_V1_RawHTTPRequest: Sendable {
 
     /// Query param value.
     var value: Connectrpc_Conformance_V1_MessageContents {
-      get {return _value ?? Connectrpc_Conformance_V1_MessageContents()}
+      get {_value ?? Connectrpc_Conformance_V1_MessageContents()}
       set {_value = newValue}
     }
     /// Returns true if `value` has been explicitly set.
-    var hasValue: Bool {return self._value != nil}
+    var hasValue: Bool {self._value != nil}
     /// Clears the value of `value`. Subsequent reads from it will return its default value.
     mutating func clearValue() {self._value = nil}
 
@@ -667,7 +671,7 @@ struct Connectrpc_Conformance_V1_RawHTTPRequest: Sendable {
 }
 
 /// MessageContents represents a message in a request body.
-struct Connectrpc_Conformance_V1_MessageContents: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_MessageContents: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -711,7 +715,7 @@ struct Connectrpc_Conformance_V1_MessageContents: Sendable {
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   /// The message data can be defined in one of three ways.
-  enum OneOf_Data: Equatable, Sendable {
+  nonisolated enum OneOf_Data: Equatable, Sendable {
     /// Arbitrary bytes.
     case binary(Data)
     /// Arbitrary text.
@@ -727,7 +731,7 @@ struct Connectrpc_Conformance_V1_MessageContents: Sendable {
 }
 
 /// StreamContents represents a sequence of messages in a request body.
-struct Connectrpc_Conformance_V1_StreamContents: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_StreamContents: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -737,7 +741,7 @@ struct Connectrpc_Conformance_V1_StreamContents: Sendable {
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  struct StreamItem: Sendable {
+  nonisolated struct StreamItem: Sendable {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -747,20 +751,20 @@ struct Connectrpc_Conformance_V1_StreamContents: Sendable {
 
     /// if absent use actual length of payload
     var length: UInt32 {
-      get {return _length ?? 0}
+      get {_length ?? 0}
       set {_length = newValue}
     }
     /// Returns true if `length` has been explicitly set.
-    var hasLength: Bool {return self._length != nil}
+    var hasLength: Bool {self._length != nil}
     /// Clears the value of `length`. Subsequent reads from it will return its default value.
     mutating func clearLength() {self._length = nil}
 
     var payload: Connectrpc_Conformance_V1_MessageContents {
-      get {return _payload ?? Connectrpc_Conformance_V1_MessageContents()}
+      get {_payload ?? Connectrpc_Conformance_V1_MessageContents()}
       set {_payload = newValue}
     }
     /// Returns true if `payload` has been explicitly set.
-    var hasPayload: Bool {return self._payload != nil}
+    var hasPayload: Bool {self._payload != nil}
     /// Clears the value of `payload`. Subsequent reads from it will return its default value.
     mutating func clearPayload() {self._payload = nil}
 
@@ -778,7 +782,7 @@ struct Connectrpc_Conformance_V1_StreamContents: Sendable {
 /// RawHTTPResponse models a raw HTTP response. This can be used to craft
 /// custom responses with odd properties (including certain kinds of
 /// malformed responses) to test edge cases in clients.
-struct Connectrpc_Conformance_V1_RawHTTPResponse: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_RawHTTPResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -815,7 +819,7 @@ struct Connectrpc_Conformance_V1_RawHTTPResponse: Sendable {
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  enum OneOf_Body: Equatable, Sendable {
+  nonisolated enum OneOf_Body: Equatable, Sendable {
     /// The body is a single message.
     case unary(Connectrpc_Conformance_V1_MessageContents)
     /// The body is a stream, encoded using a five-byte
@@ -829,9 +833,9 @@ struct Connectrpc_Conformance_V1_RawHTTPResponse: Sendable {
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-fileprivate let _protobuf_package = "connectrpc.conformance.v1"
+fileprivate nonisolated let _protobuf_package = "connectrpc.conformance.v1"
 
-extension Connectrpc_Conformance_V1_UnaryResponseDefinition: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_UnaryResponseDefinition: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".UnaryResponseDefinition"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_headers\0\u{3}response_data\0\u{1}error\0\u{3}response_trailers\0\u{3}raw_response\0\u{3}response_delay_ms\0")
 
@@ -913,7 +917,7 @@ extension Connectrpc_Conformance_V1_UnaryResponseDefinition: SwiftProtobuf.Messa
   }
 }
 
-extension Connectrpc_Conformance_V1_StreamResponseDefinition: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_StreamResponseDefinition: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".StreamResponseDefinition"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_headers\0\u{3}response_data\0\u{3}response_delay_ms\0\u{1}error\0\u{3}response_trailers\0\u{3}raw_response\0")
 
@@ -972,7 +976,7 @@ extension Connectrpc_Conformance_V1_StreamResponseDefinition: SwiftProtobuf.Mess
   }
 }
 
-extension Connectrpc_Conformance_V1_UnaryRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_UnaryRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".UnaryRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_definition\0\u{3}request_data\0")
 
@@ -1011,7 +1015,7 @@ extension Connectrpc_Conformance_V1_UnaryRequest: SwiftProtobuf.Message, SwiftPr
   }
 }
 
-extension Connectrpc_Conformance_V1_UnaryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_UnaryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".UnaryResponse"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}payload\0")
 
@@ -1045,7 +1049,7 @@ extension Connectrpc_Conformance_V1_UnaryResponse: SwiftProtobuf.Message, SwiftP
   }
 }
 
-extension Connectrpc_Conformance_V1_IdempotentUnaryRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_IdempotentUnaryRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".IdempotentUnaryRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_definition\0\u{3}request_data\0")
 
@@ -1084,7 +1088,7 @@ extension Connectrpc_Conformance_V1_IdempotentUnaryRequest: SwiftProtobuf.Messag
   }
 }
 
-extension Connectrpc_Conformance_V1_IdempotentUnaryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_IdempotentUnaryResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".IdempotentUnaryResponse"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}payload\0")
 
@@ -1118,7 +1122,7 @@ extension Connectrpc_Conformance_V1_IdempotentUnaryResponse: SwiftProtobuf.Messa
   }
 }
 
-extension Connectrpc_Conformance_V1_ServerStreamRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ServerStreamRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ServerStreamRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_definition\0\u{3}request_data\0")
 
@@ -1157,7 +1161,7 @@ extension Connectrpc_Conformance_V1_ServerStreamRequest: SwiftProtobuf.Message, 
   }
 }
 
-extension Connectrpc_Conformance_V1_ServerStreamResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ServerStreamResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ServerStreamResponse"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}payload\0")
 
@@ -1191,7 +1195,7 @@ extension Connectrpc_Conformance_V1_ServerStreamResponse: SwiftProtobuf.Message,
   }
 }
 
-extension Connectrpc_Conformance_V1_ClientStreamRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ClientStreamRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientStreamRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_definition\0\u{3}request_data\0")
 
@@ -1230,7 +1234,7 @@ extension Connectrpc_Conformance_V1_ClientStreamRequest: SwiftProtobuf.Message, 
   }
 }
 
-extension Connectrpc_Conformance_V1_ClientStreamResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ClientStreamResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientStreamResponse"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}payload\0")
 
@@ -1264,7 +1268,7 @@ extension Connectrpc_Conformance_V1_ClientStreamResponse: SwiftProtobuf.Message,
   }
 }
 
-extension Connectrpc_Conformance_V1_BidiStreamRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_BidiStreamRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".BidiStreamRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_definition\0\u{3}full_duplex\0\u{3}request_data\0")
 
@@ -1308,7 +1312,7 @@ extension Connectrpc_Conformance_V1_BidiStreamRequest: SwiftProtobuf.Message, Sw
   }
 }
 
-extension Connectrpc_Conformance_V1_BidiStreamResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_BidiStreamResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".BidiStreamResponse"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}payload\0")
 
@@ -1342,7 +1346,7 @@ extension Connectrpc_Conformance_V1_BidiStreamResponse: SwiftProtobuf.Message, S
   }
 }
 
-extension Connectrpc_Conformance_V1_UnimplementedRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_UnimplementedRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".UnimplementedRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
@@ -1361,7 +1365,7 @@ extension Connectrpc_Conformance_V1_UnimplementedRequest: SwiftProtobuf.Message,
   }
 }
 
-extension Connectrpc_Conformance_V1_UnimplementedResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_UnimplementedResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".UnimplementedResponse"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
@@ -1380,7 +1384,7 @@ extension Connectrpc_Conformance_V1_UnimplementedResponse: SwiftProtobuf.Message
   }
 }
 
-extension Connectrpc_Conformance_V1_ConformancePayload: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ConformancePayload: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ConformancePayload"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}data\0\u{3}request_info\0")
 
@@ -1419,7 +1423,7 @@ extension Connectrpc_Conformance_V1_ConformancePayload: SwiftProtobuf.Message, S
   }
 }
 
-extension Connectrpc_Conformance_V1_ConformancePayload.RequestInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ConformancePayload.RequestInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = Connectrpc_Conformance_V1_ConformancePayload.protoMessageName + ".RequestInfo"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}request_headers\0\u{3}timeout_ms\0\u{1}requests\0\u{3}connect_get_info\0")
 
@@ -1468,7 +1472,7 @@ extension Connectrpc_Conformance_V1_ConformancePayload.RequestInfo: SwiftProtobu
   }
 }
 
-extension Connectrpc_Conformance_V1_ConformancePayload.ConnectGetInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ConformancePayload.ConnectGetInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = Connectrpc_Conformance_V1_ConformancePayload.protoMessageName + ".ConnectGetInfo"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}query_params\0")
 
@@ -1498,7 +1502,7 @@ extension Connectrpc_Conformance_V1_ConformancePayload.ConnectGetInfo: SwiftProt
   }
 }
 
-extension Connectrpc_Conformance_V1_Error: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_Error: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Error"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}code\0\u{1}message\0\u{1}details\0")
 
@@ -1542,7 +1546,7 @@ extension Connectrpc_Conformance_V1_Error: SwiftProtobuf.Message, SwiftProtobuf.
   }
 }
 
-extension Connectrpc_Conformance_V1_Header: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_Header: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Header"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}value\0")
 
@@ -1577,7 +1581,7 @@ extension Connectrpc_Conformance_V1_Header: SwiftProtobuf.Message, SwiftProtobuf
   }
 }
 
-extension Connectrpc_Conformance_V1_RawHTTPRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_RawHTTPRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".RawHTTPRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}verb\0\u{1}uri\0\u{1}headers\0\u{3}raw_query_params\0\u{3}encoded_query_params\0\u{1}unary\0\u{1}stream\0")
 
@@ -1669,7 +1673,7 @@ extension Connectrpc_Conformance_V1_RawHTTPRequest: SwiftProtobuf.Message, Swift
   }
 }
 
-extension Connectrpc_Conformance_V1_RawHTTPRequest.EncodedQueryParam: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_RawHTTPRequest.EncodedQueryParam: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = Connectrpc_Conformance_V1_RawHTTPRequest.protoMessageName + ".EncodedQueryParam"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}value\0\u{3}base64_encode\0")
 
@@ -1713,7 +1717,7 @@ extension Connectrpc_Conformance_V1_RawHTTPRequest.EncodedQueryParam: SwiftProto
   }
 }
 
-extension Connectrpc_Conformance_V1_MessageContents: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_MessageContents: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".MessageContents"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}binary\0\u{1}text\0\u{3}binary_message\0\u{1}compression\0")
 
@@ -1792,7 +1796,7 @@ extension Connectrpc_Conformance_V1_MessageContents: SwiftProtobuf.Message, Swif
   }
 }
 
-extension Connectrpc_Conformance_V1_StreamContents: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_StreamContents: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".StreamContents"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}items\0")
 
@@ -1822,7 +1826,7 @@ extension Connectrpc_Conformance_V1_StreamContents: SwiftProtobuf.Message, Swift
   }
 }
 
-extension Connectrpc_Conformance_V1_StreamContents.StreamItem: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_StreamContents.StreamItem: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = Connectrpc_Conformance_V1_StreamContents.protoMessageName + ".StreamItem"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}flags\0\u{1}length\0\u{1}payload\0")
 
@@ -1866,7 +1870,7 @@ extension Connectrpc_Conformance_V1_StreamContents.StreamItem: SwiftProtobuf.Mes
   }
 }
 
-extension Connectrpc_Conformance_V1_RawHTTPResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_RawHTTPResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".RawHTTPResponse"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}status_code\0\u{1}headers\0\u{1}unary\0\u{1}stream\0\u{1}trailers\0")
 

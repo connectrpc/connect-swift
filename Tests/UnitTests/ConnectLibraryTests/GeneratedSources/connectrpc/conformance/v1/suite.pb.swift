@@ -29,7 +29,7 @@ import SwiftProtobuf
 // incompatible with the version of SwiftProtobuf to which you are linking.
 // Please ensure that you are building against the same version of the API
 // that was used to generate this file.
-fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVersionCheck {
+fileprivate nonisolated struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVersionCheck {
   struct _2: SwiftProtobuf.ProtobufAPIVersion_2 {}
   typealias Version = _2
 }
@@ -39,7 +39,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 /// suite, which can contain numerous cases. Each test suite has various properties
 /// that indicate the kinds of features that are tested. Test suites may be skipped
 /// based on whether the client or server under test implements these features.
-struct Connectrpc_Conformance_V1_TestSuite: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_TestSuite: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -96,7 +96,7 @@ struct Connectrpc_Conformance_V1_TestSuite: Sendable {
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  enum TestMode: SwiftProtobuf.Enum, Swift.CaseIterable {
+  nonisolated enum TestMode: SwiftProtobuf.Enum, Swift.CaseIterable {
     typealias RawValue = Int
 
     /// Used when the test suite does not apply to a particular mode. Such tests
@@ -146,7 +146,7 @@ struct Connectrpc_Conformance_V1_TestSuite: Sendable {
 
   }
 
-  enum ConnectVersionMode: SwiftProtobuf.Enum, Swift.CaseIterable {
+  nonisolated enum ConnectVersionMode: SwiftProtobuf.Enum, Swift.CaseIterable {
     typealias RawValue = Int
 
     /// Used when the suite is agnostic to the server's validation
@@ -196,7 +196,7 @@ struct Connectrpc_Conformance_V1_TestSuite: Sendable {
   init() {}
 }
 
-struct Connectrpc_Conformance_V1_TestCase: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_TestCase: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -210,11 +210,11 @@ struct Connectrpc_Conformance_V1_TestCase: Sendable {
   /// the test harness based on the test environment (e.g. actual server and
   ///  port to use) and characteristics of a single permutation.
   var request: Connectrpc_Conformance_V1_ClientCompatRequest {
-    get {return _request ?? Connectrpc_Conformance_V1_ClientCompatRequest()}
+    get {_request ?? Connectrpc_Conformance_V1_ClientCompatRequest()}
     set {_request = newValue}
   }
   /// Returns true if `request` has been explicitly set.
-  var hasRequest: Bool {return self._request != nil}
+  var hasRequest: Bool {self._request != nil}
   /// Clears the value of `request`. Subsequent reads from it will return its default value.
   mutating func clearRequest() {self._request = nil}
 
@@ -251,11 +251,11 @@ struct Connectrpc_Conformance_V1_TestCase: Sendable {
   /// Specifying an expected response explicitly in test definitions will override
   /// the auto-generation of the test runner.
   var expectedResponse: Connectrpc_Conformance_V1_ClientResponseResult {
-    get {return _expectedResponse ?? Connectrpc_Conformance_V1_ClientResponseResult()}
+    get {_expectedResponse ?? Connectrpc_Conformance_V1_ClientResponseResult()}
     set {_expectedResponse = newValue}
   }
   /// Returns true if `expectedResponse` has been explicitly set.
-  var hasExpectedResponse: Bool {return self._expectedResponse != nil}
+  var hasExpectedResponse: Bool {self._expectedResponse != nil}
   /// Clears the value of `expectedResponse`. Subsequent reads from it will return its default value.
   mutating func clearExpectedResponse() {self._expectedResponse = nil}
 
@@ -268,7 +268,7 @@ struct Connectrpc_Conformance_V1_TestCase: Sendable {
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  struct ExpandedSize: Sendable {
+  nonisolated struct ExpandedSize: Sendable {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -278,11 +278,11 @@ struct Connectrpc_Conformance_V1_TestCase: Sendable {
     /// Any value greater than zero indicates that the request size will be that
     /// many bytes over the limit.
     var sizeRelativeToLimit: Int32 {
-      get {return _sizeRelativeToLimit ?? 0}
+      get {_sizeRelativeToLimit ?? 0}
       set {_sizeRelativeToLimit = newValue}
     }
     /// Returns true if `sizeRelativeToLimit` has been explicitly set.
-    var hasSizeRelativeToLimit: Bool {return self._sizeRelativeToLimit != nil}
+    var hasSizeRelativeToLimit: Bool {self._sizeRelativeToLimit != nil}
     /// Clears the value of `sizeRelativeToLimit`. Subsequent reads from it will return its default value.
     mutating func clearSizeRelativeToLimit() {self._sizeRelativeToLimit = nil}
 
@@ -301,9 +301,9 @@ struct Connectrpc_Conformance_V1_TestCase: Sendable {
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-fileprivate let _protobuf_package = "connectrpc.conformance.v1"
+fileprivate nonisolated let _protobuf_package = "connectrpc.conformance.v1"
 
-extension Connectrpc_Conformance_V1_TestSuite: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_TestSuite: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".TestSuite"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{1}mode\0\u{3}test_cases\0\u{3}relevant_protocols\0\u{3}relevant_http_versions\0\u{3}relevant_codecs\0\u{3}relevant_compressions\0\u{3}connect_version_mode\0\u{3}relies_on_tls\0\u{3}relies_on_tls_client_certs\0\u{3}relies_on_connect_get\0\u{3}relies_on_message_receive_limit\0")
 
@@ -388,15 +388,15 @@ extension Connectrpc_Conformance_V1_TestSuite: SwiftProtobuf.Message, SwiftProto
   }
 }
 
-extension Connectrpc_Conformance_V1_TestSuite.TestMode: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_TestSuite.TestMode: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0TEST_MODE_UNSPECIFIED\0\u{1}TEST_MODE_CLIENT\0\u{1}TEST_MODE_SERVER\0")
 }
 
-extension Connectrpc_Conformance_V1_TestSuite.ConnectVersionMode: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_TestSuite.ConnectVersionMode: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0CONNECT_VERSION_MODE_UNSPECIFIED\0\u{1}CONNECT_VERSION_MODE_REQUIRE\0\u{1}CONNECT_VERSION_MODE_IGNORE\0")
 }
 
-extension Connectrpc_Conformance_V1_TestCase: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_TestCase: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".TestCase"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}request\0\u{3}expand_requests\0\u{3}expected_response\0\u{3}other_allowed_error_codes\0")
 
@@ -445,7 +445,7 @@ extension Connectrpc_Conformance_V1_TestCase: SwiftProtobuf.Message, SwiftProtob
   }
 }
 
-extension Connectrpc_Conformance_V1_TestCase.ExpandedSize: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_TestCase.ExpandedSize: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = Connectrpc_Conformance_V1_TestCase.protoMessageName + ".ExpandedSize"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}size_relative_to_limit\0")
 

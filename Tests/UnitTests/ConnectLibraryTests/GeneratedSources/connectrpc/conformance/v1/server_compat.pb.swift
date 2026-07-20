@@ -22,7 +22,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 import SwiftProtobuf
 
 // If the compiler emits an error on this type, it is because this file
@@ -30,7 +34,7 @@ import SwiftProtobuf
 // incompatible with the version of SwiftProtobuf to which you are linking.
 // Please ensure that you are building against the same version of the API
 // that was used to generate this file.
-fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVersionCheck {
+fileprivate nonisolated struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVersionCheck {
   struct _2: SwiftProtobuf.ProtobufAPIVersion_2 {}
   typealias Version = _2
 }
@@ -49,7 +53,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 /// Each test process is expected to start only one RPC server.
 /// When testing multiple configurations, multiple test processes
 /// will be started, each with different properties.
-struct Connectrpc_Conformance_V1_ServerCompatRequest: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_ServerCompatRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -105,11 +109,11 @@ struct Connectrpc_Conformance_V1_ServerCompatRequest: Sendable {
   /// If it chooses to use a different certificate and key, it must send
   /// back the corresponding certificate in the ServerCompatResponse.
   var serverCreds: Connectrpc_Conformance_V1_TLSCreds {
-    get {return _serverCreds ?? Connectrpc_Conformance_V1_TLSCreds()}
+    get {_serverCreds ?? Connectrpc_Conformance_V1_TLSCreds()}
     set {_serverCreds = newValue}
   }
   /// Returns true if `serverCreds` has been explicitly set.
-  var hasServerCreds: Bool {return self._serverCreds != nil}
+  var hasServerCreds: Bool {self._serverCreds != nil}
   /// Clears the value of `serverCreds`. Subsequent reads from it will return its default value.
   mutating func clearServerCreds() {self._serverCreds = nil}
 
@@ -121,7 +125,7 @@ struct Connectrpc_Conformance_V1_ServerCompatRequest: Sendable {
 }
 
 /// The outcome of one ServerCompatRequest.
-struct Connectrpc_Conformance_V1_ServerCompatResponse: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_ServerCompatResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -146,9 +150,9 @@ struct Connectrpc_Conformance_V1_ServerCompatResponse: Sendable {
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-fileprivate let _protobuf_package = "connectrpc.conformance.v1"
+fileprivate nonisolated let _protobuf_package = "connectrpc.conformance.v1"
 
-extension Connectrpc_Conformance_V1_ServerCompatRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ServerCompatRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ServerCompatRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}protocol\0\u{3}http_version\0\u{4}\u{2}use_tls\0\u{3}client_tls_cert\0\u{3}message_receive_limit\0\u{3}server_creds\0")
 
@@ -207,7 +211,7 @@ extension Connectrpc_Conformance_V1_ServerCompatRequest: SwiftProtobuf.Message, 
   }
 }
 
-extension Connectrpc_Conformance_V1_ServerCompatResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ServerCompatResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ServerCompatResponse"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}host\0\u{1}port\0\u{3}pem_cert\0")
 
