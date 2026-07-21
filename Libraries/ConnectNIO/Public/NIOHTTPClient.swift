@@ -15,11 +15,11 @@
 import Connect
 import Foundation
 import NIOConcurrencyHelpers
-@preconcurrency import NIOCore
+import NIOCore
 import NIOHTTP1
 import NIOHTTP2
 import NIOPosix
-@preconcurrency import NIOSSL
+import NIOSSL
 import os.log
 
 /// HTTP client powered by Swift NIO which supports trailers (unlike URLSession).
@@ -32,13 +32,13 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     private let timeout: TimeInterval?
     private let useSSL: Bool
 
-    private var pendingRequests = [(NIOHTTP2.HTTP2StreamMultiplexer?) -> Void]()
+    private var pendingRequests = [(NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer?) -> Void]()
     private var state = State.disconnected
 
     private enum State {
         case disconnected
         case connecting
-        case connected(channel: NIOCore.Channel, multiplexer: NIOHTTP2.HTTP2StreamMultiplexer)
+        case connected(channel: NIOCore.Channel, multiplexer: NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer)
     }
 
     /// Designated initializer for the client.
@@ -74,28 +74,21 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
             .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
             .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .channelInitializer { channel in
-                do {
-                    let channelPipeline: EventLoopFuture<Void>
+                channel.eventLoop.makeCompletedFuture {
                     if let tlsConfiguration = tlsConfiguration {
                         let sslContext = try NIOSSL.NIOSSLContext(configuration: tlsConfiguration)
                         let sslHandler = try NIOSSL.NIOSSLClientHandler(
                             context: sslContext, serverHostname: host
                         )
-                        channelPipeline = channel.pipeline
-                            .addHandler(sslHandler)
-                    } else {
-                        channelPipeline = channel.pipeline
-                            .addHandlers([])
+                        try channel.pipeline.syncOperations.addHandler(sslHandler)
                     }
-
-                    return channelPipeline.flatMap {
-                        return channel.configureHTTP2Pipeline(mode: .client) { channel in
-                            return channel.eventLoop.makeSucceededVoidFuture()
-                        }
+                    _ = try channel.pipeline.syncOperations.configureHTTP2Pipeline(
+                        mode: .client,
+                        connectionConfiguration: .init(),
+                        streamConfiguration: .init()
+                    ) { channel in
+                        channel.eventLoop.makeSucceededVoidFuture()
                     }
-                    .map { (_: NIOHTTP2.HTTP2StreamMultiplexer) in }
-                } catch {
-                    return channel.close(mode: .all)
                 }
             }
     }
@@ -173,7 +166,9 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
 
     // MARK: - Private
 
-    private func sendOrQueueRequest(send: @escaping (NIOHTTP2.HTTP2StreamMultiplexer?) -> Void) {
+    private func sendOrQueueRequest(
+        send: @escaping (NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer?) -> Void
+    ) {
         self.lock.withLock {
             switch self.state {
             case .connected(_, let multiplexer):
@@ -198,7 +193,8 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                     switch result {
                     case .success(let channel):
                         let multiplexer = try channel.pipeline.syncOperations
-                            .handler(type: HTTP2StreamMultiplexer.self)
+                            .handler(type: NIOHTTP2.NIOHTTP2Handler.self)
+                            .syncMultiplexer()
                         channel.closeFuture.whenComplete { [weak self] _ in
                             self?.lock.withLock { self?.state = .disconnected }
                         }
@@ -219,7 +215,9 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
             }
     }
 
-    private func flushOrFailPendingRequests(using multiplexer: NIOHTTP2.HTTP2StreamMultiplexer?) {
+    private func flushOrFailPendingRequests(
+        using multiplexer: NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer?
+    ) {
         for request in self.pendingRequests {
             request(multiplexer)
         }
@@ -229,13 +227,16 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     private func startMultiplexChannel(
         for url: URL,
         on eventLoop: NIOCore.EventLoop,
-        using multiplexer: NIOHTTP2.HTTP2StreamMultiplexer,
-        with connectHandler: any NIOCore.ChannelInboundHandler
+        using multiplexer: NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer,
+        with connectHandler: any NIOCore.ChannelInboundHandler & Sendable
     ) {
-        let handlers = self.createChannelHandlers(with: connectHandler)
         let promise = eventLoop.makePromise(of: NIOCore.Channel.self)
         multiplexer.createStreamChannel(promise: promise) { channel in
-            return channel.pipeline.addHandlers(handlers)
+            channel.eventLoop.makeCompletedFuture {
+                try channel.pipeline.syncOperations.addHandlers(
+                    self.createChannelHandlers(with: connectHandler)
+                )
+            }
         }
     }
 
@@ -271,6 +272,6 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
 
 private extension ConnectError {
     static func disconnected() -> Self {
-        return .init(code: .unavailable, message: "client is not connected")
+        .init(code: .unavailable, message: "client is not connected")
     }
 }
