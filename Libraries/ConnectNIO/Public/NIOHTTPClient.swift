@@ -38,7 +38,9 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     private enum State {
         case disconnected
         case connecting
-        case connected(channel: NIOCore.Channel, multiplexer: NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer)
+        case connected(
+            channel: NIOCore.Channel, multiplexer: NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer
+        )
     }
 
     /// Designated initializer for the client.
