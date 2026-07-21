@@ -22,7 +22,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 import SwiftProtobuf
 
 // If the compiler emits an error on this type, it is because this file
@@ -30,12 +34,12 @@ import SwiftProtobuf
 // incompatible with the version of SwiftProtobuf to which you are linking.
 // Please ensure that you are building against the same version of the API
 // that was used to generate this file.
-fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVersionCheck {
+fileprivate nonisolated struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVersionCheck {
   struct _2: SwiftProtobuf.ProtobufAPIVersion_2 {}
   typealias Version = _2
 }
 
-enum Connectrpc_Conformance_V1_HTTPVersion: SwiftProtobuf.Enum, Swift.CaseIterable {
+nonisolated enum Connectrpc_Conformance_V1_HTTPVersion: SwiftProtobuf.Enum, Swift.CaseIterable {
   typealias RawValue = Int
   case unspecified // = 0
   case httpVersion1 // = 1
@@ -77,7 +81,7 @@ enum Connectrpc_Conformance_V1_HTTPVersion: SwiftProtobuf.Enum, Swift.CaseIterab
 
 }
 
-enum Connectrpc_Conformance_V1_Protocol: SwiftProtobuf.Enum, Swift.CaseIterable {
+nonisolated enum Connectrpc_Conformance_V1_Protocol: SwiftProtobuf.Enum, Swift.CaseIterable {
   typealias RawValue = Int
   case unspecified // = 0
   case connect // = 1
@@ -123,7 +127,7 @@ enum Connectrpc_Conformance_V1_Protocol: SwiftProtobuf.Enum, Swift.CaseIterable 
 
 }
 
-enum Connectrpc_Conformance_V1_Codec: SwiftProtobuf.Enum, Swift.CaseIterable {
+nonisolated enum Connectrpc_Conformance_V1_Codec: SwiftProtobuf.Enum, Swift.CaseIterable {
   typealias RawValue = Int
   case unspecified // = 0
   case proto // = 1
@@ -169,7 +173,7 @@ enum Connectrpc_Conformance_V1_Codec: SwiftProtobuf.Enum, Swift.CaseIterable {
 
 }
 
-enum Connectrpc_Conformance_V1_Compression: SwiftProtobuf.Enum, Swift.CaseIterable {
+nonisolated enum Connectrpc_Conformance_V1_Compression: SwiftProtobuf.Enum, Swift.CaseIterable {
   typealias RawValue = Int
   case unspecified // = 0
   case identity // = 1
@@ -223,7 +227,7 @@ enum Connectrpc_Conformance_V1_Compression: SwiftProtobuf.Enum, Swift.CaseIterab
 
 }
 
-enum Connectrpc_Conformance_V1_StreamType: SwiftProtobuf.Enum, Swift.CaseIterable {
+nonisolated enum Connectrpc_Conformance_V1_StreamType: SwiftProtobuf.Enum, Swift.CaseIterable {
   typealias RawValue = Int
   case unspecified // = 0
   case unary // = 1
@@ -273,7 +277,7 @@ enum Connectrpc_Conformance_V1_StreamType: SwiftProtobuf.Enum, Swift.CaseIterabl
 
 }
 
-enum Connectrpc_Conformance_V1_Code: SwiftProtobuf.Enum, Swift.CaseIterable {
+nonisolated enum Connectrpc_Conformance_V1_Code: SwiftProtobuf.Enum, Swift.CaseIterable {
   typealias RawValue = Int
   case unspecified // = 0
   case canceled // = 1
@@ -369,7 +373,7 @@ enum Connectrpc_Conformance_V1_Code: SwiftProtobuf.Enum, Swift.CaseIterable {
 
 /// Config defines the configuration for running conformance tests.
 /// This enumerates all of the "flavors" of the test suite to run.
-struct Connectrpc_Conformance_V1_Config: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_Config: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -379,11 +383,11 @@ struct Connectrpc_Conformance_V1_Config: Sendable {
   /// If absent, an empty message is used. See Features for more
   /// on how empty/absent fields are interpreted.
   var features: Connectrpc_Conformance_V1_Features {
-    get {return _features ?? Connectrpc_Conformance_V1_Features()}
+    get {_features ?? Connectrpc_Conformance_V1_Features()}
     set {_features = newValue}
   }
   /// Returns true if `features` has been explicitly set.
-  var hasFeatures: Bool {return self._features != nil}
+  var hasFeatures: Bool {self._features != nil}
   /// Clears the value of `features`. Subsequent reads from it will return its default value.
   mutating func clearFeatures() {self._features = nil}
 
@@ -406,7 +410,7 @@ struct Connectrpc_Conformance_V1_Config: Sendable {
 /// used to determine the server configurations and test cases that
 /// will be run. They are defined in YAML files and are specified as part of the
 /// --conf flag to the test runner.
-struct Connectrpc_Conformance_V1_Features: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_Features: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -437,22 +441,22 @@ struct Connectrpc_Conformance_V1_Features: Sendable {
   /// Whether H2C (unencrypted, non-TLS HTTP/2 over cleartext) is supported.
   /// If absent, true is assumed.
   var supportsH2C: Bool {
-    get {return _supportsH2C ?? false}
+    get {_supportsH2C ?? false}
     set {_supportsH2C = newValue}
   }
   /// Returns true if `supportsH2C` has been explicitly set.
-  var hasSupportsH2C: Bool {return self._supportsH2C != nil}
+  var hasSupportsH2C: Bool {self._supportsH2C != nil}
   /// Clears the value of `supportsH2C`. Subsequent reads from it will return its default value.
   mutating func clearSupportsH2C() {self._supportsH2C = nil}
 
   /// Whether TLS is supported.
   /// If absent, true is assumed.
   var supportsTls: Bool {
-    get {return _supportsTls ?? false}
+    get {_supportsTls ?? false}
     set {_supportsTls = newValue}
   }
   /// Returns true if `supportsTls` has been explicitly set.
-  var hasSupportsTls: Bool {return self._supportsTls != nil}
+  var hasSupportsTls: Bool {self._supportsTls != nil}
   /// Clears the value of `supportsTls`. Subsequent reads from it will return its default value.
   mutating func clearSupportsTls() {self._supportsTls = nil}
 
@@ -460,55 +464,55 @@ struct Connectrpc_Conformance_V1_Features: Sendable {
   /// If absent, false is assumed. This should not be set if
   /// supports_tls is false.
   var supportsTlsClientCerts: Bool {
-    get {return _supportsTlsClientCerts ?? false}
+    get {_supportsTlsClientCerts ?? false}
     set {_supportsTlsClientCerts = newValue}
   }
   /// Returns true if `supportsTlsClientCerts` has been explicitly set.
-  var hasSupportsTlsClientCerts: Bool {return self._supportsTlsClientCerts != nil}
+  var hasSupportsTlsClientCerts: Bool {self._supportsTlsClientCerts != nil}
   /// Clears the value of `supportsTlsClientCerts`. Subsequent reads from it will return its default value.
   mutating func clearSupportsTlsClientCerts() {self._supportsTlsClientCerts = nil}
 
   /// Whether trailers are supported.
   /// If absent, true is assumed. If false, implies that gRPC protocol is not allowed.
   var supportsTrailers: Bool {
-    get {return _supportsTrailers ?? false}
+    get {_supportsTrailers ?? false}
     set {_supportsTrailers = newValue}
   }
   /// Returns true if `supportsTrailers` has been explicitly set.
-  var hasSupportsTrailers: Bool {return self._supportsTrailers != nil}
+  var hasSupportsTrailers: Bool {self._supportsTrailers != nil}
   /// Clears the value of `supportsTrailers`. Subsequent reads from it will return its default value.
   mutating func clearSupportsTrailers() {self._supportsTrailers = nil}
 
   /// Whether half duplex bidi streams are supported over HTTP/1.1.
   /// If absent, false is assumed.
   var supportsHalfDuplexBidiOverHTTP1: Bool {
-    get {return _supportsHalfDuplexBidiOverHTTP1 ?? false}
+    get {_supportsHalfDuplexBidiOverHTTP1 ?? false}
     set {_supportsHalfDuplexBidiOverHTTP1 = newValue}
   }
   /// Returns true if `supportsHalfDuplexBidiOverHTTP1` has been explicitly set.
-  var hasSupportsHalfDuplexBidiOverHTTP1: Bool {return self._supportsHalfDuplexBidiOverHTTP1 != nil}
+  var hasSupportsHalfDuplexBidiOverHTTP1: Bool {self._supportsHalfDuplexBidiOverHTTP1 != nil}
   /// Clears the value of `supportsHalfDuplexBidiOverHTTP1`. Subsequent reads from it will return its default value.
   mutating func clearSupportsHalfDuplexBidiOverHTTP1() {self._supportsHalfDuplexBidiOverHTTP1 = nil}
 
   /// Whether Connect via GET is supported.
   /// If absent, true is assumed.
   var supportsConnectGet: Bool {
-    get {return _supportsConnectGet ?? false}
+    get {_supportsConnectGet ?? false}
     set {_supportsConnectGet = newValue}
   }
   /// Returns true if `supportsConnectGet` has been explicitly set.
-  var hasSupportsConnectGet: Bool {return self._supportsConnectGet != nil}
+  var hasSupportsConnectGet: Bool {self._supportsConnectGet != nil}
   /// Clears the value of `supportsConnectGet`. Subsequent reads from it will return its default value.
   mutating func clearSupportsConnectGet() {self._supportsConnectGet = nil}
 
   /// Whether a message receive limit is supported.
   /// If absent, true is assumed.
   var supportsMessageReceiveLimit: Bool {
-    get {return _supportsMessageReceiveLimit ?? false}
+    get {_supportsMessageReceiveLimit ?? false}
     set {_supportsMessageReceiveLimit = newValue}
   }
   /// Returns true if `supportsMessageReceiveLimit` has been explicitly set.
-  var hasSupportsMessageReceiveLimit: Bool {return self._supportsMessageReceiveLimit != nil}
+  var hasSupportsMessageReceiveLimit: Bool {self._supportsMessageReceiveLimit != nil}
   /// Clears the value of `supportsMessageReceiveLimit`. Subsequent reads from it will return its default value.
   mutating func clearSupportsMessageReceiveLimit() {self._supportsMessageReceiveLimit = nil}
 
@@ -529,7 +533,7 @@ struct Connectrpc_Conformance_V1_Features: Sendable {
 /// run, the Config and the supported features therein are used to compute all
 /// of the cases relevant to the implementation under test. These configuration
 /// cases are then used to select which test cases are applicable.
-struct Connectrpc_Conformance_V1_ConfigCase: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_ConfigCase: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -552,22 +556,22 @@ struct Connectrpc_Conformance_V1_ConfigCase: Sendable {
   /// If absent, indicates cases for plaintext (no TLS) but also for
   /// TLS if features indicate that TLS is supported.
   var useTls: Bool {
-    get {return _useTls ?? false}
+    get {_useTls ?? false}
     set {_useTls = newValue}
   }
   /// Returns true if `useTls` has been explicitly set.
-  var hasUseTls: Bool {return self._useTls != nil}
+  var hasUseTls: Bool {self._useTls != nil}
   /// Clears the value of `useTls`. Subsequent reads from it will return its default value.
   mutating func clearUseTls() {self._useTls = nil}
 
   /// If absent, indicates cases without client certs but also cases
   /// that use client certs if features indicate they are supported.
   var useTlsClientCerts: Bool {
-    get {return _useTlsClientCerts ?? false}
+    get {_useTlsClientCerts ?? false}
     set {_useTlsClientCerts = newValue}
   }
   /// Returns true if `useTlsClientCerts` has been explicitly set.
-  var hasUseTlsClientCerts: Bool {return self._useTlsClientCerts != nil}
+  var hasUseTlsClientCerts: Bool {self._useTlsClientCerts != nil}
   /// Clears the value of `useTlsClientCerts`. Subsequent reads from it will return its default value.
   mutating func clearUseTlsClientCerts() {self._useTlsClientCerts = nil}
 
@@ -575,11 +579,11 @@ struct Connectrpc_Conformance_V1_ConfigCase: Sendable {
   /// limits but also cases that do test message receive limits if
   /// features indicate they are supported.
   var useMessageReceiveLimit: Bool {
-    get {return _useMessageReceiveLimit ?? false}
+    get {_useMessageReceiveLimit ?? false}
     set {_useMessageReceiveLimit = newValue}
   }
   /// Returns true if `useMessageReceiveLimit` has been explicitly set.
-  var hasUseMessageReceiveLimit: Bool {return self._useMessageReceiveLimit != nil}
+  var hasUseMessageReceiveLimit: Bool {self._useMessageReceiveLimit != nil}
   /// Clears the value of `useMessageReceiveLimit`. Subsequent reads from it will return its default value.
   mutating func clearUseMessageReceiveLimit() {self._useMessageReceiveLimit = nil}
 
@@ -595,7 +599,7 @@ struct Connectrpc_Conformance_V1_ConfigCase: Sendable {
 /// TLSCreds represents credentials for TLS. It includes both a
 /// certificate and corresponding private key. Both are encoded
 /// in PEM format.
-struct Connectrpc_Conformance_V1_TLSCreds: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_TLSCreds: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -611,33 +615,33 @@ struct Connectrpc_Conformance_V1_TLSCreds: Sendable {
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-fileprivate let _protobuf_package = "connectrpc.conformance.v1"
+fileprivate nonisolated let _protobuf_package = "connectrpc.conformance.v1"
 
-extension Connectrpc_Conformance_V1_HTTPVersion: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_HTTPVersion: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0HTTP_VERSION_UNSPECIFIED\0\u{1}HTTP_VERSION_1\0\u{1}HTTP_VERSION_2\0\u{1}HTTP_VERSION_3\0")
 }
 
-extension Connectrpc_Conformance_V1_Protocol: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_Protocol: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0PROTOCOL_UNSPECIFIED\0\u{1}PROTOCOL_CONNECT\0\u{1}PROTOCOL_GRPC\0\u{1}PROTOCOL_GRPC_WEB\0")
 }
 
-extension Connectrpc_Conformance_V1_Codec: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_Codec: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0CODEC_UNSPECIFIED\0\u{1}CODEC_PROTO\0\u{1}CODEC_JSON\0\u{1}CODEC_TEXT\0")
 }
 
-extension Connectrpc_Conformance_V1_Compression: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_Compression: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0COMPRESSION_UNSPECIFIED\0\u{1}COMPRESSION_IDENTITY\0\u{1}COMPRESSION_GZIP\0\u{1}COMPRESSION_BR\0\u{1}COMPRESSION_ZSTD\0\u{1}COMPRESSION_DEFLATE\0\u{1}COMPRESSION_SNAPPY\0")
 }
 
-extension Connectrpc_Conformance_V1_StreamType: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_StreamType: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0STREAM_TYPE_UNSPECIFIED\0\u{1}STREAM_TYPE_UNARY\0\u{1}STREAM_TYPE_CLIENT_STREAM\0\u{1}STREAM_TYPE_SERVER_STREAM\0\u{1}STREAM_TYPE_HALF_DUPLEX_BIDI_STREAM\0\u{1}STREAM_TYPE_FULL_DUPLEX_BIDI_STREAM\0")
 }
 
-extension Connectrpc_Conformance_V1_Code: SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_Code: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0CODE_UNSPECIFIED\0\u{1}CODE_CANCELED\0\u{1}CODE_UNKNOWN\0\u{1}CODE_INVALID_ARGUMENT\0\u{1}CODE_DEADLINE_EXCEEDED\0\u{1}CODE_NOT_FOUND\0\u{1}CODE_ALREADY_EXISTS\0\u{1}CODE_PERMISSION_DENIED\0\u{1}CODE_RESOURCE_EXHAUSTED\0\u{1}CODE_FAILED_PRECONDITION\0\u{1}CODE_ABORTED\0\u{1}CODE_OUT_OF_RANGE\0\u{1}CODE_UNIMPLEMENTED\0\u{1}CODE_INTERNAL\0\u{1}CODE_UNAVAILABLE\0\u{1}CODE_DATA_LOSS\0\u{1}CODE_UNAUTHENTICATED\0")
 }
 
-extension Connectrpc_Conformance_V1_Config: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_Config: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Config"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}features\0\u{3}include_cases\0\u{3}exclude_cases\0")
 
@@ -681,7 +685,7 @@ extension Connectrpc_Conformance_V1_Config: SwiftProtobuf.Message, SwiftProtobuf
   }
 }
 
-extension Connectrpc_Conformance_V1_Features: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_Features: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Features"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}versions\0\u{1}protocols\0\u{1}codecs\0\u{1}compressions\0\u{3}stream_types\0\u{3}supports_h2c\0\u{3}supports_tls\0\u{3}supports_tls_client_certs\0\u{3}supports_trailers\0\u{3}supports_half_duplex_bidi_over_http1\0\u{3}supports_connect_get\0\u{3}supports_message_receive_limit\0")
 
@@ -770,7 +774,7 @@ extension Connectrpc_Conformance_V1_Features: SwiftProtobuf.Message, SwiftProtob
   }
 }
 
-extension Connectrpc_Conformance_V1_ConfigCase: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ConfigCase: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ConfigCase"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}version\0\u{1}protocol\0\u{1}codec\0\u{1}compression\0\u{3}stream_type\0\u{3}use_tls\0\u{3}use_tls_client_certs\0\u{3}use_message_receive_limit\0")
 
@@ -839,7 +843,7 @@ extension Connectrpc_Conformance_V1_ConfigCase: SwiftProtobuf.Message, SwiftProt
   }
 }
 
-extension Connectrpc_Conformance_V1_TLSCreds: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_TLSCreds: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".TLSCreds"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}cert\0\u{1}key\0")
 

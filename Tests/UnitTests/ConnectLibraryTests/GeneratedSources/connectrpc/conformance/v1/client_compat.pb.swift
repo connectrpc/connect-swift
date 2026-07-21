@@ -22,7 +22,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 import SwiftProtobuf
 
 // If the compiler emits an error on this type, it is because this file
@@ -30,7 +34,7 @@ import SwiftProtobuf
 // incompatible with the version of SwiftProtobuf to which you are linking.
 // Please ensure that you are building against the same version of the API
 // that was used to generate this file.
-fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVersionCheck {
+fileprivate nonisolated struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVersionCheck {
   struct _2: SwiftProtobuf.ProtobufAPIVersion_2 {}
   typealias Version = _2
 }
@@ -39,7 +43,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 /// these from stdin and, for each one, invokes an RPC as directed
 /// and writes the results (in the form of a ClientCompatResponse
 /// message) to stdout.
-struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
+nonisolated struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -47,7 +51,7 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   /// The name of the test that this request is performing.
   /// When writing test cases, this is a required field.
   var testName: String {
-    get {return _storage._testName}
+    get {_storage._testName}
     set {_uniqueStorage()._testName = newValue}
   }
 
@@ -59,37 +63,37 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   ///
   /// The HTTP version to use for the test (i.e. HTTP/1.1, HTTP/2, HTTP/3).
   var httpVersion: Connectrpc_Conformance_V1_HTTPVersion {
-    get {return _storage._httpVersion}
+    get {_storage._httpVersion}
     set {_uniqueStorage()._httpVersion = newValue}
   }
 
   /// The protocol to use for the test (i.e. Connect, gRPC, gRPC-web).
   var `protocol`: Connectrpc_Conformance_V1_Protocol {
-    get {return _storage._protocol}
+    get {_storage._protocol}
     set {_uniqueStorage()._protocol = newValue}
   }
 
   /// The codec to use for the test (i.e. JSON, proto/binary).
   var codec: Connectrpc_Conformance_V1_Codec {
-    get {return _storage._codec}
+    get {_storage._codec}
     set {_uniqueStorage()._codec = newValue}
   }
 
   /// The compression to use for the test (i.e. brotli, gzip, identity).
   var compression: Connectrpc_Conformance_V1_Compression {
-    get {return _storage._compression}
+    get {_storage._compression}
     set {_uniqueStorage()._compression = newValue}
   }
 
   /// The server host that this request will be sent to.
   var host: String {
-    get {return _storage._host}
+    get {_storage._host}
     set {_uniqueStorage()._host = newValue}
   }
 
   /// The server port that this request will be sent to.
   var port: UInt32 {
-    get {return _storage._port}
+    get {_storage._port}
     set {_uniqueStorage()._port = newValue}
   }
 
@@ -97,7 +101,7 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   /// server's PEM-encoded certificate, which the client should
   /// verify and trust.
   var serverTlsCert: Data {
-    get {return _storage._serverTlsCert}
+    get {_storage._serverTlsCert}
     set {_uniqueStorage()._serverTlsCert = newValue}
   }
 
@@ -105,18 +109,18 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   /// authenticate with the server. This will only be present
   /// when server_tls_cert is non-empty.
   var clientTlsCreds: Connectrpc_Conformance_V1_TLSCreds {
-    get {return _storage._clientTlsCreds ?? Connectrpc_Conformance_V1_TLSCreds()}
+    get {_storage._clientTlsCreds ?? Connectrpc_Conformance_V1_TLSCreds()}
     set {_uniqueStorage()._clientTlsCreds = newValue}
   }
   /// Returns true if `clientTlsCreds` has been explicitly set.
-  var hasClientTlsCreds: Bool {return _storage._clientTlsCreds != nil}
+  var hasClientTlsCreds: Bool {_storage._clientTlsCreds != nil}
   /// Clears the value of `clientTlsCreds`. Subsequent reads from it will return its default value.
   mutating func clearClientTlsCreds() {_uniqueStorage()._clientTlsCreds = nil}
 
   /// If non-zero, indicates the maximum size in bytes for a message.
   /// If the server sends anything larger, the client should reject it.
   var messageReceiveLimit: UInt32 {
-    get {return _storage._messageReceiveLimit}
+    get {_storage._messageReceiveLimit}
     set {_uniqueStorage()._messageReceiveLimit = newValue}
   }
 
@@ -124,11 +128,11 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   /// If specified, method must also be specified.
   /// If not specified, defaults to "connectrpc.conformance.v1.ConformanceService".
   var service: String {
-    get {return _storage._service ?? String()}
+    get {_storage._service ?? String()}
     set {_uniqueStorage()._service = newValue}
   }
   /// Returns true if `service` has been explicitly set.
-  var hasService: Bool {return _storage._service != nil}
+  var hasService: Bool {_storage._service != nil}
   /// Clears the value of `service`. Subsequent reads from it will return its default value.
   mutating func clearService() {_uniqueStorage()._service = nil}
 
@@ -136,11 +140,11 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   /// If specified, service must also be specified.
   /// If not specified, the test runner will auto-populate this field based on the stream_type.
   var method: String {
-    get {return _storage._method ?? String()}
+    get {_storage._method ?? String()}
     set {_uniqueStorage()._method = newValue}
   }
   /// Returns true if `method` has been explicitly set.
-  var hasMethod: Bool {return _storage._method != nil}
+  var hasMethod: Bool {_storage._method != nil}
   /// Clears the value of `method`. Subsequent reads from it will return its default value.
   mutating func clearMethod() {_uniqueStorage()._method = nil}
 
@@ -148,7 +152,7 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   /// stream, or half-duplex bidi stream).
   /// When writing test cases, this is a required field.
   var streamType: Connectrpc_Conformance_V1_StreamType {
-    get {return _storage._streamType}
+    get {_storage._streamType}
     set {_uniqueStorage()._streamType = newValue}
   }
 
@@ -156,7 +160,7 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   /// Unary, this instructs the client to use a GET HTTP method
   /// when making the request.
   var useGetHTTPMethod: Bool {
-    get {return _storage._useGetHTTPMethod}
+    get {_storage._useGetHTTPMethod}
     set {_uniqueStorage()._useGetHTTPMethod = newValue}
   }
 
@@ -165,7 +169,7 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   /// part of the relevant protocol (such as "content-type", etc) should
   /// not be stated here.
   var requestHeaders: [Connectrpc_Conformance_V1_Header] {
-    get {return _storage._requestHeaders}
+    get {_storage._requestHeaders}
     set {_uniqueStorage()._requestHeaders = newValue}
   }
 
@@ -177,18 +181,18 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   /// For client and bidi stream methods, all entries will have the
   /// same type URL.
   var requestMessages: [SwiftProtobuf.Google_Protobuf_Any] {
-    get {return _storage._requestMessages}
+    get {_storage._requestMessages}
     set {_uniqueStorage()._requestMessages = newValue}
   }
 
   /// The timeout, in milliseconds, for the request. This is equivalent to a
   /// deadline for the request. If unset, there will be no timeout.
   var timeoutMs: UInt32 {
-    get {return _storage._timeoutMs ?? 0}
+    get {_storage._timeoutMs ?? 0}
     set {_uniqueStorage()._timeoutMs = newValue}
   }
   /// Returns true if `timeoutMs` has been explicitly set.
-  var hasTimeoutMs: Bool {return _storage._timeoutMs != nil}
+  var hasTimeoutMs: Bool {_storage._timeoutMs != nil}
   /// Clears the value of `timeoutMs`. Subsequent reads from it will return its default value.
   mutating func clearTimeoutMs() {_uniqueStorage()._timeoutMs = nil}
 
@@ -196,18 +200,18 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   /// For client or bidi stream methods, this delay should be
   /// applied before each request sent.
   var requestDelayMs: UInt32 {
-    get {return _storage._requestDelayMs}
+    get {_storage._requestDelayMs}
     set {_uniqueStorage()._requestDelayMs = newValue}
   }
 
   /// If present, the client should cancel the RPC instead of
   /// allowing to complete normally.
   var cancel: Connectrpc_Conformance_V1_ClientCompatRequest.Cancel {
-    get {return _storage._cancel ?? Connectrpc_Conformance_V1_ClientCompatRequest.Cancel()}
+    get {_storage._cancel ?? Connectrpc_Conformance_V1_ClientCompatRequest.Cancel()}
     set {_uniqueStorage()._cancel = newValue}
   }
   /// Returns true if `cancel` has been explicitly set.
-  var hasCancel: Bool {return _storage._cancel != nil}
+  var hasCancel: Bool {_storage._cancel != nil}
   /// Clears the value of `cancel`. Subsequent reads from it will return its default value.
   mutating func clearCancel() {_uniqueStorage()._cancel = nil}
 
@@ -221,17 +225,17 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
   /// provided and valid so that the reference client knows how it
   /// should try to interpret the server's response.
   var rawRequest: Connectrpc_Conformance_V1_RawHTTPRequest {
-    get {return _storage._rawRequest ?? Connectrpc_Conformance_V1_RawHTTPRequest()}
+    get {_storage._rawRequest ?? Connectrpc_Conformance_V1_RawHTTPRequest()}
     set {_uniqueStorage()._rawRequest = newValue}
   }
   /// Returns true if `rawRequest` has been explicitly set.
-  var hasRawRequest: Bool {return _storage._rawRequest != nil}
+  var hasRawRequest: Bool {_storage._rawRequest != nil}
   /// Clears the value of `rawRequest`. Subsequent reads from it will return its default value.
   mutating func clearRawRequest() {_uniqueStorage()._rawRequest = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
-  struct Cancel: Sendable {
+  nonisolated struct Cancel: Sendable {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -301,7 +305,7 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
     /// after all request messages are sent and the send side is
     /// closed (as if the after_close_send_ms field were present
     /// and zero).
-    enum OneOf_CancelTiming: Equatable, Sendable {
+    nonisolated enum OneOf_CancelTiming: Equatable, Sendable {
       /// When present, the client should cancel *instead of*
       /// closing the send side of the stream, after all requests
       /// have been sent.
@@ -344,7 +348,7 @@ struct Connectrpc_Conformance_V1_ClientCompatRequest: @unchecked Sendable {
 }
 
 /// The outcome of one ClientCompatRequest.
-struct Connectrpc_Conformance_V1_ClientCompatResponse: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_ClientCompatResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -390,7 +394,7 @@ struct Connectrpc_Conformance_V1_ClientCompatResponse: Sendable {
   /// (e.g. a unary request that defines zero or multiple request messages).
   ///
   /// However, once the RPC is issued, any resulting error should instead be encoded in response.
-  enum OneOf_Result: Equatable, Sendable {
+  nonisolated enum OneOf_Result: Equatable, Sendable {
     case response(Connectrpc_Conformance_V1_ClientResponseResult)
     case error(Connectrpc_Conformance_V1_ClientErrorResult)
 
@@ -401,7 +405,7 @@ struct Connectrpc_Conformance_V1_ClientCompatResponse: Sendable {
 
 /// The result of a ClientCompatRequest, which may or may not be successful.
 /// The client will build this message and return it back to the test runner.
-struct Connectrpc_Conformance_V1_ClientResponseResult: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_ClientResponseResult: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -419,11 +423,11 @@ struct Connectrpc_Conformance_V1_ClientResponseResult: Sendable {
   /// of a runtime error and should always be the proto equivalent of a Connect
   /// or gRPC error.
   var error: Connectrpc_Conformance_V1_Error {
-    get {return _error ?? Connectrpc_Conformance_V1_Error()}
+    get {_error ?? Connectrpc_Conformance_V1_Error()}
     set {_error = newValue}
   }
   /// Returns true if `error` has been explicitly set.
-  var hasError: Bool {return self._error != nil}
+  var hasError: Bool {self._error != nil}
   /// Clears the value of `error`. Subsequent reads from it will return its default value.
   mutating func clearError() {self._error = nil}
 
@@ -439,11 +443,11 @@ struct Connectrpc_Conformance_V1_ClientResponseResult: Sendable {
   /// If you are implementing a client-under-test, you should ignore this field
   /// and leave it unset.
   var httpStatusCode: Int32 {
-    get {return _httpStatusCode ?? 0}
+    get {_httpStatusCode ?? 0}
     set {_httpStatusCode = newValue}
   }
   /// Returns true if `httpStatusCode` has been explicitly set.
-  var hasHTTPStatusCode: Bool {return self._httpStatusCode != nil}
+  var hasHTTPStatusCode: Bool {self._httpStatusCode != nil}
   /// Clears the value of `httpStatusCode`. Subsequent reads from it will return its default value.
   mutating func clearHTTPStatusCode() {self._httpStatusCode = nil}
 
@@ -466,7 +470,7 @@ struct Connectrpc_Conformance_V1_ClientResponseResult: Sendable {
 /// The client is not able to fulfill the ClientCompatRequest. This may be due
 /// to a runtime error or an unexpected internal error such as the requested protocol
 /// not being supported. This is completely independent of the actual RPC invocation.
-struct Connectrpc_Conformance_V1_ClientErrorResult: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_ClientErrorResult: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -484,7 +488,7 @@ struct Connectrpc_Conformance_V1_ClientErrorResult: Sendable {
 /// Details about various values as observed on the wire. This message is used
 /// only by the reference client when reporting results and should not be populated
 /// by clients under test.
-struct Connectrpc_Conformance_V1_WireDetails: Sendable {
+nonisolated struct Connectrpc_Conformance_V1_WireDetails: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -495,11 +499,11 @@ struct Connectrpc_Conformance_V1_WireDetails: Sendable {
   /// When processing an error from a Connect server, this should contain
   /// the actual JSON received on the wire.
   var connectErrorRaw: SwiftProtobuf.Google_Protobuf_Struct {
-    get {return _connectErrorRaw ?? SwiftProtobuf.Google_Protobuf_Struct()}
+    get {_connectErrorRaw ?? SwiftProtobuf.Google_Protobuf_Struct()}
     set {_connectErrorRaw = newValue}
   }
   /// Returns true if `connectErrorRaw` has been explicitly set.
-  var hasConnectErrorRaw: Bool {return self._connectErrorRaw != nil}
+  var hasConnectErrorRaw: Bool {self._connectErrorRaw != nil}
   /// Clears the value of `connectErrorRaw`. Subsequent reads from it will return its default value.
   mutating func clearConnectErrorRaw() {self._connectErrorRaw = nil}
 
@@ -516,11 +520,11 @@ struct Connectrpc_Conformance_V1_WireDetails: Sendable {
   /// capture all of the entries and their exact on-the-wire spelling
   /// and formatting.
   var actualGrpcwebTrailers: String {
-    get {return _actualGrpcwebTrailers ?? String()}
+    get {_actualGrpcwebTrailers ?? String()}
     set {_actualGrpcwebTrailers = newValue}
   }
   /// Returns true if `actualGrpcwebTrailers` has been explicitly set.
-  var hasActualGrpcwebTrailers: Bool {return self._actualGrpcwebTrailers != nil}
+  var hasActualGrpcwebTrailers: Bool {self._actualGrpcwebTrailers != nil}
   /// Clears the value of `actualGrpcwebTrailers`. Subsequent reads from it will return its default value.
   mutating func clearActualGrpcwebTrailers() {self._actualGrpcwebTrailers = nil}
 
@@ -534,9 +538,9 @@ struct Connectrpc_Conformance_V1_WireDetails: Sendable {
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-fileprivate let _protobuf_package = "connectrpc.conformance.v1"
+fileprivate nonisolated let _protobuf_package = "connectrpc.conformance.v1"
 
-extension Connectrpc_Conformance_V1_ClientCompatRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ClientCompatRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientCompatRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}test_name\0\u{3}http_version\0\u{1}protocol\0\u{1}codec\0\u{1}compression\0\u{1}host\0\u{1}port\0\u{3}server_tls_cert\0\u{3}client_tls_creds\0\u{3}message_receive_limit\0\u{1}service\0\u{1}method\0\u{3}stream_type\0\u{3}use_get_http_method\0\u{3}request_headers\0\u{3}request_messages\0\u{3}timeout_ms\0\u{3}request_delay_ms\0\u{1}cancel\0\u{3}raw_request\0")
 
@@ -739,7 +743,7 @@ extension Connectrpc_Conformance_V1_ClientCompatRequest: SwiftProtobuf.Message, 
   }
 }
 
-extension Connectrpc_Conformance_V1_ClientCompatRequest.Cancel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ClientCompatRequest.Cancel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = Connectrpc_Conformance_V1_ClientCompatRequest.protoMessageName + ".Cancel"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}before_close_send\0\u{3}after_close_send_ms\0\u{3}after_num_responses\0")
 
@@ -813,7 +817,7 @@ extension Connectrpc_Conformance_V1_ClientCompatRequest.Cancel: SwiftProtobuf.Me
   }
 }
 
-extension Connectrpc_Conformance_V1_ClientCompatResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ClientCompatResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientCompatResponse"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}test_name\0\u{1}response\0\u{1}error\0")
 
@@ -885,7 +889,7 @@ extension Connectrpc_Conformance_V1_ClientCompatResponse: SwiftProtobuf.Message,
   }
 }
 
-extension Connectrpc_Conformance_V1_ClientResponseResult: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ClientResponseResult: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientResponseResult"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}response_headers\0\u{1}payloads\0\u{1}error\0\u{3}response_trailers\0\u{3}num_unsent_requests\0\u{3}http_status_code\0\u{1}feedback\0")
 
@@ -949,7 +953,7 @@ extension Connectrpc_Conformance_V1_ClientResponseResult: SwiftProtobuf.Message,
   }
 }
 
-extension Connectrpc_Conformance_V1_ClientErrorResult: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_ClientErrorResult: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientErrorResult"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}message\0")
 
@@ -979,7 +983,7 @@ extension Connectrpc_Conformance_V1_ClientErrorResult: SwiftProtobuf.Message, Sw
   }
 }
 
-extension Connectrpc_Conformance_V1_WireDetails: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Conformance_V1_WireDetails: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".WireDetails"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}actual_status_code\0\u{3}connect_error_raw\0\u{3}actual_http_trailers\0\u{3}actual_grpcweb_trailers\0")
 

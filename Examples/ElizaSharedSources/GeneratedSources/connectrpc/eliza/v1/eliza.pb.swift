@@ -29,13 +29,13 @@ import SwiftProtobuf
 // incompatible with the version of SwiftProtobuf to which you are linking.
 // Please ensure that you are building against the same version of the API
 // that was used to generate this file.
-fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVersionCheck {
+fileprivate nonisolated struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVersionCheck {
   struct _2: SwiftProtobuf.ProtobufAPIVersion_2 {}
   typealias Version = _2
 }
 
 /// SayRequest is a single-sentence request.
-struct Connectrpc_Eliza_V1_SayRequest: Sendable {
+nonisolated struct Connectrpc_Eliza_V1_SayRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -48,7 +48,7 @@ struct Connectrpc_Eliza_V1_SayRequest: Sendable {
 }
 
 /// SayResponse is a single-sentence response.
-struct Connectrpc_Eliza_V1_SayResponse: Sendable {
+nonisolated struct Connectrpc_Eliza_V1_SayResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -62,7 +62,7 @@ struct Connectrpc_Eliza_V1_SayResponse: Sendable {
 
 /// ConverseRequest is a single sentence request sent as part of a
 /// back-and-forth conversation.
-struct Connectrpc_Eliza_V1_ConverseRequest: Sendable {
+nonisolated struct Connectrpc_Eliza_V1_ConverseRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -76,7 +76,7 @@ struct Connectrpc_Eliza_V1_ConverseRequest: Sendable {
 
 /// ConverseResponse is a single sentence response sent in answer to a
 /// ConverseRequest.
-struct Connectrpc_Eliza_V1_ConverseResponse: Sendable {
+nonisolated struct Connectrpc_Eliza_V1_ConverseResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -89,7 +89,7 @@ struct Connectrpc_Eliza_V1_ConverseResponse: Sendable {
 }
 
 /// IntroduceRequest asks Eliza to introduce itself to the named user.
-struct Connectrpc_Eliza_V1_IntroduceRequest: Sendable {
+nonisolated struct Connectrpc_Eliza_V1_IntroduceRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -102,7 +102,7 @@ struct Connectrpc_Eliza_V1_IntroduceRequest: Sendable {
 }
 
 /// IntroduceResponse is one sentence of Eliza's introductory monologue.
-struct Connectrpc_Eliza_V1_IntroduceResponse: Sendable {
+nonisolated struct Connectrpc_Eliza_V1_IntroduceResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -116,9 +116,9 @@ struct Connectrpc_Eliza_V1_IntroduceResponse: Sendable {
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-fileprivate let _protobuf_package = "connectrpc.eliza.v1"
+fileprivate nonisolated let _protobuf_package = "connectrpc.eliza.v1"
 
-extension Connectrpc_Eliza_V1_SayRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Eliza_V1_SayRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".SayRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}sentence\0")
 
@@ -148,7 +148,7 @@ extension Connectrpc_Eliza_V1_SayRequest: SwiftProtobuf.Message, SwiftProtobuf._
   }
 }
 
-extension Connectrpc_Eliza_V1_SayResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Eliza_V1_SayResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".SayResponse"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}sentence\0")
 
@@ -178,7 +178,7 @@ extension Connectrpc_Eliza_V1_SayResponse: SwiftProtobuf.Message, SwiftProtobuf.
   }
 }
 
-extension Connectrpc_Eliza_V1_ConverseRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Eliza_V1_ConverseRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ConverseRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}sentence\0")
 
@@ -208,7 +208,7 @@ extension Connectrpc_Eliza_V1_ConverseRequest: SwiftProtobuf.Message, SwiftProto
   }
 }
 
-extension Connectrpc_Eliza_V1_ConverseResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Eliza_V1_ConverseResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ConverseResponse"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}sentence\0")
 
@@ -238,7 +238,7 @@ extension Connectrpc_Eliza_V1_ConverseResponse: SwiftProtobuf.Message, SwiftProt
   }
 }
 
-extension Connectrpc_Eliza_V1_IntroduceRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Eliza_V1_IntroduceRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".IntroduceRequest"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0")
 
@@ -268,7 +268,7 @@ extension Connectrpc_Eliza_V1_IntroduceRequest: SwiftProtobuf.Message, SwiftProt
   }
 }
 
-extension Connectrpc_Eliza_V1_IntroduceResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+nonisolated extension Connectrpc_Eliza_V1_IntroduceResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".IntroduceResponse"
   static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}sentence\0")
 
