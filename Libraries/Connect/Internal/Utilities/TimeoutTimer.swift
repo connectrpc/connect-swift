@@ -15,15 +15,13 @@
 import Foundation
 
 final class TimeoutTimer: Sendable {
-    private let hasTimedOut: Locked<Bool>
-    private let onTimeout: Locked<(@Sendable () -> Void)?>
+    private let hasTimedOut = Locked(false)
+    private let onTimeout = Locked<(@Sendable () -> Void)?>(nil)
     private let queue = DispatchQueue(label: "connectrpc.Timeout")
     private let timeout: TimeInterval
-    // Safety: `nonisolated(unsafe)` because `DispatchWorkItem` carries no `Sendable`
-    // conformance in the SDK. The item is created once in `init` and never reassigned;
-    // the only operations performed on it are `cancel()` and a single `asyncAfter`
-    // enqueue, both of which are thread-safe.
-    nonisolated(unsafe) private let workItem: DispatchWorkItem
+    // Safety: `DispatchWorkItem` is non-Sendable; the only cross-thread operation
+    // performed on it is `cancel()`, which is thread-safe.
+    private let workItem = Locked<DispatchWorkItem?>(nil)
 
     var timedOut: Bool {
         return self.hasTimedOut.value
@@ -34,24 +32,7 @@ final class TimeoutTimer: Sendable {
             return nil
         }
 
-        // Locals are created first and captured by the work item so that it does
-        // not retain `self` (approximating the previous `[weak self]` lifetime
-        // semantics: `deinit` cancels the not-yet-started work item). One narrow
-        // difference from `[weak self]`: if the work item has already started
-        // executing when the last owner releases the timer, it now still invokes
-        // `onTimeout` (previously the nil weak reference made it a no-op). That
-        // late invocation is safe: the timer is retained by the response-handling
-        // closures until the request completes, and a post-completion cancel is
-        // dropped by the completion guards (`hasCompleted` et al.) downstream.
-        let hasTimedOut = Locked(false)
-        let onTimeout = Locked<(@Sendable () -> Void)?>(nil)
         self.timeout = timeout
-        self.hasTimedOut = hasTimedOut
-        self.onTimeout = onTimeout
-        self.workItem = DispatchWorkItem {
-            hasTimedOut.value = true
-            onTimeout.value?()
-        }
     }
 
     deinit {
@@ -61,12 +42,17 @@ final class TimeoutTimer: Sendable {
     func start(onTimeout: @escaping @Sendable () -> Void) {
         let milliseconds = Int(self.timeout * 1_000)
         self.onTimeout.value = onTimeout
+        let item = DispatchWorkItem { [weak self] in
+            self?.hasTimedOut.value = true
+            self?.onTimeout.value?()
+        }
+        self.workItem.value = item
         self.queue.asyncAfter(
-            deadline: .now() + .milliseconds(milliseconds), execute: self.workItem
+            deadline: .now() + .milliseconds(milliseconds), execute: item
         )
     }
 
     func cancel() {
-        self.workItem.cancel()
+        self.workItem.value?.cancel()
     }
 }
