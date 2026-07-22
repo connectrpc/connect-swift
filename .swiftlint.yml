@@ -120,8 +120,4 @@ custom_rules:
   swift_testing_over_xctest:
     name: "Use Swift Testing rather than XCTest for writing tests"
     message: "Import Testing and write tests with @Test/#expect instead of XCTest."
-    regex: '^\s*(@testable\s+)?import\s+XCTest\b'
-    match_kinds:
-      - attribute.builtin
-      - keyword
-      - identifier
+    regex: 'XCTest'
