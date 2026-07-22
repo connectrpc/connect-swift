@@ -14,32 +14,38 @@
 
 import Connect
 import Foundation
-import XCTest
+import Testing
 
-final class GzipCompressionPoolTests: XCTestCase {
-    func testDecompressingGzippedFile() throws {
+struct GzipCompressionPoolTests {
+    @available(iOS 13, *)
+    @Test
+    func decompressingGzippedFile() throws {
         let compressedData = try self.gzippedFileData()
-        let decompressedText = try XCTUnwrap(String(
+        let decompressedText = try #require(String(
             data: try GzipCompressionPool().decompress(data: compressedData),
             encoding: .utf8
         ))
-        XCTAssertEqual(decompressedText, self.expectedUnzippedFileText())
+        #expect(decompressedText == self.expectedUnzippedFileText())
     }
 
-    func testCompressingAndDecompressingData() throws {
-        let original = try XCTUnwrap(self.expectedUnzippedFileText().data(using: .utf8))
+    @available(iOS 13, *)
+    @Test
+    func compressingAndDecompressingData() throws {
+        let original = try #require(self.expectedUnzippedFileText().data(using: .utf8))
         let compressionPool = GzipCompressionPool()
         let compressed = try compressionPool.compress(data: original)
-        XCTAssertTrue(compressed.starts(with: [0x1f, 0x8b])) // Indicates gzip
-        XCTAssertNotEqual(compressed.count, original.count)
+        #expect(compressed.starts(with: [0x1f, 0x8b])) // Indicates gzip
+        #expect(compressed.count != original.count)
 
         let decompressed = try compressionPool.decompress(data: compressed)
-        XCTAssertEqual(decompressed, original)
+        #expect(decompressed == original)
     }
 
-    func testDoesNotGzipDataThatIsAlreadyGzipped() throws {
+    @available(iOS 13, *)
+    @Test
+    func doesNotGzipDataThatIsAlreadyGzipped() throws {
         let compressed = try self.gzippedFileData()
-        XCTAssertEqual(compressed, try GzipCompressionPool().compress(data: compressed))
+        #expect(try compressed == GzipCompressionPool().compress(data: compressed))
     }
 
     // MARK: - Private
@@ -49,7 +55,7 @@ final class GzipCompressionPoolTests: XCTestCase {
     }
 
     private func gzippedFileData() throws -> Data {
-        let gzippedFileURL = try XCTUnwrap(
+        let gzippedFileURL = try #require(
             Bundle.module.url(
                 forResource: "gzip-test.txt.gz", withExtension: nil, subdirectory: "TestResources"
             )

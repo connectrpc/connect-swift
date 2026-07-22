@@ -35,7 +35,6 @@ opt_in_rules:
   - empty_collection_literal
   - empty_count
   - empty_string
-  - empty_xctest_method
   - enum_case_associated_values_count
   - explicit_init
   - fallthrough
@@ -77,7 +76,6 @@ opt_in_rules:
   - vertical_parameter_alignment_on_call
   - vertical_whitespace_closing_braces
   - vertical_whitespace_opening_braces
-  - xct_specific_matcher
   - yoda_condition
 trailing_whitespace:
   ignores_comments: false
@@ -119,6 +117,7 @@ custom_rules:
   spaces_over_tabs:
     name: "Use (4) spaces instead of tabs"
     regex: '\t'
-  xctestcase:
-    name: "Use XCTestCase over XCTest to ensure tests run properly"
-    regex: ': XCTest[\s,]+'
+  swift_testing_over_xctest:
+    name: "Use Swift Testing rather than XCTest for writing tests"
+    message: "Import Testing and write tests with @Test/#expect instead of XCTest."
+    regex: 'XCTest'

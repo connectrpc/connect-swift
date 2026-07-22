@@ -14,10 +14,12 @@
 
 @testable import Connect
 import Foundation
-import XCTest
+import Testing
 
-final class ConnectEndStreamResponseTests: XCTestCase {
-    func testLowercasesAllHeaderKeys() throws {
+struct ConnectEndStreamResponseTests {
+    @available(iOS 13, *)
+    @Test
+    func lowercasesAllHeaderKeys() throws {
         let dictionary = [
             "metadata": [
                 "sOmEkEy": ["foo"],
@@ -26,18 +28,22 @@ final class ConnectEndStreamResponseTests: XCTestCase {
         ]
         let data = try JSONSerialization.data(withJSONObject: dictionary)
         let response = try JSONDecoder().decode(ConnectEndStreamResponse.self, from: data)
-        XCTAssertNil(response.error)
-        XCTAssertEqual(response.metadata, ["somekey": ["foo"], "otherkey1": ["BAR", "bAz"]])
+        #expect(response.error == nil)
+        #expect(response.metadata == ["somekey": ["foo"], "otherkey1": ["BAR", "bAz"]])
     }
 
-    func testAllowsOmittedErrorAndMetadata() throws {
+    @available(iOS 13, *)
+    @Test
+    func allowsOmittedErrorAndMetadata() throws {
         let data = try JSONSerialization.data(withJSONObject: [String: Any]())
         let response = try JSONDecoder().decode(ConnectEndStreamResponse.self, from: data)
-        XCTAssertNil(response.error)
-        XCTAssertNil(response.metadata)
+        #expect(response.error == nil)
+        #expect(response.metadata == nil)
     }
 
-    func testDeserializesError() throws {
+    @available(iOS 13, *)
+    @Test
+    func deserializesError() throws {
         let dictionary = [
             "error": [
                 "code": "permission_denied",
@@ -45,6 +51,6 @@ final class ConnectEndStreamResponseTests: XCTestCase {
         ]
         let data = try JSONSerialization.data(withJSONObject: dictionary)
         let response = try JSONDecoder().decode(ConnectEndStreamResponse.self, from: data)
-        XCTAssertEqual(response.error?.code, .permissionDenied)
+        #expect(response.error?.code == .permissionDenied)
     }
 }

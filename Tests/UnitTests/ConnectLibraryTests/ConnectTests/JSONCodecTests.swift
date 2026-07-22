@@ -15,9 +15,9 @@
 import Connect
 import Foundation
 import SwiftProtobuf
-import XCTest
+import Testing
 
-final class JSONCodecTests: XCTestCase {
+struct JSONCodecTests {
     private let message: Connectrpc_Conformance_V1_RawHTTPRequest = .with { proto in
         proto.body = .unary(Connectrpc_Conformance_V1_MessageContents.with { message in
             message.binary = Data([0x0, 0x1, 0x2, 0x3])
@@ -33,61 +33,71 @@ final class JSONCodecTests: XCTestCase {
         proto.rawQueryParams = [.init()]
     }
 
-    func testSerializingAndDeserializingWithDefaultOptions() throws {
+    @available(iOS 13, *)
+    @Test
+    func serializingAndDeserializingWithDefaultOptions() throws {
         let codec = JSONCodec()
         let serialized = try codec.serialize(message: self.message)
-        XCTAssertEqual(try codec.deserialize(source: serialized), self.message)
+        #expect(try codec.deserialize(source: serialized) == self.message)
     }
 
-    func testSerializingAndDeserializingWithEnumsAsInts() throws {
+    @available(iOS 13, *)
+    @Test
+    func serializingAndDeserializingWithEnumsAsInts() throws {
         let codec = JSONCodec(alwaysEncodeEnumsAsInts: true, preserveProtobufFieldNames: false)
         let serialized = try codec.serialize(message: self.message)
-        let dictionary = try XCTUnwrap(
+        let dictionary = try #require(
             try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
         )
-        XCTAssertEqual((dictionary["unary"] as? [String: Any])?["compression"] as? Int, 2)
-        XCTAssertEqual(try codec.deserialize(source: serialized), self.message)
+        #expect((dictionary["unary"] as? [String: Any])?["compression"] as? Int == 2)
+        #expect(try codec.deserialize(source: serialized) == self.message)
     }
 
-    func testSerializingAndDeserializingWithEnumsAsStrings() throws {
+    @available(iOS 13, *)
+    @Test
+    func serializingAndDeserializingWithEnumsAsStrings() throws {
         let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: false)
         let serialized = try codec.serialize(message: self.message)
-        let dictionary = try XCTUnwrap(
+        let dictionary = try #require(
             try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
         )
-        XCTAssertEqual(
-            (dictionary["unary"] as? [String: Any])?["compression"] as? String, "COMPRESSION_GZIP"
+        #expect(
+            (dictionary["unary"] as? [String: Any])?["compression"] as? String == "COMPRESSION_GZIP"
         )
-        XCTAssertEqual(try codec.deserialize(source: serialized), self.message)
+        #expect(try codec.deserialize(source: serialized) == self.message)
     }
 
-    func testSerializingAndDeserializingWithProtobufFieldNames() throws {
+    @available(iOS 13, *)
+    @Test
+    func serializingAndDeserializingWithProtobufFieldNames() throws {
         let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: true)
         let serialized = try codec.serialize(message: self.message)
-        let dictionary = try XCTUnwrap(
+        let dictionary = try #require(
             try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
         )
-        XCTAssertTrue(Set(dictionary.keys).isSuperset(of: [
+        #expect(Set(dictionary.keys).isSuperset(of: [
             "headers",
             "unary",
             "uri",
             "raw_query_params",
         ]))
-        XCTAssertEqual(try codec.deserialize(source: serialized), self.message)
+        #expect(try codec.deserialize(source: serialized) == self.message)
     }
 
-    func testSerializingAndDeserializingWithCamelCaseFieldNames() throws {
+    @available(iOS 13, *)
+    @Test
+    func serializingAndDeserializingWithCamelCaseFieldNames() throws {
         let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: false)
         let serialized = try codec.serialize(message: self.message)
-        let dictionary = try XCTUnwrap(
+        let dictionary = try #require(
             try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
         )
-        XCTAssertTrue(Set(dictionary.keys).isSuperset(of: [
+        #expect(Set(dictionary.keys).isSuperset(of: [
             "headers",
             "unary",
             "uri",
             "rawQueryParams",
         ]))
-        XCTAssertEqual(try codec.deserialize(source: serialized), self.message)
+        #expect(try codec.deserialize(source: serialized) == self.message)
     }
 }

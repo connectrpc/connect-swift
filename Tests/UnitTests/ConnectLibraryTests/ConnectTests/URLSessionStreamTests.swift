@@ -14,14 +14,16 @@
 
 @testable import Connect
 import Foundation
-import XCTest
+import Testing
 
-final class URLSessionStreamTests: XCTestCase {
+struct URLSessionStreamTests {
     /// `URLSession` requests a body stream via `urlSession(_:task:needNewBodyStream:)` both for the
     /// initial send and when it resends a request after a recoverable error. A streamed request
     /// body cannot be replayed, and returning the same already-opened stream on a resend crashes
     /// CFNetwork. The stream must therefore be vended only once.
-    func testVendsRequestBodyStreamOnlyOnce() {
+    @available(iOS 13, *)
+    @Test
+    func vendsRequestBodyStreamOnlyOnce() {
         let stream = URLSessionStream(
             request: URLRequest(url: URL(string: "https://connectrpc.com")!),
             session: URLSession(configuration: .ephemeral),
@@ -34,9 +36,9 @@ final class URLSessionStreamTests: XCTestCase {
         )
         defer { stream.cancel() }
 
-        XCTAssertNotNil(stream.requestBodyStream, "The initial body stream should be vended.")
-        XCTAssertNil(
-            stream.requestBodyStream,
+        #expect(stream.requestBodyStream != nil, "The initial body stream should be vended.")
+        #expect(
+            stream.requestBodyStream == nil,
             "A resend must not reuse the already-opened body stream."
         )
     }
