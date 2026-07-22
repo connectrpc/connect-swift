@@ -129,6 +129,14 @@ serial client hung or died between cases. With `verbose=true`, locate the last
 line — that is the in-flight case at the wedge point. The listed FAILED cases
 were never run; do not treat them as independent assertion failures.
 
+The URLSession conformance client uses one shared ephemeral `URLSession` for the
+whole process (not a fresh `.default` session per case). Creating hundreds of
+default sessions in one process thrashes the on-disk URLCache
+(`~/Library/Caches/<bundle>/Cache.db`) and can leave a streamed upload task
+parked forever. If you are debugging an older binary and see
+`stepSQLStatement…Cache.db` errors in the client log, clear that cache directory
+or rebuild from a revision that uses the shared ephemeral client.
+
 ### Unit Tests
 
 Unit tests live in the [`UnitTests` directory](../Tests/UnitTests)
