@@ -10,6 +10,8 @@ BIN := .tmp/bin
 LICENSE_HEADER_YEAR_RANGE := 2022-2025
 CONFORMANCE_PROTO_REF := fc1c52eb4a602c058882f6ad6ca0ffb1c39c4730
 CONFORMANCE_RUNNER_TAG := v1.0.5
+# Optional args forwarded to ConnectConformanceClient (e.g. `verbose=true`).
+CONFORMANCE_CLIENT_ARGS ?=
 EXAMPLES_PROTO_REF := e74547031f662f81a62f5e95ebaa9f7037e0c41b
 LICENSE_HEADER_VERSION := v1.35.1
 LICENSE_IGNORE := -e Package.swift \
@@ -78,8 +80,8 @@ $(BIN)/license-headers: Makefile
 testconformance: ## Run all conformance tests
 	swift build -c release --product ConnectConformanceClient
 	mv ./.build/release/ConnectConformanceClient $(BIN)
-	PATH="$(abspath $(BIN)):$(PATH)" connectconformance --trace --conf ./Tests/ConformanceClient/InvocationConfigs/urlsession.yaml --mode client $(BIN)/ConnectConformanceClient httpclient=urlsession
-	PATH="$(abspath $(BIN)):$(PATH)" connectconformance --trace --conf ./Tests/ConformanceClient/InvocationConfigs/nio.yaml --mode client $(BIN)/ConnectConformanceClient httpclient=nio
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance --trace --conf ./Tests/ConformanceClient/InvocationConfigs/urlsession.yaml --mode client $(BIN)/ConnectConformanceClient httpclient=urlsession $(CONFORMANCE_CLIENT_ARGS)
+	PATH="$(abspath $(BIN)):$(PATH)" connectconformance --trace --conf ./Tests/ConformanceClient/InvocationConfigs/nio.yaml --mode client $(BIN)/ConnectConformanceClient httpclient=nio $(CONFORMANCE_CLIENT_ARGS)
 
 .PHONY: testunit
 testunit: ## Run all unit tests

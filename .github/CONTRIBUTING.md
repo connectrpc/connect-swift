@@ -101,6 +101,34 @@ make installconformancerunner
 make testconformance
 ```
 
+CI enables per-case client diagnostics via `verbose=true`. For a quiet local run
+that matches the default Makefile, leave `CONFORMANCE_CLIENT_ARGS` unset. To
+reproduce CI's diagnostic output locally:
+
+```sh
+make testconformance CONFORMANCE_CLIENT_ARGS=verbose=true
+```
+
+To isolate the URLSession suite (the surface that historically wedges first):
+
+```sh
+swift build -c release --product ConnectConformanceClient
+mkdir -p .tmp/bin
+cp .build/release/ConnectConformanceClient .tmp/bin/
+PATH="$(pwd)/.tmp/bin:$PATH" connectconformance \
+  --trace --verbose \
+  --conf ./Tests/ConformanceClient/InvocationConfigs/urlsession.yaml \
+  --mode client \
+  .tmp/bin/ConnectConformanceClient httpclient=urlsession verbose=true
+```
+
+If a run emits a nameless `timed out waiting for result from client` followed by
+a burst of unrelated `FAILED: … failed to get result from client` lines, the
+serial client hung or died between cases. With `verbose=true`, locate the last
+`[conformance-client] … starting <test>` line that has no matching `finished`
+line — that is the in-flight case at the wedge point. The listed FAILED cases
+were never run; do not treat them as independent assertion failures.
+
 ### Unit Tests
 
 Unit tests live in the [`UnitTests` directory](../Tests/UnitTests)
