@@ -68,7 +68,7 @@ struct ConnectMocksTests {
             .message(.with { $0.payload.data = Data(repeating: 0, count: 456) }),
             .complete(code: .ok, error: nil, trailers: nil),
         ]
-        #expect(!client.mockBidiStream.isClosed)
+        #expect(client.mockBidiStream.isClosed == false)
 
         var sentInputs = [Connectrpc_Conformance_V1_BidiStreamRequest]()
         var closeCalled = false
@@ -108,7 +108,7 @@ struct ConnectMocksTests {
             .message(.with { $0.payload.data = Data(repeating: 0, count: 456) }),
             .complete(code: .ok, error: nil, trailers: nil),
         ]
-        #expect(!client.mockAsyncBidiStream.isClosed)
+        #expect(client.mockAsyncBidiStream.isClosed == false)
 
         var sentInputs = [Connectrpc_Conformance_V1_BidiStreamRequest]()
         var closeCalled = false

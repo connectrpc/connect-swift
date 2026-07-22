@@ -41,7 +41,7 @@ struct EnvelopeTests {
         let originalData = Data(repeating: 0xa, count: 50)
         let packed = Envelope._packMessage(originalData, using: nil)
         #expect(packed[0] == 0) // Compression flag = false
-        #expect(!Envelope._isCompressed(packed))
+        #expect(Envelope._isCompressed(packed) == false)
         #expect(Envelope._messageLength(forPackedData: packed) == originalData.count)
         #expect(packed[5...] == originalData) // Post-prefix data should match compressed value
 
@@ -59,7 +59,7 @@ struct EnvelopeTests {
             originalData, using: .init(minBytes: 100, pool: GzipCompressionPool())
         )
         #expect(packed[0] == 0) // Compression flag = false
-        #expect(!Envelope._isCompressed(packed))
+        #expect(Envelope._isCompressed(packed) == false)
         #expect(Envelope._messageLength(forPackedData: packed) == originalData.count)
         #expect(packed[5...] == originalData) // Post-prefix data should match compressed value
 

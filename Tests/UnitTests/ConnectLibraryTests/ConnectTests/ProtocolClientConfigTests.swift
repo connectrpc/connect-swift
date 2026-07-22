@@ -46,7 +46,7 @@ struct ProtocolClientConfigTests {
         let compression = ProtocolClientConfig.RequestCompression(
             minBytes: 100, pool: GzipCompressionPool()
         )
-        #expect(!compression.shouldCompress(data))
+        #expect(compression.shouldCompress(data) == false)
     }
 
     @available(iOS 13, *)
@@ -156,16 +156,16 @@ struct ProtocolClientConfigTests {
             networkProtocol: .connect,
             unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
         ).shouldUseUnaryGET(for: request))
-        #expect(!ProtocolClientConfig(
+        #expect(ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
-        ).shouldUseUnaryGET(for: request))
-        #expect(!ProtocolClientConfig(
+        ).shouldUseUnaryGET(for: request) == false)
+        #expect(ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .disabled
-        ).shouldUseUnaryGET(for: request))
+        ).shouldUseUnaryGET(for: request) == false)
     }
 
     @available(iOS 13, *)
@@ -179,26 +179,26 @@ struct ProtocolClientConfigTests {
             trailers: nil,
             idempotencyLevel: .idempotent
         )
-        #expect(!ProtocolClientConfig(
+        #expect(ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .alwaysEnabled
-        ).shouldUseUnaryGET(for: request))
-        #expect(!ProtocolClientConfig(
+        ).shouldUseUnaryGET(for: request) == false)
+        #expect(ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
-        ).shouldUseUnaryGET(for: request))
-        #expect(!ProtocolClientConfig(
+        ).shouldUseUnaryGET(for: request) == false)
+        #expect(ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
-        ).shouldUseUnaryGET(for: request))
-        #expect(!ProtocolClientConfig(
+        ).shouldUseUnaryGET(for: request) == false)
+        #expect(ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .disabled
-        ).shouldUseUnaryGET(for: request))
+        ).shouldUseUnaryGET(for: request) == false)
     }
 
     @available(iOS 13, *)
@@ -212,26 +212,26 @@ struct ProtocolClientConfigTests {
             trailers: nil,
             idempotencyLevel: .unknown
         )
-        #expect(!ProtocolClientConfig(
+        #expect(ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .alwaysEnabled
-        ).shouldUseUnaryGET(for: request))
-        #expect(!ProtocolClientConfig(
+        ).shouldUseUnaryGET(for: request) == false)
+        #expect(ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
-        ).shouldUseUnaryGET(for: request))
-        #expect(!ProtocolClientConfig(
+        ).shouldUseUnaryGET(for: request) == false)
+        #expect(ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
-        ).shouldUseUnaryGET(for: request))
-        #expect(!ProtocolClientConfig(
+        ).shouldUseUnaryGET(for: request) == false)
+        #expect(ProtocolClientConfig(
             host: "https://connectrpc.com",
             networkProtocol: .connect,
             unaryGET: .disabled
-        ).shouldUseUnaryGET(for: request))
+        ).shouldUseUnaryGET(for: request) == false)
     }
 
     @available(iOS 13, *)
@@ -282,8 +282,8 @@ struct ProtocolClientConfigTests {
         let getRequest = config.transformToGETIfNeeded(request)
         let url = getRequest.url.absoluteString
         // Must NOT contain + or / (standard base64 chars)
-        #expect(!url.contains("+"), "URL must use URL-safe base64, not standard base64")
-        #expect(!url.contains("/message/"), "URL must use URL-safe base64")
+        #expect(url.contains("+") == false, "URL must use URL-safe base64, not standard base64")
+        #expect(url.contains("/message/") == false, "URL must use URL-safe base64")
         // Must contain the URL-safe base64 encoded message
         #expect(url.contains("message=Pj-__w"), "Expected raw URL-safe base64 encoding")
     }
