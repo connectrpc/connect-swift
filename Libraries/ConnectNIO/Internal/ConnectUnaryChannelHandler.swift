@@ -20,40 +20,42 @@ import NIOHTTP1
 
 /// NIO-based channel handler for unary requests made through the Connect library.
 ///
-/// Safety: `@unchecked Sendable` because all mutable state is confined to
-/// `self.eventLoop`: external entry points hop via `runOnEventLoop`, and NIO
-/// invokes the `ChannelInboundHandler` callbacks on the event loop.
-/// Removal plan: wrap state in `NIOLoopBound` (runtime-asserted confinement) or
-/// adopt NIO's async channel APIs if the package's NIO floor rises far enough.
-final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
+/// Loop-confined mutable state is held in `NIOLoopBoundBox`, which runtime-asserts
+/// that every read/write occurs on `self.eventLoop`. External entry points hop via
+/// `runOnEventLoop`; NIO invokes `ChannelInboundHandler` callbacks on the event loop.
+final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, Sendable {
+    private struct State {
+        var context: NIOCore.ChannelHandlerContext?
+        var isClosed = false
+        var hasResponded = false
+        var receivedHead: NIOHTTP1.HTTPResponseHead?
+        var receivedData: Foundation.Data?
+        var receivedEnd: NIOHTTP1.HTTPHeaders?
+    }
+
     private let eventLoop: NIOCore.EventLoop
     private let request: Connect.HTTPRequest<Data?>
-    private let onMetrics: (Connect.HTTPMetrics) -> Void
-    private let onResponse: (Connect.HTTPResponse) -> Void
-
-    private var context: NIOCore.ChannelHandlerContext?
-    private var isClosed = false
-    private var hasResponded = false
-    private var receivedHead: NIOHTTP1.HTTPResponseHead?
-    private var receivedData: Foundation.Data?
-    private var receivedEnd: NIOHTTP1.HTTPHeaders?
+    private let onMetrics: @Sendable (Connect.HTTPMetrics) -> Void
+    private let onResponse: @Sendable (Connect.HTTPResponse) -> Void
+    private let state: NIOLoopBoundBox<State>
 
     init(
         request: Connect.HTTPRequest<Data?>,
         eventLoop: NIOCore.EventLoop,
-        onMetrics: @escaping (Connect.HTTPMetrics) -> Void,
-        onResponse: @escaping (Connect.HTTPResponse) -> Void
+        onMetrics: @escaping @Sendable (Connect.HTTPMetrics) -> Void,
+        onResponse: @escaping @Sendable (Connect.HTTPResponse) -> Void
     ) {
         self.request = request
         self.eventLoop = eventLoop
         self.onMetrics = onMetrics
         self.onResponse = onResponse
+        self.state = .makeBoxSendingValue(State(), eventLoop: eventLoop)
     }
 
     /// Cancel the in-flight request, if currently active.
     func cancel() {
         self.runOnEventLoop {
-            if self.isClosed {
+            if self.state.value.isClosed {
                 return
             }
 
@@ -79,23 +81,25 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
 
     private func createResponse(error: Swift.Error?) -> Connect.HTTPResponse {
         return HTTPResponse(
-            code: self.receivedHead.map { .fromNIOStatus($0.status) } ?? .unknown,
-            headers: self.receivedHead.map { .fromNIOHeaders($0.headers) } ?? [:],
-            message: self.receivedData,
-            trailers: self.receivedEnd.map { .fromNIOHeaders($0) } ?? [:],
+            code: self.state.value.receivedHead.map { .fromNIOStatus($0.status) } ?? .unknown,
+            headers: self.state.value.receivedHead.map { .fromNIOHeaders($0.headers) } ?? [:],
+            message: self.state.value.receivedData,
+            trailers: self.state.value.receivedEnd.map { .fromNIOHeaders($0) } ?? [:],
             error: error,
-            tracingInfo: self.receivedHead.map { .init(httpStatus: Int($0.status.code)) }
+            tracingInfo: self.state.value.receivedHead.map {
+                .init(httpStatus: Int($0.status.code))
+            }
         )
     }
 
     private func closeConnection() {
-        if self.isClosed {
+        if self.state.value.isClosed {
             return
         }
 
-        self.hasResponded = true
-        self.isClosed = true
-        self.context?.close(promise: nil)
+        self.state.value.hasResponded = true
+        self.state.value.isClosed = true
+        self.state.value.context?.close(promise: nil)
     }
 
     // MARK: - ChannelInboundHandler
@@ -104,7 +108,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
     typealias InboundIn = NIOHTTP1.HTTPClientResponsePart
 
     func channelActive(context: NIOCore.ChannelHandlerContext) {
-        if self.isClosed {
+        if self.state.value.isClosed {
             return
         }
 
@@ -133,24 +137,24 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
     }
 
     func channelRead(context: NIOCore.ChannelHandlerContext, data: NIOCore.NIOAny) {
-        if self.isClosed {
+        if self.state.value.isClosed {
             return
         }
 
         let response = self.unwrapInboundIn(data)
         switch response {
         case .head(let head):
-            self.receivedHead = head
+            self.state.value.receivedHead = head
             context.fireChannelRead(data)
         case .body(let byteBuffer):
-            if self.receivedData != nil {
-                self.receivedData?.append(Data(buffer: byteBuffer))
+            if self.state.value.receivedData != nil {
+                self.state.value.receivedData?.append(Data(buffer: byteBuffer))
             } else {
-                self.receivedData = Data(buffer: byteBuffer)
+                self.state.value.receivedData = Data(buffer: byteBuffer)
             }
             context.fireChannelRead(data)
         case .end(let trailers):
-            self.receivedEnd = trailers
+            self.state.value.receivedEnd = trailers
             self.onResponse(self.createResponse(error: nil))
             self.onMetrics(.init(taskMetrics: nil))
             self.closeConnection()
@@ -158,37 +162,37 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
     }
 
     func handlerAdded(context: NIOCore.ChannelHandlerContext) {
-      self.context = context
+        self.state.value.context = context
     }
 
     func handlerRemoved(context: NIOCore.ChannelHandlerContext) {
-      self.context = nil
+        self.state.value.context = nil
     }
 
     func channelInactive(context: ChannelHandlerContext) {
-      let shouldNotify = !self.hasResponded
-      self.closeConnection()
+        let shouldNotify = !self.state.value.hasResponded
+        self.closeConnection()
         if shouldNotify {
-          self.onResponse(.init(
-              code: .unavailable,
-              headers: [:],
-              message: nil,
-              trailers: [:],
-              error: ConnectError(
-                  code: .unavailable,
-                  message: "Channel became inactive",
-                  exception: nil,
-                  details: [],
-                  metadata: [:]
-              ),
-              tracingInfo: nil
-          ))
-      }
-      context.fireChannelInactive()
+            self.onResponse(.init(
+                code: .unavailable,
+                headers: [:],
+                message: nil,
+                trailers: [:],
+                error: ConnectError(
+                    code: .unavailable,
+                    message: "Channel became inactive",
+                    exception: nil,
+                    details: [],
+                    metadata: [:]
+                ),
+                tracingInfo: nil
+            ))
+        }
+        context.fireChannelInactive()
     }
 
     func errorCaught(context: NIOCore.ChannelHandlerContext, error: Swift.Error) {
-        if self.isClosed {
+        if self.state.value.isClosed {
             return
         }
 
