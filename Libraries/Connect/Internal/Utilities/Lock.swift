@@ -22,7 +22,7 @@ import Foundation
 /// thread can still hold a reference.
 /// Removal plan: replace with `OSAllocatedUnfairLock` (requires iOS 16/macOS 13
 /// minimum) or `Synchronization.Mutex` (iOS 18/macOS 15) if/when deployment
-/// targets are raised. See §6 of SWIFT6_MIGRATION_PLAN.md.
+/// targets are raised.
 final class Lock: @unchecked Sendable {
     private let underlyingLock: UnsafeMutablePointer<os_unfair_lock>
 

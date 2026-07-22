@@ -22,7 +22,7 @@ import Foundation
 /// through `self.lock.perform`. Callers must not store values whose thread-safety
 /// depends on external state.
 /// Removal plan: becomes `Synchronization.Mutex<Wrapped>` if/when the deployment
-/// floor reaches iOS 18/macOS 15. See §6 of SWIFT6_MIGRATION_PLAN.md.
+/// floor reaches iOS 18/macOS 15.
 final class Locked<Wrapped>: @unchecked Sendable {
     private let lock = Lock()
     private var wrappedValue: Wrapped
