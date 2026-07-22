@@ -74,10 +74,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Build with warnings as errors
-        # Enforces the Swift 6 zero-warning end state so a reintroduced
-        # strict-concurrency warning fails CI. Dependency warnings are
-        # suppressed by SwiftPM, so this gates only this package's targets.
-        run: swift build -Xswiftc -warnings-as-errors
+        # Enforces the Swift 6 zero-warning end state (including test targets)
+        # so a reintroduced strict-concurrency warning fails CI. Dependency
+        # warnings are suppressed by SwiftPM, so this gates only this
+        # package's targets.
+        run: swift build --build-tests -Xswiftc -warnings-as-errors
   run-conformance-tests:
     runs-on: macos-26
     steps:
