@@ -76,9 +76,7 @@ jobs:
       - name: Install conformance runner
         run: make installconformancerunner
       - name: Run conformance tests
-        # verbose=true logs each case's start/finish to stderr so a serial-client
-        # hang identifies the exact in-flight test in CI logs.
-        run: make testconformance CONFORMANCE_CLIENT_ARGS=verbose=true
+        run: make testconformance
   run-unit-tests:
     runs-on: macos-26
     steps:
