@@ -152,6 +152,13 @@ To use `protoc` instead of `buf`, add a `--connect-swift_out` flag to
 +    my.proto
 ```
 
+## Requirements
+
+Swift Package Manager consumption requires **Xcode 16 / Swift 6** (or newer)
+because the package manifest uses `swift-tools-version:6.0`.
+CocoaPods consumers can still build the library in Swift 5 or Swift 6 mode
+as declared in the podspecs.
+
 ## Quick Start
 
 Head over to our [quick start tutorial][getting-started] to get started.
