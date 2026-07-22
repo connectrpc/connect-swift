@@ -69,11 +69,6 @@ final class ConformanceInvoker: Sendable {
                 port: Int(request.port)
             )
         case .urlSession:
-            // One shared ephemeral session for the whole process. Creating a fresh
-            // `URLSessionConfiguration.default` client per case opens the process-wide
-            // on-disk URLCache (`…/Caches/<bundle>/Cache.db`) hundreds of times; under
-            // that churn CFNetwork can emit SQLITE_READONLY errors and leave a streamed
-            // upload task parked forever, which wedges the serial conformance client.
             return SharedURLSessionHTTPClient.shared
         }
     }
@@ -425,10 +420,6 @@ final class ConformanceInvoker: Sendable {
     }
 }
 
-/// Process-wide URLSession-backed HTTP client used by the conformance executable.
-///
-/// Kept outside `ConformanceInvoker` so every case shares one ephemeral session instead of
-/// thrashing the default on-disk URLCache between cases.
 @available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
 private enum SharedURLSessionHTTPClient {
     static let shared: URLSessionHTTPClient = {
