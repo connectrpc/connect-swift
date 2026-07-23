@@ -162,9 +162,12 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
         _ session: URLSession, task: URLSessionTask,
         needNewBodyStream completionHandler: @escaping (InputStream?) -> Void
     ) {
-        completionHandler(
-            self.lock.perform { self.streams[task.taskIdentifier]?.requestBodyStream }
-        )
+        // Look up the stream under the lock, but vend/cancel the body stream outside it.
+        // `requestBodyStream` may call `task.cancel()`, and cancelation can deliver
+        // `didCompleteWithError` on this same serial delegate queue; holding `self.lock`
+        // across that work would risk lock-order deadlocks with stream removal.
+        let stream = self.lock.perform { self.streams[task.taskIdentifier] }
+        completionHandler(stream?.requestBodyStream)
     }
 
     open func urlSession(

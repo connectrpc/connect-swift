@@ -69,7 +69,7 @@ final class ConformanceInvoker: Sendable {
                 port: Int(request.port)
             )
         case .urlSession:
-            return URLSessionHTTPClient()
+            return SharedURLSessionHTTPClient.shared
         }
     }
 
@@ -418,6 +418,16 @@ final class ConformanceInvoker: Sendable {
             return .init()
         }
     }
+}
+
+@available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
+private enum SharedURLSessionHTTPClient {
+    static let shared: URLSessionHTTPClient = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.urlCache = nil
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        return URLSessionHTTPClient(configuration: configuration)
+    }()
 }
 
 private extension Connect.Headers {

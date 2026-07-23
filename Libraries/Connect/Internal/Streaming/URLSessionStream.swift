@@ -47,8 +47,10 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
     /// canceled and `nil` is returned. Cancellation is required in addition to returning `nil`:
     /// CFNetwork does not treat a `nil` body stream as a failure and can instead leave the task
     /// parked indefinitely waiting for a body stream, never delivering any delegate callback.
-    /// Canceling guarantees `urlSession(_:task:didCompleteWithError:)` is delivered so the failure
-    /// is surfaced through the normal stream-close path.
+    /// Canceling is the best available signal to request
+    /// `urlSession(_:task:didCompleteWithError:)` so the failure can be surfaced through the
+    /// normal stream-close path (CFNetwork still may delay or omit completion under process-wide
+    /// URLCache corruption.
     var requestBodyStream: Foundation.InputStream? {
         return self.requestBodyStreamVended.perform { vended in
             guard !vended else {
