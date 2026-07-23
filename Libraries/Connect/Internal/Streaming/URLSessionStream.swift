@@ -50,7 +50,7 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
     /// Canceling is the best available signal to request
     /// `urlSession(_:task:didCompleteWithError:)` so the failure can be surfaced through the
     /// normal stream-close path (CFNetwork still may delay or omit completion under process-wide
-    /// URLCache corruption; conformance avoids that by using a shared ephemeral session).
+    /// URLCache corruption.
     var requestBodyStream: Foundation.InputStream? {
         return self.requestBodyStreamVended.perform { vended in
             guard !vended else {
