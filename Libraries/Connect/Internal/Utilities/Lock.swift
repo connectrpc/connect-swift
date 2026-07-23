@@ -15,12 +15,21 @@
 import Foundation
 
 /// Internal implementation of a lock. Wraps usage of `os_unfair_lock`.
+///
+/// Safety: `@unchecked Sendable` because this type *is* the synchronization
+/// primitive — the pointer is allocated once in `init`, only ever accessed via
+/// `os_unfair_lock_lock`/`unlock`, and deallocated in `deinit` when no other
+/// thread can still hold a reference.
+/// Removal plan: replace with `OSAllocatedUnfairLock` (requires iOS 16/macOS 13
+/// minimum) or `Synchronization.Mutex` (iOS 18/macOS 15) if/when deployment
+/// targets are raised.
 final class Lock: @unchecked Sendable {
     private let underlyingLock: UnsafeMutablePointer<os_unfair_lock>
 
     init() {
         // Reasoning for allocating here: http://www.russbishop.net/the-law
-        // When iOS 15 support is dropped, `OSAllocatedUnfairLock` should be used.
+        // When the minimum supported version reaches iOS 16/macOS 13,
+        // `OSAllocatedUnfairLock` should be used.
         self.underlyingLock = .allocate(capacity: 1)
         self.underlyingLock.initialize(to: os_unfair_lock())
     }

@@ -14,12 +14,14 @@
 
 import Foundation
 
-final class TimeoutTimer: @unchecked Sendable {
+final class TimeoutTimer: Sendable {
     private let hasTimedOut = Locked(false)
-    private var onTimeout: (() -> Void)?
+    private let onTimeout = Locked<(@Sendable () -> Void)?>(nil)
     private let queue = DispatchQueue(label: "connectrpc.Timeout")
     private let timeout: TimeInterval
-    private var workItem: DispatchWorkItem! // Force-unwrapped to allow capturing self in init
+    // Safety: `DispatchWorkItem` is non-Sendable; the only cross-thread operation
+    // performed on it is `cancel()`, which is thread-safe.
+    private let workItem = Locked<DispatchWorkItem?>(nil)
 
     var timedOut: Bool {
         return self.hasTimedOut.value
@@ -31,25 +33,26 @@ final class TimeoutTimer: @unchecked Sendable {
         }
 
         self.timeout = timeout
-        self.workItem = DispatchWorkItem { [weak self] in
-            self?.hasTimedOut.value = true
-            self?.onTimeout?()
-        }
     }
 
     deinit {
         self.cancel()
     }
 
-    func start(onTimeout: @escaping () -> Void) {
+    func start(onTimeout: @escaping @Sendable () -> Void) {
         let milliseconds = Int(self.timeout * 1_000)
-        self.queue.sync { self.onTimeout = onTimeout }
+        self.onTimeout.value = onTimeout
+        let item = DispatchWorkItem { [weak self] in
+            self?.hasTimedOut.value = true
+            self?.onTimeout.value?()
+        }
+        self.workItem.value = item
         self.queue.asyncAfter(
-            deadline: .now() + .milliseconds(milliseconds), execute: self.workItem
+            deadline: .now() + .milliseconds(milliseconds), execute: item
         )
     }
 
     func cancel() {
-        workItem.cancel()
+        self.workItem.value?.cancel()
     }
 }

@@ -18,12 +18,14 @@ import SwiftProtobuf
 ///
 /// The complexity around configuring callbacks on this type is an artifact of the library
 /// supporting both callbacks and async/await. This is internal to the package, and not public.
-final class ClientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>: @unchecked Sendable {
+final class ClientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>: Sendable {
     private let onResult: @Sendable (StreamResult<Output>) -> Void
     private let receivedResults = Locked([StreamResult<Output>]())
     /// Callbacks used to send outbound data and close the stream.
-    /// Optional because these callbacks are not available until the stream is initialized.
-    private var requestCallbacks: RequestCallbacks<Input>?
+    /// Wrapped because these callbacks are not available until the stream is
+    /// initialized (`configureForSending` is called immediately after `init`,
+    /// before the stream escapes to the caller).
+    private let requestCallbacks = Locked<RequestCallbacks<Input>?>(nil)
 
     private struct NotConfiguredForSendingError: Swift.Error {}
 
@@ -40,7 +42,7 @@ final class ClientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>: @
     /// - returns: This instance of the stream (useful for chaining).
     @discardableResult
     func configureForSending(with requestCallbacks: RequestCallbacks<Input>) -> Self {
-        self.requestCallbacks = requestCallbacks
+        self.requestCallbacks.value = requestCallbacks
         return self
     }
 
@@ -67,7 +69,7 @@ final class ClientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>: @
 extension ClientOnlyStream: ClientOnlyStreamInterface {
     @discardableResult
     func send(_ input: Input) throws -> Self {
-        guard let sendData = self.requestCallbacks?.sendData else {
+        guard let sendData = self.requestCallbacks.value?.sendData else {
             throw NotConfiguredForSendingError()
         }
 
@@ -76,10 +78,10 @@ extension ClientOnlyStream: ClientOnlyStreamInterface {
     }
 
     func closeAndReceive() {
-        self.requestCallbacks?.sendClose()
+        self.requestCallbacks.value?.sendClose()
     }
 
     func cancel() {
-        self.requestCallbacks?.cancel()
+        self.requestCallbacks.value?.cancel()
     }
 }

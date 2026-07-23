@@ -19,17 +19,24 @@ import NIOFoundationCompat
 import NIOHTTP1
 
 /// NIO-based channel handler for streams made through the Connect library.
-final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
+///
+/// Loop-confined mutable state is held in `NIOLoopBoundBox`, which runtime-asserts
+/// that every read/write occurs on `self.eventLoop`. External entry points hop via
+/// `runOnEventLoop`; NIO invokes `ChannelInboundHandler` callbacks on the event loop.
+final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, Sendable {
+    private struct State {
+        var context: NIOCore.ChannelHandlerContext?
+        var isClosed = false
+        var hasResponded = false
+        var pendingClose: NIOHTTP1.HTTPClientRequestPart?
+        var pendingData = Foundation.Data()
+        var receivedStatus: NIOHTTP1.HTTPResponseStatus?
+    }
+
     private let eventLoop: NIOCore.EventLoop
     private let request: Connect.HTTPRequest<Data?>
     private let responseCallbacks: Connect.ResponseCallbacks
-
-    private var context: NIOCore.ChannelHandlerContext?
-    private var isClosed = false
-    private var hasResponded = false
-    private var pendingClose: NIOHTTP1.HTTPClientRequestPart?
-    private var pendingData = Foundation.Data()
-    private var receivedStatus: NIOHTTP1.HTTPResponseStatus?
+    private let state: NIOLoopBoundBox<State>
 
     init(
         request: Connect.HTTPRequest<Data?>,
@@ -39,6 +46,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
         self.request = request
         self.responseCallbacks = responseCallbacks
         self.eventLoop = eventLoop
+        self.state = .makeBoxSendingValue(State(), eventLoop: eventLoop)
     }
 
     /// Send outbound data over the stream.
@@ -46,15 +54,15 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     /// - parameter data: The data to send.
     func sendData(_ data: Data) {
         self.runOnEventLoop {
-            if self.isClosed {
+            if self.state.value.isClosed {
                 return
             }
 
-            if let context = self.context {
+            if let context = self.state.value.context {
                 context.writeAndFlush(self.wrapOutboundOut(.body(.byteBuffer(.init(data: data)))))
                     .cascade(to: nil)
             } else {
-                self.pendingData.append(contentsOf: data)
+                self.state.value.pendingData.append(contentsOf: data)
             }
         }
     }
@@ -62,14 +70,14 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     /// Close the stream.
     func close() {
         self.runOnEventLoop {
-            if self.isClosed {
+            if self.state.value.isClosed {
                 return
             }
 
-            if let context = self.context {
+            if let context = self.state.value.context {
                 context.writeAndFlush(self.wrapOutboundOut(.end(nil))).cascade(to: nil)
             } else {
-                self.pendingClose = .end(nil)
+                self.state.value.pendingClose = .end(nil)
             }
         }
     }
@@ -77,7 +85,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     /// Cancel the stream, if currently active.
     func cancel() {
         self.runOnEventLoop {
-            if self.isClosed {
+            if self.state.value.isClosed {
                 return
             }
 
@@ -95,13 +103,13 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     }
 
     private func closeConnection() {
-        if self.isClosed {
+        if self.state.value.isClosed {
             return
         }
 
-        self.hasResponded = true
-        self.isClosed = true
-        self.context?.close(promise: nil)
+        self.state.value.hasResponded = true
+        self.state.value.isClosed = true
+        self.state.value.context?.close(promise: nil)
     }
 
     // MARK: - ChannelInboundHandler
@@ -110,7 +118,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     typealias InboundIn = NIOHTTP1.HTTPClientResponsePart
 
     func channelActive(context: NIOCore.ChannelHandlerContext) {
-        if self.isClosed {
+        if self.state.value.isClosed {
             return
         }
 
@@ -121,15 +129,17 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
         let nioRequestHead = HTTPRequestHead.fromConnect(self.request, nioHeaders: nioHeaders)
         context.write(self.wrapOutboundOut(.head(nioRequestHead))).cascade(to: nil)
 
-        if !self.pendingData.isEmpty {
-            context.write(self.wrapOutboundOut(.body(.byteBuffer(.init(data: self.pendingData)))))
-                .cascade(to: nil)
-            self.pendingData = Data()
+        if !self.state.value.pendingData.isEmpty {
+            context.write(
+                self.wrapOutboundOut(.body(.byteBuffer(.init(data: self.state.value.pendingData))))
+            )
+            .cascade(to: nil)
+            self.state.value.pendingData = Data()
         }
 
-        if let pendingClose = self.pendingClose {
+        if let pendingClose = self.state.value.pendingClose {
             context.write(self.wrapOutboundOut(pendingClose)).cascade(to: nil)
-            self.pendingClose = nil
+            self.state.value.pendingClose = nil
         }
 
         context.flush()
@@ -137,14 +147,14 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     }
 
     func channelRead(context: NIOCore.ChannelHandlerContext, data: NIOCore.NIOAny) {
-        if self.isClosed {
+        if self.state.value.isClosed {
             return
         }
 
         let response = self.unwrapInboundIn(data)
         switch response {
         case .head(let head):
-            self.receivedStatus = head.status
+            self.state.value.receivedStatus = head.status
             self.responseCallbacks.receiveResponseHeaders(.fromNIOHeaders(head.headers))
             context.fireChannelRead(data)
         case .body(let byteBuffer):
@@ -152,7 +162,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             context.fireChannelRead(data)
         case .end(let trailers):
             self.responseCallbacks.receiveClose(
-                self.receivedStatus.map { .fromNIOStatus($0) } ?? .ok,
+                self.state.value.receivedStatus.map { .fromNIOStatus($0) } ?? .ok,
                 trailers.map { .fromNIOHeaders($0) } ?? [:],
                 nil
             )
@@ -161,34 +171,34 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     }
 
     func handlerAdded(context: NIOCore.ChannelHandlerContext) {
-      self.context = context
+        self.state.value.context = context
     }
 
     func handlerRemoved(context: NIOCore.ChannelHandlerContext) {
-      self.context = nil
+        self.state.value.context = nil
     }
 
     func channelInactive(context: ChannelHandlerContext) {
-      let shouldNotify = !self.hasResponded
-      self.closeConnection()
-      if shouldNotify {
-          self.responseCallbacks.receiveClose(
-              .unavailable,
-              [:],
-              ConnectError(
-                  code: .unavailable,
-                  message: "Channel became inactive",
-                  exception: nil,
-                  details: [],
-                  metadata: [:]
-              )
-          )
-      }
-      context.fireChannelInactive()
+        let shouldNotify = !self.state.value.hasResponded
+        self.closeConnection()
+        if shouldNotify {
+            self.responseCallbacks.receiveClose(
+                .unavailable,
+                [:],
+                ConnectError(
+                    code: .unavailable,
+                    message: "Channel became inactive",
+                    exception: nil,
+                    details: [],
+                    metadata: [:]
+                )
+            )
+        }
+        context.fireChannelInactive()
     }
 
     func errorCaught(context: NIOCore.ChannelHandlerContext, error: Swift.Error) {
-        if self.isClosed {
+        if self.state.value.isClosed {
             return
         }
 

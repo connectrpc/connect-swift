@@ -16,6 +16,13 @@ import Foundation
 
 /// Class containing an internal lock which can be used to ensure thread-safe access to an
 /// underlying value. Conforms to `Sendable`, making it accessible from `@Sendable` closures.
+///
+/// Safety: `@unchecked Sendable` because checked conformance is impossible by design
+/// (`wrappedValue` is intentionally mutable): all reads/writes of `wrappedValue` go
+/// through `self.lock.perform`. Callers must not store values whose thread-safety
+/// depends on external state.
+/// Removal plan: becomes `Synchronization.Mutex<Wrapped>` if/when the deployment
+/// floor reaches iOS 18/macOS 15.
 final class Locked<Wrapped>: @unchecked Sendable {
     private let lock = Lock()
     private var wrappedValue: Wrapped

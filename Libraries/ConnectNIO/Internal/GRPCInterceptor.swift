@@ -280,6 +280,9 @@ private extension Envelope {
     }
 }
 
+// Safety: `@unchecked Sendable` because `wrappedValue` is mutable by design; all
+// accesses are guarded by `NIOLock`. Duplicates Connect's internal `Locked` because
+// internal types do not cross module boundaries.
 private final class Locked<T>: @unchecked Sendable {
     private let lock = NIOLock()
     private var wrappedValue: T

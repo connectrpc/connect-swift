@@ -16,8 +16,14 @@ import Foundation
 
 /// Stream implementation that wraps a `URLSession` stream.
 ///
-/// Note: This class is `@unchecked Sendable` because the `Foundation.{Input|Output}Stream`
-/// types do not conform to `Sendable`.
+/// Safety: `@unchecked Sendable` because checked conformance is blocked by the
+/// non-`Sendable` `NSObject` superclass and the non-`Sendable` stored
+/// `Foundation.{Input|Output}Stream` and `URLSessionUploadTask` types. Every
+/// stored property is an immutable `let`; all mutable state (`closedByServer`,
+/// `requestBodyStreamVended`) lives in `Locked` wrappers, and `readStream` is
+/// vended to `URLSession` at most once via the `requestBodyStreamVended` guard.
+/// Removal plan: requires Foundation's stream/task types to become `Sendable`
+/// (or replacement of the bound-stream bridging design).
 final class URLSessionStream: NSObject, @unchecked Sendable {
     private let closedByServer = Locked(false)
     private let readStream: Foundation.InputStream

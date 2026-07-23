@@ -23,6 +23,20 @@ import NIOSSL
 import os.log
 
 /// HTTP client powered by Swift NIO which supports trailers (unlike URLSession).
+///
+/// Safety: `@unchecked Sendable` because (a) checked `Sendable` requires `final`
+/// and this class is deliberately `open` for subclassing, and (b) its mutable
+/// state (`state`, `pendingRequests`, and the lazy `bootstrap`) is only ever
+/// accessed within `self.lock.withLock`. Subclasses must provide their own
+/// synchronization for any state they add.
+/// `deinit` audit: `deinit` may run on one of `loopGroup`'s own threads (see the
+/// comment in `deinit`); everything it calls is safe from any thread. Any new
+/// `deinit` logic must preserve that property — Swift 6 does not check `deinit`
+/// isolation.
+/// Sharp edge (do not change casually): `sendOrQueueRequest` invokes the `send`
+/// closure while holding `self.lock`; this is safe today because the closure only
+/// enqueues non-blocking NIO work, but it must not block or re-enter
+/// `sendOrQueueRequest`.
 open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     private lazy var bootstrap = self.createBootstrap()
     private let host: String
@@ -76,6 +90,13 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
             .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
             .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .channelInitializer { channel in
+                // The initializer closure runs on the channel's event loop, so the
+                // non-Sendable SSL handler is created and installed on the event
+                // loop via `syncOperations`, and the HTTP/2 pipeline is configured
+                // synchronously via `syncOperations.configureHTTP2Pipeline` instead
+                // of moving non-Sendable state into `@Sendable` future callbacks.
+                // A thrown error fails the connect future, which the failure path
+                // in `connectChannelAndMultiplexerIfNeeded()` already handles.
                 channel.eventLoop.makeCompletedFuture {
                     if let tlsConfiguration = tlsConfiguration {
                         let sslContext = try NIOSSL.NIOSSLContext(configuration: tlsConfiguration)
@@ -232,31 +253,28 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         using multiplexer: NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer,
         with connectHandler: any NIOCore.ChannelInboundHandler & Sendable
     ) {
+        // The non-Sendable codec/idle-state handlers are created inside the stream
+        // channel initializer closure, which runs on the channel's event loop, so
+        // they never cross an isolation boundary. Only Sendable values are captured.
+        let useSSL = self.useSSL
+        let timeout = self.timeout
         let promise = eventLoop.makePromise(of: NIOCore.Channel.self)
         multiplexer.createStreamChannel(promise: promise) { channel in
-            channel.eventLoop.makeCompletedFuture {
-                try channel.pipeline.syncOperations.addHandlers(
-                    self.createChannelHandlers(with: connectHandler)
-                )
+            return channel.eventLoop.makeCompletedFuture {
+                var handlers: [NIOCore.ChannelHandler] = [
+                    useSSL
+                    ? HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https)
+                    : HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .http),
+                    connectHandler,
+                ]
+                if let timeout = timeout {
+                    handlers.insert(
+                        IdleStateHandler(allTimeout: .milliseconds(Int64(timeout * 1_000.0))), at: 0
+                    )
+                }
+                try channel.pipeline.syncOperations.addHandlers(handlers)
             }
         }
-    }
-
-    private func createChannelHandlers(
-        with connectHandler: any NIOCore.ChannelInboundHandler
-    ) -> [NIOCore.ChannelHandler] {
-        var handlers: [NIOCore.ChannelHandler] = [
-            self.useSSL
-            ? HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https)
-            : HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .http),
-            connectHandler,
-        ]
-        if let timeout = self.timeout {
-            handlers.insert(
-                IdleStateHandler(allTimeout: .milliseconds(Int64(timeout * 1_000.0))), at: 0
-            )
-        }
-        return handlers
     }
 
     deinit {
