@@ -16,7 +16,17 @@ import Foundation
 
 final class TimeoutTimer: @unchecked Sendable {
     private let hasTimedOut = Locked(false)
-    private var onTimeout: (() -> Void)?
+    /// Callback to invoke when the deadline is reached.
+    ///
+    /// Guarded by a lock rather than confined to `queue`: the class is
+    /// `@unchecked Sendable`, so nothing structurally prevented a future edit from reading
+    /// this from off-queue, and the compiler could not flag it.
+    ///
+    /// The callback must be read out of the lock and invoked *outside* it. It re-enters this
+    /// object - `ProtocolClient` passes a closure that cancels the in-flight request, and
+    /// cancelation can lead back to `cancel()` or to `deinit`. Holding a lock across it
+    /// reintroduces the deadlock fixed in #389.
+    private let onTimeout = Locked<(@Sendable () -> Void)?>(nil)
     private let queue = DispatchQueue(label: "connectrpc.Timeout")
     private let timeout: TimeInterval
     private var workItem: DispatchWorkItem! // Force-unwrapped to allow capturing self in init
@@ -33,7 +43,9 @@ final class TimeoutTimer: @unchecked Sendable {
         self.timeout = timeout
         self.workItem = DispatchWorkItem { [weak self] in
             self?.hasTimedOut.value = true
-            self?.onTimeout?()
+            // Read the callback out of the lock before invoking it - see `onTimeout` above.
+            let onTimeout = self?.onTimeout.value
+            onTimeout?()
         }
     }
 
@@ -41,9 +53,13 @@ final class TimeoutTimer: @unchecked Sendable {
         self.cancel()
     }
 
-    func start(onTimeout: @escaping () -> Void) {
+    /// Start the timer. Must be called at most once per instance: the callback is assigned
+    /// before the work item is scheduled, so the work item cannot observe a `nil` callback.
+    ///
+    /// - parameter onTimeout: Closure to invoke if the deadline is reached before `cancel()`.
+    func start(onTimeout: @escaping @Sendable () -> Void) {
         let milliseconds = Int(self.timeout * 1_000)
-        self.queue.sync { self.onTimeout = onTimeout }
+        self.onTimeout.value = onTimeout
         self.queue.asyncAfter(
             deadline: .now() + .milliseconds(milliseconds), execute: self.workItem
         )
