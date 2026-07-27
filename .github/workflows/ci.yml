@@ -54,6 +54,18 @@ jobs:
       - uses: actions/checkout@v7
       - name: Build Connect watchOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Ultra 3 (49mm),OS=latest' | xcbeautify
+  build-strict-concurrency:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v7
+      # The package builds in Swift 6 language mode (see `swiftLanguageModes` in
+      # Package.swift), so strict concurrency violations are already errors. This job
+      # guards the remaining gap: warnings. Without it, a strict-concurrency warning
+      # (for example one downgraded by `@preconcurrency`) can land unnoticed.
+      # `--build-tests` extends the guarantee to the test targets, which the
+      # `xcodebuild -scheme Connect-Package` jobs above do not cover.
+      - name: Build all targets and tests with warnings as errors
+        run: swift build --build-tests -Xswiftc -warnings-as-errors
   build-plugin-and-generate:
     runs-on: macos-26
     steps:
