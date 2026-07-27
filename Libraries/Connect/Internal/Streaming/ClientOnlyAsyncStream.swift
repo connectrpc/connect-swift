@@ -21,8 +21,10 @@ import Foundation
 /// This subclasses `BidirectionalAsyncStream` since its behavior is purely additive (it overlays
 /// some additional validation) and both types are internal to the package, not public.
 ///
-/// Safety: Inherits `@unchecked Sendable` from `BidirectionalAsyncStream`; the restated
-/// conformance below is redundant but harmless. Its own state is `Locked`.
+/// Safety: `@unchecked Sendable` restates the superclass's conformance, which the compiler
+/// requires of every subclass ("must restate inherited '@unchecked Sendable' conformance") so
+/// that each subclass re-asserts the unchecked invariant for the state it adds. The state added
+/// here is `Locked`, so `BidirectionalAsyncStream`'s invariant continues to hold.
 @available(iOS 13, *)
 final class ClientOnlyAsyncStream<
     Input: ProtobufMessage, Output: ProtobufMessage
