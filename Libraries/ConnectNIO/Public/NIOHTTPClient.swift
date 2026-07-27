@@ -79,6 +79,13 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     /// when creating new connections thereafter.
     /// This function may be used as an external customization point.
     ///
+    /// Important: the returned bootstrap **must** use this client's own event loop group.
+    /// The channel handlers installed on each stream confine their state to the event loop
+    /// obtained from that group, and accessing it from a foreign loop traps. Overrides should
+    /// therefore customize the bootstrap returned by `super.createBootstrap()`
+    /// (e.g. `super.createBootstrap().channelOption(...)`) rather than constructing a
+    /// `ClientBootstrap` on a group of their own.
+    ///
     /// - returns: The bootstrap that should be used for creating new connections.
     open func createBootstrap() -> NIOPosix.ClientBootstrap {
         let host = self.host
@@ -215,6 +222,17 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 do {
                     switch result {
                     case .success(let channel):
+                        // `loopGroup` has a single loop, so `next()` identifies it. A bootstrap
+                        // from an overridden `createBootstrap()` that uses a different group
+                        // would put channel callbacks on a loop the handlers are not bound to,
+                        // tripping `NIOLoopBoundBox`'s precondition deep inside NIO.
+                        assert(
+                            self.map { channel.eventLoop === $0.loopGroup.next() } ?? true,
+                            """
+                            createBootstrap() must use the client's own event loop group; \
+                            customize super.createBootstrap() instead of building a new one.
+                            """
+                        )
                         let multiplexer = try channel.pipeline.syncOperations
                             .handler(type: NIOHTTP2.NIOHTTP2Handler.self)
                             .syncMultiplexer()
