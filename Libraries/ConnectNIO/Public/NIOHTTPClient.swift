@@ -77,6 +77,18 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     /// when creating new connections thereafter.
     /// This function may be used as an external customization point.
     ///
+    /// Important: the returned bootstrap **must** use this client's own event loop group.
+    /// `unary(...)` and `stream(...)` bind each channel handler to `self.loopGroup.next()` and
+    /// funnel every external entry point through that loop, while NIO delivers the handler's
+    /// inbound callbacks on whichever loop its channel belongs to. If those are two different
+    /// loops, both invariants documented on `ConnectUnaryChannelHandler` and
+    /// `ConnectStreamChannelHandler` break at once and the handler's unsynchronized state is
+    /// read and written concurrently. That is a silent data race, not a trap - the handlers are
+    /// `@unchecked Sendable`, so neither the compiler nor NIO will flag it. Overrides should
+    /// therefore customize the bootstrap returned by `super.createBootstrap()`
+    /// (e.g. `super.createBootstrap().channelOption(...)`) rather than constructing a
+    /// `ClientBootstrap` on a group of their own.
+    ///
     /// - returns: The bootstrap that should be used for creating new connections.
     open func createBootstrap() -> NIOPosix.ClientBootstrap {
         let host = self.host
@@ -204,6 +216,18 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 do {
                     switch result {
                     case .success(let channel):
+                        // Debug-only guard for the constraint documented on `createBootstrap()`.
+                        // `loopGroup` has a single loop, so `next()` identifies it. Deliberately
+                        // placed outside `lock.withLock`: the strong `self` this creates may be
+                        // the last reference, and running `deinit` - which takes the lock - while
+                        // the lock is held would deadlock.
+                        assert(
+                            self.map { channel.eventLoop === $0.loopGroup.next() } ?? true,
+                            """
+                            createBootstrap() must use the client's own event loop group; \
+                            customize super.createBootstrap() instead of building a new one.
+                            """
+                        )
                         let multiplexer = try channel.pipeline.syncOperations
                             .handler(type: NIOHTTP2.NIOHTTP2Handler.self)
                             .syncMultiplexer()
