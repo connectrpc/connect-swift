@@ -54,12 +54,51 @@ struct TimeoutTests {
         #expect((error as? ConnectError)?.message == "request exceeded allowed timeout")
     }
 
+    /// A terminal callback can cancel the timer before `ProtocolClient` reaches its
+    /// `start()` call, so cancelation must be sticky rather than a no-op.
+    @available(iOS 13, *)
+    @Test
+    func cancelBeforeStartDisarmsTimer() async throws {
+        let timer = try #require(TimeoutTimer(config: self.makeConfig()))
+        let didTimeOut = Locked(false)
+
+        timer.cancel()
+        timer.start(onTimeout: { didTimeOut.value = true })
+
+        try await Task.sleep(nanoseconds: 200_000_000)
+        #expect(didTimeOut.value == false)
+        #expect(timer.timedOut == false)
+    }
+
+    /// A cancelation racing `start()` must not be lost.
+    @available(iOS 13, *)
+    @Test
+    func cancelConcurrentWithStartDisarmsTimer() async throws {
+        let timers = try (0..<100).map { _ in
+            try #require(TimeoutTimer(config: self.makeConfig()))
+        }
+        let timedOutCount = Locked(0)
+        await withTaskGroup(of: Void.self) { group in
+            for timer in timers {
+                group.addTask {
+                    timer.start(onTimeout: { timedOutCount.perform { $0 += 1 } })
+                }
+                group.addTask { timer.cancel() }
+            }
+        }
+
+        try await Task.sleep(nanoseconds: 200_000_000)
+        #expect(timedOutCount.value == 0)
+    }
+
+    private func makeConfig() -> ProtocolClientConfig {
+        return ProtocolClientConfig(host: "http://localhost", timeout: 0.01)
+    }
+
     private func makeClient() -> Connectrpc_Conformance_V1_ConformanceServiceClient {
-        let config = ProtocolClientConfig(
-            host: "http://localhost",
-            timeout: 0.01
+        let protocolClient = ProtocolClient(
+            httpClient: TimeoutHTTPClient(), config: self.makeConfig()
         )
-        let protocolClient = ProtocolClient(httpClient: TimeoutHTTPClient(), config: config)
         return Connectrpc_Conformance_V1_ConformanceServiceClient(client: protocolClient)
     }
 }
