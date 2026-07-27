@@ -22,8 +22,8 @@ import NIOHTTP1
 final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
     private let eventLoop: NIOCore.EventLoop
     private let request: Connect.HTTPRequest<Data?>
-    private let onMetrics: (Connect.HTTPMetrics) -> Void
-    private let onResponse: (Connect.HTTPResponse) -> Void
+    private let onMetrics: @Sendable (Connect.HTTPMetrics) -> Void
+    private let onResponse: @Sendable (Connect.HTTPResponse) -> Void
 
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
@@ -35,8 +35,8 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
     init(
         request: Connect.HTTPRequest<Data?>,
         eventLoop: NIOCore.EventLoop,
-        onMetrics: @escaping (Connect.HTTPMetrics) -> Void,
-        onResponse: @escaping (Connect.HTTPResponse) -> Void
+        onMetrics: @escaping @Sendable (Connect.HTTPMetrics) -> Void,
+        onResponse: @escaping @Sendable (Connect.HTTPResponse) -> Void
     ) {
         self.request = request
         self.eventLoop = eventLoop

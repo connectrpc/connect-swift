@@ -32,8 +32,14 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     private let timeout: TimeInterval?
     private let useSSL: Bool
 
-    private var pendingRequests = [(NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer?) -> Void]()
+    private var pendingRequests = [PendingRequest]()
     private var state = State.disconnected
+
+    /// Closure invoked with the HTTP/2 multiplexer once a connection is established, or with
+    /// `nil` if connecting failed. Queued while the client is connecting and drained from an
+    /// event-loop callback, hence `@Sendable`.
+    private typealias PendingRequest =
+        @Sendable (NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer?) -> Void
 
     private enum State {
         case disconnected
@@ -168,9 +174,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
 
     // MARK: - Private
 
-    private func sendOrQueueRequest(
-        send: @escaping (NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer?) -> Void
-    ) {
+    private func sendOrQueueRequest(send: @escaping PendingRequest) {
         self.lock.withLock {
             switch self.state {
             case .connected(_, let multiplexer):
@@ -243,7 +247,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     }
 
     private func createChannelHandlers(
-        with connectHandler: any NIOCore.ChannelInboundHandler
+        with connectHandler: any NIOCore.ChannelInboundHandler & Sendable
     ) -> [NIOCore.ChannelHandler] {
         var handlers: [NIOCore.ChannelHandler] = [
             self.useSSL
