@@ -64,6 +64,9 @@ final class ConnectMockGenerator: Generator {
         self.printLine("///")
         self.printLine("/// Note: This class does not handle thread-safe locking, but provides")
         self.printLine("/// `@unchecked Sendable` conformance to simplify testing and mocking.")
+        self.printLine("/// It is intended for single-test use: configure it, exercise it, then")
+        self.printLine("/// assert on it. Do not share an instance across concurrent tests or")
+        self.printLine("/// mutate its properties from multiple threads.")
         self.printLine("@available(iOS 13, *)")
         self.printLine(
             """
