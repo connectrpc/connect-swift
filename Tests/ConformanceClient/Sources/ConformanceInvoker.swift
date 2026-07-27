@@ -155,7 +155,12 @@ final class ConformanceInvoker: Sendable {
         let unaryRequest = try Connectrpc_Conformance_V1_UnaryRequest(
             unpackingAny: self.context.requestMessages[0]
         )
-        let task = Task { [unowned self] in
+        // Unstructured `Task` on purpose: the conformance `cancelTiming` matrix needs a handle
+        // to cancel this call independently of the enclosing task, which structured
+        // concurrency does not allow. `self` is captured strongly - the task is a local and is
+        // never stored on `self`, so there is no retain cycle, and a strong capture cannot
+        // become a use-after-free if an early return is ever added before `await task.value`.
+        let task = Task {
             return await self.client.unary(
                 request: unaryRequest,
                 headers: .fromConformanceHeaders(self.context.requestHeaders)
@@ -189,7 +194,8 @@ final class ConformanceInvoker: Sendable {
         let unaryRequest = try Connectrpc_Conformance_V1_IdempotentUnaryRequest(
             unpackingAny: self.context.requestMessages[0]
         )
-        let task = Task { [unowned self] in
+        // Unstructured `Task` on purpose, with a strong `self` capture - see `invokeUnary()`.
+        let task = Task {
             return await self.client.idempotentUnary(
                 request: unaryRequest,
                 headers: .fromConformanceHeaders(self.context.requestHeaders)

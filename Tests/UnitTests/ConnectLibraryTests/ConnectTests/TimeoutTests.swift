@@ -64,7 +64,10 @@ struct TimeoutTests {
     }
 }
 
-private final class TimeoutHTTPClient: HTTPClientInterface, @unchecked Sendable {
+/// Stateless by design - it holds no stored properties, so `Sendable` is checked by the
+/// compiler rather than asserted with `@unchecked`. Per-request state lives in `Locked`
+/// values captured by the returned closures.
+private final class TimeoutHTTPClient: HTTPClientInterface, Sendable {
     @discardableResult
     func unary(
         request: HTTPRequest<Data?>,
