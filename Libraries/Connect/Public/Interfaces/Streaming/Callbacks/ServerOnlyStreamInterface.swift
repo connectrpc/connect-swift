@@ -16,7 +16,11 @@ import SwiftProtobuf
 
 /// Represents a server-only stream (a stream where the server streams data to the client after
 /// receiving an initial request) that can send request messages.
-public protocol ServerOnlyStreamInterface<Input> {
+///
+/// Requires `Sendable` for the same reason as `ServerOnlyAsyncStreamInterface`: streams are
+/// vended by `ProtocolClientInterface` (itself `Sendable`) and are used across threads, since
+/// results arrive on whichever thread the underlying HTTP client delivers them on.
+public protocol ServerOnlyStreamInterface<Input>: Sendable {
     /// The input (request) message type.
     associatedtype Input: ProtobufMessage
 

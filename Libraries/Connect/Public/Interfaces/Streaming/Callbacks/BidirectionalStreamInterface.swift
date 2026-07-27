@@ -15,7 +15,11 @@
 import SwiftProtobuf
 
 /// Represents a bidirectional stream that can send request messages and initiate closes.
-public protocol BidirectionalStreamInterface<Input> {
+///
+/// Requires `Sendable` for the same reason as `BidirectionalAsyncStreamInterface`: streams are
+/// vended by `ProtocolClientInterface` (itself `Sendable`) and are used across threads, since
+/// results arrive on whichever thread the underlying HTTP client delivers them on.
+public protocol BidirectionalStreamInterface<Input>: Sendable {
     /// The input (request) message type.
     associatedtype Input: ProtobufMessage
 
