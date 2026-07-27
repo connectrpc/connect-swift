@@ -16,6 +16,14 @@ import Foundation
 
 /// Class containing an internal lock which can be used to ensure thread-safe access to an
 /// underlying value. Conforms to `Sendable`, making it accessible from `@Sendable` closures.
+///
+/// `Wrapped` is intentionally unconstrained. Constraining it to `Sendable` would break the
+/// main reason this type exists - guarding values that are not themselves `Sendable` - which
+/// is the standard trade-off for a mutex box, and is why this type is `@unchecked Sendable`.
+///
+/// `ConnectNIO` has its own minimal copy of this type (see `GRPCInterceptor.swift`) because
+/// this one is `internal` to the `Connect` module and cannot be shared across the module
+/// boundary; that file documents why the alternatives were rejected.
 final class Locked<Wrapped>: @unchecked Sendable {
     private let lock = Lock()
     private var wrappedValue: Wrapped

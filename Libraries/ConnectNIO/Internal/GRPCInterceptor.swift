@@ -280,6 +280,15 @@ private extension Envelope {
     }
 }
 
+/// Minimal lock-guarded box, intentionally duplicated from `Connect`'s internal `Locked<T>`
+/// rather than shared.
+///
+/// `Connect.Locked` is `internal` to the `Connect` module, so this module cannot see it. The
+/// obvious fix - promoting it to `package` access - does not work: `Connect-Swift.podspec`
+/// ships `Libraries/Connect/**/*.swift` and CocoaPods compiles without `-package-name`, which
+/// the `package` access level requires. Promoting it to `public` under the `PackageInternal`
+/// convention would work but permanently grows `Connect`'s public API surface to deduplicate
+/// a dozen lines. Both were considered and rejected; keep them separate.
 private final class Locked<T>: @unchecked Sendable {
     private let lock = NIOLock()
     private var wrappedValue: T

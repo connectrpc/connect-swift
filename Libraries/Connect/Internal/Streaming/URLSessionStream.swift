@@ -18,6 +18,20 @@ import Foundation
 ///
 /// Note: This class is `@unchecked Sendable` because the `Foundation.{Input|Output}Stream`
 /// types do not conform to `Sendable`.
+///
+/// Known gap, deliberately not addressed here: `writeStream` is written by `sendData(_:)` and
+/// closed by `close()` with no lock. Both are reachable concurrently through
+/// `RequestCallbacks.sendData` / `.sendClose`, which `ProtocolClient`'s
+/// `PendingRequestCallbacks` does not serialize, so concurrent `sendData(_:)` calls can
+/// interleave writes into the bound `OutputStream`. Unlike the other `@unchecked Sendable`
+/// sites in this package - which are safe by an unenforced convention - this is a genuine
+/// latent race.
+///
+/// It is left alone on purpose: the fix (a lock around the `writeStream.write` loop and
+/// `close()`) changes throughput behavior under load, and this file already carries two
+/// hard-won CFNetwork workarounds (see `requestBodyStream` below, plus #399 and #412). It
+/// belongs in its own change gated on both conformance runs and a client-streaming soak,
+/// rather than being folded into a non-behavioral concurrency-annotation pass.
 final class URLSessionStream: NSObject, @unchecked Sendable {
     private let closedByServer = Locked(false)
     private let readStream: Foundation.InputStream

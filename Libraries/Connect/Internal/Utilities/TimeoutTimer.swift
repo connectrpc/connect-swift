@@ -49,6 +49,14 @@ final class TimeoutTimer: @unchecked Sendable {
         }
     }
 
+    // Deinit isolation audit: safe on any thread, including from inside `onTimeout` itself.
+    // Swift 6 does not check the isolation of `deinit`, so this is verified by inspection.
+    //
+    // This is not hypothetical: before #389 `cancel()` wrapped `workItem.cancel()` in
+    // `queue.sync`, and when the timer's own work item released the last reference, `deinit`
+    // re-entered the serial queue and deadlocked. `DispatchWorkItem.cancel()` is thread-safe
+    // and non-blocking, which is the only reason this is safe - do not reintroduce a
+    // `queue.sync` or any lock acquisition here.
     deinit {
         self.cancel()
     }

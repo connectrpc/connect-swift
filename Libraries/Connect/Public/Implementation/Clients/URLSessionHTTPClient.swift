@@ -48,6 +48,11 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
         delegate.client = self
     }
 
+    // Deinit isolation audit: safe on any thread, including the delegate `OperationQueue`.
+    // Swift 6 does not check the isolation of `deinit`, so this is verified by inspection.
+    // `finishTasksAndInvalidate()` is asynchronous and callable from any thread, and
+    // `URLSessionDelegateWrapper` holds only a `weak` reference back to this client, so the
+    // session's strong hold on its delegate does not keep this object alive or block dealloc.
     deinit {
         self.session.finishTasksAndInvalidate()
     }
@@ -199,6 +204,17 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
 /// To work around this, `URLSessionDelegateWrapper` maintains a `weak` reference to the
 /// `URLSessionHTTPClient` and passes delegate calls through to it, avoiding the retain cycle.
 private final class URLSessionDelegateWrapper: NSObject, @unchecked Sendable {
+    /// Deliberately left unsynchronized, and the reason `@unchecked Sendable` is needed here.
+    ///
+    /// This is written exactly once, in `URLSessionHTTPClient.init` immediately after
+    /// `super.init()`, and that write happens-before any delegate callback can arrive:
+    /// `URLSession` cannot dispatch a callback for a task that does not exist yet, and no task
+    /// can be created until `init` returns. Reads then all occur on the delegate
+    /// `OperationQueue`, which is configured with `maxConcurrentOperationCount = 1`.
+    ///
+    /// It cannot be a `let`: the retain-cycle avoidance described above requires assigning
+    /// `self` after `super.init()`. Wrapping it would need a `weak` box type that does not
+    /// exist here, which is not worth it for one write-once slot.
     weak var client: URLSessionHTTPClient?
 }
 

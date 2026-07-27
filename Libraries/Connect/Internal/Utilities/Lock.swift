@@ -25,6 +25,10 @@ final class Lock: @unchecked Sendable {
         self.underlyingLock.initialize(to: os_unfair_lock())
     }
 
+    // Deinit isolation audit: safe on any thread. Swift 6 does not check the isolation of
+    // `deinit`, so this is verified by inspection rather than by the compiler. There is no
+    // isolation requirement here, and the lock cannot be held at this point because `deinit`
+    // only runs once the last reference is gone.
     deinit {
         self.underlyingLock.deinitialize(count: 1)
         self.underlyingLock.deallocate()

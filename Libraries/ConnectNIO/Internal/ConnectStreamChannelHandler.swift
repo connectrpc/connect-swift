@@ -19,6 +19,19 @@ import NIOFoundationCompat
 import NIOHTTP1
 
 /// NIO-based channel handler for streams made through the Connect library.
+///
+/// The mutable state below is deliberately unsynchronized, and this is why the type is
+/// `@unchecked Sendable` rather than checked. Safety rests on two invariants the compiler
+/// cannot see:
+///
+/// 1. NIO invokes `ChannelInboundHandler` callbacks (`channelActive`, `channelRead`,
+///    `handlerAdded`, `handlerRemoved`, `channelInactive`, `errorCaught`,
+///    `userInboundEventTriggered`) only on this channel's `EventLoop`.
+/// 2. Every externally reachable entry point - `sendData(_:)`, `close()`, `cancel()` - funnels
+///    through `runOnEventLoop(action:)`, which hops to that same `EventLoop`.
+///
+/// Any new method that touches this state must go through `runOnEventLoop(action:)`. Adding
+/// one that does not is a data race, and nothing in the type system will stop it.
 final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
     private let eventLoop: NIOCore.EventLoop
     private let request: Connect.HTTPRequest<Data?>

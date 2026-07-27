@@ -24,6 +24,12 @@ import os.log
 
 /// HTTP client powered by Swift NIO which supports trailers (unlike URLSession).
 open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
+    /// Lazy initialization is *not* atomic. This is safe only because its sole reader,
+    /// `connectChannelAndMultiplexerIfNeeded()`, is called exclusively from inside
+    /// `sendOrQueueRequest`'s `lock.withLock` block, so the one-time initialization is
+    /// serialized by that lock. Reading `self.bootstrap` from anywhere outside the lock would
+    /// be a race on the lazy initialization itself, and the compiler cannot flag it because
+    /// this class is `@unchecked Sendable`.
     private lazy var bootstrap = self.createBootstrap()
     private let host: String
     private let lock = NIOConcurrencyHelpers.NIOLock()
@@ -263,6 +269,20 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         return handlers
     }
 
+    // Deinit isolation audit: safe, and the most delicate `deinit` in the package. Swift 6
+    // does not check the isolation of `deinit`, so both hazards below are verified by
+    // inspection only - a zero-warning strict-concurrency build says nothing about them.
+    //
+    // Hazard 1 - shutting down the group from one of its own loops. Addressed in #407 and
+    // described in the comment on `shutdownGracefully` below.
+    //
+    // Hazard 2 - lock re-entrancy. `NIOLock` is not reentrant and this `deinit` acquires it.
+    // That is safe only because every closure that could release the last reference holds a
+    // strong reference across the whole `withLock` expression via its *outer* optional chain:
+    // `self?.lock.withLock { self?... }` keeps `self` alive for the duration of the call, so
+    // an inner `self?` temporary can never be the last release. Rewriting any of those
+    // closures to `guard let self` and calling `self.lock.withLock` would silently break this
+    // and deadlock here. Do not refactor them without re-deriving this property.
     deinit {
         self.lock.withLock {
             if case .connected(let channel, _) = self.state {
@@ -272,6 +292,16 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         // An event loop callback can release the client's last reference, running `deinit` on that
         // event loop. The synchronous `syncShutdownGracefully()` call will trap there because the
         // loop cannot wait for itself to stop, so initiate shutdown asynchronously.
+        //
+        // Known consequence: a `Cancelable` returned by `unary(...)` captures its handler
+        // strongly, and the handler holds its `EventLoop` strongly, but the group is owned by
+        // this client. A `Cancelable` invoked after the client is gone therefore reaches
+        // `runOnEventLoop` -> `EventLoop.submit` on a loop this call has already shut down.
+        // SwiftNIO currently logs "Cannot schedule tasks on an EventLoop that has already
+        // shut down" and ignores it - the conformance suite emits ~25 such lines per NIO run,
+        // both before and after this migration - but SwiftNIO states it will become a forced
+        // crash in a future version. Fixing it means tying handler/`Cancelable` lifetime to
+        // the client rather than to the closure; tracked as follow-up, not addressed here.
         self.loopGroup.shutdownGracefully { _ in }
     }
 }
