@@ -23,7 +23,15 @@ final class ClientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>: @
     private let receivedResults = Locked([StreamResult<Output>]())
     /// Callbacks used to send outbound data and close the stream.
     /// Optional because these callbacks are not available until the stream is initialized.
-    private var requestCallbacks: RequestCallbacks<Input>?
+    ///
+    /// Guarded by a lock rather than left as a plain `var`: this is written once by
+    /// `configureForSending(with:)` but read from arbitrary threads by `send()`,
+    /// `closeAndReceive()` and `cancel()`. The class is `@unchecked Sendable`, so the
+    /// compiler cannot flag an unsynchronized access here.
+    ///
+    /// Only the reference read is performed under the lock. Never invoke a callback while
+    /// holding it - they re-enter interceptor and network code.
+    private let requestCallbacks = Locked<RequestCallbacks<Input>?>(nil)
 
     private struct NotConfiguredForSendingError: Swift.Error {}
 
@@ -40,7 +48,7 @@ final class ClientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>: @
     /// - returns: This instance of the stream (useful for chaining).
     @discardableResult
     func configureForSending(with requestCallbacks: RequestCallbacks<Input>) -> Self {
-        self.requestCallbacks = requestCallbacks
+        self.requestCallbacks.value = requestCallbacks
         return self
     }
 
@@ -67,7 +75,7 @@ final class ClientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>: @
 extension ClientOnlyStream: ClientOnlyStreamInterface {
     @discardableResult
     func send(_ input: Input) throws -> Self {
-        guard let sendData = self.requestCallbacks?.sendData else {
+        guard let sendData = self.requestCallbacks.value?.sendData else {
             throw NotConfiguredForSendingError()
         }
 
@@ -76,10 +84,10 @@ extension ClientOnlyStream: ClientOnlyStreamInterface {
     }
 
     func closeAndReceive() {
-        self.requestCallbacks?.sendClose()
+        self.requestCallbacks.value?.sendClose()
     }
 
     func cancel() {
-        self.requestCallbacks?.cancel()
+        self.requestCallbacks.value?.cancel()
     }
 }

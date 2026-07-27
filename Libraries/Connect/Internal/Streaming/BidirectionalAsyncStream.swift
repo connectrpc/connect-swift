@@ -33,7 +33,16 @@ class BidirectionalAsyncStream<
     private var receiveResult: ((StreamResult<Output>) -> Void)!
     /// Callbacks used to send outbound data and close the stream.
     /// Optional because these callbacks are not available until the stream is initialized.
-    private var requestCallbacks: RequestCallbacks<Input>?
+    ///
+    /// Guarded by a lock rather than left as a plain `var`: this is written once by
+    /// `configureForSending(with:)` but read from arbitrary threads, including the
+    /// `@Sendable` `continuation.onTermination` closure below, which fires on whichever
+    /// thread cancels or tears down the consuming task. The class is `@unchecked Sendable`,
+    /// so the compiler cannot flag an unsynchronized access here.
+    ///
+    /// Only the reference read is performed under the lock. Never invoke a callback while
+    /// holding it - they re-enter interceptor and network code.
+    private let requestCallbacks = Locked<RequestCallbacks<Input>?>(nil)
 
     private struct NotConfiguredForSendingError: Swift.Error {}
 
@@ -55,7 +64,7 @@ class BidirectionalAsyncStream<
                 }
             }
             continuation.onTermination = { @Sendable _ in
-                self.requestCallbacks?.sendClose()
+                self.requestCallbacks.value?.sendClose()
             }
         }
     }
@@ -69,7 +78,7 @@ class BidirectionalAsyncStream<
     /// - returns: This instance of the stream (useful for chaining).
     @discardableResult
     func configureForSending(with requestCallbacks: RequestCallbacks<Input>) -> Self {
-        self.requestCallbacks = requestCallbacks
+        self.requestCallbacks.value = requestCallbacks
         return self
     }
 
@@ -86,7 +95,7 @@ class BidirectionalAsyncStream<
 extension BidirectionalAsyncStream: BidirectionalAsyncStreamInterface {
     @discardableResult
     func send(_ input: Input) throws -> Self {
-        guard let sendData = self.requestCallbacks?.sendData else {
+        guard let sendData = self.requestCallbacks.value?.sendData else {
             throw NotConfiguredForSendingError()
         }
 
@@ -99,10 +108,10 @@ extension BidirectionalAsyncStream: BidirectionalAsyncStreamInterface {
     }
 
     func close() {
-        self.requestCallbacks?.sendClose()
+        self.requestCallbacks.value?.sendClose()
     }
 
     func cancel() {
-        self.requestCallbacks?.cancel()
+        self.requestCallbacks.value?.cancel()
     }
 }
