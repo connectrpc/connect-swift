@@ -14,7 +14,7 @@ EXAMPLES_PROTO_REF := e74547031f662f81a62f5e95ebaa9f7037e0c41b
 LICENSE_HEADER_VERSION := v1.35.1
 LICENSE_IGNORE := -e Package.swift \
     -e $(BIN)\/ \
-    -e Examples/ElizaSharedSources/GeneratedSources\/ \
+    -e Examples/ElizaSwiftPackageApp/ElizaSwiftPackageApp/GeneratedSources\/ \
     -e Libraries/Connect/Internal/GeneratedSources\/ \
     -e Tests/ConformanceClient/GeneratedSources\/ \
     -e Tests/UnitTests/ConnectLibraryTests/GeneratedSources\/
@@ -38,7 +38,7 @@ clean: cleangenerated ## Delete all plugins and generated outputs
 
 .PHONY: cleangenerated
 cleangenerated: ## Delete all generated outputs
-	rm -rf ./Examples/ElizaSharedSources/GeneratedSources/*
+	rm -rf ./Examples/ElizaSwiftPackageApp/ElizaSwiftPackageApp/GeneratedSources/*
 	rm -rf ./Libraries/Connect/Internal/GeneratedSources/*
 	rm -rf ./Tests/ConformanceClient/GeneratedSources/*
 	rm -rf ./Tests/UnitTests/ConnectLibraryTests/GeneratedSources/*
