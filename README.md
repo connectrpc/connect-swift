@@ -6,12 +6,6 @@ Connect-Swift
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20tvOS%20%7C%20watchOS-lightgrey?style=flat)](./Package.swift)
 [![License](https://img.shields.io/github/license/connectrpc/connect-swift?style=flat)](./LICENSE)
 
-> [!NOTE]
-> **CocoaPods support has been removed.** Connect-Swift is distributed exclusively through
-> Swift Package Manager. The last version published to CocoaPods Trunk was `1.2.3`; those podspecs
-> remain installable but will not be updated. CocoaPods Trunk stops accepting new podspecs entirely
-> on December 2, 2026 — see the [CocoaPods Trunk read-only plan][cocoapods-readonly].
-
 Connect-Swift is a small library (<200KB!) that provides support for using
 generated,
 type-safe, and idiomatic Swift APIs to communicate with your app's servers
@@ -208,6 +202,14 @@ Our goal is to not make breaking changes unless absolutely necessary.
 ## Legal
 
 Offered under the [Apache 2 license](./LICENSE).
+
+## CocoaPods
+
+> [!NOTE]
+> **CocoaPods support has been removed.** Connect-Swift is distributed exclusively through
+> Swift Package Manager. The last version published to CocoaPods Trunk was `1.2.3`; those podspecs
+> remain installable but will not be updated. CocoaPods Trunk stops accepting new podspecs entirely
+> on December 2, 2026 — see the [CocoaPods Trunk read-only plan][cocoapods-readonly].
 
 [blog]: https://buf.build/blog/announcing-connect-swift
 [buf-studio]: https://buf.build/studio

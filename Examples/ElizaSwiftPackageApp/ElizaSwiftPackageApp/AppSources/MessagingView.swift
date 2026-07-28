@@ -65,7 +65,7 @@ struct MessagingView<ViewModel: MessagingViewModel>: View {
                         .id(message.id)
                     }
                 }
-                .onChange(of: self.viewModel.messages.count) { messageCount in
+                .onChange(of: self.viewModel.messages.count) { _, messageCount in
                     listView.scrollTo(self.viewModel.messages[messageCount - 1].id)
                 }
             }
