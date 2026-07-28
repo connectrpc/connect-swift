@@ -13,11 +13,8 @@
 // limitations under the License.
 
 import Connect
-#if !COCOAPODS
-// SwiftNIO (and gRPC) support is not available via CocoaPods since SwiftNIO does not support it.
 // This import is only necessary if using gRPC, not for Connect or gRPC-Web.
 import ConnectNIO
-#endif
 import SwiftUI
 
 private enum MessagingConnectionType: Int, CaseIterable {
@@ -48,8 +45,7 @@ struct MenuView: View {
             codec: ProtoCodec(), // Protobuf binary, or JSONCodec() for JSON
             unaryGET: .disabled // Can enable to use cacheable unary HTTP GET requests
         )
-        #if !COCOAPODS
-        // For gRPC (which is not supported by CocoaPods), use the NIO HTTP client:
+        // For gRPC, use the NIO HTTP client:
         if case .custom = networkProtocol {
             return Connectrpc_Eliza_V1_ElizaServiceClient(
                 client: ProtocolClient(
@@ -58,7 +54,6 @@ struct MenuView: View {
                 )
             )
         }
-        #endif
         return Connectrpc_Eliza_V1_ElizaServiceClient(
             client: ProtocolClient(
                 httpClient: URLSessionHTTPClient(),
@@ -108,7 +103,6 @@ struct MenuView: View {
                         )
 
                     case .grpcUnary:
-                        #if !COCOAPODS
                         NavigationLink(
                             "gRPC (Unary)",
                             destination: LazyNavigationView {
@@ -120,7 +114,6 @@ struct MenuView: View {
                             }
                             .navigationTitle("Eliza Chat (gRPC Unary)")
                         )
-                        #endif
 
                     case .grpcWebUnary:
                         NavigationLink(
@@ -136,7 +129,6 @@ struct MenuView: View {
                         )
 
                     case .grpcStreaming:
-                        #if !COCOAPODS
                         NavigationLink(
                             "gRPC (Streaming)",
                             destination: LazyNavigationView {
@@ -148,7 +140,6 @@ struct MenuView: View {
                             }
                             .navigationTitle("Eliza Chat (gRPC Streaming)")
                         )
-                        #endif
 
                     case .grpcWebStreaming:
                         NavigationLink(

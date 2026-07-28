@@ -13,15 +13,6 @@ env:
 permissions:
   contents: read
 jobs:
-  build-eliza-cocoapods-example:
-    runs-on: macos-26
-    steps:
-      - uses: actions/checkout@v7
-      - name: Build Eliza CocoaPods example
-        run: |
-          cd Examples/ElizaCocoaPodsApp
-          pod install
-          set -o pipefail && xcodebuild -workspace ElizaCocoaPodsApp.xcworkspace -scheme ElizaCocoaPodsApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
   build-eliza-swiftpm-example:
     runs-on: macos-26
     steps:
