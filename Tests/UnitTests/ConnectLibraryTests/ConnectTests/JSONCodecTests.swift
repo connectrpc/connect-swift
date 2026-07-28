@@ -33,7 +33,6 @@ struct JSONCodecTests {
         proto.rawQueryParams = [.init()]
     }
 
-    @available(iOS 13, *)
     @Test
     func serializingAndDeserializingWithDefaultOptions() throws {
         let codec = JSONCodec()
@@ -41,7 +40,6 @@ struct JSONCodecTests {
         #expect(try codec.deserialize(source: serialized) == self.message)
     }
 
-    @available(iOS 13, *)
     @Test
     func serializingAndDeserializingWithEnumsAsInts() throws {
         let codec = JSONCodec(alwaysEncodeEnumsAsInts: true, preserveProtobufFieldNames: false)
@@ -53,7 +51,6 @@ struct JSONCodecTests {
         #expect(try codec.deserialize(source: serialized) == self.message)
     }
 
-    @available(iOS 13, *)
     @Test
     func serializingAndDeserializingWithEnumsAsStrings() throws {
         let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: false)
@@ -67,7 +64,6 @@ struct JSONCodecTests {
         #expect(try codec.deserialize(source: serialized) == self.message)
     }
 
-    @available(iOS 13, *)
     @Test
     func serializingAndDeserializingWithProtobufFieldNames() throws {
         let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: true)
@@ -84,7 +80,6 @@ struct JSONCodecTests {
         #expect(try codec.deserialize(source: serialized) == self.message)
     }
 
-    @available(iOS 13, *)
     @Test
     func serializingAndDeserializingWithCamelCaseFieldNames() throws {
         let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: false)

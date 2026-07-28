@@ -31,7 +31,6 @@ struct ProtoCodecTests {
         ]
     }
 
-    @available(iOS 13, *)
     @Test
     func serializingAndDeserializing() throws {
         let codec = ProtoCodec()

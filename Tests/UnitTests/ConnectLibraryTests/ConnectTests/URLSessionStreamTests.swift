@@ -21,7 +21,6 @@ struct URLSessionStreamTests {
     /// initial send and when it resends a request after a recoverable error. A streamed request
     /// body cannot be replayed, and returning the same already-opened stream on a resend crashes
     /// CFNetwork. The stream must therefore be vended only once.
-    @available(iOS 13, *)
     @Test
     func vendsRequestBodyStreamOnlyOnce() {
         let stream = URLSessionStream(
@@ -46,7 +45,6 @@ struct URLSessionStreamTests {
     /// A second `needNewBodyStream` cancels the task because the bound body cannot be replayed.
     /// That cancelation must surface as `.unavailable` (retriable connection failure), not
     /// `.canceled`, and `receiveClose` must fire exactly once.
-    @available(iOS 13, *)
     @Test
     func resendCancelationIsRemappedToUnavailableExactlyOnce() async {
         await confirmation("receiveClose", expectedCount: 1) { confirm in

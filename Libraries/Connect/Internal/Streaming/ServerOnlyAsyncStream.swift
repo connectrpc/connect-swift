@@ -15,7 +15,6 @@
 import SwiftProtobuf
 
 /// Concrete **internal** implementation of `ServerOnlyAsyncStreamInterface`.
-@available(iOS 13, *)
 final class ServerOnlyAsyncStream<Input: ProtobufMessage, Output: ProtobufMessage>: Sendable {
     private let bidirectionalStream: BidirectionalAsyncStream<Input, Output>
 
@@ -24,7 +23,6 @@ final class ServerOnlyAsyncStream<Input: ProtobufMessage, Output: ProtobufMessag
     }
 }
 
-@available(iOS 13, *)
 extension ServerOnlyAsyncStream: ServerOnlyAsyncStreamInterface {
     func send(_ input: Input) throws {
         try self.bidirectionalStream.send(input)

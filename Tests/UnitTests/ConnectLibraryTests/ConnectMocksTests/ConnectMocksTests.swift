@@ -22,7 +22,6 @@ import Testing
 struct ConnectMocksTests {
     // MARK: - Unary
 
-    @available(iOS 13, *)
     @Test
     func mockUnaryCallbacks() {
         let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
@@ -38,7 +37,6 @@ struct ConnectMocksTests {
         #expect(receivedMessage.value?.payload.data.count == 1)
     }
 
-    @available(iOS 13, *)
     @Test
     func mockUnaryAsyncAwait() async {
         let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
@@ -53,7 +51,6 @@ struct ConnectMocksTests {
 
     // MARK: - Bidirectional stream
 
-    @available(iOS 13, *)
     @Test
     func mockBidirectionalStreamCallbacks() {
         let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
@@ -93,7 +90,6 @@ struct ConnectMocksTests {
         #expect(client.mockBidiStream.isClosed)
     }
 
-    @available(iOS 13, *)
     @Test
     func mockBidirectionalStreamAsyncAwait() async throws {
         let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
@@ -134,7 +130,6 @@ struct ConnectMocksTests {
 
     // MARK: - Server-only stream
 
-    @available(iOS 13, *)
     @Test
     func mockServerOnlyStreamCallbacks() {
         let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
@@ -165,7 +160,6 @@ struct ConnectMocksTests {
         #expect(receivedResults.value == expectedResults)
     }
 
-    @available(iOS 13, *)
     @Test
     func mockServerOnlyStreamAsyncAwait() async throws {
         let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()

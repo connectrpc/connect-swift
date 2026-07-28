@@ -18,7 +18,6 @@ import SwiftProtobuf
 import Testing
 
 struct ConnectErrorTests {
-    @available(iOS 13, *)
     @Test
     func deserializingFullErrorAndUnpackingDetails() throws {
         let expectedDetails = Connectrpc_Conformance_V1_RawHTTPRequest.with { $0.uri = "foo/bar" }
@@ -32,7 +31,6 @@ struct ConnectErrorTests {
         #expect(error.metadata.isEmpty)
     }
 
-    @available(iOS 13, *)
     @Test
     func deserializingFullErrorAndUnpackingDetailsWithUnpaddedBase64() throws {
         let expectedDetails = Connectrpc_Conformance_V1_RawHTTPRequest.with { $0.uri = "foo/bar" }
@@ -46,7 +44,6 @@ struct ConnectErrorTests {
         #expect(error.metadata.isEmpty)
     }
 
-    @available(iOS 13, *)
     @Test
     func deserializingFullErrorAndUnpackingMultipleDetails() throws {
         let expectedDetails1 = Connectrpc_Conformance_V1_RawHTTPRequest.with { $0.uri = "foo/bar" }
@@ -61,7 +58,6 @@ struct ConnectErrorTests {
         #expect(error.metadata.isEmpty)
     }
 
-    @available(iOS 13, *)
     @Test
     func deserializingErrorUsingHelperFunctionLowercasesHeaderKeys() throws {
         let expectedDetails = Connectrpc_Conformance_V1_RawHTTPRequest.with { $0.uri = "a/b/c" }
@@ -83,7 +79,6 @@ struct ConnectErrorTests {
         #expect(error.metadata == ["somekey": ["foo"], "otherkey1": ["BAR", "bAz"]])
     }
 
-    @available(iOS 13, *)
     @Test
     func deserializingErrorUsingHelperFunctionCombinesHeadersAndTrailers() throws {
         let expectedDetails = Connectrpc_Conformance_V1_RawHTTPRequest.with { $0.uri = "a/b/c" }
@@ -112,7 +107,6 @@ struct ConnectErrorTests {
         ])
     }
 
-    @available(iOS 13, *)
     @Test
     func deserializingSimpleError() throws {
         let errorDictionary = [

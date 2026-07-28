@@ -16,7 +16,6 @@ import Connect
 import Testing
 
 struct ServiceMetadataTests {
-    @available(iOS 13, *)
     @Test
     func methodSpecsAreGeneratedCorrectlyForService() {
         #expect(

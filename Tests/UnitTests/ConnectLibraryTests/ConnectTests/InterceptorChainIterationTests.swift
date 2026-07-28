@@ -16,7 +16,6 @@
 import Testing
 
 struct InterceptorChainIterationTests {
-    @available(iOS 13, *)
     @Test
     func executingNonFailing() {
         let initialValue = ""
@@ -34,7 +33,6 @@ struct InterceptorChainIterationTests {
         #expect(result.value == "ab")
     }
 
-    @available(iOS 13, *)
     @Test
     func executingNonFailingReversed() {
         let initialValue = ""
@@ -52,7 +50,6 @@ struct InterceptorChainIterationTests {
         #expect(result.value == "ba")
     }
 
-    @available(iOS 13, *)
     @Test
     func executingLinkedNonFailing() {
         let result = Locked(0)
@@ -74,7 +71,6 @@ struct InterceptorChainIterationTests {
         #expect(result.value == 12 + 1 + 3)
     }
 
-    @available(iOS 13, *)
     @Test
     func executingFailableWithoutError() {
         let result = Locked<Result<String, ConnectError>?>(nil)
@@ -91,7 +87,6 @@ struct InterceptorChainIterationTests {
         #expect((try? result.value?.get()) == "ab")
     }
 
-    @available(iOS 13, *)
     @Test
     func executingFailableWithoutErrorReversed() {
         let result = Locked<Result<String, ConnectError>?>(nil)
@@ -108,7 +103,6 @@ struct InterceptorChainIterationTests {
         #expect((try? result.value?.get()) == "ba")
     }
 
-    @available(iOS 13, *)
     @Test
     func executingFailableWithError() {
         let result = Locked<Result<String, ConnectError>?>(nil)
@@ -129,7 +123,6 @@ struct InterceptorChainIterationTests {
         #expect(throws: ConnectError.self) { try result.value?.get() }
     }
 
-    @available(iOS 13, *)
     @Test
     func executingLinkedFailableWithoutError() {
         let result = Locked<Result<Int, ConnectError>?>(nil)
@@ -151,7 +144,6 @@ struct InterceptorChainIterationTests {
         #expect((try? result.value?.get()) == 12 + 1 + 3)
     }
 
-    @available(iOS 13, *)
     @Test
     func executingLinkedFailableWithErrorOnFirstIteration() {
         let result = Locked<Result<Int, ConnectError>?>(nil)
@@ -177,7 +169,6 @@ struct InterceptorChainIterationTests {
         #expect(throws: ConnectError.self) { try result.value?.get() }
     }
 
-    @available(iOS 13, *)
     @Test
     func executingLinkedFailableWithErrorOnTransform() {
         let result = Locked<Result<Int, ConnectError>?>(nil)
@@ -203,7 +194,6 @@ struct InterceptorChainIterationTests {
         #expect(throws: ConnectError.self) { try result.value?.get() }
     }
 
-    @available(iOS 13, *)
     @Test
     func executingLinkedFailableWithErrorOnSecondIteration() {
         let result = Locked<Result<Int, ConnectError>?>(nil)
