@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import Foundation
 import Combine
 import Connect
 import os.log
+import SwiftProtobuf
 
 private typealias ConverseRequest = Connectrpc_Eliza_V1_ConverseRequest
 private typealias ConverseResponse = Connectrpc_Eliza_V1_ConverseResponse

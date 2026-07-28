@@ -2,9 +2,9 @@ Connect-Swift
 =============
 
 [![Build](https://github.com/connectrpc/connect-swift/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/connectrpc/connect-swift/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/cocoapods/v/Connect-Swift.svg?style=flat)](https://cocoapods.org/pods/Connect-Swift)
-[![Platform](https://img.shields.io/cocoapods/p/Connect-Swift.svg?style=flat)](https://cocoapods.org/pods/Connect-Swift)
-[![License](https://img.shields.io/cocoapods/l/Connect-Swift.svg?style=flat)](https://cocoapods.org/pods/Connect-Swift)
+[![Version](https://img.shields.io/github/v/tag/connectrpc/connect-swift?label=version&style=flat)](https://github.com/connectrpc/connect-swift/releases/latest)
+[![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20tvOS%20%7C%20watchOS-lightgrey?style=flat)](./Package.swift)
+[![License](https://img.shields.io/github/license/connectrpc/connect-swift?style=flat)](./LICENSE)
 
 Connect-Swift is a small library (<200KB!) that provides support for using
 generated,
@@ -172,7 +172,6 @@ directory and can be opened and built using Xcode. They demonstrate:
 
 - Using streaming APIs
 - Integrating with Swift Package Manager
-- Integrating with CocoaPods
 - Using the [Connect protocol][connect-protocol]
 - Using the [gRPC protocol][grpc-protocol]
 - Using the [gRPC-Web protocol][grpc-web-protocol]
@@ -204,8 +203,17 @@ Our goal is to not make breaking changes unless absolutely necessary.
 
 Offered under the [Apache 2 license](./LICENSE).
 
+## CocoaPods
+
+> [!NOTE]
+> **CocoaPods support has been removed.** Connect-Swift is distributed exclusively through
+> Swift Package Manager. The last version published to CocoaPods Trunk was `1.2.3`; those podspecs
+> remain installable but will not be updated. CocoaPods Trunk stops accepting new podspecs entirely
+> on December 2, 2026 — see the [CocoaPods Trunk read-only plan][cocoapods-readonly].
+
 [blog]: https://buf.build/blog/announcing-connect-swift
 [buf-studio]: https://buf.build/studio
+[cocoapods-readonly]: https://blog.cocoapods.org/CocoaPods-Specs-Repo/
 [connect-conformance]: https://github.com/connectrpc/conformance
 [connect-go]: https://github.com/connectrpc/connect-go
 [connect-kotlin]: https://github.com/connectrpc/connect-kotlin

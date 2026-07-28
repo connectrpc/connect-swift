@@ -162,23 +162,17 @@ To update dependencies such as `SwiftProtobuf` in this repository:
 
 1. Update the main [library's `Package.swift` file](../Package.swift) with the new version.
 2. Open the project to ensure the [`Package.resolved` file](../Package.resolved) gets updated by Xcode.
-3. Update the versions in both the [`Connect-Swift.podspec`](../Connect-Swift.podspec) and
-   [`Connect-Swift-Mocks.podspec`](../Connect-Swift-Mocks.podspec) files.
-4. Open the [Swift package example app](../Examples/ElizaSwiftPackageApp) to ensure its `Package.resolved` file gets updated.
-5. Run `pod update` in the [CocoaPods example app's directory](../Examples/ElizaCocoaPodsApp).
-6. Update remote plugin entries (such as `buf.build/apple/swift`) in all `buf.gen.yaml` files to be in sync with their respective runtime libraries.
-7. Run `make buildplugins && make generate` to apply any generated diffs from the newly updated plugins.
+3. Open the [Swift package example app](../Examples/ElizaSwiftPackageApp) to ensure its `Package.resolved` file gets updated.
+4. Update remote plugin entries (such as `buf.build/apple/swift`) in all `buf.gen.yaml` files to be in sync with their respective runtime libraries.
+5. Run `make buildplugins && make generate` to apply any generated diffs from the newly updated plugins.
 
 ## Releasing
 
 Releases should be tagged in `x.y.z` SemVer format.
 
-1. Update both [`Connect-Swift.podspec`](../Connect-Swift.podspec) and
-   [`Connect-Swift-Mocks.podspec`](../Connect-Swift-Mocks.podspec) to reflect
-   the upcoming version on `main`. In the same PR, update the example CocoaPods
-   app by running `cd Examples/ElizaCocoaPodsApp && pod install`.
-2. Create a new GitHub release/tag after merging these changes.
-3. CI will automatically push the updated specs to CocoaPods in its [release job](./workflows/release.yml).
+1. Create a new GitHub release/tag on `main`.
+2. CI will build the generator plugins and attach them to the release in its
+   [release job](./workflows/release.yml).
 
 [dco]: https://developercertificate.org
 [commit-message]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html

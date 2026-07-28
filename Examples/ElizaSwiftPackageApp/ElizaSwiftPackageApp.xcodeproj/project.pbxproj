@@ -3,241 +3,148 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B216FC0C29723F65003AB294 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FC0429723F65003AB294 /* Message.swift */; };
-		B216FC0D29723F65003AB294 /* MessagingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FC0529723F65003AB294 /* MessagingView.swift */; };
-		B216FC0E29723F65003AB294 /* MessagingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FC0629723F65003AB294 /* MessagingViewModel.swift */; };
-		B216FC0F29723F65003AB294 /* ElizaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FC0729723F65003AB294 /* ElizaApp.swift */; };
-		B216FC1029723F65003AB294 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216FC0829723F65003AB294 /* MenuView.swift */; };
-		B216FC1129723F65003AB294 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B216FC0929723F65003AB294 /* README.md */; };
-		B236EE8C295F564900DDCDA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B236EE8B295F564900DDCDA9 /* Assets.xcassets */; };
-		B236EEA4295F569700DDCDA9 /* Connect in Frameworks */ = {isa = PBXBuildFile; productRef = B236EEA3295F569700DDCDA9 /* Connect */; };
-		B23B25B32AE088BF001C64E0 /* eliza.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B23B25B12AE088BF001C64E0 /* eliza.pb.swift */; };
-		B23B25B42AE088BF001C64E0 /* eliza.connect.swift in Sources */ = {isa = PBXBuildFile; fileRef = B23B25B22AE088BF001C64E0 /* eliza.connect.swift */; };
-		B2C1986529CA282B00C3D327 /* ConnectNIO in Frameworks */ = {isa = PBXBuildFile; productRef = B2C1986429CA282B00C3D327 /* ConnectNIO */; };
+		B5D484E13018D72E00F7FF4C /* Connect in Frameworks */ = {isa = PBXBuildFile; productRef = B5D484E03018D72E00F7FF4C /* Connect */; };
+		B5D484E33018D72E00F7FF4C /* ConnectMocks in Frameworks */ = {isa = PBXBuildFile; productRef = B5D484E23018D72E00F7FF4C /* ConnectMocks */; };
+		B5D484E53018D72E00F7FF4C /* ConnectNIO in Frameworks */ = {isa = PBXBuildFile; productRef = B5D484E43018D72E00F7FF4C /* ConnectNIO */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		B216FC0429723F65003AB294 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
-		B216FC0529723F65003AB294 /* MessagingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingView.swift; sourceTree = "<group>"; };
-		B216FC0629723F65003AB294 /* MessagingViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagingViewModel.swift; sourceTree = "<group>"; };
-		B216FC0729723F65003AB294 /* ElizaApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElizaApp.swift; sourceTree = "<group>"; };
-		B216FC0829723F65003AB294 /* MenuView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
-		B216FC0929723F65003AB294 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		B236EE84295F564800DDCDA9 /* ElizaSwiftPackageApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ElizaSwiftPackageApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		B236EE8B295F564900DDCDA9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		B236EEA1295F568C00DDCDA9 /* connect-swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "connect-swift"; path = ../..; sourceTree = "<group>"; };
-		B23B25B12AE088BF001C64E0 /* eliza.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = eliza.pb.swift; sourceTree = "<group>"; };
-		B23B25B22AE088BF001C64E0 /* eliza.connect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = eliza.connect.swift; sourceTree = "<group>"; };
-		B28B406129B2B79A00F8CCA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		B5D484BE3018D6CB00F7FF4C /* ElizaSwiftPackageApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ElizaSwiftPackageApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		B5D484C03018D6CB00F7FF4C /* ElizaSwiftPackageApp */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ElizaSwiftPackageApp;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
-		B236EE81295F564800DDCDA9 /* Frameworks */ = {
+		B5D484BB3018D6CB00F7FF4C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B2C1986529CA282B00C3D327 /* ConnectNIO in Frameworks */,
-				B236EEA4295F569700DDCDA9 /* Connect in Frameworks */,
+				B5D484E13018D72E00F7FF4C /* Connect in Frameworks */,
+				B5D484E53018D72E00F7FF4C /* ConnectNIO in Frameworks */,
+				B5D484E33018D72E00F7FF4C /* ConnectMocks in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B216FBFF29723F65003AB294 /* ElizaSharedSources */ = {
+		B5D484B53018D6CB00F7FF4C = {
 			isa = PBXGroup;
 			children = (
-				B216FC0329723F65003AB294 /* AppSources */,
-				B23B25AD2AE088BF001C64E0 /* GeneratedSources */,
-				B216FC0929723F65003AB294 /* README.md */,
-			);
-			name = ElizaSharedSources;
-			path = ../../ElizaSharedSources;
-			sourceTree = "<group>";
-		};
-		B216FC0329723F65003AB294 /* AppSources */ = {
-			isa = PBXGroup;
-			children = (
-				B216FC0429723F65003AB294 /* Message.swift */,
-				B216FC0529723F65003AB294 /* MessagingView.swift */,
-				B216FC0629723F65003AB294 /* MessagingViewModel.swift */,
-				B216FC0729723F65003AB294 /* ElizaApp.swift */,
-				B216FC0829723F65003AB294 /* MenuView.swift */,
-			);
-			path = AppSources;
-			sourceTree = "<group>";
-		};
-		B236EE7B295F564800DDCDA9 = {
-			isa = PBXGroup;
-			children = (
-				B236EEA0295F568C00DDCDA9 /* Packages */,
-				B236EE86295F564800DDCDA9 /* ElizaSwiftPackageApp */,
-				B236EE85295F564800DDCDA9 /* Products */,
-				B236EEA2295F569700DDCDA9 /* Frameworks */,
+				B5D484C03018D6CB00F7FF4C /* ElizaSwiftPackageApp */,
+				B5D484BF3018D6CB00F7FF4C /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		B236EE85295F564800DDCDA9 /* Products */ = {
+		B5D484BF3018D6CB00F7FF4C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B236EE84295F564800DDCDA9 /* ElizaSwiftPackageApp.app */,
+				B5D484BE3018D6CB00F7FF4C /* ElizaSwiftPackageApp.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		B236EE86295F564800DDCDA9 /* ElizaSwiftPackageApp */ = {
-			isa = PBXGroup;
-			children = (
-				B28B406129B2B79A00F8CCA4 /* Info.plist */,
-				B216FBFF29723F65003AB294 /* ElizaSharedSources */,
-				B236EE8B295F564900DDCDA9 /* Assets.xcassets */,
-			);
-			path = ElizaSwiftPackageApp;
-			sourceTree = "<group>";
-		};
-		B236EEA0295F568C00DDCDA9 /* Packages */ = {
-			isa = PBXGroup;
-			children = (
-				B236EEA1295F568C00DDCDA9 /* connect-swift */,
-			);
-			name = Packages;
-			sourceTree = "<group>";
-		};
-		B236EEA2295F569700DDCDA9 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		B23B25AD2AE088BF001C64E0 /* GeneratedSources */ = {
-			isa = PBXGroup;
-			children = (
-				B23B25AE2AE088BF001C64E0 /* connectrpc */,
-			);
-			path = GeneratedSources;
-			sourceTree = "<group>";
-		};
-		B23B25AE2AE088BF001C64E0 /* connectrpc */ = {
-			isa = PBXGroup;
-			children = (
-				B23B25AF2AE088BF001C64E0 /* eliza */,
-			);
-			path = connectrpc;
-			sourceTree = "<group>";
-		};
-		B23B25AF2AE088BF001C64E0 /* eliza */ = {
-			isa = PBXGroup;
-			children = (
-				B23B25B02AE088BF001C64E0 /* v1 */,
-			);
-			path = eliza;
-			sourceTree = "<group>";
-		};
-		B23B25B02AE088BF001C64E0 /* v1 */ = {
-			isa = PBXGroup;
-			children = (
-				B23B25B12AE088BF001C64E0 /* eliza.pb.swift */,
-				B23B25B22AE088BF001C64E0 /* eliza.connect.swift */,
-			);
-			path = v1;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B236EE83295F564800DDCDA9 /* ElizaSwiftPackageApp */ = {
+		B5D484BD3018D6CB00F7FF4C /* ElizaSwiftPackageApp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B236EE92295F564900DDCDA9 /* Build configuration list for PBXNativeTarget "ElizaSwiftPackageApp" */;
+			buildConfigurationList = B5D484C93018D6CB00F7FF4C /* Build configuration list for PBXNativeTarget "ElizaSwiftPackageApp" */;
 			buildPhases = (
-				B236EE80295F564800DDCDA9 /* Sources */,
-				B236EE81295F564800DDCDA9 /* Frameworks */,
-				B236EE82295F564800DDCDA9 /* Resources */,
+				B5D484BA3018D6CB00F7FF4C /* Sources */,
+				B5D484BB3018D6CB00F7FF4C /* Frameworks */,
+				B5D484BC3018D6CB00F7FF4C /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				B5D484C03018D6CB00F7FF4C /* ElizaSwiftPackageApp */,
+			);
 			name = ElizaSwiftPackageApp;
 			packageProductDependencies = (
-				B236EEA3295F569700DDCDA9 /* Connect */,
-				B2C1986429CA282B00C3D327 /* ConnectNIO */,
+				B5D484E03018D72E00F7FF4C /* Connect */,
+				B5D484E23018D72E00F7FF4C /* ConnectMocks */,
+				B5D484E43018D72E00F7FF4C /* ConnectNIO */,
 			);
 			productName = ElizaSwiftPackageApp;
-			productReference = B236EE84295F564800DDCDA9 /* ElizaSwiftPackageApp.app */;
+			productReference = B5D484BE3018D6CB00F7FF4C /* ElizaSwiftPackageApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		B236EE7C295F564800DDCDA9 /* Project object */ = {
+		B5D484B63018D6CB00F7FF4C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1420;
-				LastUpgradeCheck = 1500;
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 2660;
 				TargetAttributes = {
-					B236EE83295F564800DDCDA9 = {
-						CreatedOnToolsVersion = 14.2;
+					B5D484BD3018D6CB00F7FF4C = {
+						CreatedOnToolsVersion = 26.6;
 					};
 				};
 			};
-			buildConfigurationList = B236EE7F295F564800DDCDA9 /* Build configuration list for PBXProject "ElizaSwiftPackageApp" */;
-			compatibilityVersion = "Xcode 14.0";
+			buildConfigurationList = B5D484B93018D6CB00F7FF4C /* Build configuration list for PBXProject "ElizaSwiftPackageApp" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = B236EE7B295F564800DDCDA9;
-			productRefGroup = B236EE85295F564800DDCDA9 /* Products */;
+			mainGroup = B5D484B53018D6CB00F7FF4C;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B5D484DF3018D72E00F7FF4C /* XCLocalSwiftPackageReference "../../../connect-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = B5D484BF3018D6CB00F7FF4C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B236EE83295F564800DDCDA9 /* ElizaSwiftPackageApp */,
+				B5D484BD3018D6CB00F7FF4C /* ElizaSwiftPackageApp */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		B236EE82295F564800DDCDA9 /* Resources */ = {
+		B5D484BC3018D6CB00F7FF4C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B216FC1129723F65003AB294 /* README.md in Resources */,
-				B236EE8C295F564900DDCDA9 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		B236EE80295F564800DDCDA9 /* Sources */ = {
+		B5D484BA3018D6CB00F7FF4C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B23B25B32AE088BF001C64E0 /* eliza.pb.swift in Sources */,
-				B216FC0E29723F65003AB294 /* MessagingViewModel.swift in Sources */,
-				B216FC0D29723F65003AB294 /* MessagingView.swift in Sources */,
-				B216FC0F29723F65003AB294 /* ElizaApp.swift in Sources */,
-				B216FC0C29723F65003AB294 /* Message.swift in Sources */,
-				B23B25B42AE088BF001C64E0 /* eliza.connect.swift in Sources */,
-				B216FC1029723F65003AB294 /* MenuView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		B236EE90295F564900DDCDA9 /* Debug */ = {
+		B5D484C73018D6CB00F7FF4C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -271,7 +178,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -285,20 +192,20 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		B236EE91295F564900DDCDA9 /* Release */ = {
+		B5D484C83018D6CB00F7FF4C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -332,7 +239,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -340,117 +247,143 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		B236EE93295F564900DDCDA9 /* Debug */ = {
+		B5D484CA3018D6CB00F7FF4C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ElizaSwiftPackageApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Eliza;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.connectrpc.ElizaSwiftPackageApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				XROS_DEPLOYMENT_TARGET = 26.5;
 			};
 			name = Debug;
 		};
-		B236EE94295F564900DDCDA9 /* Release */ = {
+		B5D484CB3018D6CB00F7FF4C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ElizaSwiftPackageApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Eliza;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.connectrpc.ElizaSwiftPackageApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				XROS_DEPLOYMENT_TARGET = 26.5;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B236EE7F295F564800DDCDA9 /* Build configuration list for PBXProject "ElizaSwiftPackageApp" */ = {
+		B5D484B93018D6CB00F7FF4C /* Build configuration list for PBXProject "ElizaSwiftPackageApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B236EE90295F564900DDCDA9 /* Debug */,
-				B236EE91295F564900DDCDA9 /* Release */,
+				B5D484C73018D6CB00F7FF4C /* Debug */,
+				B5D484C83018D6CB00F7FF4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B236EE92295F564900DDCDA9 /* Build configuration list for PBXNativeTarget "ElizaSwiftPackageApp" */ = {
+		B5D484C93018D6CB00F7FF4C /* Build configuration list for PBXNativeTarget "ElizaSwiftPackageApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B236EE93295F564900DDCDA9 /* Debug */,
-				B236EE94295F564900DDCDA9 /* Release */,
+				B5D484CA3018D6CB00F7FF4C /* Debug */,
+				B5D484CB3018D6CB00F7FF4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		B5D484DF3018D72E00F7FF4C /* XCLocalSwiftPackageReference "../../../connect-swift" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../../../connect-swift";
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
-		B236EEA3295F569700DDCDA9 /* Connect */ = {
+		B5D484E03018D72E00F7FF4C /* Connect */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Connect;
 		};
-		B2C1986429CA282B00C3D327 /* ConnectNIO */ = {
+		B5D484E23018D72E00F7FF4C /* ConnectMocks */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ConnectMocks;
+		};
+		B5D484E43018D72E00F7FF4C /* ConnectNIO */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ConnectNIO;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = B236EE7C295F564800DDCDA9 /* Project object */;
+	rootObject = B5D484B63018D6CB00F7FF4C /* Project object */;
 }
