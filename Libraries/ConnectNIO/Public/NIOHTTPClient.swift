@@ -229,9 +229,18 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         }
 
         self.state = .connecting
+        // NIO drives an in-flight connect to completion on its own — the DNS lookup runs on an
+        // offload queue and hops back onto the event loop from there — so that hop never passes
+        // through `EventLoopGroupOwner.execute(on:_:)` and cannot be gated. Registering the
+        // connect as outstanding work keeps the group alive until it settles, so releasing the
+        // client mid-connect cannot leave NIO scheduling onto a shut-down loop. The owner is
+        // captured strongly: it must outlive the client here, which is the whole point.
+        let loopGroupOwner = self.loopGroupOwner
+        loopGroupOwner.beginWork()
         self.bootstrap
             .connect(host: self.host, port: self.port)
             .whenComplete { [weak self] result in
+                defer { loopGroupOwner.endWork() }
                 do {
                     switch result {
                     case .success(let channel):

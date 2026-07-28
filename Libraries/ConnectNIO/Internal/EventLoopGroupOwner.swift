@@ -38,6 +38,8 @@ final class EventLoopGroupOwner: @unchecked Sendable {
     private let lock = NIOConcurrencyHelpers.NIOLock()
     /// Guarded by `lock`.
     private var isShutDown = false
+    /// Guarded by `lock`. Shutdown is deferred while this is non-zero. See `beginWork()`.
+    private var outstandingWorkCount = 0
 
     /// The underlying group, for use when creating bootstraps and channels.
     var eventLoopGroup: NIOCore.EventLoopGroup {
@@ -106,8 +108,40 @@ final class EventLoopGroupOwner: @unchecked Sendable {
         }
     }
 
-    /// Stops scheduling new work and, if this owner created the group, shuts the group down.
-    /// Idempotent, so `deinit` may safely call this after an explicit call.
+    /// Registers work whose completion NIO schedules onto the loop *itself*, and which therefore
+    /// cannot be gated by `execute(on:_:)`. A connect is the case that matters: NIO runs the DNS
+    /// lookup on an offload queue and hops back onto the event loop from there
+    /// (`GetaddrinfoResolver`), so the only way to stop that hop from landing on a dead loop is to
+    /// keep the loop alive. The group's shutdown is deferred until the matching `endWork()`.
+    ///
+    /// - returns: True if the work was registered, false if the group is already shut down.
+    @discardableResult
+    func beginWork() -> Bool {
+        return self.lock.withLock { () -> Bool in
+            if self.isShutDown {
+                return false
+            }
+
+            self.outstandingWorkCount += 1
+            return true
+        }
+    }
+
+    /// Balances a successful `beginWork()`, performing a deferred shutdown if this was the last
+    /// outstanding work and `shutDown()` has already been called.
+    func endWork() {
+        let shouldShutDownGroup = self.lock.withLock { () -> Bool in
+            self.outstandingWorkCount = max(0, self.outstandingWorkCount - 1)
+            return self.isShutDown && self.isGroupOwned && self.outstandingWorkCount == 0
+        }
+
+        if shouldShutDownGroup {
+            self.shutDownGroup()
+        }
+    }
+
+    /// Stops scheduling new work and, if this owner created the group and no work is outstanding,
+    /// shuts the group down. Idempotent, so `deinit` may safely call this after an explicit call.
     func shutDown() {
         let shouldShutDownGroup = self.lock.withLock { () -> Bool in
             if self.isShutDown {
@@ -115,18 +149,22 @@ final class EventLoopGroupOwner: @unchecked Sendable {
             }
 
             self.isShutDown = true
-            return self.isGroupOwned
+            return self.isGroupOwned && self.outstandingWorkCount == 0
         }
 
         if shouldShutDownGroup {
-            // Shutting down must stay asynchronous. An event loop callback can release the last
-            // reference to this owner, running `deinit` on one of the group's own threads, and
-            // `syncShutdownGracefully()` traps there because a loop cannot wait for itself to
-            // stop. The `withExtendedLifetime(self)` above makes that release land on an event loop
-            // thread more often than it otherwise would, so this is more load-bearing than it looks
-            // - never switch it back to the synchronous form.
-            self.group.shutdownGracefully { _ in }
+            self.shutDownGroup()
         }
+    }
+
+    private func shutDownGroup() {
+        // Shutting down must stay asynchronous. An event loop callback can release the last
+        // reference to this owner, running `deinit` on one of the group's own threads, and
+        // `syncShutdownGracefully()` traps there because a loop cannot wait for itself to stop.
+        // The `withExtendedLifetime(self)` above makes that release land on an event loop thread
+        // more often than it otherwise would, so this is more load-bearing than it looks - never
+        // switch it back to the synchronous form.
+        self.group.shutdownGracefully { _ in }
     }
 
     deinit {

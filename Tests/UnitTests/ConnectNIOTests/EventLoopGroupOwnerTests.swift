@@ -88,6 +88,34 @@ struct EventLoopGroupOwnerTests {
         #expect(didRun.wait(timeout: .now() + .seconds(5)) == .success)
     }
 
+    /// Some work is completed by NIO on its own schedule and never passes through
+    /// `execute(on:_:)` — a connect resolves DNS on an offload queue and hops back onto the loop
+    /// from inside NIO. Gating cannot reach that hop, so while such work is outstanding the loop
+    /// itself has to stay alive: shutdown is deferred until `endWork()`.
+    @Test
+    func deferShutDownWhileWorkIsOutstanding() {
+        let owner = EventLoopGroupOwner()
+        let eventLoop = owner.next()
+        #expect(owner.beginWork())
+        owner.shutDown()
+
+        // Scheduled straight onto the loop, bypassing the gate, exactly as NIO does internally.
+        let didRun = DispatchSemaphore(value: 0)
+        eventLoop.execute { didRun.signal() }
+        #expect(didRun.wait(timeout: .now() + .seconds(5)) == .success)
+
+        owner.endWork()
+    }
+
+    /// Work cannot be registered once the group is shut down — there is nothing left to keep
+    /// alive, and reporting otherwise would leave the caller expecting a loop that is gone.
+    @Test
+    func refusesWorkAfterShutDown() {
+        let owner = EventLoopGroupOwner()
+        owner.shutDown()
+        #expect(!owner.beginWork())
+    }
+
     /// Shutdown must stay asynchronous: `syncShutdownGracefully()` traps when it runs on a thread
     /// belonging to the group being shut down, which is exactly what happens when the last
     /// reference to the owner is released by an event loop callback.
