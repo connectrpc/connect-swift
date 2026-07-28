@@ -30,7 +30,6 @@ internal protocol Connectrpc_Conformance_V1_ConformanceServiceClientInterface: S
     /// Servers should allow the response definition to be unset in the request and
     /// if it is, set no response headers or trailers and return no response data.
     /// The returned payload should only contain the request info.
-    @available(iOS 13, *)
     func `unary`(request: Connectrpc_Conformance_V1_UnaryRequest, headers: Connect.Headers) async -> ResponseMessage<Connectrpc_Conformance_V1_UnaryResponse>
 
     /// A server-streaming operation. The request indicates the response headers,
@@ -53,7 +52,6 @@ internal protocol Connectrpc_Conformance_V1_ConformanceServiceClientInterface: S
     /// and return without error if one is not. Stream headers and trailers should
     /// still be set on the stream if provided regardless of whether a response is
     /// sent or an error is thrown.
-    @available(iOS 13, *)
     func `serverStream`(headers: Connect.Headers) -> any Connect.ServerOnlyAsyncStreamInterface<Connectrpc_Conformance_V1_ServerStreamRequest, Connectrpc_Conformance_V1_ServerStreamResponse>
 
     /// A client-streaming operation. The first request indicates the response
@@ -74,7 +72,6 @@ internal protocol Connectrpc_Conformance_V1_ConformanceServiceClientInterface: S
     /// Servers should allow the response definition to be unset in the request and
     /// if it is, set no response headers or trailers and return no response data.
     /// The returned payload should only contain the request info.
-    @available(iOS 13, *)
     func `clientStream`(headers: Connect.Headers) -> any Connect.ClientOnlyAsyncStreamInterface<Connectrpc_Conformance_V1_ClientStreamRequest, Connectrpc_Conformance_V1_ClientStreamResponse>
 
     /// A bidirectional-streaming operation. The first request indicates the response
@@ -124,18 +121,15 @@ internal protocol Connectrpc_Conformance_V1_ConformanceServiceClientInterface: S
     ///
     /// - if the response_delay_ms duration is specified, the server should wait that
     ///   long in between sending each response message.
-    @available(iOS 13, *)
     func `bidiStream`(headers: Connect.Headers) -> any Connect.BidirectionalAsyncStreamInterface<Connectrpc_Conformance_V1_BidiStreamRequest, Connectrpc_Conformance_V1_BidiStreamResponse>
 
     /// A unary endpoint that the server should not implement and should instead
     /// return an unimplemented error when invoked.
-    @available(iOS 13, *)
     func `unimplemented`(request: Connectrpc_Conformance_V1_UnimplementedRequest, headers: Connect.Headers) async -> ResponseMessage<Connectrpc_Conformance_V1_UnimplementedResponse>
 
     /// A unary endpoint denoted as having no side effects (i.e. idempotent).
     /// Implementations should use an HTTP GET when invoking this endpoint and
     /// leverage query parameters to send data.
-    @available(iOS 13, *)
     func `idempotentUnary`(request: Connectrpc_Conformance_V1_IdempotentUnaryRequest, headers: Connect.Headers) async -> ResponseMessage<Connectrpc_Conformance_V1_IdempotentUnaryResponse>
 }
 
@@ -147,32 +141,26 @@ internal final class Connectrpc_Conformance_V1_ConformanceServiceClient: Connect
         self.client = client
     }
 
-    @available(iOS 13, *)
     internal func `unary`(request: Connectrpc_Conformance_V1_UnaryRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_UnaryResponse> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.ConformanceService/Unary", idempotencyLevel: .unknown, request: request, headers: headers)
     }
 
-    @available(iOS 13, *)
     internal func `serverStream`(headers: Connect.Headers = [:]) -> any Connect.ServerOnlyAsyncStreamInterface<Connectrpc_Conformance_V1_ServerStreamRequest, Connectrpc_Conformance_V1_ServerStreamResponse> {
         return self.client.serverOnlyStream(path: "/connectrpc.conformance.v1.ConformanceService/ServerStream", headers: headers)
     }
 
-    @available(iOS 13, *)
     internal func `clientStream`(headers: Connect.Headers = [:]) -> any Connect.ClientOnlyAsyncStreamInterface<Connectrpc_Conformance_V1_ClientStreamRequest, Connectrpc_Conformance_V1_ClientStreamResponse> {
         return self.client.clientOnlyStream(path: "/connectrpc.conformance.v1.ConformanceService/ClientStream", headers: headers)
     }
 
-    @available(iOS 13, *)
     internal func `bidiStream`(headers: Connect.Headers = [:]) -> any Connect.BidirectionalAsyncStreamInterface<Connectrpc_Conformance_V1_BidiStreamRequest, Connectrpc_Conformance_V1_BidiStreamResponse> {
         return self.client.bidirectionalStream(path: "/connectrpc.conformance.v1.ConformanceService/BidiStream", headers: headers)
     }
 
-    @available(iOS 13, *)
     internal func `unimplemented`(request: Connectrpc_Conformance_V1_UnimplementedRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_UnimplementedResponse> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.ConformanceService/Unimplemented", idempotencyLevel: .unknown, request: request, headers: headers)
     }
 
-    @available(iOS 13, *)
     internal func `idempotentUnary`(request: Connectrpc_Conformance_V1_IdempotentUnaryRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Connectrpc_Conformance_V1_IdempotentUnaryResponse> {
         return await self.client.unary(path: "/connectrpc.conformance.v1.ConformanceService/IdempotentUnary", idempotencyLevel: .noSideEffects, request: request, headers: headers)
     }

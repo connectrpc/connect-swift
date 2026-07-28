@@ -66,7 +66,6 @@ struct FilePathComponentsTests {
         ),
     ]
 
-    @available(iOS 13, *)
     @Test(arguments: Self.testCases)
     func splitsProtoFilePath(testCase: TestCase) {
         let components = FilePathComponents(path: testCase.path)
@@ -88,7 +87,6 @@ struct FilePathComponentsTests {
     }
 }
 
-@available(iOS 13, *)
 extension FilePathComponentsTests.TestCase: CustomTestStringConvertible {
     var testDescription: String {
         self.path

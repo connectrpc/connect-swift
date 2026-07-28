@@ -17,7 +17,6 @@ import Foundation
 import Testing
 
 struct ConnectEndStreamResponseTests {
-    @available(iOS 13, *)
     @Test
     func lowercasesAllHeaderKeys() throws {
         let dictionary = [
@@ -32,7 +31,6 @@ struct ConnectEndStreamResponseTests {
         #expect(response.metadata == ["somekey": ["foo"], "otherkey1": ["BAR", "bAz"]])
     }
 
-    @available(iOS 13, *)
     @Test
     func allowsOmittedErrorAndMetadata() throws {
         let data = try JSONSerialization.data(withJSONObject: [String: Any]())
@@ -41,7 +39,6 @@ struct ConnectEndStreamResponseTests {
         #expect(response.metadata == nil)
     }
 
-    @available(iOS 13, *)
     @Test
     func deserializesError() throws {
         let dictionary = [

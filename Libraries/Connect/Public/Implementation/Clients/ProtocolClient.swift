@@ -206,7 +206,6 @@ extension ProtocolClient: ProtocolClientInterface {
 
     // MARK: - Async/await
 
-    @available(iOS 13, *)
     public func unary<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         idempotencyLevel: IdempotencyLevel,
@@ -221,7 +220,6 @@ extension ProtocolClient: ProtocolClientInterface {
         }.send()
     }
 
-    @available(iOS 13, *)
     public func bidirectionalStream<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         headers: Headers
@@ -234,7 +232,6 @@ extension ProtocolClient: ProtocolClientInterface {
         return bidirectionalAsync.configureForSending(with: callbacks)
     }
 
-    @available(iOS 13, *)
     public func clientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         headers: Headers
@@ -246,7 +243,6 @@ extension ProtocolClient: ProtocolClientInterface {
         return clientOnlyAsync.configureForSending(with: callbacks)
     }
 
-    @available(iOS 13, *)
     public func serverOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         headers: Headers

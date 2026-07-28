@@ -17,7 +17,6 @@ import Foundation
 import Testing
 
 struct TimeoutTests {
-    @available(iOS 13, *)
     @Test
     func unaryRequestTimesOut() async {
         let client = self.makeClient()
@@ -30,7 +29,6 @@ struct TimeoutTests {
         #expect(response.error?.message == "request exceeded allowed timeout")
     }
 
-    @available(iOS 13, *)
     @Test
     func streamRequestTimesOut() async throws {
         let client = self.makeClient()

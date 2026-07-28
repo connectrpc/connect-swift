@@ -20,7 +20,6 @@ import SwiftProtobuf
 ///
 /// If the library removes callback support in favor of only supporting async/await in the future,
 /// this class can be simplified.
-@available(iOS 13, *)
 class BidirectionalAsyncStream<
     Input: ProtobufMessage, Output: ProtobufMessage
 >: @unchecked Sendable {
@@ -82,7 +81,6 @@ class BidirectionalAsyncStream<
     }
 }
 
-@available(iOS 13, *)
 extension BidirectionalAsyncStream: BidirectionalAsyncStreamInterface {
     @discardableResult
     func send(_ input: Input) throws -> Self {

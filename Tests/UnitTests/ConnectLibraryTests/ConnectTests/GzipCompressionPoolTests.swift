@@ -17,7 +17,6 @@ import Foundation
 import Testing
 
 struct GzipCompressionPoolTests {
-    @available(iOS 13, *)
     @Test
     func decompressingGzippedFile() throws {
         let compressedData = try self.gzippedFileData()
@@ -28,7 +27,6 @@ struct GzipCompressionPoolTests {
         #expect(decompressedText == self.expectedUnzippedFileText())
     }
 
-    @available(iOS 13, *)
     @Test
     func compressingAndDecompressingData() throws {
         let original = try #require(self.expectedUnzippedFileText().data(using: .utf8))
@@ -41,7 +39,6 @@ struct GzipCompressionPoolTests {
         #expect(decompressed == original)
     }
 
-    @available(iOS 13, *)
     @Test
     func doesNotGzipDataThatIsAlreadyGzipped() throws {
         let compressed = try self.gzippedFileData()

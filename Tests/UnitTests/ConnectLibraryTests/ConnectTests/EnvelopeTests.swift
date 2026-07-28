@@ -17,7 +17,6 @@ import Foundation
 import Testing
 
 struct EnvelopeTests {
-    @available(iOS 13, *)
     @Test
     func packingAndUnpackingCompressedMessage() throws {
         let originalData = Data(repeating: 0xa, count: 50)
@@ -35,7 +34,6 @@ struct EnvelopeTests {
         #expect(unpacked.headerByte == 1) // Compression flag = true
     }
 
-    @available(iOS 13, *)
     @Test
     func packingAndUnpackingUncompressedMessageBecauseCompressionMinBytesIsNil() throws {
         let originalData = Data(repeating: 0xa, count: 50)
@@ -51,7 +49,6 @@ struct EnvelopeTests {
         #expect(unpacked.headerByte == 0) // Compression flag = false
     }
 
-    @available(iOS 13, *)
     @Test
     func packingAndUnpackingUncompressedMessageBecauseMessageIsTooSmall() throws {
         let originalData = Data(repeating: 0xa, count: 50)
@@ -69,7 +66,6 @@ struct EnvelopeTests {
         #expect(unpacked.headerByte == 0) // Compression flag = false
     }
 
-    @available(iOS 13, *)
     @Test
     func throwsWhenUnpackingCompressedMessageWithoutDecompressionPool() throws {
         let originalData = Data(repeating: 0xa, count: 50)
@@ -87,7 +83,6 @@ struct EnvelopeTests {
         }
     }
 
-    @available(iOS 13, *)
     @Test
     func messageLengthOfIncompleteData() {
         // Messages are incomplete if they do not contain enough data for the 5-byte prefix

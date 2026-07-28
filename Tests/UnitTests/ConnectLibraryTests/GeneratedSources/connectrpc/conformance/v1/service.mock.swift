@@ -20,7 +20,6 @@ import SwiftProtobuf
 ///
 /// Note: This class does not handle thread-safe locking, but provides
 /// `@unchecked Sendable` conformance to simplify testing and mocking.
-@available(iOS 13, *)
 internal class Connectrpc_Conformance_V1_ConformanceServiceClientMock: Connectrpc_Conformance_V1_ConformanceServiceClientInterface, @unchecked Sendable {
     private var cancellables = [Combine.AnyCancellable]()
 

@@ -24,7 +24,6 @@ private final class MockUnaryAndStreamInterceptor: UnaryInterceptor, StreamInter
 struct InterceptorFactoryTests {
     private let config = ProtocolClientConfig(host: "localhost")
 
-    @available(iOS 13, *)
     @Test
     func instantiatesUnaryInterceptorForUnary() {
         let factory = InterceptorFactory { _ in MockUnaryInterceptor() }
@@ -33,7 +32,6 @@ struct InterceptorFactoryTests {
         )
     }
 
-    @available(iOS 13, *)
     @Test
     func instantiatesStreamInterceptorForStream() {
         let factory = InterceptorFactory { _ in MockStreamInterceptor() }
@@ -42,7 +40,6 @@ struct InterceptorFactoryTests {
         )
     }
 
-    @available(iOS 13, *)
     @Test
     func instantiatesCombinedInterceptorForStreamAndUnary() {
         let factory = InterceptorFactory { _ in MockUnaryAndStreamInterceptor() }
@@ -54,14 +51,12 @@ struct InterceptorFactoryTests {
         )
     }
 
-    @available(iOS 13, *)
     @Test
     func doesNotInstantiateUnaryInterceptorForStream() {
         let factory = InterceptorFactory { _ in MockUnaryInterceptor() }
         #expect(factory.createStream(with: self.config) == nil)
     }
 
-    @available(iOS 13, *)
     @Test
     func doesNotInstantiateStreamInterceptorForUnary() {
         let factory = InterceptorFactory { _ in MockStreamInterceptor() }

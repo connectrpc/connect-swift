@@ -21,7 +21,6 @@ private final class NoopInterceptor1: UnaryInterceptor, StreamInterceptor {}
 private final class NoopInterceptor2: UnaryInterceptor, StreamInterceptor {}
 
 struct ProtocolClientConfigTests {
-    @available(iOS 13, *)
     @Test
     func defaultResponseCompressionPoolIncludesGzip() {
         let config = ProtocolClientConfig(host: "https://connectrpc.com")
@@ -29,7 +28,6 @@ struct ProtocolClientConfigTests {
         #expect(config.acceptCompressionPoolNames() == ["gzip"])
     }
 
-    @available(iOS 13, *)
     @Test
     func shouldCompressDataLargerThanMinBytes() {
         let data = Data(repeating: 0xa, count: 50)
@@ -39,7 +37,6 @@ struct ProtocolClientConfigTests {
         #expect(compression.shouldCompress(data))
     }
 
-    @available(iOS 13, *)
     @Test
     func shouldNotCompressDataSmallerThanMinBytes() {
         let data = Data(repeating: 0xa, count: 50)
@@ -49,7 +46,6 @@ struct ProtocolClientConfigTests {
         #expect(compression.shouldCompress(data) == false)
     }
 
-    @available(iOS 13, *)
     @Test
     func creatingURLsWithVariousHosts() {
         let rpcPath = Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.unary.path
@@ -91,7 +87,6 @@ struct ProtocolClientConfigTests {
         )
     }
 
-    @available(iOS 13, *)
     @Test
     func addsConnectInterceptorLastWhenUsingConnectProtocol() {
         let config = ProtocolClientConfig(
@@ -105,7 +100,6 @@ struct ProtocolClientConfigTests {
         #expect(config.interceptors[1].createStream(with: config) is ConnectInterceptor)
     }
 
-    @available(iOS 13, *)
     @Test
     func addsGRPCWebInterceptorLastWhenUsingGRPCWebProtocol() {
         let config = ProtocolClientConfig(
@@ -119,7 +113,6 @@ struct ProtocolClientConfigTests {
         #expect(config.interceptors[1].createStream(with: config) is GRPCWebInterceptor)
     }
 
-    @available(iOS 13, *)
     @Test
     func addsProtocolInterceptorLastWhenUsingOtherProtocol() {
         let config = ProtocolClientConfig(
@@ -135,7 +128,6 @@ struct ProtocolClientConfigTests {
         #expect(config.interceptors[1].createStream(with: config) is NoopInterceptor2)
     }
 
-    @available(iOS 13, *)
     @Test
     func unaryGETRequestWithNoSideEffects() {
         let request = HTTPRequest<Data?>(
@@ -168,7 +160,6 @@ struct ProtocolClientConfigTests {
         ).shouldUseUnaryGET(for: request) == false)
     }
 
-    @available(iOS 13, *)
     @Test
     func unaryGETRequestWithIdempotentSideEffects() {
         let request = HTTPRequest<Data?>(
@@ -201,7 +192,6 @@ struct ProtocolClientConfigTests {
         ).shouldUseUnaryGET(for: request) == false)
     }
 
-    @available(iOS 13, *)
     @Test
     func unaryGETRequestWithUnknownSideEffects() {
         let request = HTTPRequest<Data?>(
@@ -234,7 +224,6 @@ struct ProtocolClientConfigTests {
         ).shouldUseUnaryGET(for: request) == false)
     }
 
-    @available(iOS 13, *)
     @Test
     func transformToGETWithoutRequestCompression() {
         let request = HTTPRequest<Data?>(
@@ -261,7 +250,6 @@ struct ProtocolClientConfigTests {
         )
     }
 
-    @available(iOS 13, *)
     @Test
     func transformToGETUsesURLSafeBase64() {
         // Data bytes [0x3E, 0x3F, 0xBF, 0xFF] produce "+P+//w==" in standard base64
@@ -288,7 +276,6 @@ struct ProtocolClientConfigTests {
         #expect(url.contains("message=Pj-__w"), "Expected raw URL-safe base64 encoding")
     }
 
-    @available(iOS 13, *)
     @Test
     func transformToGETWithRequestCompression() {
         let compressedRequest = HTTPRequest<Data?>(

@@ -138,7 +138,9 @@ final class ConnectClientGenerator: Generator {
     private func printAsyncAwaitMethodInterface(for method: MethodDescriptor) {
         self.printLine()
         self.printCommentsIfNeeded(for: method)
-        self.printLine(method.asyncAwaitAvailabilityAnnotation())
+        if let availabilityAnnotation = method.asyncAwaitAvailabilityAnnotation() {
+            self.printLine(availabilityAnnotation)
+        }
         self.printLine(
             method.asyncAwaitSignature(
                 using: self.namer, includeDefaults: false, options: self.options
@@ -170,7 +172,9 @@ final class ConnectClientGenerator: Generator {
 
     private func printAsyncAwaitMethodImplementation(for method: MethodDescriptor) {
         self.printLine()
-        self.printLine(method.asyncAwaitAvailabilityAnnotation())
+        if let availabilityAnnotation = method.asyncAwaitAvailabilityAnnotation() {
+            self.printLine(availabilityAnnotation)
+        }
         self.printLine(
             "\(self.visibility) "
             + method.asyncAwaitSignature(
@@ -213,7 +217,7 @@ private extension MethodDescriptor {
         if self.options.deprecated {
             // swiftlint:disable line_length
             return """
-            @available(iOS, introduced: 12, deprecated: 12, message: "This RPC has been marked as deprecated in its `.proto` file.")
+            @available(iOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
             @available(macOS, introduced: 10.15, deprecated: 10.15, message: "This RPC has been marked as deprecated in its `.proto` file.")
             @available(tvOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
             @available(watchOS, introduced: 6, deprecated: 6, message: "This RPC has been marked as deprecated in its `.proto` file.")
@@ -224,12 +228,12 @@ private extension MethodDescriptor {
         }
     }
 
-    func asyncAwaitAvailabilityAnnotation() -> String {
+    func asyncAwaitAvailabilityAnnotation() -> String? {
         if self.options.deprecated {
             // swiftlint:disable:next line_length
             return "@available(iOS, introduced: 13, deprecated: 13, message: \"This RPC has been marked as deprecated in its `.proto` file.\")"
         } else {
-            return "@available(iOS 13, *)"
+            return nil
         }
     }
 

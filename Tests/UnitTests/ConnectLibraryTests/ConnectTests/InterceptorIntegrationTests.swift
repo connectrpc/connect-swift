@@ -23,7 +23,6 @@ import Testing
 /// `TimeoutTests`, which also performs live networking) still run concurrently with it.
 @Suite(.serialized)
 struct InterceptorIntegrationTests {
-    @available(iOS 13, *)
     @Test
     func unaryInterceptorSuccess() async {
         let trackedSteps = Locked([InterceptorStep]())
@@ -59,7 +58,6 @@ struct InterceptorIntegrationTests {
         ])
     }
 
-    @available(iOS 13, *)
     @Test
     func streamInterceptorSuccess() async throws {
         let trackedSteps = Locked([InterceptorStep]())
@@ -197,7 +195,6 @@ struct InterceptorIntegrationTests {
         ))
     }
 
-    @available(iOS 13, *)
     @Test
     func unaryInterceptorCanFailOutboundRequest() async {
         let trackedSteps = Locked([InterceptorStep]())
@@ -231,7 +228,6 @@ struct InterceptorIntegrationTests {
         ])
     }
 
-    @available(iOS 13, *)
     @Test
     func streamInterceptorCanFailOutboundRequest() async {
         let trackedSteps = Locked([InterceptorStep]())
@@ -267,7 +263,6 @@ struct InterceptorIntegrationTests {
         ])
     }
 
-    @available(iOS 13, *)
     @Test
     func streamDoesNotPassRequestDataToInterceptorsUntilRequestHeadersAreSent() async throws {
         let trackedSteps = Locked([InterceptorStep]())
