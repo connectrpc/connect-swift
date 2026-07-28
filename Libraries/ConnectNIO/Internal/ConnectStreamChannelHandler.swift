@@ -23,6 +23,9 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     private let eventLoop: NIOCore.EventLoop
     private let request: Connect.HTTPRequest<Data?>
     private let responseCallbacks: Connect.ResponseCallbacks
+    /// Weak by design: the handler outlives the client which created it. See
+    /// `EventLoopGroupOwner`.
+    private weak var loopGroupOwner: EventLoopGroupOwner?
 
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
@@ -34,11 +37,13 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     init(
         request: Connect.HTTPRequest<Data?>,
         responseCallbacks: Connect.ResponseCallbacks,
-        eventLoop: NIOCore.EventLoop
+        eventLoop: NIOCore.EventLoop,
+        loopGroupOwner: EventLoopGroupOwner
     ) {
         self.request = request
         self.responseCallbacks = responseCallbacks
         self.eventLoop = eventLoop
+        self.loopGroupOwner = loopGroupOwner
     }
 
     /// Send outbound data over the stream.
@@ -90,7 +95,9 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
         if self.eventLoop.inEventLoop {
             action()
         } else {
-            self.eventLoop.submit(action).cascade(to: nil)
+            // The owner drops the action if the client - and therefore the event loop group - is
+            // already gone, rather than scheduling onto a loop which has shut down.
+            self.loopGroupOwner?.execute(on: self.eventLoop, action)
         }
     }
 

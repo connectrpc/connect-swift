@@ -27,7 +27,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     private lazy var bootstrap = self.createBootstrap()
     private let host: String
     private let lock = NIOConcurrencyHelpers.NIOLock()
-    private let loopGroup = NIOPosix.MultiThreadedEventLoopGroup(numberOfThreads: 1)
+    private let loopGroupOwner: EventLoopGroupOwner
     private let port: Int
     private let timeout: TimeInterval?
     private let useSSL: Bool
@@ -35,12 +35,32 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     private var pendingRequests = [(NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer?) -> Void]()
     private var state = State.disconnected
 
+    /// The group whose event loops this client uses. Exposed for testing.
+    var eventLoopGroup: NIOCore.EventLoopGroup {
+        return self.loopGroupOwner.eventLoopGroup
+    }
+
     private enum State {
         case disconnected
         case connecting
         case connected(
             channel: NIOCore.Channel, multiplexer: NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer
         )
+    }
+
+    /// The connection details parsed from the host and port passed to an initializer.
+    private struct Endpoint {
+        let host: String
+        let port: Int
+        let useSSL: Bool
+
+        init(host: String, port: Int?) {
+            let baseURL = URL(string: host)!
+            let useSSL = baseURL.scheme?.lowercased() == "https"
+            self.host = baseURL.host!
+            self.port = port ?? baseURL.port ?? (useSSL ? 443 : 80)
+            self.useSSL = useSSL
+        }
     }
 
     /// Designated initializer for the client.
@@ -53,12 +73,31 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     /// - parameter timeout: Optional timeout after which to terminate requests/streams if no
     ///                      activity has occurred in the request or response path.
     public init(host: String, port: Int? = nil, timeout: TimeInterval? = nil) {
-        let baseURL = URL(string: host)!
-        let useSSL = baseURL.scheme?.lowercased() == "https"
-        self.host = baseURL.host!
-        self.port = port ?? baseURL.port ?? (useSSL ? 443 : 80)
+        let endpoint = Endpoint(host: host, port: port)
+        self.host = endpoint.host
+        self.port = endpoint.port
+        self.useSSL = endpoint.useSSL
         self.timeout = timeout
-        self.useSSL = useSSL
+        self.loopGroupOwner = EventLoopGroupOwner()
+    }
+
+    /// Initializer which uses an externally managed event loop group rather than creating one.
+    /// The injected group is never shut down by the client, so it may safely be shared.
+    ///
+    /// - parameter host: Target host (e.g., `https://connectrpc.com`).
+    /// - parameter port: Port to use for the connection, as described above.
+    /// - parameter timeout: Optional timeout, as described above.
+    /// - parameter eventLoopGroup: The group whose event loops the client should use.
+    init(
+        host: String, port: Int? = nil, timeout: TimeInterval? = nil,
+        eventLoopGroup: NIOCore.EventLoopGroup
+    ) {
+        let endpoint = Endpoint(host: host, port: port)
+        self.host = endpoint.host
+        self.port = endpoint.port
+        self.useSSL = endpoint.useSSL
+        self.timeout = timeout
+        self.loopGroupOwner = EventLoopGroupOwner(group: eventLoopGroup, isGroupOwned: false)
     }
 
     /// Called before the first request/stream is initialized, and the result is stored for reuse
@@ -72,7 +111,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         ? self.createTLSConfiguration(forHost: host)
         : nil
 
-        return NIOPosix.ClientBootstrap(group: self.loopGroup)
+        return NIOPosix.ClientBootstrap(group: self.loopGroupOwner.eventLoopGroup)
             .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
             .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .channelInitializer { channel in
@@ -114,10 +153,11 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         onMetrics: @escaping @Sendable (Connect.HTTPMetrics) -> Void,
         onResponse: @escaping @Sendable (Connect.HTTPResponse) -> Void
     ) -> Connect.Cancelable {
-        let eventLoop = self.loopGroup.next()
+        let eventLoop = self.loopGroupOwner.next()
         let handler = ConnectUnaryChannelHandler(
             request: request,
             eventLoop: eventLoop,
+            loopGroupOwner: self.loopGroupOwner,
             onMetrics: onMetrics,
             onResponse: onResponse
         )
@@ -144,11 +184,12 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         request: Connect.HTTPRequest<Data?>,
         responseCallbacks: Connect.ResponseCallbacks
     ) -> Connect.RequestCallbacks<Data> {
-        let eventLoop = self.loopGroup.next()
+        let eventLoop = self.loopGroupOwner.next()
         let handler = ConnectStreamChannelHandler(
             request: request,
             responseCallbacks: responseCallbacks,
-            eventLoop: eventLoop
+            eventLoop: eventLoop,
+            loopGroupOwner: self.loopGroupOwner
         )
         self.sendOrQueueRequest { [weak self] multiplexer in
             if let multiplexer = multiplexer {
@@ -265,10 +306,9 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 channel.close(mode: .all, promise: nil)
             }
         }
-        // An event loop callback can release the client's last reference, running `deinit` on that
-        // event loop. The synchronous `syncShutdownGracefully()` call will trap there because the
-        // loop cannot wait for itself to stop, so initiate shutdown asynchronously.
-        self.loopGroup.shutdownGracefully { _ in }
+        // Shut down outside `self.lock` to preserve the lock ordering documented on
+        // `EventLoopGroupOwner`: this lock may be taken before the owner's, never the reverse.
+        self.loopGroupOwner.shutDown()
     }
 }
 
