@@ -17,12 +17,9 @@ import Foundation
 import SwiftProtobuf
 import Testing
 
-/// These tests compose a real `BidirectionalAsyncStream`, so they also cover its result
-/// delivery, ordering and sending. Only its termination handling is tested separately, in
-/// `BidirectionalAsyncStreamTests`.
+/// Composes a real `BidirectionalAsyncStream`, so these cover its delivery and sending too.
 ///
-/// The time limit exists because these tests drain a stream: a regression that stops the stream
-/// from finishing would otherwise hang the whole test run instead of failing it.
+/// Time-limited so a stream that never finishes fails rather than hangs.
 @Suite(.timeLimit(.minutes(1)))
 struct ClientOnlyAsyncStreamTests {
     private typealias Empty = Google_Protobuf_Empty
@@ -48,9 +45,8 @@ struct ClientOnlyAsyncStreamTests {
         #expect(code == .ok)
     }
 
-    /// A client-only stream expects exactly one response message. Any other count collapses the
-    /// whole result set into a single error, which is only satisfiable if results were buffered -
-    /// forwarding them as they arrived would have already delivered the headers.
+    /// Exactly one message is expected; any other count replaces the buffered results with a
+    /// single error. Doubles as the buffering check - a passthrough would have delivered headers.
     @Test(arguments: [
         (0, "unary stream has no messages"),
         (2, "unary stream has multiple messages"),
@@ -76,8 +72,6 @@ struct ClientOnlyAsyncStreamTests {
         #expect((error as? ConnectError)?.message == expectedMessage)
     }
 
-    /// When the server itself fails, its error must surface untouched rather than being masked by
-    /// the "no messages" validation that a zero-message stream would otherwise trigger.
     @Test
     func passesResultsThroughWhenTheStreamCompletesWithAnError() async {
         let serverError = ConnectError(code: .unavailable, message: "server is down")
@@ -97,10 +91,6 @@ struct ClientOnlyAsyncStreamTests {
         #expect((error as? ConnectError)?.message == "server is down")
     }
 
-    /// These three were inherited before this type moved to composition and are now hand-written
-    /// forwards, so the routing is what needs pinning. Asserting the call sequence catches a
-    /// swapped forward - `closeAndReceive()` routed to `cancel()` - that per-call counts would
-    /// report far less clearly.
     @Test
     func routesSendCloseAndCancelToTheUnderlyingStream() throws {
         let calls = Locked([String]())
@@ -129,8 +119,6 @@ struct ClientOnlyAsyncStreamTests {
         }
     }
 
-    /// Drives a client-only stream with the given server results and drains everything the
-    /// consumer actually observes.
     private func resultsFromServer(
         _ handleResults: (ClientOnlyAsyncStream<Empty, Empty>) -> Void
     ) async -> [StreamResult<Empty>] {

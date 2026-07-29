@@ -17,12 +17,10 @@ import Foundation
 import SwiftProtobuf
 import Testing
 
-/// Result delivery, ordering and sending are covered by `ClientOnlyAsyncStreamTests`, which
-/// composes a real `BidirectionalAsyncStream` and therefore exercises all of it. What only this
-/// suite can reach is the termination handler that closes the request when the stream ends.
+/// Delivery and sending are covered by `ClientOnlyAsyncStreamTests`, which composes this type;
+/// what remains here is termination.
 ///
-/// The time limit exists because these tests consume a stream: a regression that stops results
-/// being delivered would otherwise hang the whole test run instead of failing it.
+/// Time-limited so a stalled stream fails rather than hangs.
 @Suite(.timeLimit(.minutes(1)))
 struct BidirectionalAsyncStreamTests {
     private typealias Empty = Google_Protobuf_Empty
@@ -39,10 +37,6 @@ struct BidirectionalAsyncStreamTests {
         }
     }
 
-    /// A stream abandoned without completing must still close the request. This is the only test
-    /// that pins the termination handler capturing the callbacks box rather than `self`:
-    /// capturing `self` forms a retain cycle, so the instance never deallocates, the handler
-    /// never runs, and the request is left open.
     @Test
     func closesTheRequestWhenReleasedWithoutCompleting() async {
         await confirmation("the request is closed") { closed in
@@ -50,9 +44,7 @@ struct BidirectionalAsyncStreamTests {
         }
     }
 
-    /// Creates a stream in its own scope, consumes a single result, then returns so that the
-    /// stream is released without ever completing. The release - and therefore the close - is
-    /// complete by the time this function returns.
+    /// Separate function so the stream is deterministically released when it returns.
     private func consumeOneResultThenRelease(onClose: Confirmation) async {
         let stream = BidirectionalAsyncStream<Empty, Empty>()
         stream.configureForSending(with: RequestCallbacks<Empty>(
