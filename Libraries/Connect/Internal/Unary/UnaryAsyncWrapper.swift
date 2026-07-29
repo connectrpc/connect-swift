@@ -57,10 +57,20 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage> {
                 self.cancelable = self.sendUnary { response in
                     // In some circumstances where a request timeout and a server
                     // error occur at nearly the same moment, the underlying
-                    // `swift-nio` system will trigger this callback twice. This check
-                    // discards the second occurrence to avoid resuming `continuation`
-                    // multiple times, which would result in a crash.
-                    guard !hasResumed.value else {
+                    // `swift-nio` system will trigger this callback twice. Only one
+                    // caller may resume `continuation`; resuming it twice is a crash.
+                    //
+                    // Claiming that right must be a *single* atomic operation. A
+                    // separate check and set would let two concurrent callbacks both
+                    // observe `false` and both proceed to resume.
+                    let shouldResume = hasResumed.perform { hasResumed -> Bool in
+                        if hasResumed {
+                            return false
+                        }
+                        hasResumed = true
+                        return true
+                    }
+                    guard shouldResume else {
                         os_log(
                             .fault,
                             """
@@ -70,8 +80,10 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage> {
                         )
                         return
                     }
+                    // Deliberately outside the lock: `Locked` is backed by
+                    // `os_unfair_lock`, and resuming a continuation while holding it
+                    // risks priority inversion.
                     continuation.resume(returning: response)
-                    hasResumed.perform(action: { $0 = true })
                 }
             }
         } onCancel: {
