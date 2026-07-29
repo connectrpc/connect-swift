@@ -16,22 +16,27 @@ import Foundation
 
 /// Fires a callback if a configured deadline elapses before the timer is canceled.
 ///
-/// Cancelation is sticky: once `cancel()` has been called the timer can never fire, even if
-/// `start(onTimeout:)` runs afterwards. `ProtocolClient` depends on this - draining pending
-/// request callbacks can synchronously reach `cancel()` before `start()`.
+/// `.timedOut` and `.canceled` are both terminal, so cancelation is sticky - once `cancel()` has
+/// been called the timer can never fire, even if `start(onTimeout:)` runs afterwards.
+/// `ProtocolClient` depends on this - draining pending request callbacks can synchronously reach
+/// `cancel()` before `start()`.
 final class TimeoutTimer: Sendable {
     private enum State {
         case ready
         case started(Task<Void, Never>)
+        case timedOut
         case canceled
     }
 
-    private let hasTimedOut = Locked(false)
     private let state = Locked<State>(.ready)
     private let timeout: TimeInterval
 
     var timedOut: Bool {
-        return self.hasTimedOut.value
+        if case .timedOut = self.state.value {
+            return true
+        }
+
+        return false
     }
 
     init?(config: ProtocolClientConfig) {
@@ -51,7 +56,7 @@ final class TimeoutTimer: Sendable {
         // Clamped: `timeout` is caller-supplied, and `UInt64(negativeDouble)` traps.
         let nanoseconds = UInt64(max(0, self.timeout * 1_000_000_000))
         // Avoid capturing `self` so `deinit` disarms the orphaned timer.
-        let hasTimedOut = self.hasTimedOut
+        let state = self.state
         let task = Task {
             do {
                 try await Task.sleep(nanoseconds: nanoseconds)
@@ -59,21 +64,34 @@ final class TimeoutTimer: Sendable {
                 return
             }
 
-            hasTimedOut.value = true
-            // Must stay outside any lock: this re-enters `cancel()`/`deinit` via cancelation,
-            // which is the deadlock fixed in #389.
+            // `.ready` is reachable: this task can wake before `start()` registers it below.
+            let didTimeOut = state.perform { state -> Bool in
+                switch state {
+                case .ready, .started:
+                    state = .timedOut
+                    return true
+                case .timedOut, .canceled:
+                    return false
+                }
+            }
+            guard didTimeOut else {
+                return
+            }
+
+            // Must stay outside the lock: this re-enters `timedOut`/`cancel()`/`deinit` via
+            // cancelation, which would deadlock.
             onTimeout()
         }
-        let wasCanceled = self.state.perform { state -> Bool in
+        let isTerminal = self.state.perform { state -> Bool in
             switch state {
-            case .canceled:
+            case .timedOut, .canceled:
                 return true
             case .ready, .started:
                 state = .started(task)
                 return false
             }
         }
-        if wasCanceled {
+        if isTerminal {
             task.cancel()
         }
     }
@@ -84,8 +102,12 @@ final class TimeoutTimer: Sendable {
             case .started(let task):
                 state = .canceled
                 return task
-            case .ready, .canceled:
+            case .ready:
                 state = .canceled
+                return nil
+            case .timedOut, .canceled:
+                // Terminal. `.timedOut` must survive, because `deinit` always calls `cancel()`
+                // and `ProtocolClient` reads `timedOut` while the timer is still alive.
                 return nil
             }
         }
