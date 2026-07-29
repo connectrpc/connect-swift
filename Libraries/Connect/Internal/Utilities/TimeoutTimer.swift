@@ -14,12 +14,21 @@
 
 import Foundation
 
-final class TimeoutTimer: @unchecked Sendable {
+/// Fires a callback if a configured deadline elapses before the timer is canceled.
+///
+/// Cancelation is sticky: once `cancel()` has been called the timer can never fire, even if
+/// `start(onTimeout:)` runs afterwards. `ProtocolClient` depends on this - draining pending
+/// request callbacks can synchronously reach `cancel()` before `start()`.
+final class TimeoutTimer: Sendable {
+    private enum State {
+        case ready
+        case started(Task<Void, Never>)
+        case canceled
+    }
+
     private let hasTimedOut = Locked(false)
-    private var onTimeout: (() -> Void)?
-    private let queue = DispatchQueue(label: "connectrpc.Timeout")
+    private let state = Locked<State>(.ready)
     private let timeout: TimeInterval
-    private var workItem: DispatchWorkItem! // Force-unwrapped to allow capturing self in init
 
     var timedOut: Bool {
         return self.hasTimedOut.value
@@ -31,25 +40,55 @@ final class TimeoutTimer: @unchecked Sendable {
         }
 
         self.timeout = timeout
-        self.workItem = DispatchWorkItem { [weak self] in
-            self?.hasTimedOut.value = true
-            self?.onTimeout?()
-        }
     }
 
     deinit {
         self.cancel()
     }
 
-    func start(onTimeout: @escaping () -> Void) {
-        let milliseconds = Int(self.timeout * 1_000)
-        self.queue.sync { self.onTimeout = onTimeout }
-        self.queue.asyncAfter(
-            deadline: .now() + .milliseconds(milliseconds), execute: self.workItem
-        )
+    /// Start the timer. Has no effect if `cancel()` has already been called.
+    func start(onTimeout: @escaping @Sendable () -> Void) {
+        // Clamped: `timeout` is caller-supplied, and `UInt64(negativeDouble)` traps.
+        let nanoseconds = UInt64(max(0, self.timeout * 1_000_000_000))
+        // Capturing the box rather than `self` lets `deinit` disarm an orphaned timer.
+        let hasTimedOut = self.hasTimedOut
+        let task = Task {
+            do {
+                try await Task.sleep(nanoseconds: nanoseconds)
+            } catch {
+                return
+            }
+
+            hasTimedOut.value = true
+            // Must stay outside any lock: this re-enters `cancel()`/`deinit` via cancelation,
+            // which is the deadlock fixed in #389.
+            onTimeout()
+        }
+        let wasCanceled = self.state.perform { state -> Bool in
+            switch state {
+            case .canceled:
+                return true
+            case .ready, .started:
+                state = .started(task)
+                return false
+            }
+        }
+        if wasCanceled {
+            task.cancel()
+        }
     }
 
     func cancel() {
-        workItem.cancel()
+        let task = self.state.perform { state -> Task<Void, Never>? in
+            switch state {
+            case .started(let task):
+                state = .canceled
+                return task
+            case .ready, .canceled:
+                state = .canceled
+                return nil
+            }
+        }
+        task?.cancel()
     }
 }
