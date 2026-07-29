@@ -12,20 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Foundation
+import SwiftProtobuf
 
 /// Concrete **internal** implementation of `ClientOnlyAsyncStreamInterface`.
-/// Provides the necessary wiring to bridge from closures/callbacks to Swift's `AsyncStream`
-/// to work with async/await.
-///
-/// This subclasses `BidirectionalAsyncStream` since its behavior is purely additive (it overlays
-/// some additional validation) and both types are internal to the package, not public.
+/// Overlays additional client-only validation on top of a `BidirectionalAsyncStream`, which
+/// provides the wiring from closures/callbacks to Swift's `AsyncStream`.
 final class ClientOnlyAsyncStream<
     Input: ProtobufMessage, Output: ProtobufMessage
->: BidirectionalAsyncStream<Input, Output>, @unchecked Sendable {
+>: Sendable {
+    private let bidirectionalStream: BidirectionalAsyncStream<Input, Output>
     private let receivedResults = Locked([StreamResult<Output>]())
 
-    override func handleResultFromServer(_ result: StreamResult<Output>) {
+    init(bidirectionalStream: BidirectionalAsyncStream<Input, Output>) {
+        self.bidirectionalStream = bidirectionalStream
+    }
+
+    /// Send a result to the consumer after doing additional validations for client-only streams.
+    /// Should be called by the protocol client when a result is received from the network.
+    ///
+    /// - parameter result: The new result that was received.
+    func handleResultFromServer(_ result: StreamResult<Output>) {
         let (isComplete, results) = self.receivedResults.perform { results in
             results.append(result)
             if case .complete = result {
@@ -37,12 +43,26 @@ final class ClientOnlyAsyncStream<
         guard isComplete else {
             return
         }
-        results.forEach(super.handleResultFromServer)
+        results.forEach(self.bidirectionalStream.handleResultFromServer)
     }
 }
 
 extension ClientOnlyAsyncStream: ClientOnlyAsyncStreamInterface {
+    @discardableResult
+    func send(_ input: Input) throws -> Self {
+        try self.bidirectionalStream.send(input)
+        return self
+    }
+
+    func results() -> AsyncStream<StreamResult<Output>> {
+        return self.bidirectionalStream.results()
+    }
+
     func closeAndReceive() {
-        self.close()
+        self.bidirectionalStream.close()
+    }
+
+    func cancel() {
+        self.bidirectionalStream.cancel()
     }
 }

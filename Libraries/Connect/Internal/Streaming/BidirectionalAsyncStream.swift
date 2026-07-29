@@ -20,19 +20,16 @@ import SwiftProtobuf
 ///
 /// If the library removes callback support in favor of only supporting async/await in the future,
 /// this class can be simplified.
-class BidirectionalAsyncStream<
+final class BidirectionalAsyncStream<
     Input: ProtobufMessage, Output: ProtobufMessage
->: @unchecked Sendable {
+>: Sendable {
     /// The underlying async stream that will be exposed to the consumer.
-    /// Force unwrapped because it captures `self` on `init`.
-    private var asyncStream: AsyncStream<StreamResult<Output>>!
-    /// Stored closure to provide access to the `AsyncStream.Continuation` so that result data
-    /// can be passed through to the `AsyncStream` when received.
-    /// Force unwrapped because it must be set within the context of the `AsyncStream.Continuation`.
-    private var receiveResult: ((StreamResult<Output>) -> Void)!
+    private let asyncStream: AsyncStream<StreamResult<Output>>
+    /// Continuation used to pass result data through to the `AsyncStream` when received.
+    private let continuation: AsyncStream<StreamResult<Output>>.Continuation
     /// Callbacks used to send outbound data and close the stream.
-    /// Optional because these callbacks are not available until the stream is initialized.
-    private var requestCallbacks: RequestCallbacks<Input>?
+    /// Empty until the stream is initialized via `configureForSending()`.
+    private let requestCallbacks = Locked<RequestCallbacks<Input>?>(nil)
 
     private struct NotConfiguredForSendingError: Swift.Error {}
 
@@ -40,22 +37,13 @@ class BidirectionalAsyncStream<
     ///
     /// Note: `configureForSending()` must be called before using the stream.
     init() {
-        self.asyncStream = AsyncStream<StreamResult<Output>> { continuation in
-            self.receiveResult = { result in
-                if Task.isCancelled {
-                    return
-                }
-                switch result {
-                case .headers, .message:
-                    continuation.yield(result)
-                case .complete:
-                    continuation.yield(result)
-                    continuation.finish()
-                }
-            }
-            continuation.onTermination = { @Sendable _ in
-                self.requestCallbacks?.sendClose()
-            }
+        let (asyncStream, continuation) = AsyncStream.makeStream(of: StreamResult<Output>.self)
+        self.asyncStream = asyncStream
+        self.continuation = continuation
+        // Capture the lock box rather than `self` so the continuation's stored termination
+        // handler does not retain this instance.
+        continuation.onTermination = { [requestCallbacks] _ in
+            requestCallbacks.value?.sendClose()
         }
     }
 
@@ -68,7 +56,7 @@ class BidirectionalAsyncStream<
     /// - returns: This instance of the stream (useful for chaining).
     @discardableResult
     func configureForSending(with requestCallbacks: RequestCallbacks<Input>) -> Self {
-        self.requestCallbacks = requestCallbacks
+        self.requestCallbacks.value = requestCallbacks
         return self
     }
 
@@ -77,14 +65,23 @@ class BidirectionalAsyncStream<
     ///
     /// - parameter result: The new result that was received.
     func handleResultFromServer(_ result: StreamResult<Output>) {
-        self.receiveResult(result)
+        if Task.isCancelled {
+            return
+        }
+        switch result {
+        case .headers, .message:
+            self.continuation.yield(result)
+        case .complete:
+            self.continuation.yield(result)
+            self.continuation.finish()
+        }
     }
 }
 
 extension BidirectionalAsyncStream: BidirectionalAsyncStreamInterface {
     @discardableResult
     func send(_ input: Input) throws -> Self {
-        guard let sendData = self.requestCallbacks?.sendData else {
+        guard let sendData = self.requestCallbacks.value?.sendData else {
             throw NotConfiguredForSendingError()
         }
 
@@ -97,10 +94,10 @@ extension BidirectionalAsyncStream: BidirectionalAsyncStreamInterface {
     }
 
     func close() {
-        self.requestCallbacks?.sendClose()
+        self.requestCallbacks.value?.sendClose()
     }
 
     func cancel() {
-        self.requestCallbacks?.cancel()
+        self.requestCallbacks.value?.cancel()
     }
 }
