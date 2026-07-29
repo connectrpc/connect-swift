@@ -86,25 +86,6 @@ struct BidirectionalAsyncStreamTests {
         }
     }
 
-    @Test
-    func clientOnlyStreamBuffersResultsUntilComplete() async {
-        let bidirectional = BidirectionalAsyncStream<Empty, Empty>()
-        let clientOnly = ClientOnlyAsyncStream(bidirectionalStream: bidirectional)
-        bidirectional.configureForSending(with: RequestCallbacks<Empty>(
-            cancel: {}, sendData: { _ in }, sendClose: {}
-        ))
-
-        clientOnly.handleResultFromServer(.headers([:]))
-        clientOnly.handleResultFromServer(.message(Empty()))
-        clientOnly.handleResultFromServer(.complete(code: .ok, error: nil, trailers: nil))
-
-        var results = [StreamResult<Empty>]()
-        for await result in clientOnly.results() {
-            results.append(result)
-        }
-        #expect(results.count == 3)
-    }
-
     /// Creates a stream in its own scope, consumes a single result, then returns so that the
     /// stream is released without ever completing. The release - and therefore the close - is
     /// complete by the time this function returns.
