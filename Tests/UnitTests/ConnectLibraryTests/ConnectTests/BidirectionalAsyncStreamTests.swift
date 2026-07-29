@@ -22,19 +22,21 @@ struct BidirectionalAsyncStreamTests {
 
     @Test
     func deliversResultsInOrderAndClosesOnComplete() async {
-        let didClose = Locked(false)
-        let stream = BidirectionalAsyncStream<Empty, Empty>()
-        stream.configureForSending(with: RequestCallbacks<Empty>(
-            cancel: {}, sendData: { _ in }, sendClose: { didClose.value = true }
-        ))
+        let results = await confirmation("the underlying stream is closed") { closed in
+            let stream = BidirectionalAsyncStream<Empty, Empty>()
+            stream.configureForSending(with: RequestCallbacks<Empty>(
+                cancel: {}, sendData: { _ in }, sendClose: { closed() }
+            ))
 
-        stream.handleResultFromServer(.headers(["a": ["b"]]))
-        stream.handleResultFromServer(.message(Empty()))
-        stream.handleResultFromServer(.complete(code: .ok, error: nil, trailers: nil))
+            stream.handleResultFromServer(.headers(["a": ["b"]]))
+            stream.handleResultFromServer(.message(Empty()))
+            stream.handleResultFromServer(.complete(code: .ok, error: nil, trailers: nil))
 
-        var results = [StreamResult<Empty>]()
-        for await result in stream.results() {
-            results.append(result)
+            var results = [StreamResult<Empty>]()
+            for await result in stream.results() {
+                results.append(result)
+            }
+            return results
         }
 
         #expect(results.count == 3)
@@ -48,37 +50,40 @@ struct BidirectionalAsyncStreamTests {
             return
         }
         #expect(code == .ok)
-
-        try? await Task.sleep(nanoseconds: 50_000_000)
-        #expect(didClose.value)
     }
 
     @Test
     func closesUnderlyingStreamWhenConsumingTaskIsCancelled() async {
-        let didClose = Locked(false)
-        let stream = BidirectionalAsyncStream<Empty, Empty>()
-        stream.configureForSending(with: RequestCallbacks<Empty>(
-            cancel: {}, sendData: { _ in }, sendClose: { didClose.value = true }
-        ))
+        await confirmation("the underlying stream is closed") { closed in
+            let stream = BidirectionalAsyncStream<Empty, Empty>()
+            stream.configureForSending(with: RequestCallbacks<Empty>(
+                cancel: {}, sendData: { _ in }, sendClose: { closed() }
+            ))
 
-        let consumer = Task {
-            for await _ in stream.results() {}
+            // Route one result through the consumer and wait for it to come back out. This
+            // proves the consuming task is running and iterating before it gets cancelled,
+            // without having to sleep and hope.
+            let (consuming, isConsuming) = AsyncStream.makeStream(of: Void.self)
+            let consumer = Task {
+                for await _ in stream.results() {
+                    isConsuming.yield()
+                }
+            }
+            stream.handleResultFromServer(.headers([:]))
+            for await _ in consuming {
+                break
+            }
+
+            consumer.cancel()
+            await consumer.value
         }
-        try? await Task.sleep(nanoseconds: 50_000_000)
-        consumer.cancel()
-        await consumer.value
-
-        try? await Task.sleep(nanoseconds: 100_000_000)
-        #expect(didClose.value)
     }
 
     @Test
     func closesUnderlyingStreamWhenReleasedWithoutCompleting() async {
-        let didClose = Locked(false)
-        await self.consumeOneResultThenRelease(didClose: didClose)
-
-        try? await Task.sleep(nanoseconds: 100_000_000)
-        #expect(didClose.value)
+        await confirmation("the underlying stream is closed") { closed in
+            await self.consumeOneResultThenRelease(onClose: closed)
+        }
     }
 
     @Test
@@ -101,11 +106,12 @@ struct BidirectionalAsyncStreamTests {
     }
 
     /// Creates a stream in its own scope, consumes a single result, then returns so that the
-    /// stream is released without ever completing.
-    private func consumeOneResultThenRelease(didClose: Locked<Bool>) async {
+    /// stream is released without ever completing. The release - and therefore the close - is
+    /// complete by the time this function returns.
+    private func consumeOneResultThenRelease(onClose: Confirmation) async {
         let stream = BidirectionalAsyncStream<Empty, Empty>()
         stream.configureForSending(with: RequestCallbacks<Empty>(
-            cancel: {}, sendData: { _ in }, sendClose: { didClose.value = true }
+            cancel: {}, sendData: { _ in }, sendClose: { onClose() }
         ))
         stream.handleResultFromServer(.headers([:]))
         for await _ in stream.results() {
