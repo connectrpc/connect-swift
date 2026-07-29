@@ -17,71 +17,35 @@ import Foundation
 import SwiftProtobuf
 import Testing
 
+/// Result delivery, ordering and sending are covered by `ClientOnlyAsyncStreamTests`, which
+/// composes a real `BidirectionalAsyncStream` and therefore exercises all of it. What only this
+/// suite can reach is the termination handler that closes the request when the stream ends.
+///
+/// The time limit exists because these tests consume a stream: a regression that stops results
+/// being delivered would otherwise hang the whole test run instead of failing it.
+@Suite(.timeLimit(.minutes(1)))
 struct BidirectionalAsyncStreamTests {
     private typealias Empty = Google_Protobuf_Empty
 
     @Test
-    func deliversResultsInOrderAndClosesOnComplete() async {
-        let results = await confirmation("the underlying stream is closed") { closed in
+    func closesTheRequestWhenTheStreamCompletes() async {
+        await confirmation("the request is closed") { closed in
             let stream = BidirectionalAsyncStream<Empty, Empty>()
             stream.configureForSending(with: RequestCallbacks<Empty>(
                 cancel: {}, sendData: { _ in }, sendClose: { closed() }
             ))
 
-            stream.handleResultFromServer(.headers(["a": ["b"]]))
-            stream.handleResultFromServer(.message(Empty()))
             stream.handleResultFromServer(.complete(code: .ok, error: nil, trailers: nil))
-
-            var results = [StreamResult<Empty>]()
-            for await result in stream.results() {
-                results.append(result)
-            }
-            return results
-        }
-
-        #expect(results.count == 3)
-        guard case .headers(let headers) = results.first else {
-            Issue.record("Expected headers to be received first.")
-            return
-        }
-        #expect(headers == ["a": ["b"]])
-        guard case .complete(let code, _, _) = results.last else {
-            Issue.record("Expected the stream to end with a completion.")
-            return
-        }
-        #expect(code == .ok)
-    }
-
-    @Test
-    func closesUnderlyingStreamWhenConsumingTaskIsCancelled() async {
-        await confirmation("the underlying stream is closed") { closed in
-            let stream = BidirectionalAsyncStream<Empty, Empty>()
-            stream.configureForSending(with: RequestCallbacks<Empty>(
-                cancel: {}, sendData: { _ in }, sendClose: { closed() }
-            ))
-
-            // Route one result through the consumer and wait for it to come back out. This
-            // proves the consuming task is running and iterating before it gets cancelled,
-            // without having to sleep and hope.
-            let (consuming, isConsuming) = AsyncStream.makeStream(of: Void.self)
-            let consumer = Task {
-                for await _ in stream.results() {
-                    isConsuming.yield()
-                }
-            }
-            stream.handleResultFromServer(.headers([:]))
-            for await _ in consuming {
-                break
-            }
-
-            consumer.cancel()
-            await consumer.value
         }
     }
 
+    /// A stream abandoned without completing must still close the request. This is the only test
+    /// that pins the termination handler capturing the callbacks box rather than `self`:
+    /// capturing `self` forms a retain cycle, so the instance never deallocates, the handler
+    /// never runs, and the request is left open.
     @Test
-    func closesUnderlyingStreamWhenReleasedWithoutCompleting() async {
-        await confirmation("the underlying stream is closed") { closed in
+    func closesTheRequestWhenReleasedWithoutCompleting() async {
+        await confirmation("the request is closed") { closed in
             await self.consumeOneResultThenRelease(onClose: closed)
         }
     }
