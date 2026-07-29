@@ -34,7 +34,7 @@ struct EventLoopGroupOwnerTests {
 
         await confirmation("the action runs") { confirm in
             await withCheckedContinuation { continuation in
-                let wasScheduled = owner.execute(on: owner.next()) {
+                let wasScheduled = owner.next().run {
                     confirm()
                     continuation.resume()
                 }
@@ -48,12 +48,12 @@ struct EventLoopGroupOwnerTests {
     @Test
     func dropsActionAfterShutDown() async {
         let owner = EventLoopGroupOwner()
-        let eventLoop = owner.next()
+        let handle = owner.next()
         owner.shutDown()
 
         // The gate is synchronous, so a dropped action can be asserted without waiting.
         await confirmation("the action never runs", expectedCount: 0) { confirm in
-            let wasScheduled = owner.execute(on: eventLoop) { confirm() }
+            let wasScheduled = handle.run { confirm() }
             #expect(!wasScheduled)
         }
     }
@@ -66,11 +66,11 @@ struct EventLoopGroupOwnerTests {
         let owner = EventLoopGroupOwner()
         defer { owner.shutDown() }
 
-        let eventLoop = owner.next()
+        let handle = owner.next()
         let ranInline: Bool = await withCheckedContinuation { continuation in
-            eventLoop.execute {
+            handle.loop.execute {
                 let action = InlineAction()
-                owner.execute(on: eventLoop) { action.didRun = true }
+                handle.run { action.didRun = true }
                 // Read back on the same thread: true only if the action ran without a hop.
                 continuation.resume(returning: action.didRun)
             }
@@ -85,7 +85,7 @@ struct EventLoopGroupOwnerTests {
     func doesNotShutDownInjectedGroup() async {
         let group = NIOPosix.MultiThreadedEventLoopGroup(numberOfThreads: 1)
         let owner = EventLoopGroupOwner(group: group, isGroupOwned: false)
-        let eventLoop = owner.next()
+        let eventLoop = owner.next().loop
         owner.shutDown()
         #expect(!owner.hasInitiatedGroupShutDown)
 
@@ -134,7 +134,7 @@ struct EventLoopGroupOwnerTests {
         let owner = EventLoopGroupOwner()
         await confirmation("shutDown() returns from the event loop thread") { confirm in
             await withCheckedContinuation { continuation in
-                owner.next().execute {
+                owner.next().loop.execute {
                     owner.shutDown()
                     confirm()
                     continuation.resume()

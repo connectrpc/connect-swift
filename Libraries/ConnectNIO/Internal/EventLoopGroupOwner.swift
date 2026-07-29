@@ -16,12 +16,8 @@ import NIOConcurrencyHelpers
 import NIOCore
 import NIOPosix
 
-/// Owns an `EventLoopGroup`'s lifetime and gates the scheduling of work onto its loops.
-///
-/// Handlers hold this **weakly**, so a call arriving after the client is gone finds nothing and is
-/// dropped rather than landing on a shut down loop. Strong references are not an option: handlers
-/// are not reliably released today (the `ProtocolClient` stream/handler cycle and
-/// `TimeoutTimer.cancel()` both leak them), so they would pin an event loop thread forever.
+/// Owns an `EventLoopGroup`'s lifetime and gates the scheduling of work onto its loops. Callers
+/// schedule through the `EventLoopHandle`s it vends rather than touching a loop directly.
 final class EventLoopGroupOwner: @unchecked Sendable {
     private let group: NIOCore.EventLoopGroup
     private let isGroupOwned: Bool
@@ -59,24 +55,19 @@ final class EventLoopGroupOwner: @unchecked Sendable {
         self.isGroupOwned = isGroupOwned
     }
 
-    /// - returns: The next event loop to use for a request or stream.
-    func next() -> NIOCore.EventLoop {
-        return self.group.next()
+    /// - returns: A handle to the next event loop to use for a request or stream.
+    func next() -> EventLoopHandle {
+        return EventLoopHandle(loop: self.group.next(), owner: self)
     }
 
-    /// Runs an action on the given event loop unless the group has already been shut down.
+    /// Enqueues an action onto the given event loop unless the group has already been shut down.
+    /// Callers must be off the loop; `EventLoopHandle.run(_:)` handles the inline case.
     ///
-    /// - returns: True if the action ran or was enqueued, false if it was dropped.
+    /// - returns: True if the action was enqueued, false if it was dropped.
     @discardableResult
-    func execute(
+    func enqueue(
         on eventLoop: NIOCore.EventLoop, _ action: @escaping @Sendable () -> Void
     ) -> Bool {
-        // Outside the lock so an action re-entering from the loop's thread cannot deadlock.
-        if eventLoop.inEventLoop {
-            action()
-            return true
-        }
-
         // The lock deliberately spans the enqueue. NIO accepts tasks while a loop is `.open` or
         // `.closing`, so an enqueue that happens-before `shutdownGracefully()` is guaranteed to
         // drain; checking the flag before taking the lock would reopen the race. Holding it is
@@ -154,5 +145,37 @@ final class EventLoopGroupOwner: @unchecked Sendable {
 
     deinit {
         self.shutDown()
+    }
+}
+
+/// A single event loop paired with the gate deciding whether work may still be scheduled onto it.
+///
+/// The owner is held **weakly**, so a call arriving after the client is gone finds nothing and is
+/// dropped rather than landing on a shut down loop. Strong references are not an option: handlers
+/// are not reliably released today (the `ProtocolClient` stream/handler cycle and
+/// `TimeoutTimer.cancel()` both leak them), so they would pin an event loop thread forever.
+struct EventLoopHandle: Sendable {
+    let loop: NIOCore.EventLoop
+    private weak var owner: EventLoopGroupOwner?
+
+    init(loop: NIOCore.EventLoop, owner: EventLoopGroupOwner) {
+        self.loop = loop
+        self.owner = owner
+    }
+
+    /// Runs an action on the loop, inline if already on it and enqueued otherwise.
+    ///
+    /// - returns: True if the action ran or was enqueued, false if it was dropped.
+    @discardableResult
+    func run(_ action: @escaping @Sendable () -> Void) -> Bool {
+        // Inline, and outside the owner's lock, so an action re-entering from the loop's own
+        // thread cannot deadlock. Being on that thread also proves the loop is still running, so
+        // this holds even once the owner is gone.
+        if self.loop.inEventLoop {
+            action()
+            return true
+        }
+
+        return self.owner?.enqueue(on: self.loop, action) ?? false
     }
 }

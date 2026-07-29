@@ -62,8 +62,7 @@ struct ConnectStreamChannelHandlerTests {
                 responseCallbacks: Self.responseCallbacks(receiveClose: { code, _, error in
                     continuation.resume(returning: (code, error))
                 }),
-                eventLoop: owner.next(),
-                loopGroupOwner: owner
+                eventLoop: owner.next()
             )
             handler.cancel()
         }
@@ -93,8 +92,7 @@ struct ConnectStreamChannelHandlerTests {
                     receiveResponseMetrics: { _ in confirm() },
                     receiveClose: { _, _, _ in confirm() }
                 ),
-                eventLoop: eventLoop,
-                loopGroupOwner: owner
+                eventLoop: eventLoop
             )
             action(handler)
         }

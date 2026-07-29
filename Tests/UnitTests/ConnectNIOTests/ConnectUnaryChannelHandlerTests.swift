@@ -38,7 +38,6 @@ struct ConnectUnaryChannelHandlerTests {
             let handler = ConnectUnaryChannelHandler(
                 request: Self.request(),
                 eventLoop: eventLoop,
-                loopGroupOwner: owner,
                 onMetrics: { _ in },
                 onResponse: { _ in confirm() }
             )
@@ -57,7 +56,6 @@ struct ConnectUnaryChannelHandlerTests {
             let handler = ConnectUnaryChannelHandler(
                 request: Self.request(),
                 eventLoop: owner.next(),
-                loopGroupOwner: owner,
                 onMetrics: { _ in },
                 onResponse: { continuation.resume(returning: $0) }
             )

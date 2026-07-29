@@ -154,14 +154,13 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         let handler = ConnectUnaryChannelHandler(
             request: request,
             eventLoop: eventLoop,
-            loopGroupOwner: self.loopGroupOwner,
             onMetrics: onMetrics,
             onResponse: onResponse
         )
         self.sendOrQueueRequest { [weak self] multiplexer in
             if let multiplexer = multiplexer {
                 self?.startMultiplexChannel(
-                    for: request.url, on: eventLoop, using: multiplexer, with: handler
+                    for: request.url, on: eventLoop.loop, using: multiplexer, with: handler
                 )
             } else {
                 onResponse(.init(
@@ -185,13 +184,12 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         let handler = ConnectStreamChannelHandler(
             request: request,
             responseCallbacks: responseCallbacks,
-            eventLoop: eventLoop,
-            loopGroupOwner: self.loopGroupOwner
+            eventLoop: eventLoop
         )
         self.sendOrQueueRequest { [weak self] multiplexer in
             if let multiplexer = multiplexer {
                 self?.startMultiplexChannel(
-                    for: request.url, on: eventLoop, using: multiplexer, with: handler
+                    for: request.url, on: eventLoop.loop, using: multiplexer, with: handler
                 )
             } else {
                 responseCallbacks.receiveClose(.unavailable, [:], ConnectError.disconnected())

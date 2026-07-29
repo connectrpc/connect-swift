@@ -20,11 +20,9 @@ import NIOHTTP1
 
 /// NIO-based channel handler for streams made through the Connect library.
 final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
-    private let eventLoop: NIOCore.EventLoop
+    private let eventLoop: EventLoopHandle
     private let request: Connect.HTTPRequest<Data?>
     private let responseCallbacks: Connect.ResponseCallbacks
-    /// Weak: the handler can outlive the client. See `EventLoopGroupOwner`.
-    private weak var loopGroupOwner: EventLoopGroupOwner?
 
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
@@ -36,20 +34,18 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     init(
         request: Connect.HTTPRequest<Data?>,
         responseCallbacks: Connect.ResponseCallbacks,
-        eventLoop: NIOCore.EventLoop,
-        loopGroupOwner: EventLoopGroupOwner
+        eventLoop: EventLoopHandle
     ) {
         self.request = request
         self.responseCallbacks = responseCallbacks
         self.eventLoop = eventLoop
-        self.loopGroupOwner = loopGroupOwner
     }
 
     /// Send outbound data over the stream.
     ///
     /// - parameter data: The data to send.
     func sendData(_ data: Data) {
-        self.runOnEventLoop {
+        self.eventLoop.run {
             if self.isClosed {
                 return
             }
@@ -65,7 +61,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
 
     /// Close the stream.
     func close() {
-        self.runOnEventLoop {
+        self.eventLoop.run {
             if self.isClosed {
                 return
             }
@@ -80,22 +76,13 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
 
     /// Cancel the stream, if currently active.
     func cancel() {
-        self.runOnEventLoop {
+        self.eventLoop.run {
             if self.isClosed {
                 return
             }
 
             self.closeConnection()
             self.responseCallbacks.receiveClose(.canceled, [:], ConnectError.canceled())
-        }
-    }
-
-    private func runOnEventLoop(action: @escaping @Sendable () -> Void) {
-        if self.eventLoop.inEventLoop {
-            action()
-        } else {
-            // Dropped if the client, and therefore the group, is already gone.
-            self.loopGroupOwner?.execute(on: self.eventLoop, action)
         }
     }
 

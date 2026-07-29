@@ -20,12 +20,10 @@ import NIOHTTP1
 
 /// NIO-based channel handler for unary requests made through the Connect library.
 final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
-    private let eventLoop: NIOCore.EventLoop
+    private let eventLoop: EventLoopHandle
     private let request: Connect.HTTPRequest<Data?>
     private let onMetrics: (Connect.HTTPMetrics) -> Void
     private let onResponse: (Connect.HTTPResponse) -> Void
-    /// Weak: the handler can outlive the client. See `EventLoopGroupOwner`.
-    private weak var loopGroupOwner: EventLoopGroupOwner?
 
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
@@ -36,21 +34,19 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
 
     init(
         request: Connect.HTTPRequest<Data?>,
-        eventLoop: NIOCore.EventLoop,
-        loopGroupOwner: EventLoopGroupOwner,
+        eventLoop: EventLoopHandle,
         onMetrics: @escaping (Connect.HTTPMetrics) -> Void,
         onResponse: @escaping (Connect.HTTPResponse) -> Void
     ) {
         self.request = request
         self.eventLoop = eventLoop
-        self.loopGroupOwner = loopGroupOwner
         self.onMetrics = onMetrics
         self.onResponse = onResponse
     }
 
     /// Cancel the in-flight request, if currently active.
     func cancel() {
-        self.runOnEventLoop {
+        self.eventLoop.run {
             if self.isClosed {
                 return
             }
@@ -64,15 +60,6 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
                 error: ConnectError.canceled(),
                 tracingInfo: nil
             ))
-        }
-    }
-
-    private func runOnEventLoop(action: @escaping @Sendable () -> Void) {
-        if self.eventLoop.inEventLoop {
-            action()
-        } else {
-            // Dropped if the client, and therefore the group, is already gone.
-            self.loopGroupOwner?.execute(on: self.eventLoop, action)
         }
     }
 
