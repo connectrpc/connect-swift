@@ -18,17 +18,14 @@ import Foundation
 import NIOPosix
 import Testing
 
-/// The handler is exercised directly rather than through a channel: `swift-nio-http2` ships no
-/// test utilities for the multiplexer, and `EmbeddedChannel` cannot reproduce the off-loop
-/// scheduling path because its event loop always reports `inEventLoop == true`.
+/// Exercises the handler directly: `swift-nio-http2` ships no multiplexer test utilities, and
+/// `EmbeddedChannel` always reports `inEventLoop == true`, so it never takes the off-loop path.
 struct ConnectStreamChannelHandlerTests {
     private typealias StreamClose = (code: Code, error: Swift.Error?)
 
-    /// A cancelation which arrives after the client - and therefore its event loop group - is gone
-    /// must be dropped. Scheduling onto a shut down loop prints a NIO error which is slated to
-    /// become a forced crash, and the unfulfilled promise left behind by `submit(_:)` trips the
-    /// debug-only leaked promise trap in `EventLoopFuture.deinit`, so a regression here takes the
-    /// test process down rather than surfacing in conformance runs.
+    /// A cancelation arriving after the client is gone must be dropped. A regression takes the
+    /// test process down: `submit(_:)`'s unfulfilled promise trips a debug-only trap in
+    /// `EventLoopFuture.deinit`.
     @Test
     func cancelAfterGroupShutdownDoesNotTrap() async {
         await Self.withHandlerOnShutDownGroup { handler in
@@ -36,8 +33,7 @@ struct ConnectStreamChannelHandlerTests {
         }
     }
 
-    /// Outbound data sent after teardown takes the same off-loop path as cancelation and must
-    /// likewise be dropped rather than enqueued.
+    /// Outbound data takes the same off-loop path and must likewise be dropped.
     @Test
     func sendDataAfterShutdownIsDropped() async {
         await Self.withHandlerOnShutDownGroup { handler in
@@ -45,8 +41,7 @@ struct ConnectStreamChannelHandlerTests {
         }
     }
 
-    /// Half-closing after teardown takes the same off-loop path as cancelation and must likewise
-    /// be dropped rather than enqueued.
+    /// Half-closing takes the same off-loop path and must likewise be dropped.
     @Test
     func closeAfterShutdownIsDropped() async {
         await Self.withHandlerOnShutDownGroup { handler in
@@ -54,9 +49,8 @@ struct ConnectStreamChannelHandlerTests {
         }
     }
 
-    /// Anti-regression for the gate above: a cancelation on a live group must still deliver
-    /// `.canceled`. A gate which is too aggressive would silently report wrong codes for the
-    /// conformance cases which cancel a stream in flight.
+    /// Anti-regression: a gate too aggressive would report wrong codes for conformance cases
+    /// which cancel a stream in flight.
     @Test
     func cancelDeliversCanceledResponseWhileGroupIsRunning() async {
         let owner = EventLoopGroupOwner()
@@ -78,13 +72,12 @@ struct ConnectStreamChannelHandlerTests {
         #expect((close.error as? ConnectError)?.code == .canceled)
     }
 
-    /// Builds a handler over a group which is provably shut down, runs `action` against it from
-    /// off the event loop, and asserts that no response callback fires as a result.
+    /// Runs `action` off-loop against a handler whose group is shut down, asserting no callback
+    /// fires.
     private static func withHandlerOnShutDownGroup(
         _ action: (ConnectStreamChannelHandler) -> Void
     ) async {
-        // The group is owned by the test rather than by the owner so that its teardown can be
-        // awaited here, making the loop provably dead before the late call arrives.
+        // Owned by the test so its teardown can be awaited, making the loop provably dead.
         let group = NIOPosix.MultiThreadedEventLoopGroup(numberOfThreads: 1)
         let owner = EventLoopGroupOwner(group: group, isGroupOwned: false)
         let eventLoop = owner.next()

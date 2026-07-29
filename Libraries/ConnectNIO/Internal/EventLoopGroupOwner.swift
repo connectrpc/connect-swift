@@ -16,34 +16,32 @@ import NIOConcurrencyHelpers
 import NIOCore
 import NIOPosix
 
-/// Owns the lifetime of an `EventLoopGroup` and gates the scheduling of work onto its event loops.
+/// Owns an `EventLoopGroup`'s lifetime and gates the scheduling of work onto its loops.
 ///
-/// Callers which can outlive the client that created them - such as a cancelation closure invoked
-/// from an unstructured task - hold this type **weakly**. A call arriving while the client is alive
-/// keeps the group running across the hop onto the event loop, and a call arriving after the client
-/// is gone finds nothing and is dropped rather than being scheduled onto a loop which has already
-/// shut down.
-///
-/// Weak references are load-bearing here, and strong ones are not an option: channel handlers are
-/// not reliably released today, so retaining the group from a handler would pin one event loop OS
-/// thread per request forever. Both leaks are unconditional:
-/// - `ProtocolClient`'s `onResult` closure captures the bidirectional stream strongly, that closure
-///   is stored in the `ResponseCallbacks` held by `ConnectStreamChannelHandler`, and the stream's
-///   `RequestCallbacks` retain the handler in turn. Every async stream leaks its handler.
-/// - When a timeout is configured, `TimeoutTimer.cancel()` never clears `onTimeout`, which retains
-///   the closure holding the request's cancelable, and through it the handler.
+/// Handlers hold this **weakly**, so a call arriving after the client is gone finds nothing and is
+/// dropped rather than landing on a shut down loop. Strong references are not an option: handlers
+/// are not reliably released today (the `ProtocolClient` stream/handler cycle and
+/// `TimeoutTimer.cancel()` both leak them), so they would pin an event loop thread forever.
 final class EventLoopGroupOwner: @unchecked Sendable {
     private let group: NIOCore.EventLoopGroup
     private let isGroupOwned: Bool
     private let lock = NIOConcurrencyHelpers.NIOLock()
     /// Guarded by `lock`.
     private var isShutDown = false
-    /// Guarded by `lock`. Shutdown is deferred while this is non-zero. See `beginWork()`.
+    /// Guarded by `lock`. Shutdown is deferred while non-zero. See `beginWork()`.
     private var outstandingWorkCount = 0
+    /// Guarded by `lock`. Whether `shutDownGroup()` has run.
+    private var didShutDownGroup = false
 
-    /// The underlying group, for use when creating bootstraps and channels.
     var eventLoopGroup: NIOCore.EventLoopGroup {
         return self.group
+    }
+
+    /// Whether the group's shutdown has actually been started. Exposed for testing, since
+    /// `shutdownGracefully` is asynchronous and a closing loop still accepts work, so observing
+    /// this through the loop would race.
+    var hasInitiatedGroupShutDown: Bool {
+        return self.lock.withLock { self.didShutDownGroup }
     }
 
     /// Creates an owner of a new single-threaded group whose lifetime it fully manages.
@@ -54,65 +52,50 @@ final class EventLoopGroupOwner: @unchecked Sendable {
     }
 
     /// - parameter group: The group onto whose loops this owner schedules work.
-    /// - parameter isGroupOwned: Whether this owner is responsible for shutting the group down.
-    ///                           An injected group belongs to its creator and is never shut down
-    ///                           here, so that it may safely be shared between clients.
+    /// - parameter isGroupOwned: Whether to shut the group down. An injected group belongs to its
+    ///                           creator and is never shut down here, so it may be shared.
     init(group: NIOCore.EventLoopGroup, isGroupOwned: Bool) {
         self.group = group
         self.isGroupOwned = isGroupOwned
     }
 
-    /// - returns: The next event loop which should be used for a request or stream.
+    /// - returns: The next event loop to use for a request or stream.
     func next() -> NIOCore.EventLoop {
         return self.group.next()
     }
 
     /// Runs an action on the given event loop unless the group has already been shut down.
     ///
-    /// - parameter eventLoop: The loop on which to run the action. Must belong to this group.
-    /// - parameter action: The action to run.
-    ///
     /// - returns: True if the action ran or was enqueued, false if it was dropped.
     @discardableResult
     func execute(
         on eventLoop: NIOCore.EventLoop, _ action: @escaping @Sendable () -> Void
     ) -> Bool {
-        // The on-loop fast path stays outside the lock so that an action which re-enters this
-        // function from the loop's own thread cannot deadlock against it.
+        // Outside the lock so an action re-entering from the loop's thread cannot deadlock.
         if eventLoop.inEventLoop {
             action()
             return true
         }
 
-        // The lock is deliberately held *across* the enqueue. NIO accepts tasks while a loop is
-        // both `.open` and `.closing`, so any enqueue which happens-before `shutdownGracefully()`
-        // is guaranteed to land and drain. Checking the flag before taking the lock, or replacing
-        // it with an atomic, would leave a window in which the group shuts down between the check
-        // and the enqueue - which is precisely the bug this type exists to close.
-        //
-        // Holding the lock across `eventLoop.execute` is safe: for an off-loop caller NIO only
-        // appends the task under its own internal lock and wakes the selector, so no foreign code
-        // runs underneath this lock. Lock ordering: `NIOHTTPClient`'s lock may be taken before this
-        // one, never the reverse.
+        // The lock deliberately spans the enqueue. NIO accepts tasks while a loop is `.open` or
+        // `.closing`, so an enqueue that happens-before `shutdownGracefully()` is guaranteed to
+        // drain; checking the flag before taking the lock would reopen the race. Holding it is
+        // safe because NIO only appends under its own lock and wakes the selector.
         return self.lock.withLock { () -> Bool in
             if self.isShutDown {
                 return false
             }
 
-            // `execute` rather than `submit(_:).cascade(to: nil)`: `submit` allocates a promise
-            // which is never fulfilled when the enqueue fails, and `EventLoopFuture.deinit` traps
-            // on a leaked promise in debug builds. `execute` performs the same enqueue with no
-            // promise attached.
+            // `execute`, not `submit(_:)`, whose promise is never fulfilled when the enqueue fails
+            // and trips `EventLoopFuture.deinit`'s leaked-promise trap in debug builds.
             eventLoop.execute { withExtendedLifetime(self) { action() } }
             return true
         }
     }
 
-    /// Registers work whose completion NIO schedules onto the loop *itself*, and which therefore
-    /// cannot be gated by `execute(on:_:)`. A connect is the case that matters: NIO runs the DNS
-    /// lookup on an offload queue and hops back onto the event loop from there
-    /// (`GetaddrinfoResolver`), so the only way to stop that hop from landing on a dead loop is to
-    /// keep the loop alive. The group's shutdown is deferred until the matching `endWork()`.
+    /// Registers work whose completion NIO schedules itself, bypassing `execute(on:_:)` - namely a
+    /// connect, whose DNS lookup hops back onto the loop from an offload queue. Shutdown is
+    /// deferred until the matching `endWork()` so that hop cannot land on a dead loop.
     ///
     /// - returns: True if the work was registered, false if the group is already shut down.
     @discardableResult
@@ -127,11 +110,14 @@ final class EventLoopGroupOwner: @unchecked Sendable {
         }
     }
 
-    /// Balances a successful `beginWork()`, performing a deferred shutdown if this was the last
-    /// outstanding work and `shutDown()` has already been called.
+    /// Balances a successful `beginWork()`, running a deferred shutdown if this was the last work.
     func endWork() {
         let shouldShutDownGroup = self.lock.withLock { () -> Bool in
-            self.outstandingWorkCount = max(0, self.outstandingWorkCount - 1)
+            guard self.outstandingWorkCount > 0 else {
+                return false
+            }
+
+            self.outstandingWorkCount -= 1
             return self.isShutDown && self.isGroupOwned && self.outstandingWorkCount == 0
         }
 
@@ -140,8 +126,8 @@ final class EventLoopGroupOwner: @unchecked Sendable {
         }
     }
 
-    /// Stops scheduling new work and, if this owner created the group and no work is outstanding,
-    /// shuts the group down. Idempotent, so `deinit` may safely call this after an explicit call.
+    /// Stops scheduling new work and shuts the group down once no work is outstanding.
+    /// Idempotent, so `deinit` may safely call this after an explicit call.
     func shutDown() {
         let shouldShutDownGroup = self.lock.withLock { () -> Bool in
             if self.isShutDown {
@@ -158,12 +144,11 @@ final class EventLoopGroupOwner: @unchecked Sendable {
     }
 
     private func shutDownGroup() {
-        // Shutting down must stay asynchronous. An event loop callback can release the last
-        // reference to this owner, running `deinit` on one of the group's own threads, and
-        // `syncShutdownGracefully()` traps there because a loop cannot wait for itself to stop.
-        // The `withExtendedLifetime(self)` above makes that release land on an event loop thread
-        // more often than it otherwise would, so this is more load-bearing than it looks - never
-        // switch it back to the synchronous form.
+        // Called outside `lock`, so retaking it here is safe.
+        self.lock.withLock { self.didShutDownGroup = true }
+        // Must stay asynchronous: this owner's last reference is often released on one of the
+        // group's own threads, where `syncShutdownGracefully()` traps waiting for that loop to
+        // stop. Never switch it back to the synchronous form.
         self.group.shutdownGracefully { _ in }
     }
 

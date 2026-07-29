@@ -18,15 +18,12 @@ import Foundation
 import NIOPosix
 import Testing
 
-/// The handler is exercised directly rather than through a channel: `swift-nio-http2` ships no
-/// test utilities for the multiplexer, and `EmbeddedChannel` cannot reproduce the off-loop
-/// scheduling path because its event loop always reports `inEventLoop == true`.
+/// Exercises the handler directly: `swift-nio-http2` ships no multiplexer test utilities, and
+/// `EmbeddedChannel` always reports `inEventLoop == true`, so it never takes the off-loop path.
 struct ConnectUnaryChannelHandlerTests {
-    /// A cancelation which arrives after the client - and therefore its event loop group - is gone
-    /// must be dropped. Scheduling onto a shut down loop prints a NIO error which is slated to
-    /// become a forced crash, and the unfulfilled promise left behind by `submit(_:)` trips the
-    /// debug-only leaked promise trap in `EventLoopFuture.deinit`, so a regression here takes the
-    /// test process down rather than surfacing in conformance runs.
+    /// A cancelation arriving after the client is gone must be dropped. A regression takes the
+    /// test process down: `submit(_:)`'s unfulfilled promise trips a debug-only trap in
+    /// `EventLoopFuture.deinit`.
     @Test
     func cancelAfterGroupShutdownDoesNotTrap() async {
         // The group is owned by the test rather than by the owner so that its teardown can be
@@ -49,9 +46,8 @@ struct ConnectUnaryChannelHandlerTests {
         }
     }
 
-    /// Anti-regression for the gate above: a cancelation on a live group must still deliver
-    /// `.canceled`. A gate which is too aggressive would silently report wrong codes for the
-    /// conformance cases which cancel a request in flight.
+    /// Anti-regression: a gate too aggressive would report wrong codes for conformance cases
+    /// which cancel a request in flight.
     @Test
     func cancelDeliversCanceledResponseWhileGroupIsRunning() async {
         let owner = EventLoopGroupOwner()

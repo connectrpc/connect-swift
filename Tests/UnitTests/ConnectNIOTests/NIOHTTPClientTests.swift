@@ -13,27 +13,32 @@
 // limitations under the License.
 
 @testable import ConnectNIO
-import Dispatch
 import NIOPosix
 import Testing
 
 struct NIOHTTPClientTests {
-    /// A client which creates its own event loop group shuts that group down on deallocation, but
-    /// an injected group belongs to the caller and must outlive the client so that several clients
-    /// can share one group.
-    @Test
-    func deinitDoesNotShutDownInjectedGroup() {
+    /// A client shuts down the group it created, but an injected group belongs to the caller and
+    /// must outlive the client so that several clients can share one.
+    @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *)
+    @Test(.timeLimit(.minutes(1)))
+    func deinitDoesNotShutDownInjectedGroup() async {
         let group = NIOPosix.MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        defer { try? group.syncShutdownGracefully() }
 
-        // Scoped so that the client is released before the group is exercised below.
+        // Scoped so the client is released before the group is exercised below.
         do {
             let client = NIOHTTPClient(host: "https://connectrpc.com", eventLoopGroup: group)
             #expect(client.eventLoopGroup as AnyObject === group as AnyObject)
         }
 
-        let didRun = DispatchSemaphore(value: 0)
-        group.next().execute { didRun.signal() }
-        #expect(didRun.wait(timeout: .now() + .seconds(5)) == .success)
+        await confirmation("the injected group still schedules") { confirm in
+            await withCheckedContinuation { continuation in
+                group.next().execute {
+                    confirm()
+                    continuation.resume()
+                }
+            }
+        }
+
+        try? await group.shutdownGracefully()
     }
 }

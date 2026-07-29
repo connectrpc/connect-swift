@@ -35,7 +35,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     private var pendingRequests = [(NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer?) -> Void]()
     private var state = State.disconnected
 
-    /// The group whose event loops this client uses. Exposed for testing.
+    /// Exposed for testing.
     var eventLoopGroup: NIOCore.EventLoopGroup {
         return self.loopGroupOwner.eventLoopGroup
     }
@@ -84,9 +84,6 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     /// Initializer which uses an externally managed event loop group rather than creating one.
     /// The injected group is never shut down by the client, so it may safely be shared.
     ///
-    /// - parameter host: Target host (e.g., `https://connectrpc.com`).
-    /// - parameter port: Port to use for the connection, as described above.
-    /// - parameter timeout: Optional timeout, as described above.
     /// - parameter eventLoopGroup: The group whose event loops the client should use.
     init(
         host: String, port: Int? = nil, timeout: TimeInterval? = nil,
@@ -229,12 +226,9 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         }
 
         self.state = .connecting
-        // NIO drives an in-flight connect to completion on its own — the DNS lookup runs on an
-        // offload queue and hops back onto the event loop from there — so that hop never passes
-        // through `EventLoopGroupOwner.execute(on:_:)` and cannot be gated. Registering the
-        // connect as outstanding work keeps the group alive until it settles, so releasing the
-        // client mid-connect cannot leave NIO scheduling onto a shut-down loop. The owner is
-        // captured strongly: it must outlive the client here, which is the whole point.
+        // NIO completes an in-flight connect itself, hopping back onto the loop from the DNS
+        // offload queue, so registering it keeps the group alive until it settles. Captured
+        // strongly: the owner must outlive a client released mid-connect.
         let loopGroupOwner = self.loopGroupOwner
         loopGroupOwner.beginWork()
         self.bootstrap
@@ -315,8 +309,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 channel.close(mode: .all, promise: nil)
             }
         }
-        // Shut down outside `self.lock` to preserve the lock ordering documented on
-        // `EventLoopGroupOwner`: this lock may be taken before the owner's, never the reverse.
+        // Outside `self.lock`: this lock may be taken before the owner's, never the reverse.
         self.loopGroupOwner.shutDown()
     }
 }

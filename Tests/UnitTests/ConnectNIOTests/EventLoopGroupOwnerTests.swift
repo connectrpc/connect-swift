@@ -13,102 +13,112 @@
 // limitations under the License.
 
 @testable import ConnectNIO
-import Dispatch
 import NIOCore
 import NIOPosix
 import Testing
 
-/// These tests deliberately use a real `MultiThreadedEventLoopGroup` rather than
-/// `EmbeddedEventLoop`, whose `inEventLoop` is unconditionally `true` - the off-loop path being
-/// tested here would never be taken.
+/// Uses a real `MultiThreadedEventLoopGroup` rather than `EmbeddedEventLoop`, whose `inEventLoop`
+/// is unconditionally `true` - the off-loop path tested here would never be taken.
 struct EventLoopGroupOwnerTests {
-    /// An action scheduled from off the event loop runs while the group is still alive.
-    @Test
-    func executesActionWhileGroupIsRunning() {
+    /// Touched only on the event loop thread which creates it.
+    private final class InlineAction: @unchecked Sendable {
+        var didRun = false
+    }
+
+    /// An action scheduled from off the loop runs while the group is alive.
+    @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *)
+    @Test(.timeLimit(.minutes(1)))
+    func executesActionWhileGroupIsRunning() async {
         let owner = EventLoopGroupOwner()
         defer { owner.shutDown() }
 
-        let didRun = DispatchSemaphore(value: 0)
-        let wasScheduled = owner.execute(on: owner.next()) { didRun.signal() }
-        #expect(wasScheduled)
-        #expect(didRun.wait(timeout: .now() + .seconds(5)) == .success)
+        await confirmation("the action runs") { confirm in
+            await withCheckedContinuation { continuation in
+                let wasScheduled = owner.execute(on: owner.next()) {
+                    confirm()
+                    continuation.resume()
+                }
+                #expect(wasScheduled)
+            }
+        }
     }
 
-    /// The invariant this type exists to encode: once the group has been shut down, later actions
-    /// are dropped rather than scheduled onto an event loop which can no longer run them.
+    /// The invariant this type encodes: once shut down, actions are dropped rather than scheduled
+    /// onto a loop which can no longer run them.
     @Test
-    func dropsActionAfterShutDown() {
+    func dropsActionAfterShutDown() async {
         let owner = EventLoopGroupOwner()
         let eventLoop = owner.next()
         owner.shutDown()
 
-        let didRun = DispatchSemaphore(value: 0)
-        let wasScheduled = owner.execute(on: eventLoop) { didRun.signal() }
-        #expect(!wasScheduled)
-        #expect(didRun.wait(timeout: .now() + .milliseconds(100)) == .timedOut)
+        // The gate is synchronous, so a dropped action can be asserted without waiting.
+        await confirmation("the action never runs", expectedCount: 0) { confirm in
+            let wasScheduled = owner.execute(on: eventLoop) { confirm() }
+            #expect(!wasScheduled)
+        }
     }
 
-    /// Actions submitted from the event loop's own thread run inline rather than being enqueued,
-    /// so that an action which re-enters the owner cannot deadlock against its lock.
-    @Test
-    func runsActionInlineWhenAlreadyOnEventLoop() {
+    /// Actions submitted from the loop's own thread run inline, so an action re-entering the owner
+    /// cannot deadlock against its lock.
+    @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *)
+    @Test(.timeLimit(.minutes(1)))
+    func runsActionInlineWhenAlreadyOnEventLoop() async {
         let owner = EventLoopGroupOwner()
         defer { owner.shutDown() }
 
         let eventLoop = owner.next()
-        let ranInline = DispatchSemaphore(value: 0)
-        let finished = DispatchSemaphore(value: 0)
-        eventLoop.execute {
-            let didRun = DispatchSemaphore(value: 0)
-            let wasScheduled = owner.execute(on: eventLoop) { didRun.signal() }
-            // A zero timeout only succeeds if the action has already run, i.e. ran inline.
-            if wasScheduled, didRun.wait(timeout: .now()) == .success {
-                ranInline.signal()
+        let ranInline: Bool = await withCheckedContinuation { continuation in
+            eventLoop.execute {
+                let action = InlineAction()
+                owner.execute(on: eventLoop) { action.didRun = true }
+                // Read back on the same thread: true only if the action ran without a hop.
+                continuation.resume(returning: action.didRun)
             }
-            finished.signal()
         }
 
-        #expect(finished.wait(timeout: .now() + .seconds(5)) == .success)
-        #expect(ranInline.wait(timeout: .now()) == .success, "The action should run inline.")
+        #expect(ranInline)
     }
 
-    /// An injected group belongs to its creator and may be shared between clients, so the owner
-    /// must never shut it down.
-    @Test
-    func doesNotShutDownInjectedGroup() {
+    /// An injected group belongs to its creator and may be shared, so it is never shut down here.
+    @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *)
+    @Test(.timeLimit(.minutes(1)))
+    func doesNotShutDownInjectedGroup() async {
         let group = NIOPosix.MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        defer { try? group.syncShutdownGracefully() }
-
         let owner = EventLoopGroupOwner(group: group, isGroupOwned: false)
         let eventLoop = owner.next()
         owner.shutDown()
+        #expect(!owner.hasInitiatedGroupShutDown)
 
-        let didRun = DispatchSemaphore(value: 0)
-        eventLoop.execute { didRun.signal() }
-        #expect(didRun.wait(timeout: .now() + .seconds(5)) == .success)
+        await confirmation("the injected group still schedules") { confirm in
+            await withCheckedContinuation { continuation in
+                eventLoop.execute {
+                    confirm()
+                    continuation.resume()
+                }
+            }
+        }
+
+        try? await group.shutdownGracefully()
     }
 
-    /// Some work is completed by NIO on its own schedule and never passes through
-    /// `execute(on:_:)` — a connect resolves DNS on an offload queue and hops back onto the loop
-    /// from inside NIO. Gating cannot reach that hop, so while such work is outstanding the loop
-    /// itself has to stay alive: shutdown is deferred until `endWork()`.
+    /// NIO schedules some work onto the loop itself, bypassing `execute(on:_:)` - a connect hops
+    /// back from its DNS offload queue. The group must stay up while such work is outstanding.
+    ///
+    /// Asserted on the owner rather than by scheduling onto the loop: `shutdownGracefully` is
+    /// asynchronous and a closing loop still accepts tasks, so a liveness probe would race.
     @Test
     func deferShutDownWhileWorkIsOutstanding() {
         let owner = EventLoopGroupOwner()
-        let eventLoop = owner.next()
         #expect(owner.beginWork())
-        owner.shutDown()
 
-        // Scheduled straight onto the loop, bypassing the gate, exactly as NIO does internally.
-        let didRun = DispatchSemaphore(value: 0)
-        eventLoop.execute { didRun.signal() }
-        #expect(didRun.wait(timeout: .now() + .seconds(5)) == .success)
+        owner.shutDown()
+        #expect(!owner.hasInitiatedGroupShutDown, "Shutdown must wait for outstanding work.")
 
         owner.endWork()
+        #expect(owner.hasInitiatedGroupShutDown, "The last endWork() must shut the group down.")
     }
 
-    /// Work cannot be registered once the group is shut down — there is nothing left to keep
-    /// alive, and reporting otherwise would leave the caller expecting a loop that is gone.
+    /// Work cannot be registered once the group is shut down: there is nothing left to keep alive.
     @Test
     func refusesWorkAfterShutDown() {
         let owner = EventLoopGroupOwner()
@@ -116,17 +126,20 @@ struct EventLoopGroupOwnerTests {
         #expect(!owner.beginWork())
     }
 
-    /// Shutdown must stay asynchronous: `syncShutdownGracefully()` traps when it runs on a thread
-    /// belonging to the group being shut down, which is exactly what happens when the last
-    /// reference to the owner is released by an event loop callback.
-    @Test
-    func shutDownFromInsideEventLoopDoesNotTrap() {
+    /// Shutdown must stay asynchronous: `syncShutdownGracefully()` traps on a thread belonging to
+    /// the group being shut down, which is where the owner's last reference is often released.
+    @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *)
+    @Test(.timeLimit(.minutes(1)))
+    func shutDownFromInsideEventLoopDoesNotTrap() async {
         let owner = EventLoopGroupOwner()
-        let finished = DispatchSemaphore(value: 0)
-        owner.next().execute {
-            owner.shutDown()
-            finished.signal()
+        await confirmation("shutDown() returns from the event loop thread") { confirm in
+            await withCheckedContinuation { continuation in
+                owner.next().execute {
+                    owner.shutDown()
+                    confirm()
+                    continuation.resume()
+                }
+            }
         }
-        #expect(finished.wait(timeout: .now() + .seconds(5)) == .success)
     }
 }
