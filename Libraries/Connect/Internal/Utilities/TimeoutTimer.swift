@@ -50,7 +50,7 @@ final class TimeoutTimer: Sendable {
     func start(onTimeout: @escaping @Sendable () -> Void) {
         // Clamped: `timeout` is caller-supplied, and `UInt64(negativeDouble)` traps.
         let nanoseconds = UInt64(max(0, self.timeout * 1_000_000_000))
-        // Capturing the box rather than `self` lets `deinit` disarm an orphaned timer.
+        // Avoid capturing `self` so `deinit` disarms the orphaned timer.
         let hasTimedOut = self.hasTimedOut
         let task = Task {
             do {
