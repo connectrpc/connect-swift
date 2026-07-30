@@ -13,18 +13,10 @@
 // limitations under the License.
 
 extension Trailers {
-    /// **This should not be considered part of Connect's public/stable interface, and is subject
-    /// to change. When the compiler supports it, this should be package-internal.**
-    ///
     /// Identifies the status code from gRPC and gRPC-Web trailers.
     ///
     /// - returns: The gRPC status code, if specified.
-    @available(
-        swift,
-        deprecated: 100.0,
-        message: "This is an internal-only API which will be made package-private in Swift 6."
-    )
-    public func _grpcStatus() -> Code? {
+    package func grpcStatus() -> Code? {
         return self[HeaderConstants.grpcStatus]?
             .first
             .flatMap(Int.init)

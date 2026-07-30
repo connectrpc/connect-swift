@@ -15,9 +15,6 @@
 import Foundation
 
 extension ConnectError {
-    /// **This should not be considered part of Connect's public/stable interface, and is subject
-    /// to change. When the compiler supports it, this should be package-internal.**
-    ///
     /// Parses gRPC headers and/or trailers to obtain the status and any potential error.
     ///
     /// - parameter headers: Headers received from the server.
@@ -25,16 +22,11 @@ extension ConnectError {
     ///                       passed in the headers block for gRPC-Web.
     ///
     /// - returns: A tuple containing the gRPC status code and an optional error.
-    @available(
-        swift,
-        deprecated: 100.0,
-        message: "This is an internal-only API which will be made package-private in Swift 6."
-    )
-    public static func _parseGRPCHeaders(
+    package static func parseGRPCHeaders(
         _ headers: Headers?, trailers: Trailers?
     ) -> (grpcCode: Code, error: ConnectError?) {
         // "Trailers-only" responses can be sent in the headers or trailers block.
-        guard let grpcCode = trailers?._grpcStatus() ?? headers?._grpcStatus() else {
+        guard let grpcCode = trailers?.grpcStatus() ?? headers?.grpcStatus() else {
             return (.unknown, ConnectError(code: .unknown, message: "RPC response missing status"))
         }
 

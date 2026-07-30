@@ -15,9 +15,6 @@
 import Foundation
 
 extension Headers {
-    /// **This should not be considered part of Connect's public/stable interface, and is subject
-    /// to change. When the compiler supports it, this should be package-internal.**
-    ///
     /// Adds required headers to gRPC and gRPC-Web requests/streams.
     ///
     /// - parameter config: The configuration to use for adding headers (i.e., for compression
@@ -25,12 +22,7 @@ extension Headers {
     /// - parameter grpcWeb: Should be true if using gRPC-Web, false if gRPC.
     ///
     /// - returns: A set of updated headers.
-    @available(
-        swift,
-        deprecated: 100.0,
-        message: "This is an internal-only API which will be made package-private in Swift 6."
-    )
-    public func _addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
+    package func addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
         var headers = self
         headers[HeaderConstants.grpcAcceptEncoding] = config
             .acceptCompressionPoolNames()

@@ -297,12 +297,12 @@ extension ProtocolClient: ProtocolClientInterface {
                     // Handle cases where multiple messages are received in a single chunk.
                     responseBuffer += data
                     while true {
-                        let messageLength = Envelope._messageLength(forPackedData: responseBuffer)
+                        let messageLength = Envelope.messageLength(forPackedData: responseBuffer)
                         if messageLength < 0 {
                             return
                         }
 
-                        let prefixedMessageLength = Envelope._prefixLength + messageLength
+                        let prefixedMessageLength = Envelope.prefixLength + messageLength
                         guard responseBuffer.count >= prefixedMessageLength else {
                             return
                         }
