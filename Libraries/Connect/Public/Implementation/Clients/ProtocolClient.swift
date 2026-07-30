@@ -236,11 +236,13 @@ extension ProtocolClient: ProtocolClientInterface {
         path: String,
         headers: Headers
     ) -> any ClientOnlyAsyncStreamInterface<Input, Output> {
-        let clientOnlyAsync = ClientOnlyAsyncStream<Input, Output>()
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let clientOnlyAsync = ClientOnlyAsyncStream(bidirectionalStream: bidirectionalAsync)
         let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
             path: path, headers: headers, onResult: { clientOnlyAsync.handleResultFromServer($0) }
         )
-        return clientOnlyAsync.configureForSending(with: callbacks)
+        bidirectionalAsync.configureForSending(with: callbacks)
+        return clientOnlyAsync
     }
 
     public func serverOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>(
