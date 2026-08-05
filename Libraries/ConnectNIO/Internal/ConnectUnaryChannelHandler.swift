@@ -20,7 +20,7 @@ import NIOHTTP1
 
 /// NIO-based channel handler for unary requests made through the Connect library.
 final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
-    private let eventLoop: NIOCore.EventLoop
+    private let eventLoop: EventLoopHandle
     private let request: Connect.HTTPRequest<Data?>
     private let onMetrics: (Connect.HTTPMetrics) -> Void
     private let onResponse: (Connect.HTTPResponse) -> Void
@@ -34,7 +34,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
 
     init(
         request: Connect.HTTPRequest<Data?>,
-        eventLoop: NIOCore.EventLoop,
+        eventLoop: EventLoopHandle,
         onMetrics: @escaping (Connect.HTTPMetrics) -> Void,
         onResponse: @escaping (Connect.HTTPResponse) -> Void
     ) {
@@ -46,7 +46,7 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
 
     /// Cancel the in-flight request, if currently active.
     func cancel() {
-        self.runOnEventLoop {
+        self.eventLoop.run {
             if self.isClosed {
                 return
             }
@@ -60,14 +60,6 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
                 error: ConnectError.canceled(),
                 tracingInfo: nil
             ))
-        }
-    }
-
-    private func runOnEventLoop(action: @escaping @Sendable () -> Void) {
-        if self.eventLoop.inEventLoop {
-            action()
-        } else {
-            self.eventLoop.submit(action).cascade(to: nil)
         }
     }
 

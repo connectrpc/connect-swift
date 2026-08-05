@@ -142,6 +142,17 @@ let package = Package(
                 "README.md",
             ]
         ),
+        .testTarget(
+            name: "ConnectNIOTests",
+            dependencies: [
+                "Connect",
+                "ConnectNIO",
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+                .product(name: "NIOPosix", package: "swift-nio"),
+            ],
+            path: "Tests/UnitTests/ConnectNIOTests"
+        ),
         .target(
             name: "ConnectPluginUtilities",
             dependencies: [
