@@ -16,18 +16,14 @@ import Foundation
 
 /// Races `operation` against a deadline, canceling it if the deadline wins.
 ///
-/// - parameter timeout: Deadline in seconds. `nil` runs `operation` with no deadline.
+/// - parameter timeout: Deadline in seconds.
 /// - parameter operation: The work to perform.
 ///
 /// - returns: The result of `operation`, or `nil` if the deadline elapsed first.
 func withDeadline<T: Sendable>(
-    _ timeout: TimeInterval?,
+    _ timeout: TimeInterval,
     operation: @escaping @Sendable () async -> T
 ) async -> T? {
-    guard let timeout else {
-        return await operation()
-    }
-
     // `UInt64(negativeDouble)` traps, so negative timeouts are clamped to zero.
     let nanoseconds = UInt64(max(0, timeout * 1_000_000_000))
 

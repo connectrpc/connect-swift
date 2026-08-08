@@ -37,12 +37,6 @@ struct DeadlineTests {
     }
 
     @Test
-    func runsWithoutDeadlineWhenTimeoutIsNil() async {
-        let result = await withDeadline(nil) { 42 }
-        #expect(result == 42)
-    }
-
-    @Test
     func clampsNegativeTimeoutToZero() async {
         let result: String? = await withDeadline(-1.0) {
             try? await Task.sleep(nanoseconds: Self.operationNanoseconds)
