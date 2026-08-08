@@ -58,6 +58,9 @@
 public protocol Interceptor: AnyObject, Sendable {
     /// Observe and/or mutate response metrics for a unary request or stream.
     ///
+    /// Provided for source compatibility; prefer implementing the `async` spelling below, which is
+    /// the one the library invokes and which defaults to forwarding here.
+    ///
     /// - parameter metrics: Metrics containing data about the completed request/stream.
     /// - parameter proceed: Closure which must be called to pass (potentially altered) data to the
     ///                      next interceptor.
@@ -66,6 +69,13 @@ public protocol Interceptor: AnyObject, Sendable {
         _ metrics: HTTPMetrics,
         proceed: @escaping @Sendable (HTTPMetrics) -> Void
     )
+
+    /// Observe and/or mutate response metrics for a unary request or stream.
+    ///
+    /// - parameter metrics: Metrics containing data about the completed request/stream.
+    /// - returns: The (potentially altered) metrics to pass to the next interceptor.
+    @Sendable
+    func handleResponseMetrics(_ metrics: HTTPMetrics) async -> HTTPMetrics
 }
 
 extension Interceptor {
@@ -75,5 +85,12 @@ extension Interceptor {
         proceed: @escaping @Sendable (HTTPMetrics) -> Void
     ) {
         proceed(metrics)
+    }
+
+    @Sendable
+    public func handleResponseMetrics(_ metrics: HTTPMetrics) async -> HTTPMetrics {
+        return await withSingleResume { resume in
+            self.handleResponseMetrics(metrics, proceed: resume)
+        }
     }
 }

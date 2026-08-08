@@ -45,123 +45,20 @@ extension ProtocolClient: ProtocolClientInterface {
         headers: Headers,
         completion: @escaping @Sendable (ResponseMessage<Output>) -> Void
     ) -> Cancelable {
-        let cancelation = Locked<(cancelable: Cancelable?, isCancelled: Bool)>((nil, false))
-        let config = self.config
-        var headers = headers
-        headers[HeaderConstants.contentType] = ["application/\(config.codec.name())"]
-        let request = HTTPRequest<Input>(
-            url: config.createURL(forPath: path),
-            headers: headers,
-            message: request,
-            method: .post,
-            trailers: nil,
-            idempotencyLevel: idempotencyLevel
-        )
-        let timeoutTimer = TimeoutTimer(config: config)
-        let interceptorChain = self.config.createUnaryInterceptorChain()
-        interceptorChain.executeLinkedInterceptorsAndStopOnFailure(
-            interceptorChain.interceptors.map { $0.handleUnaryRequest },
-            firstInFirstOut: true,
-            initial: request,
-            transform: { intercepted, proceed in
-                do {
-                    let data: Data
-                    if config.unaryGET.isEnabled && intercepted.idempotencyLevel == .noSideEffects {
-                        data = try config.codec.deterministicallySerialize(
-                            message: intercepted.message
-                        )
-                    } else {
-                        data = try config.codec.serialize(message: intercepted.message)
-                    }
-                    proceed(.success(HTTPRequest<Data?>(
-                        url: intercepted.url,
-                        headers: intercepted.headers,
-                        message: data,
-                        method: intercepted.method,
-                        trailers: intercepted.trailers,
-                        idempotencyLevel: intercepted.idempotencyLevel
-                    )))
-                } catch let error {
-                    proceed(.failure(ConnectError(
-                        code: .unknown, message: "request serialization failed",
-                        exception: error, details: [], metadata: [:]
-                    )))
-                }
-            },
-            then: interceptorChain.interceptors.map { $0.handleUnaryRawRequest },
-            finish: { interceptedResult in
-                cancelation.perform { cancelation in
-                    if cancelation.isCancelled {
-                        // If the caller cancelled the request while it was being processed
-                        // by interceptors, don't send the request.
-                        return
-                    }
-
-                    let interceptedRequest: HTTPRequest<Data?>
-                    switch interceptedResult {
-                    case .success(let value):
-                        interceptedRequest = value
-                    case .failure(let error):
-                        completion(ResponseMessage(result: .failure(error)))
-                        return
-                    }
-
-                    cancelation.cancelable = self.httpClient.unary(
-                        request: interceptedRequest,
-                        onMetrics: { metrics in
-                            interceptorChain.executeInterceptors(
-                                interceptorChain.interceptors.map { $0.handleResponseMetrics },
-                                firstInFirstOut: false,
-                                initial: metrics,
-                                finish: { _ in }
-                            )
-                        },
-                        onResponse: { initialResponse in
-                            var initialResponse = initialResponse
-                            if initialResponse.code == .canceled && timeoutTimer?.timedOut == true {
-                                initialResponse = .init(
-                                    code: .deadlineExceeded,
-                                    headers: initialResponse.headers,
-                                    message: nil,
-                                    trailers: initialResponse.trailers,
-                                    error: ConnectError(
-                                        code: .deadlineExceeded,
-                                        message: "request exceeded allowed timeout",
-                                        exception: nil, details: [], metadata: [:]
-                                    ),
-                                    tracingInfo: nil
-                                )
-                            } else {
-                                timeoutTimer?.cancel()
-                            }
-
-                            interceptorChain.executeLinkedInterceptors(
-                                interceptorChain.interceptors.map { $0.handleUnaryRawResponse },
-                                firstInFirstOut: false,
-                                initial: initialResponse,
-                                transform: { interceptedResponse, proceed in
-                                    proceed(ResponseMessage<Output>(
-                                        response: interceptedResponse, codec: config.codec
-                                    ))
-                                },
-                                then: interceptorChain.interceptors.map { $0.handleUnaryResponse },
-                                finish: completion
-                            )
-                        }
-                    )
-
-                    timeoutTimer?.start(onTimeout: { [cancelation] in
-                        cancelation.cancelable?.cancel()
-                    })
-                }
+        let task = Task {
+            let response: ResponseMessage<Output> = await self.unary(
+                path: path, idempotencyLevel: idempotencyLevel, request: request, headers: headers
+            )
+            // Cancelation drops the completion, matching the closure-based implementation this
+            // replaced.
+            // TODO: Deliver a `.canceled` `ResponseMessage` instead.
+            guard !Task.isCancelled else {
+                return
             }
-        )
-        return Cancelable {
-            cancelation.perform { cancelation in
-                cancelation.cancelable?.cancel()
-                cancelation = (cancelable: nil, isCancelled: true)
-            }
+
+            completion(response)
         }
+        return Cancelable { task.cancel() }
     }
 
     public func bidirectionalStream<
@@ -212,12 +109,59 @@ extension ProtocolClient: ProtocolClientInterface {
         request: Input,
         headers: Headers
     ) async -> ResponseMessage<Output> {
-        return await UnaryAsyncWrapper { completion in
-            self.unary(
-                path: path, idempotencyLevel: idempotencyLevel, request: request,
-                headers: headers, completion: completion
-            )
-        }.send()
+        let config = self.config
+        var headers = headers
+        headers[HeaderConstants.contentType] = ["application/\(config.codec.name())"]
+        let interceptorChain = config.createUnaryInterceptorChain()
+        let httpRequest = HTTPRequest<Input>(
+            url: config.createURL(forPath: path),
+            headers: headers,
+            message: request,
+            method: .post,
+            trailers: nil,
+            idempotencyLevel: idempotencyLevel
+        )
+
+        do {
+            let intercepted = try await interceptorChain.executeRequest(httpRequest)
+            let serialized = try Self.serialize(intercepted, config: config)
+            let interceptedRequest = try await interceptorChain.executeRawRequest(serialized)
+
+            // If the caller canceled the request while it was being processed by interceptors,
+            // don't send the request.
+            try Task.checkCancellation()
+
+            let sendRequest: @Sendable () async -> HTTPResponse = {
+                await self.httpClient.unary(
+                    request: interceptedRequest,
+                    onMetrics: { metrics in
+                        Task { _ = await interceptorChain.executeMetrics(metrics) }
+                    }
+                )
+            }
+            let response: HTTPResponse
+            if let timeout = config.timeout {
+                response = await withDeadline(timeout, operation: sendRequest)
+                    ?? Self.deadlineExceededResponse()
+            } else {
+                response = await sendRequest()
+            }
+            let interceptedResponse = await interceptorChain.executeRawResponse(response)
+            return await interceptorChain.executeResponse(ResponseMessage<Output>(
+                response: interceptedResponse, codec: config.codec
+            ))
+        } catch let error as ConnectError {
+            // Matches the closure-based implementation this replaced: a failure originating from
+            // the request path is returned directly, without invoking the response interceptors.
+            return ResponseMessage(result: .failure(error))
+        } catch is CancellationError {
+            return ResponseMessage(code: .canceled, result: .failure(.canceled()))
+        } catch let error {
+            return ResponseMessage(result: .failure(ConnectError(
+                code: .unknown, message: "request serialization failed",
+                exception: error, details: [], metadata: [:]
+            )))
+        }
     }
 
     public func bidirectionalStream<Input: ProtobufMessage, Output: ProtobufMessage>(
@@ -260,6 +204,60 @@ extension ProtocolClient: ProtocolClientInterface {
     }
 
     // MARK: - Private
+
+    /// Serialize a typed request into its raw form, matching the codec selection rules used for
+    /// unary requests (deterministic serialization is required for idempotent GET requests, since
+    /// the serialized message is used to build the URL).
+    ///
+    /// - parameter request: The typed request to serialize.
+    /// - parameter config: The configuration providing the codec and unary GET settings.
+    /// - returns: The request with its message replaced by serialized data.
+    /// - throws: A `ConnectError` with a `.unknown` code if serialization fails.
+    private static func serialize<Input: ProtobufMessage>(
+        _ request: HTTPRequest<Input>, config: ProtocolClientConfig
+    ) throws -> HTTPRequest<Data?> {
+        do {
+            let data: Data
+            if config.unaryGET.isEnabled && request.idempotencyLevel == .noSideEffects {
+                data = try config.codec.deterministicallySerialize(message: request.message)
+            } else {
+                data = try config.codec.serialize(message: request.message)
+            }
+            return HTTPRequest<Data?>(
+                url: request.url,
+                headers: request.headers,
+                message: data,
+                method: request.method,
+                trailers: request.trailers,
+                idempotencyLevel: request.idempotencyLevel
+            )
+        } catch let error {
+            throw ConnectError(
+                code: .unknown, message: "request serialization failed",
+                exception: error, details: [], metadata: [:]
+            )
+        }
+    }
+
+    /// The response synthesized when the request's deadline elapses before the server responds.
+    ///
+    /// Headers and trailers are empty: no response was ever received to carry them. The
+    /// closure-based implementation this replaced copied headers from the canceled response, but
+    /// both built-in HTTP clients already report those as empty here, so behavior is unchanged.
+    private static func deadlineExceededResponse() -> HTTPResponse {
+        return HTTPResponse(
+            code: .deadlineExceeded,
+            headers: [:],
+            message: nil,
+            trailers: [:],
+            error: ConnectError(
+                code: .deadlineExceeded,
+                message: "request exceeded allowed timeout",
+                exception: nil, details: [], metadata: [:]
+            ),
+            tracingInfo: nil
+        )
+    }
 
     private func createRequestCallbacks<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,

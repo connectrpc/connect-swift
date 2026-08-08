@@ -16,6 +16,10 @@ import Foundation
 
 /// Races `operation` against a deadline, canceling it if the deadline wins.
 ///
+/// IMPORTANT: `withTaskGroup` awaits every child, so losing the deadline race
+/// does not unblock the caller until `operation` itself responds to
+/// cancelation - one that ignores cancelation hangs here indefinitely.
+///
 /// - parameter timeout: Deadline in seconds.
 /// - parameter operation: The work to perform.
 ///
