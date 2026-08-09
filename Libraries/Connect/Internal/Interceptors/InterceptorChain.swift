@@ -232,3 +232,57 @@ extension InterceptorChain where T == any UnaryInterceptor {
         return value
     }
 }
+
+extension InterceptorChain where T == any StreamInterceptor {
+    func executeStart(_ initial: HTTPRequest<Void>) async throws -> HTTPRequest<Void> {
+        var value = initial
+        for interceptor in self.interceptors {
+            value = try await interceptor.handleStreamStart(value)
+        }
+        return value
+    }
+
+    func executeInput<Message: ProtobufMessage>(_ initial: Message) async -> Message {
+        var value = initial
+        for interceptor in self.interceptors {
+            value = await interceptor.handleStreamInput(value)
+        }
+        return value
+    }
+
+    func executeRawInput(_ initial: Data) async -> Data {
+        var value = initial
+        for interceptor in self.interceptors {
+            value = await interceptor.handleStreamRawInput(value)
+        }
+        return value
+    }
+
+    func executeRawResult(_ initial: StreamResult<Data>) async -> StreamResult<Data> {
+        var value = initial
+        for interceptor in self.interceptors.reversed() {
+            value = await interceptor.handleStreamRawResult(value)
+        }
+        return value
+    }
+
+    func executeResult<Message: ProtobufMessage>(
+        _ initial: StreamResult<Message>
+    ) async -> StreamResult<Message> {
+        var value = initial
+        for interceptor in self.interceptors.reversed() {
+            value = await interceptor.handleStreamResult(value)
+        }
+        return value
+    }
+
+    /// Duplicated from the `any UnaryInterceptor` extension: existentials do not self-conform, so
+    /// a single `where T: Interceptor` overload cannot serve both chains.
+    func executeMetrics(_ initial: HTTPMetrics) async -> HTTPMetrics {
+        var value = initial
+        for interceptor in self.interceptors.reversed() {
+            value = await interceptor.handleResponseMetrics(value)
+        }
+        return value
+    }
+}
