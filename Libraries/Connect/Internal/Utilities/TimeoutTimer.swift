@@ -18,8 +18,9 @@ import Foundation
 ///
 /// `.timedOut` and `.canceled` are both terminal, so cancelation is sticky - once `cancel()` has
 /// been called the timer can never fire, even if `start(onTimeout:)` runs afterwards.
-/// `ProtocolClient` depends on this - draining pending request callbacks can synchronously reach
-/// `cancel()` before `start()`.
+/// `ProtocolClient` depends on this: the stream path's inbound and outbound pumps are separate
+/// concurrent tasks, and a fast `receiveClose` can reach `cancel()` on the inbound pump before the
+/// outbound pump reaches `start()` after creating the transport.
 final class TimeoutTimer: Sendable {
     private enum State {
         case ready
