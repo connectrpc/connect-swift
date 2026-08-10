@@ -265,106 +265,111 @@ extension ProtocolClient: ProtocolClientInterface {
         onResult: @escaping @Sendable (StreamResult<Output>) -> Void
     ) -> RequestCallbacks<Input> {
         let codec = self.config.codec
-        let responseBuffer = Locked(Data())
-        let hasCompleted = Locked(false)
         let timeoutTimer = TimeoutTimer(config: self.config)
         let interceptorChain = self.config.createStreamInterceptorChain()
-        let onResult: @Sendable (StreamResult<Output>) -> Void = { output in
-            if case .complete = output {
-                hasCompleted.value = true
-            }
-            onResult(output)
-        }
+
+        let (inbound, inboundContinuation) = AsyncStream.makeStream(of: InboundEvent.self)
+        // Unbounded on purpose: `ProtocolClientInterface`'s stream methods are synchronous and
+        // hand back a handle immediately, so sends made before the transport exists must be
+        // buffered.
+        let (outbound, outboundContinuation) = AsyncStream.makeStream(of: OutboundEvent<Input>.self)
+
         let responseCallbacks = ResponseCallbacks(
-            receiveResponseHeaders: { responseHeaders in
-                interceptorChain.executeLinkedInterceptors(
-                    interceptorChain.interceptors.map { $0.handleStreamRawResult },
-                    firstInFirstOut: false,
-                    initial: .headers(responseHeaders),
-                    transform: { interceptedResult, proceed in
-                        if let typedResult = interceptedResult.toTyped(Output.self, using: codec) {
-                            proceed(typedResult)
-                        }
-                    },
-                    then: interceptorChain.interceptors.map { $0.handleStreamResult },
-                    finish: onResult
-                )
-            },
-            receiveResponseData: { data in
-                responseBuffer.perform { responseBuffer in
-                    // Handle cases where multiple messages are received in a single chunk.
-                    responseBuffer += data
-                    while true {
-                        let messageLength = Envelope.messageLength(forPackedData: responseBuffer)
-                        if messageLength < 0 {
-                            return
-                        }
-
-                        let prefixedMessageLength = Envelope.prefixLength + messageLength
-                        guard responseBuffer.count >= prefixedMessageLength else {
-                            return
-                        }
-
-                        interceptorChain.executeLinkedInterceptors(
-                            interceptorChain.interceptors.map { $0.handleStreamRawResult },
-                            firstInFirstOut: false,
-                            initial: .message(responseBuffer.prefix(prefixedMessageLength)),
-                            transform: { interceptedResult, proceed in
-                                if let typedResult = interceptedResult.toTyped(
-                                    Output.self, using: codec
-                                ) {
-                                    proceed(typedResult)
-                                }
-                            },
-                            then: interceptorChain.interceptors.map { $0.handleStreamResult },
-                            finish: onResult
-                        )
-                        responseBuffer = Data(responseBuffer.suffix(from: prefixedMessageLength))
-                    }
-                }
-            },
+            receiveResponseHeaders: { inboundContinuation.yield(.result(.headers($0))) },
+            receiveResponseData: { inboundContinuation.yield(.chunk($0)) },
             receiveResponseMetrics: { metrics in
-                interceptorChain.executeInterceptors(
-                    interceptorChain.interceptors.map { $0.handleResponseMetrics },
-                    firstInFirstOut: false,
-                    initial: metrics,
-                    finish: { _ in }
-                )
+                Task { _ = await interceptorChain.executeMetrics(metrics) }
             },
             receiveClose: { code, trailers, error in
-                if hasCompleted.value {
-                    return
-                }
-
-                var code = code
-                var error = error
-                if code == .canceled && timeoutTimer?.timedOut == true {
-                    code = .deadlineExceeded
-                    error = ConnectError(
-                        code: .deadlineExceeded,
-                        message: "request exceeded allowed timeout",
-                        exception: nil, details: [], metadata: [:]
-                    )
-                } else {
-                    timeoutTimer?.cancel()
-                }
-
-                interceptorChain.executeLinkedInterceptors(
-                    interceptorChain.interceptors.map { $0.handleStreamRawResult },
-                    firstInFirstOut: false,
-                    initial: .complete(code: code, error: error, trailers: trailers),
-                    transform: { interceptedResult, proceed in
-                        if let typedResult = interceptedResult.toTyped(Output.self, using: codec) {
-                            proceed(typedResult)
-                        }
-                    },
-                    then: interceptorChain.interceptors.map { $0.handleStreamResult },
-                    finish: onResult
+                inboundContinuation.yield(
+                    .result(.complete(code: code, error: error, trailers: trailers))
                 )
+                // The transport's close is its last event. Buffered elements are still delivered
+                // after `finish()`, so this releases the inbound pump without dropping anything.
+                inboundContinuation.finish()
             }
         )
 
-        let pendingRequestCallbacks = PendingRequestCallbacks()
+        Task {
+            var buffer = Data()
+            // Not a lock: this task is the only reader and writer. Still required -
+            // `ConnectInterceptor` converts an end-stream `.message` frame into `.complete` inside
+            // the chain, and the transport then also fires `receiveClose`, so the duplicate
+            // originates downstream of the events `finish()` can absorb.
+            var hasCompleted = false
+
+            for await event in inbound {
+                var rawResults = [StreamResult<Data>]()
+                switch event {
+                case .result(let raw):
+                    guard case .complete(let code, let error, let trailers) = raw else {
+                        rawResults = [raw]
+                        break
+                    }
+                    if hasCompleted {
+                        continue
+                    }
+
+                    // The transport only ever reports `.canceled`, so the timer is how a deadline
+                    // is told apart from a caller-initiated cancelation.
+                    if code == .canceled && timeoutTimer?.timedOut == true {
+                        let deadlineError = ConnectError(
+                            code: .deadlineExceeded,
+                            message: "request exceeded allowed timeout",
+                            exception: nil, details: [], metadata: [:]
+                        )
+                        rawResults = [
+                            .complete(
+                                code: .deadlineExceeded, error: deadlineError, trailers: trailers
+                            ),
+                        ]
+                    } else {
+                        timeoutTimer?.cancel()
+                        rawResults = [.complete(code: code, error: error, trailers: trailers)]
+                    }
+
+                case .chunk(let chunk):
+                    // Handle cases where multiple messages are received in a single chunk.
+                    buffer += chunk
+                    while true {
+                        let messageLength = Envelope.messageLength(forPackedData: buffer)
+                        if messageLength < 0 {
+                            break
+                        }
+
+                        let prefixedMessageLength = Envelope.prefixLength + messageLength
+                        guard buffer.count >= prefixedMessageLength else {
+                            break
+                        }
+
+                        rawResults.append(.message(buffer.prefix(prefixedMessageLength)))
+                        // `Envelope.messageLength(forPackedData:)` reads `data[1...4]` with
+                        // absolute indices, so the remainder must be re-based into fresh storage.
+                        // Keeping the slice silently reads the wrong four bytes on the next pass.
+                        buffer = Data(buffer.suffix(from: prefixedMessageLength))
+                    }
+                }
+
+                for rawResult in rawResults {
+                    let intercepted = await interceptorChain.executeRawResult(rawResult)
+                    // TODO: Surface the deserialization failure instead of dropping the result.
+                    guard let typed = intercepted.toTyped(Output.self, using: codec) else {
+                        continue
+                    }
+
+                    let result = await interceptorChain.executeResult(typed)
+                    onResult(result)
+                    if case .complete = result {
+                        hasCompleted = true
+                        // Ordered after `onResult`: delivering `.complete` finishes the consumer's
+                        // `results()` stream, whose termination handler calls `sendClose()`. That
+                        // close has to reach the outbound buffer before it is finished.
+                        outboundContinuation.finish()
+                    }
+                }
+            }
+        }
+
         var headers = headers
         headers[HeaderConstants.contentType] = ["application/connect+\(codec.name())"]
         let request = HTTPRequest<Void>(
@@ -375,97 +380,85 @@ extension ProtocolClient: ProtocolClientInterface {
             trailers: nil,
             idempotencyLevel: .unknown
         )
-        interceptorChain.executeInterceptorsAndStopOnFailure(
-            interceptorChain.interceptors.map { $0.handleStreamStart },
-            firstInFirstOut: true,
-            initial: request,
-            finish: { result in
-                switch result {
-                case .success(let interceptedRequest):
-                    pendingRequestCallbacks.setCallbacks(self.httpClient.stream(
-                        request: HTTPRequest(
-                            url: interceptedRequest.url,
-                            headers: interceptedRequest.headers,
-                            message: nil, // Message is void on stream creation.
-                            method: interceptedRequest.method,
-                            trailers: interceptedRequest.trailers,
-                            idempotencyLevel: interceptedRequest.idempotencyLevel
-                        ),
-                        responseCallbacks: responseCallbacks
-                    ))
-                    timeoutTimer?.start(onTimeout: {
-                        pendingRequestCallbacks.enqueue { $0.cancel() }
-                    })
-                case .failure(let error):
-                    hasCompleted.value = true
-                    onResult(.complete(code: error.code, error: error, trailers: error.metadata))
+
+        Task {
+            let interceptedRequest: HTTPRequest<Void>
+            do {
+                interceptedRequest = try await interceptorChain.executeStart(request)
+            } catch let error as ConnectError {
+                // Matches the closure-based implementation this replaced: a failure on the
+                // request path is delivered directly, without invoking the result interceptors.
+                inboundContinuation.finish()
+                onResult(.complete(code: error.code, error: error, trailers: error.metadata))
+                return
+            } catch let error {
+                inboundContinuation.finish()
+                onResult(.complete(code: .unknown, error: error, trailers: nil))
+                return
+            }
+
+            let transport = self.httpClient.stream(
+                request: HTTPRequest(
+                    url: interceptedRequest.url,
+                    headers: interceptedRequest.headers,
+                    message: nil, // Message is void on stream creation.
+                    method: interceptedRequest.method,
+                    trailers: interceptedRequest.trailers,
+                    idempotencyLevel: interceptedRequest.idempotencyLevel
+                ),
+                responseCallbacks: responseCallbacks
+            )
+            timeoutTimer?.start(onTimeout: { transport.cancel() })
+
+            for await event in outbound {
+                switch event {
+                case .data(let message):
+                    let intercepted = await interceptorChain.executeInput(message)
+                    let serialized: Data
+                    do {
+                        serialized = try codec.serialize(message: intercepted)
+                    } catch let error {
+                        // TODO: Surface the serialization failure instead of dropping the message.
+                        os_log(
+                            .error,
+                            "Failed to send request message which could not be serialized: %@",
+                            error.localizedDescription
+                        )
+                        continue
+                    }
+                    transport.sendData(await interceptorChain.executeRawInput(serialized))
+
+                case .close:
+                    // Deliberately not terminal: `cancel()` after `close()` must still reach the
+                    // transport.
+                    transport.sendClose()
+
+                case .cancel:
+                    transport.cancel()
+                    return
                 }
             }
+        }
+
+        return RequestCallbacks<Input>(
+            cancel: { outboundContinuation.yield(.cancel) },
+            sendData: { outboundContinuation.yield(.data($0)) },
+            sendClose: { outboundContinuation.yield(.close) }
         )
-        return RequestCallbacks<Input>(cancel: {
-            pendingRequestCallbacks.enqueue { requestCallbacks in
-                requestCallbacks.cancel()
-            }
-        }, sendData: { requestMessage in
-            // Wait for the stream to be established before sending data.
-            pendingRequestCallbacks.enqueue { requestCallbacks in
-                interceptorChain.executeLinkedInterceptors(
-                    interceptorChain.interceptors.map { $0.handleStreamInput },
-                    firstInFirstOut: true,
-                    initial: requestMessage,
-                    transform: { interceptedMessage, proceed in
-                        do {
-                            proceed(try codec.serialize(message: interceptedMessage))
-                        } catch let error {
-                            os_log(
-                                .error,
-                                "Failed to send request message which could not be serialized: %@",
-                                error.localizedDescription
-                            )
-                        }
-                    },
-                    then: interceptorChain.interceptors.map { $0.handleStreamRawInput },
-                    finish: requestCallbacks.sendData
-                )
-            }
-        }, sendClose: {
-            pendingRequestCallbacks.enqueue { requestCallbacks in
-                requestCallbacks.sendClose()
-            }
-        })
     }
 }
 
-private final class PendingRequestCallbacks: @unchecked Sendable {
-    private let lock = Lock()
-    private var callbacks: RequestCallbacks<Data>?
-    private var queue = [(RequestCallbacks<Data>) -> Void]()
+private enum OutboundEvent<Input: ProtobufMessage>: Sendable {
+    case data(Input)
+    case close
+    case cancel
+}
 
-    func setCallbacks(_ callbacks: RequestCallbacks<Data>) {
-        var pendingActions: [(RequestCallbacks<Data>) -> Void] = []
-        self.lock.perform {
-            self.callbacks = callbacks
-            pendingActions = self.queue
-            self.queue = []
-        }
-        for action in pendingActions {
-            action(callbacks)
-        }
-    }
-
-    func enqueue(_ action: @escaping (RequestCallbacks<Data>) -> Void) {
-        var callbacksToCall: RequestCallbacks<Data>?
-        self.lock.perform {
-            if let callbacks = self.callbacks {
-                callbacksToCall = callbacks
-            } else {
-                self.queue.append(action)
-            }
-        }
-        if let callbacks = callbacksToCall {
-            action(callbacks)
-        }
-    }
+/// Mirrors the `ResponseCallbacks` closures that carry stream results. `.chunk` is raw transport
+/// bytes, not a framed message - re-framing happens in the inbound pump.
+private enum InboundEvent: Sendable {
+    case chunk(Data)
+    case result(StreamResult<Data>) // `.headers` or `.complete`, straight from the transport.
 }
 
 private extension ResponseMessage where Output: ProtobufMessage {

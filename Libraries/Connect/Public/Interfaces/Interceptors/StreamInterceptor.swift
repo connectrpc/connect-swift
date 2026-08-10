@@ -82,6 +82,61 @@ public protocol StreamInterceptor: Interceptor {
         _ result: StreamResult<Message>,
         proceed: @escaping @Sendable (StreamResult<Message>) -> Void
     )
+
+    // MARK: - Async/await
+
+    /// Observe and/or mutate the creation of a stream and its associated headers.
+    ///
+    /// These are the spellings the library invokes; each defaults to forwarding to the
+    /// closure-based version above, so existing implementations keep being called unchanged.
+    ///
+    /// Order of invocation during a stream's lifecycle: 1
+    ///
+    /// - parameter request: The request being used to create the stream.
+    /// - returns: The (potentially altered) request to pass to the next interceptor.
+    /// - throws: A `ConnectError` to fail the stream without invoking further interceptors.
+    @Sendable
+    func handleStreamStart(_ request: HTTPRequest<Void>) async throws -> HTTPRequest<Void>
+
+    /// Observe and/or mutate a typed message to be sent to the server over a stream.
+    ///
+    /// Order of invocation during a stream's lifecycle: 2 (after `handleStreamStart()`)
+    ///
+    /// - parameter input: The message to be sent over the stream.
+    /// - returns: The (potentially altered) message to pass to the next interceptor.
+    @Sendable
+    func handleStreamInput<Message: ProtobufMessage>(_ input: Message) async -> Message
+
+    /// Observe and/or mutate a message's serialized raw data to be sent to the server
+    /// over a stream.
+    ///
+    /// Order of invocation during a stream's lifecycle: 3 (after `handleStreamInput()`)
+    ///
+    /// - parameter input: The raw data to be sent over the stream.
+    /// - returns: The (potentially altered) data to pass to the next interceptor.
+    @Sendable
+    func handleStreamRawInput(_ input: Data) async -> Data
+
+    /// Observe and/or mutate a raw result (such as a serialized message) received from the server
+    /// over a stream.
+    ///
+    /// Order of invocation during a stream's lifecycle: 4
+    ///
+    /// - parameter result: The raw result that was received over the stream.
+    /// - returns: The (potentially altered) result to pass to the next interceptor.
+    @Sendable
+    func handleStreamRawResult(_ result: StreamResult<Data>) async -> StreamResult<Data>
+
+    /// Observe and/or mutate a typed deserialized result received from the server over a stream.
+    ///
+    /// Order of invocation during a stream's lifecycle: 5 (after `handleStreamRawResult()`)
+    ///
+    /// - parameter result: The deserialized result that was received over the stream.
+    /// - returns: The (potentially altered) result to pass to the next interceptor.
+    @Sendable
+    func handleStreamResult<Message: ProtobufMessage>(
+        _ result: StreamResult<Message>
+    ) async -> StreamResult<Message>
 }
 
 extension StreamInterceptor {
@@ -123,5 +178,45 @@ extension StreamInterceptor {
         proceed: @escaping @Sendable (StreamResult<Message>) -> Void
     ) {
         proceed(result)
+    }
+
+    // MARK: - Async/await
+
+    @Sendable
+    public func handleStreamStart(_ request: HTTPRequest<Void>) async throws -> HTTPRequest<Void> {
+        let result: Result<HTTPRequest<Void>, ConnectError> = await withSingleResume { resume in
+            self.handleStreamStart(request, proceed: resume)
+        }
+        return try result.get()
+    }
+
+    @Sendable
+    public func handleStreamInput<Message: ProtobufMessage>(_ input: Message) async -> Message {
+        return await withSingleResume { resume in
+            self.handleStreamInput(input, proceed: resume)
+        }
+    }
+
+    @Sendable
+    public func handleStreamRawInput(_ input: Data) async -> Data {
+        return await withSingleResume { resume in
+            self.handleStreamRawInput(input, proceed: resume)
+        }
+    }
+
+    @Sendable
+    public func handleStreamRawResult(_ result: StreamResult<Data>) async -> StreamResult<Data> {
+        return await withSingleResume { resume in
+            self.handleStreamRawResult(result, proceed: resume)
+        }
+    }
+
+    @Sendable
+    public func handleStreamResult<Message: ProtobufMessage>(
+        _ result: StreamResult<Message>
+    ) async -> StreamResult<Message> {
+        return await withSingleResume { resume in
+            self.handleStreamResult(result, proceed: resume)
+        }
     }
 }

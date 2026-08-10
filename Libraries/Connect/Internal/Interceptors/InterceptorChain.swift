@@ -22,171 +22,13 @@ final class InterceptorChain<T: Sendable>: Sendable {
     init(_ interceptors: [T]) {
         self.interceptors = interceptors
     }
-
-    /// Invoke each of the interceptors, waiting for a given interceptor to complete before passing
-    /// the resulting value to the next interceptor and finally invoking `finish` with the final
-    /// value.
-    ///
-    /// - parameter functions: The functions to call (one for each interceptor).
-    /// - parameter firstInFirstOut: If true, `functions` will be invoked in the order they were
-    ///                              passed. If false, the order will be reversed.
-    /// - parameter initial: The initial value to pass to the first interceptor.
-    /// - parameter finish: Closure to call with the final value after each interceptor has finished
-    ///                     processing.
-    func executeInterceptors<Value>(
-        _ functions: [@Sendable (Value, @escaping @Sendable (Value) -> Void) -> Void],
-        firstInFirstOut: Bool,
-        initial: Value,
-        finish: @escaping @Sendable (Value) -> Void
-    ) {
-        let functions = firstInFirstOut ? functions.reversed() : functions
-        var next: @Sendable (Value) -> Void = { finish($0) }
-        for function in functions {
-            next = { [next] interceptedValue in function(interceptedValue, next) }
-        }
-        next(initial)
-    }
-
-    /// Performs the same functionality as `executeInterceptors()`, but allows for joining two
-    /// sets of functions and doing a transformation from one type to another inbetween sets (for
-    /// example, invoking a set of interceptors with a typed message value, serializing the
-    /// resulting message, and then invoking a second set of interceptors with the serialized data).
-    ///
-    /// - parameter value1Functions: The set of interceptor functions to call with `Value1`.
-    /// - parameter firstInFirstOut: If true, functions will be invoked in the order they were
-    ///                              passed. If false, the order will be reversed.
-    /// - parameter initial: The initial value to pass to the first interceptor.
-    /// - parameter transform: Closure called to convert `Value1` to `Value2` after
-    ///                        `value1Functions` are completed.
-    /// - parameter value2Functions: The set of interceptor functions to be called with `Value2`.
-    /// - parameter finish: Closure to call with the final value after each interceptor has finished
-    ///                     processing.
-    func executeLinkedInterceptors<Value1, Value2>(
-        _ value1Functions: [@Sendable (Value1, @escaping @Sendable (Value1) -> Void) -> Void],
-        firstInFirstOut: Bool,
-        initial: Value1,
-        transform: @escaping @Sendable (Value1, @escaping @Sendable (Value2) -> Void) -> Void,
-        then value2Functions: [@Sendable (Value2, @escaping @Sendable (Value2) -> Void) -> Void],
-        finish: @escaping @Sendable (Value2) -> Void
-    ) {
-        self.executeInterceptors(
-            value1Functions,
-            firstInFirstOut: firstInFirstOut,
-            initial: initial
-        ) { interceptedValue in
-            transform(interceptedValue) { transformedValue in
-                self.executeInterceptors(
-                    value2Functions,
-                    firstInFirstOut: firstInFirstOut,
-                    initial: transformedValue,
-                    finish: finish
-                )
-            }
-        }
-    }
-
-    /// Invoke each of the interceptors, waiting for a given interceptor to complete before passing
-    /// the resulting value to the next interceptor and finally invoking `finish` with the final
-    /// value.
-    ///
-    /// **If an interceptor returns a `Result.failure`, the chain will be terminated immediately
-    /// without invoking additional interceptors, and the failure result will be returned to the
-    /// caller.**
-    ///
-    /// - parameter functions: The functions to call (one for each interceptor).
-    /// - parameter firstInFirstOut: If true, `functions` will be invoked in the order they were
-    ///                              passed. If false, the order will be reversed.
-    /// - parameter initial: The initial value to pass to the first interceptor.
-    /// - parameter finish: Closure to call with the final value either after each interceptor has
-    ///                     finished processing or when one returns a `Result.failure`.
-    func executeInterceptorsAndStopOnFailure<Value>(
-        _ functions: [
-            @Sendable (Value, @escaping @Sendable (Result<Value, ConnectError>) -> Void) -> Void
-        ],
-        firstInFirstOut: Bool,
-        initial: Value,
-        finish: @escaping @Sendable (Result<Value, ConnectError>) -> Void
-    ) {
-        let functions = firstInFirstOut ? functions.reversed() : functions
-        var next: @Sendable (Result<Value, ConnectError>) -> Void = { finish($0) }
-        for function in functions {
-            next = { [next] result in
-                switch result {
-                case .success(let interceptedValue):
-                    function(interceptedValue, next)
-                case .failure:
-                    finish(result)
-                }
-            }
-        }
-        next(.success(initial))
-    }
-
-    /// Performs the same functionality as `executeInterceptorsAndStopOnFailure()`, but allows for
-    /// joining two sets of functions and doing a transformation from one type to another inbetween
-    /// sets (for example, invoking a set of interceptors with a typed message value,
-    /// serializing the resulting message, and then invoking a second set of interceptors with the
-    /// serialized data).
-    ///
-    /// **If an interceptor returns a `Result.failure`, both chains will be terminated immediately
-    /// without invoking additional interceptors, and the failure result will be returned to the
-    /// caller.**
-    ///
-    /// - parameter value1Functions: The set of interceptor functions to call with `Value1`.
-    /// - parameter firstInFirstOut: If true, functions will be invoked in the order they were
-    ///                              passed. If false, the order will be reversed.
-    /// - parameter initial: The initial value to pass to the first interceptor.
-    /// - parameter transform: Closure called to convert `Value1` to `Value2` after
-    ///                        `value1Functions` are completed.
-    /// - parameter value2Functions: The set of interceptor functions to be called with `Value2`.
-    /// - parameter finish: Closure to call with the final value after each interceptor has finished
-    ///                     processing.
-    func executeLinkedInterceptorsAndStopOnFailure<Value1, Value2>(
-        _ value1Functions: [
-            @Sendable (Value1, @escaping @Sendable (Result<Value1, ConnectError>) -> Void) -> Void
-        ],
-        firstInFirstOut: Bool,
-        initial: Value1,
-        transform: @escaping @Sendable (
-            Value1, @escaping @Sendable (Result<Value2, ConnectError>) -> Void
-        ) -> Void,
-        then value2Functions: [
-            @Sendable (Value2, @escaping @Sendable (Result<Value2, ConnectError>) -> Void) -> Void
-        ],
-        finish: @escaping @Sendable (Result<Value2, ConnectError>) -> Void
-    ) {
-        self.executeInterceptorsAndStopOnFailure(
-            value1Functions,
-            firstInFirstOut: firstInFirstOut,
-            initial: initial
-        ) { interceptedResult in
-            switch interceptedResult {
-            case .success(let interceptedValue):
-                transform(interceptedValue) { transformedResult in
-                    switch transformedResult {
-                    case .success(let transformedValue):
-                        self.executeInterceptorsAndStopOnFailure(
-                            value2Functions,
-                            firstInFirstOut: firstInFirstOut,
-                            initial: transformedValue,
-                            finish: finish
-                        )
-                    case .failure(let error):
-                        finish(.failure(error))
-                    }
-                }
-            case .failure(let error):
-                finish(.failure(error))
-            }
-        }
-    }
 }
 
 // MARK: - Async/await
 
-/// The closure-based functions above fold the array in reverse, so `firstInFirstOut: true` ends up
-/// invoking `interceptors[0]` outermost. The equivalent here is plain iteration for request paths
-/// (FIFO) and `reversed()` for response paths (LIFO).
+/// Request paths are FIFO (plain iteration); response paths are LIFO (`reversed()`), so
+/// `interceptors[0]` is outermost - the first to see an outbound request, the last to see an
+/// inbound response.
 extension InterceptorChain where T == any UnaryInterceptor {
     func executeRequest<Message: ProtobufMessage>(
         _ initial: HTTPRequest<Message>
@@ -224,6 +66,60 @@ extension InterceptorChain where T == any UnaryInterceptor {
         return value
     }
 
+    func executeMetrics(_ initial: HTTPMetrics) async -> HTTPMetrics {
+        var value = initial
+        for interceptor in self.interceptors.reversed() {
+            value = await interceptor.handleResponseMetrics(value)
+        }
+        return value
+    }
+}
+
+extension InterceptorChain where T == any StreamInterceptor {
+    func executeStart(_ initial: HTTPRequest<Void>) async throws -> HTTPRequest<Void> {
+        var value = initial
+        for interceptor in self.interceptors {
+            value = try await interceptor.handleStreamStart(value)
+        }
+        return value
+    }
+
+    func executeInput<Message: ProtobufMessage>(_ initial: Message) async -> Message {
+        var value = initial
+        for interceptor in self.interceptors {
+            value = await interceptor.handleStreamInput(value)
+        }
+        return value
+    }
+
+    func executeRawInput(_ initial: Data) async -> Data {
+        var value = initial
+        for interceptor in self.interceptors {
+            value = await interceptor.handleStreamRawInput(value)
+        }
+        return value
+    }
+
+    func executeRawResult(_ initial: StreamResult<Data>) async -> StreamResult<Data> {
+        var value = initial
+        for interceptor in self.interceptors.reversed() {
+            value = await interceptor.handleStreamRawResult(value)
+        }
+        return value
+    }
+
+    func executeResult<Message: ProtobufMessage>(
+        _ initial: StreamResult<Message>
+    ) async -> StreamResult<Message> {
+        var value = initial
+        for interceptor in self.interceptors.reversed() {
+            value = await interceptor.handleStreamResult(value)
+        }
+        return value
+    }
+
+    /// Duplicated from the `any UnaryInterceptor` extension: existentials do not self-conform, so
+    /// a single `where T: Interceptor` overload cannot serve both chains.
     func executeMetrics(_ initial: HTTPMetrics) async -> HTTPMetrics {
         var value = initial
         for interceptor in self.interceptors.reversed() {
