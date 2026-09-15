@@ -31,9 +31,17 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     private let port: Int
     private let timeout: TimeInterval?
     private let useSSL: Bool
+    private let contentLength: ContentLength
 
     private var pendingRequests = [(NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer?) -> Void]()
     private var state = State.disconnected
+
+    /// Whether unary requests should include a `Content-Length` header. It is optional over
+    /// HTTP/2, the only protocol this client speaks.
+    public enum ContentLength: Sendable {
+        case sent
+        case omitted
+    }
 
     private enum State {
         case disconnected
@@ -52,13 +60,21 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     ///                   (e.g., `https://connectrpc.com:8080`), the host's port will be used.
     /// - parameter timeout: Optional timeout after which to terminate requests/streams if no
     ///                      activity has occurred in the request or response path.
-    public init(host: String, port: Int? = nil, timeout: TimeInterval? = nil) {
+    /// - parameter contentLength: Whether unary requests should include a `Content-Length`
+    ///                            header. Defaults to sending it.
+    public init(
+        host: String,
+        port: Int? = nil,
+        timeout: TimeInterval? = nil,
+        contentLength: ContentLength = .sent
+    ) {
         let baseURL = URL(string: host)!
         let useSSL = baseURL.scheme?.lowercased() == "https"
         self.host = baseURL.host!
         self.port = port ?? baseURL.port ?? (useSSL ? 443 : 80)
         self.timeout = timeout
         self.useSSL = useSSL
+        self.contentLength = contentLength
     }
 
     /// Called before the first request/stream is initialized, and the result is stored for reuse
@@ -118,6 +134,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         let handler = ConnectUnaryChannelHandler(
             request: request,
             eventLoop: eventLoop,
+            contentLength: self.contentLength,
             onMetrics: onMetrics,
             onResponse: onResponse
         )

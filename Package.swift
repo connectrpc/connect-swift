@@ -96,6 +96,7 @@ let package = Package(
             dependencies: [
                 "Connect",
                 "ConnectMocks",
+                "ConnectNIO",
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
             ],
             path: "Tests/UnitTests/ConnectLibraryTests",
