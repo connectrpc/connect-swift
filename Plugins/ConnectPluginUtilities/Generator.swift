@@ -146,7 +146,7 @@ extension Generator: SwiftProtobufPluginLibrary.CodeGenerator {
             DescriptorSet.bundledEditionsSupport.lowerBound, Google_Protobuf_Edition.legacy
         )
         let maxEdition = min(
-            DescriptorSet.bundledEditionsSupport.upperBound, Google_Protobuf_Edition.edition2023
+            DescriptorSet.bundledEditionsSupport.upperBound, Google_Protobuf_Edition.edition2026
         )
         return minEdition...maxEdition
     }

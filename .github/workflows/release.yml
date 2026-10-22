@@ -16,9 +16,9 @@ jobs:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
-      - uses: bufbuild/buf-setup-action@v1.50.0
+      - uses: bufbuild/buf-action@v1
         with:
-          github_token: ${{ github.token }}
+          setup_only: true
       - name: Build plugins
         run: make buildplugins
       - name: Zip artifacts
