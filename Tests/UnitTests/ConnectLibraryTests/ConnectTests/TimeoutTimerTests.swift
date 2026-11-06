@@ -83,7 +83,81 @@ struct TimeoutTimerTests {
         }
     }
 
+    @Test
+    func reportsTimedOutOnceDeadlinePassesBeforeCallbackRuns() throws {
+        let clock = TestClock()
+        let timer = try #require(Self.makeTimer(clock: clock))
+        let didFire = Locked(false)
+        timer.start { didFire.value = true }
+        defer { timer.cancel() }
+
+        #expect(!timer.timedOut)
+
+        clock.advance(bySeconds: Self.clockTimeout + 1)
+
+        #expect(timer.timedOut)
+        #expect(!didFire.value)
+    }
+
+    @Test
+    func staysTimedOutWhenCanceledAfterDeadline() throws {
+        let clock = TestClock()
+        let timer = try #require(Self.makeTimer(clock: clock))
+        timer.start {}
+
+        clock.advance(bySeconds: Self.clockTimeout + 1)
+        timer.cancel()
+
+        #expect(timer.timedOut)
+    }
+
+    @Test
+    func isNotTimedOutWhenCanceledBeforeDeadline() throws {
+        let clock = TestClock()
+        let timer = try #require(Self.makeTimer(clock: clock))
+        timer.start {}
+
+        timer.cancel()
+        clock.advance(bySeconds: Self.clockTimeout + 1)
+
+        #expect(!timer.timedOut)
+    }
+
+    @Test
+    func isNotTimedOutBeforeStart() throws {
+        let clock = TestClock()
+        let timer = try #require(Self.makeTimer(clock: clock))
+
+        clock.advance(bySeconds: Self.clockTimeout + 1)
+
+        #expect(!timer.timedOut)
+    }
+
     private static func makeConfig() -> ProtocolClientConfig {
         return ProtocolClientConfig(host: "http://localhost", timeout: 0.05)
+    }
+
+    // Long enough that the sleeping task never wakes during a test, so only the injected clock
+    // can move the timer past its deadline.
+    private static let clockTimeout: TimeInterval = 60
+
+    private static func makeTimer(clock: TestClock) -> TimeoutTimer? {
+        return TimeoutTimer(
+            config: ProtocolClientConfig(host: "http://localhost", timeout: Self.clockTimeout),
+            now: { clock.now }
+        )
+    }
+}
+
+private final class TestClock: Sendable {
+    private let start = DispatchTime.now()
+    private let elapsed = Locked<TimeInterval>(0)
+
+    var now: DispatchTime {
+        return self.start + self.elapsed.value
+    }
+
+    func advance(bySeconds seconds: TimeInterval) {
+        self.elapsed.perform { $0 += seconds }
     }
 }

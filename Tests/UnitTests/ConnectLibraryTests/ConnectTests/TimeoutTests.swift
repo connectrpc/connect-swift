@@ -52,15 +52,121 @@ struct TimeoutTests {
         #expect((error as? ConnectError)?.message == "request exceeded allowed timeout")
     }
 
-    private func makeClient() -> Connectrpc_Conformance_V1_ConformanceServiceClient {
+    @Test
+    func unaryTransportErrorAfterDeadlineTimesOut() async {
+        let client = self.makeClient(httpClient: TransportErrorHTTPClient(
+            code: .unknown, delayNanoseconds: 100_000_000
+        ))
+        let response = await client.unary(request: .init())
+
+        #expect(response.code == .deadlineExceeded)
+        #expect(response.error?.code == .deadlineExceeded)
+    }
+
+    @Test
+    func streamTransportErrorAfterDeadlineTimesOut() async throws {
+        let client = self.makeClient(httpClient: TransportErrorHTTPClient(
+            code: .unknown, delayNanoseconds: 100_000_000
+        ))
+
+        let code = try await self.serverStreamCompletionCode(using: client)
+
+        #expect(code == .deadlineExceeded)
+    }
+
+    @Test
+    func unaryTransportErrorBeforeDeadlineKeepsItsCode() async {
+        let client = self.makeClient(
+            httpClient: TransportErrorHTTPClient(code: .unavailable, delayNanoseconds: 0),
+            timeout: 60
+        )
+        let response = await client.unary(request: .init())
+
+        #expect(response.code == .unavailable)
+    }
+
+    @Test
+    func streamTransportErrorBeforeDeadlineKeepsItsCode() async throws {
+        let client = self.makeClient(
+            httpClient: TransportErrorHTTPClient(code: .unavailable, delayNanoseconds: 0),
+            timeout: 60
+        )
+
+        let code = try await self.serverStreamCompletionCode(using: client)
+
+        #expect(code == .unavailable)
+    }
+
+    private func serverStreamCompletionCode(
+        using client: Connectrpc_Conformance_V1_ConformanceServiceClient
+    ) async throws -> Code? {
+        let stream = client.serverStream()
+        try stream.send(.init())
+        for await result in stream.results() {
+            if case .complete(let code, _, _) = result {
+                return code
+            }
+        }
+        return nil
+    }
+
+    private func makeClient(
+        httpClient: HTTPClientInterface = TimeoutHTTPClient(),
+        timeout: TimeInterval = 0.01
+    ) -> Connectrpc_Conformance_V1_ConformanceServiceClient {
         let config = ProtocolClientConfig(
             host: "http://localhost",
-            timeout: 0.01
+            timeout: timeout
         )
-        let protocolClient = ProtocolClient(httpClient: TimeoutHTTPClient(), config: config)
+        let protocolClient = ProtocolClient(httpClient: httpClient, config: config)
         return Connectrpc_Conformance_V1_ConformanceServiceClient(client: protocolClient)
     }
 }
+
+// Ignores cancelation and fails with a transport error after a delay, like a server that
+// resets the request when it enforces the deadline before the client's timer fires.
+private final class TransportErrorHTTPClient: HTTPClientInterface, Sendable {
+    private let code: Code
+    private let delayNanoseconds: UInt64
+
+    init(code: Code, delayNanoseconds: UInt64) {
+        self.code = code
+        self.delayNanoseconds = delayNanoseconds
+    }
+
+    @discardableResult
+    func unary(
+        request: HTTPRequest<Data?>,
+        onMetrics: @escaping @Sendable (HTTPMetrics) -> Void,
+        onResponse: @escaping @Sendable (HTTPResponse) -> Void
+    ) -> Cancelable {
+        Task { [code, delayNanoseconds] in
+            try? await Task.sleep(nanoseconds: delayNanoseconds)
+            onResponse(HTTPResponse(
+                code: code,
+                headers: [:],
+                message: nil,
+                trailers: [:],
+                error: TransportError(),
+                tracingInfo: nil
+            ))
+        }
+        return Cancelable {}
+    }
+
+    func stream(
+        request: HTTPRequest<Data?>,
+        responseCallbacks: ResponseCallbacks
+    ) -> RequestCallbacks<Data> {
+        Task { [code, delayNanoseconds] in
+            try? await Task.sleep(nanoseconds: delayNanoseconds)
+            responseCallbacks.receiveClose(code, [:], TransportError())
+        }
+        return RequestCallbacks(cancel: {}, sendData: { _ in }, sendClose: {})
+    }
+}
+
+private struct TransportError: Error {}
 
 private final class TimeoutHTTPClient: HTTPClientInterface, @unchecked Sendable {
     @discardableResult
