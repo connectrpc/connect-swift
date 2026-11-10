@@ -231,7 +231,7 @@ final class ConformanceInvoker: Sendable {
         var cancelAfterResponses = -1
         switch self.context.cancel.cancelTiming {
         case .beforeCloseSend:
-            break // Does not apply to server-only streams.
+            break  // Does not apply to server-only streams.
         case .afterCloseSendMs(let milliseconds):
             DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(Int(milliseconds))) {
                 stream.cancel()
@@ -273,8 +273,9 @@ final class ConformanceInvoker: Sendable {
     }
 
     private func invokeClientStream() async throws -> ConformanceResult {
-        let stream = self.client.clientStream(headers: .fromConformanceHeaders(
-            self.context.requestHeaders)
+        let stream = self.client.clientStream(
+            headers: .fromConformanceHeaders(
+                self.context.requestHeaders)
         )
         for requestMessage in self.context.requestMessages {
             let streamRequest = try Connectrpc_Conformance_V1_ClientStreamRequest(
@@ -294,7 +295,7 @@ final class ConformanceInvoker: Sendable {
             DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(Int(milliseconds))) {
                 stream.cancel()
             }
-        case .afterNumResponses: // Does not apply to client-only streams.
+        case .afterNumResponses:  // Does not apply to client-only streams.
             stream.closeAndReceive()
         case .none:
             stream.closeAndReceive()
@@ -441,10 +442,11 @@ private extension Connect.Headers {
 
     func toConformanceHeaders() -> [Connectrpc_Conformance_V1_Header] {
         return self.reduce(into: [Connectrpc_Conformance_V1_Header]()) { partialResult, header in
-            partialResult.append(.with { conformanceHeader in
-                conformanceHeader.name = header.key
-                conformanceHeader.value = header.value
-            })
+            partialResult.append(
+                .with { conformanceHeader in
+                    conformanceHeader.name = header.key
+                    conformanceHeader.value = header.value
+                })
         }
     }
 }
@@ -459,10 +461,12 @@ private extension Connect.ConnectError {
                     continue
                 }
 
-                conformanceError.details.append(.with { anyMessage in
-                    anyMessage.typeURL = "\(SwiftProtobuf.defaultAnyTypeURLPrefix)/\(detail.type)"
-                    anyMessage.value = payload
-                })
+                conformanceError.details.append(
+                    .with { anyMessage in
+                        anyMessage.typeURL =
+                            "\(SwiftProtobuf.defaultAnyTypeURLPrefix)/\(detail.type)"
+                        anyMessage.value = payload
+                    })
             }
         }
     }

@@ -98,9 +98,8 @@ final class InterceptorChain<T: Sendable>: Sendable {
     /// - parameter finish: Closure to call with the final value either after each interceptor has
     ///                     finished processing or when one returns a `Result.failure`.
     func executeInterceptorsAndStopOnFailure<Value>(
-        _ functions: [
-            @Sendable (Value, @escaping @Sendable (Result<Value, ConnectError>) -> Void) -> Void
-        ],
+        _ functions:
+            [@Sendable (Value, @escaping @Sendable (Result<Value, ConnectError>) -> Void) -> Void],
         firstInFirstOut: Bool,
         initial: Value,
         finish: @escaping @Sendable (Result<Value, ConnectError>) -> Void
@@ -140,17 +139,18 @@ final class InterceptorChain<T: Sendable>: Sendable {
     /// - parameter finish: Closure to call with the final value after each interceptor has finished
     ///                     processing.
     func executeLinkedInterceptorsAndStopOnFailure<Value1, Value2>(
-        _ value1Functions: [
-            @Sendable (Value1, @escaping @Sendable (Result<Value1, ConnectError>) -> Void) -> Void
-        ],
+        _ value1Functions:
+            // swiftlint:disable:next line_length
+            [@Sendable (Value1, @escaping @Sendable (Result<Value1, ConnectError>) -> Void) -> Void],
         firstInFirstOut: Bool,
         initial: Value1,
-        transform: @escaping @Sendable (
-            Value1, @escaping @Sendable (Result<Value2, ConnectError>) -> Void
-        ) -> Void,
-        then value2Functions: [
-            @Sendable (Value2, @escaping @Sendable (Result<Value2, ConnectError>) -> Void) -> Void
-        ],
+        transform:
+            @escaping @Sendable (
+                Value1, @escaping @Sendable (Result<Value2, ConnectError>) -> Void
+            ) -> Void,
+        then value2Functions:
+            // swiftlint:disable:next line_length
+            [@Sendable (Value2, @escaping @Sendable (Result<Value2, ConnectError>) -> Void) -> Void],
         finish: @escaping @Sendable (Result<Value2, ConnectError>) -> Void
     ) {
         self.executeInterceptorsAndStopOnFailure(

@@ -37,13 +37,16 @@ extension ConnectError {
         // Combine headers + trailers into metadata to make error parsing easier for consumers,
         // since gRPC can include error information in either headers or trailers.
         let metadata = (headers ?? [:]).merging(trailers ?? [:]) { $1 }
-        return (grpcCode, .init(
-            code: grpcCode,
-            message: metadata.grpcMessage(),
-            exception: nil,
-            details: metadata.connectErrorDetailsFromGRPC(),
-            metadata: metadata
-        ))
+        return (
+            grpcCode,
+            .init(
+                code: grpcCode,
+                message: metadata.grpcMessage(),
+                exception: nil,
+                details: metadata.connectErrorDetailsFromGRPC(),
+                metadata: metadata
+            )
+        )
     }
 }
 
@@ -68,7 +71,7 @@ private extension Trailers {
                     payload: protoDetail.value
                 )
             }
-        ?? []
+            ?? []
     }
 }
 
@@ -99,16 +102,16 @@ private extension String {
             if character == utf8Percent {
                 let secondIndex = utf8.index(index, offsetBy: 2)
                 if secondIndex >= endIndex {
-                    return self // Decoding failed
+                    return self  // Decoding failed
                 }
 
                 if let decoded = String(
-                    utf8[utf8.index(index, offsetBy: 1) ... secondIndex]
+                    utf8[utf8.index(index, offsetBy: 1)...secondIndex]
                 ).flatMap({ UInt8($0, radix: 16) }) {
                     characters.append(decoded)
                     index = utf8.index(after: secondIndex)
                 } else {
-                    return self // Decoding failed
+                    return self  // Decoding failed
                 }
             } else {
                 characters.append(character)

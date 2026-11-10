@@ -111,9 +111,22 @@ and runs the tests:
 make testunit
 ```
 
-## Linting
+## Formatting and Linting
 
-Connect-Swift uses [SwiftLint][swiftlint] for linting `.swift` files. To
+Connect-Swift uses [swift-format][swift-format] for formatting `.swift` files,
+configured by [`.swift-format`](../.swift-format). It ships with the Swift
+toolchain, so there's nothing to install. Format your changes by executing the
+following in the **root of the repo**:
+
+```sh
+make format
+```
+
+CI checks formatting with the [`soundness` job](./workflows/ci.yml), using the
+Swift version pinned there. Run `make lintformat` to check locally. Other
+versions of swift-format may format some code differently.
+
+Connect-Swift also uses [SwiftLint][swiftlint] for linting `.swift` files. To
 install the linter locally, see the [instructions][swiftlint-install]. Ensure
 that the version you install matches the version being used on the
 [`run-swiftlint` CI job](./workflows/ci.yaml).
@@ -178,6 +191,7 @@ Releases should be tagged in `x.y.z` SemVer format.
 [commit-message]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
 [fork]: https://github.com/connectrpc/connect-swift/fork
 [open-issue]: https://github.com/connectrpc/connect-swift/issues/new
+[swift-format]: https://github.com/swiftlang/swift-format
 [swiftlint]: https://github.com/realm/SwiftLint
 [swiftlint-install]: https://github.com/realm/SwiftLint#installation
 [swift-plugin-library]: https://github.com/apple/swift-protobuf/tree/main/Sources/SwiftProtobufPluginLibrary

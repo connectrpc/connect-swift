@@ -4,7 +4,7 @@ on:
     branches:
       - main
   pull_request:
-  workflow_dispatch: {} # support manual runs
+  workflow_dispatch: {}  # support manual runs
 env:
   # Sets the Xcode version to use for the CI.
   # Available versions: https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md#xcode
@@ -77,6 +77,14 @@ jobs:
           go-version: 1.24.x
       - name: Run unit tests
         run: make testunit
+  soundness:
+    uses: swiftlang/github-workflows/.github/workflows/soundness.yml@87329d126a6992483ba89aabefa1eaef1e5b0aad  # 0.0.17
+    with:
+      api_breakage_check_enabled: false
+      docs_check_enabled: false
+      format_check_container_image: swift:6.4.2
+      license_header_check_enabled: false
+      unacceptable_language_check_enabled: false
   run-swiftlint:
     runs-on: ubuntu-latest
     container:

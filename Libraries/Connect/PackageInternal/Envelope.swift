@@ -19,7 +19,7 @@ import SwiftProtobuf
 package enum Envelope {
     /// The total number of bytes that will prefix a message.
     package static var prefixLength: Int {
-        return 5 // Header flags (1 byte) + message length (4 bytes)
+        return 5  // Header flags (1 byte) + message length (4 bytes)
     }
 
     /// Packs a message into an "envelope", adding required header bytes and optionally
@@ -41,12 +41,12 @@ package enum Envelope {
             compression.shouldCompress(source),
             let compressedSource = try? compression.pool.compress(data: source)
         {
-            buffer.append(0b00000001) // 1 byte with the compression bit active
+            buffer.append(0b00000001)  // 1 byte with the compression bit active
             self.write(lengthOf: compressedSource, to: &buffer)
             buffer.append(compressedSource)
             return buffer
         } else {
-            buffer.append(0) // 1 byte with no active flags
+            buffer.append(0)  // 1 byte with no active flags
             self.write(lengthOf: source, to: &buffer)
             buffer.append(source)
             return buffer

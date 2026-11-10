@@ -22,7 +22,7 @@ let package = Package(
         .iOS(.v13),
         .macOS(.v10_15),
         .tvOS(.v13),
-        .watchOS(.v6)
+        .watchOS(.v6),
     ],
     products: [
         .library(
@@ -68,7 +68,7 @@ let package = Package(
         .target(
             name: "Connect",
             dependencies: [
-                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+                .product(name: "SwiftProtobuf", package: "swift-protobuf")
             ],
             path: "Libraries/Connect",
             exclude: [
@@ -100,10 +100,10 @@ let package = Package(
             ],
             path: "Tests/UnitTests/ConnectLibraryTests",
             exclude: [
-                "buf.gen.yaml",
+                "buf.gen.yaml"
             ],
             resources: [
-                .copy("TestResources"),
+                .copy("TestResources")
             ]
         ),
         .target(
@@ -114,7 +114,7 @@ let package = Package(
             ],
             path: "Libraries/ConnectMocks",
             exclude: [
-                "README.md",
+                "README.md"
             ]
         ),
         .executableTarget(
@@ -139,7 +139,7 @@ let package = Package(
             ],
             path: "Libraries/ConnectNIO",
             exclude: [
-                "README.md",
+                "README.md"
             ]
         ),
         .target(
@@ -153,7 +153,7 @@ let package = Package(
         .testTarget(
             name: "ConnectPluginUtilitiesTests",
             dependencies: [
-                "ConnectPluginUtilities",
+                "ConnectPluginUtilities"
             ],
             path: "Tests/UnitTests/ConnectPluginUtilitiesTests"
         ),

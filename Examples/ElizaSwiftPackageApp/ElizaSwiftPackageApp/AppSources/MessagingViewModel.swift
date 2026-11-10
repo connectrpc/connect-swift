@@ -57,10 +57,11 @@ final class UnaryMessagingViewModel: MessagingViewModel {
 
         let response = await self.client.say(request: request, headers: [:])
         os_log(.debug, "Eliza unary response: %@", String(describing: response))
-        self.messages.append(Message(
-            message: response.message?.sentence ?? "No response", author: .eliza
-        ))
-     }
+        self.messages.append(
+            Message(
+                message: response.message?.sentence ?? "No response", author: .eliza
+            ))
+    }
 
     func endChat() {}
 }

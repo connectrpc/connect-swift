@@ -71,7 +71,7 @@ struct ConnectErrorTests {
             trailers: nil,
             source: errorData
         )
-        #expect(error.code == .unavailable) // Respects the code from the error body
+        #expect(error.code == .unavailable)  // Respects the code from the error body
         #expect(error.message == "overloaded: back off and retry")
         #expect(error.exception == nil)
         #expect(error.details.count == 1)
@@ -95,22 +95,23 @@ struct ConnectErrorTests {
             ],
             source: errorData
         )
-        #expect(error.code == .unavailable) // Respects the code from the error body
+        #expect(error.code == .unavailable)  // Respects the code from the error body
         #expect(error.message == "overloaded: back off and retry")
         #expect(error.exception == nil)
         #expect(error.details.count == 1)
         #expect(error.unpackedDetails() == [expectedDetails])
-        #expect(error.metadata == [
-            "duplicatedkey": ["trailers"],
-            "otherkey1": ["BAR", "bAz"],
-            "anotherkey": ["foo"],
-        ])
+        #expect(
+            error.metadata == [
+                "duplicatedkey": ["trailers"],
+                "otherkey1": ["BAR", "bAz"],
+                "anotherkey": ["foo"],
+            ])
     }
 
     @Test
     func deserializingSimpleError() throws {
         let errorDictionary = [
-            "code": "unavailable",
+            "code": "unavailable"
         ]
         let errorData = try JSONSerialization.data(withJSONObject: errorDictionary)
         let error = try JSONDecoder().decode(ConnectError.self, from: errorData)

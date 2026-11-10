@@ -18,7 +18,7 @@ import SwiftProtobuf
 // MARK: - Helpers
 
 nonisolated(unsafe) private let iso8601DateFormatter = ISO8601DateFormatter()
-private let prefixLength = MemoryLayout<UInt32>.size // 4
+private let prefixLength = MemoryLayout<UInt32>.size  // 4
 
 private func logToStderr(_ message: String) {
     let date = Date()
@@ -52,9 +52,11 @@ private func main() async throws {
         }
 
         let nextRequestLength = nextMessageLength(using: lengthData)
-        guard let nextRequestData = try FileHandle.standardInput.read(
-            upToCount: nextRequestLength
-        ) else {
+        guard
+            let nextRequestData = try FileHandle.standardInput.read(
+                upToCount: nextRequestLength
+            )
+        else {
             throw "Expected \(nextRequestLength) bytes to deserialize request"
         }
 
@@ -62,12 +64,13 @@ private func main() async throws {
             serializedBytes: nextRequestData
         )
         if verboseArg == .enabled {
+            let cancelTiming = request.cancel.cancelTiming.map(String.init(describing:)) ?? "none"
             logToStderr(
-                "starting \(request.testName) method=\(request.method) " +
-                "protocol=\(request.protocol) codec=\(request.codec) " +
-                "compression=\(request.compression) streamType=\(request.streamType) " +
-                "cancel=\(request.cancel.cancelTiming.map(String.init(describing:)) ?? "none") " +
-                "timeoutMs=\(request.hasTimeoutMs ? String(request.timeoutMs) : "none")"
+                "starting \(request.testName) method=\(request.method) "
+                    + "protocol=\(request.protocol) codec=\(request.codec) "
+                    + "compression=\(request.compression) streamType=\(request.streamType) "
+                    + "cancel=\(cancelTiming) "
+                    + "timeoutMs=\(request.hasTimeoutMs ? String(request.timeoutMs) : "none")"
             )
         }
         let invoker = try ConformanceInvoker(request: request, clientType: clientTypeArg)

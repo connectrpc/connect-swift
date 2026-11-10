@@ -27,9 +27,10 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage> {
 
     /// Accepts a closure to be called upon completion of a request and returns a cancelable which,
     /// when invoked, will cancel the underlying request.
-    typealias PerformClosure = @Sendable (
-        @escaping @Sendable (ResponseMessage<Output>) -> Void
-    ) -> Cancelable
+    typealias PerformClosure =
+        @Sendable (
+            @escaping @Sendable (ResponseMessage<Output>) -> Void
+        ) -> Cancelable
 
     init(sendUnary: @escaping PerformClosure) {
         self.sendUnary = sendUnary

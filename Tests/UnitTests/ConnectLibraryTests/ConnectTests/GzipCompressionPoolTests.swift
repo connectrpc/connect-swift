@@ -20,10 +20,11 @@ struct GzipCompressionPoolTests {
     @Test
     func decompressingGzippedFile() throws {
         let compressedData = try self.gzippedFileData()
-        let decompressedText = try #require(String(
-            data: try GzipCompressionPool().decompress(data: compressedData),
-            encoding: .utf8
-        ))
+        let decompressedText = try #require(
+            String(
+                data: try GzipCompressionPool().decompress(data: compressedData),
+                encoding: .utf8
+            ))
         #expect(decompressedText == self.expectedUnzippedFileText())
     }
 
@@ -32,7 +33,7 @@ struct GzipCompressionPoolTests {
         let original = try #require(self.expectedUnzippedFileText().data(using: .utf8))
         let compressionPool = GzipCompressionPool()
         let compressed = try compressionPool.compress(data: original)
-        #expect(compressed.starts(with: [0x1f, 0x8b])) // Indicates gzip
+        #expect(compressed.starts(with: [0x1f, 0x8b]))  // Indicates gzip
         #expect(compressed.count != original.count)
 
         let decompressed = try compressionPool.decompress(data: compressed)

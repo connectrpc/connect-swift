@@ -128,10 +128,10 @@ final class ConnectMockGenerator: Generator {
 
         self.printLine(
             "\(self.typeVisibility) "
-            + method.callbackSignature(
-                using: self.namer, includeDefaults: true, options: self.options
-            )
-            + " {"
+                + method.callbackSignature(
+                    using: self.namer, includeDefaults: true, options: self.options
+                )
+                + " {"
         )
         self.indent {
             let mockProperty = method.callbackMockPropertyName()
@@ -160,10 +160,10 @@ final class ConnectMockGenerator: Generator {
         }
         self.printLine(
             "\(self.typeVisibility) "
-            + method.asyncAwaitSignature(
-                using: self.namer, includeDefaults: true, options: self.options
-            )
-            + " {"
+                + method.asyncAwaitSignature(
+                    using: self.namer, includeDefaults: true, options: self.options
+                )
+                + " {"
         )
         self.indent {
             if method.clientStreaming || method.serverStreaming {
@@ -202,10 +202,10 @@ private extension MethodDescriptor {
             return "MockClientOnlyStream<\(inputName), \(outputName)>()"
         } else {
             return """
-            { (_: \(inputName)) -> ResponseMessage<\(outputName)> in \
-            .init(result: .success(.init())) \
-            }
-            """
+                { (_: \(inputName)) -> ResponseMessage<\(outputName)> in \
+                .init(result: .success(.init())) \
+                }
+                """
         }
     }
 
@@ -220,10 +220,10 @@ private extension MethodDescriptor {
             return "MockClientOnlyAsyncStream<\(inputName), \(outputName)>()"
         } else {
             return """
-            { (_: \(inputName)) -> ResponseMessage<\(outputName)> in \
-            .init(result: .success(.init())) \
-            }
-            """
+                { (_: \(inputName)) -> ResponseMessage<\(outputName)> in \
+                .init(result: .success(.init())) \
+                }
+                """
         }
     }
 
@@ -231,11 +231,11 @@ private extension MethodDescriptor {
         if self.options.deprecated {
             // swiftlint:disable line_length
             return """
-            @available(iOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
-            @available(macOS, introduced: 10.15, deprecated: 10.15, message: "This RPC has been marked as deprecated in its `.proto` file.")
-            @available(tvOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
-            @available(watchOS, introduced: 6, deprecated: 6, message: "This RPC has been marked as deprecated in its `.proto` file.")
-            """
+                @available(iOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
+                @available(macOS, introduced: 10.15, deprecated: 10.15, message: "This RPC has been marked as deprecated in its `.proto` file.")
+                @available(tvOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
+                @available(watchOS, introduced: 6, deprecated: 6, message: "This RPC has been marked as deprecated in its `.proto` file.")
+                """
             // swiftlint:enable line_length
         } else {
             return nil
@@ -244,8 +244,10 @@ private extension MethodDescriptor {
 
     func asyncAwaitAvailabilityAnnotation() -> String? {
         if self.options.deprecated {
-            // swiftlint:disable:next line_length
-            return "@available(iOS, introduced: 13, deprecated: 13, message: \"This RPC has been marked as deprecated in its `.proto` file.\")"
+            // swiftlint:disable line_length
+            return
+                "@available(iOS, introduced: 13, deprecated: 13, message: \"This RPC has been marked as deprecated in its `.proto` file.\")"
+            // swiftlint:enable line_length
         } else {
             return nil
         }

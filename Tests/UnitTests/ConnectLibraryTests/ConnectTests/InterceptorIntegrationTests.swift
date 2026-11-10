@@ -40,22 +40,24 @@ struct InterceptorIntegrationTests {
                 )
             },
         ])
-        let response = await client.unary(request: .with { request in
-            request.responseDefinition = .with { response in
-                response.responseData = Data(repeating: 0, count: 10)
-            }
-        })
+        let response = await client.unary(
+            request: .with { request in
+                request.responseDefinition = .with { response in
+                    response.responseData = Data(repeating: 0, count: 10)
+                }
+            })
         #expect(response.error == nil)
-        #expect(trackedSteps.value == [
-            .unaryRequest(id: "a"),
-            .unaryRequest(id: "b"),
-            .unaryRawRequest(id: "a"),
-            .unaryRawRequest(id: "b"),
-            .unaryRawResponse(id: "b"),
-            .unaryRawResponse(id: "a"),
-            .unaryResponse(id: "b"),
-            .unaryResponse(id: "a"),
-        ])
+        #expect(
+            trackedSteps.value == [
+                .unaryRequest(id: "a"),
+                .unaryRequest(id: "b"),
+                .unaryRawRequest(id: "a"),
+                .unaryRawRequest(id: "b"),
+                .unaryRawResponse(id: "b"),
+                .unaryRawResponse(id: "a"),
+                .unaryResponse(id: "b"),
+                .unaryResponse(id: "a"),
+            ])
     }
 
     @Test
@@ -76,14 +78,15 @@ struct InterceptorIntegrationTests {
             },
         ])
         let stream = client.serverStream()
-        try stream.send(.with { request in
-            request.responseDefinition = .with { response in
-                response.responseData = [
-                    Data(repeating: 0, count: 100),
-                    Data(repeating: 0, count: 200),
-                ]
-            }
-        })
+        try stream.send(
+            .with { request in
+                request.responseDefinition = .with { response in
+                    response.responseData = [
+                        Data(repeating: 0, count: 100),
+                        Data(repeating: 0, count: 200),
+                    ]
+                }
+            })
         if let firstResponse = await stream.results().first(where: { $0.messageValue != nil }) {
             #expect(firstResponse.messageValue?.payload.data.count == 100)
         }
@@ -96,33 +99,34 @@ struct InterceptorIntegrationTests {
             }
         }
 
-        #expect(trackedSteps.value == [
-            .streamStart(id: "a"),
-            .streamStart(id: "b"),
-            .streamInput(id: "a"),
-            .streamInput(id: "b"),
-            .streamRawInput(id: "a"),
-            .streamRawInput(id: "b"),
-            .streamRawResult(id: "b", type: "headers"),
-            .streamRawResult(id: "a", type: "headers"),
-            .streamResult(id: "b", type: "headers"),
-            .streamResult(id: "a", type: "headers"),
-            .streamRawResult(id: "b", type: "message"),
-            .streamRawResult(id: "a", type: "message"),
-            .streamResult(id: "b", type: "message"),
-            .streamResult(id: "a", type: "message"),
-            .streamRawResult(id: "b", type: "message"),
-            .streamRawResult(id: "a", type: "message"),
-            .streamResult(id: "b", type: "message"),
-            .streamResult(id: "a", type: "message"),
-            .streamRawResult(id: "b", type: "complete"),
-            .streamRawResult(id: "a", type: "complete"),
-            .streamResult(id: "b", type: "complete"),
-            .streamResult(id: "a", type: "complete"),
-        ])
+        #expect(
+            trackedSteps.value == [
+                .streamStart(id: "a"),
+                .streamStart(id: "b"),
+                .streamInput(id: "a"),
+                .streamInput(id: "b"),
+                .streamRawInput(id: "a"),
+                .streamRawInput(id: "b"),
+                .streamRawResult(id: "b", type: "headers"),
+                .streamRawResult(id: "a", type: "headers"),
+                .streamResult(id: "b", type: "headers"),
+                .streamResult(id: "a", type: "headers"),
+                .streamRawResult(id: "b", type: "message"),
+                .streamRawResult(id: "a", type: "message"),
+                .streamResult(id: "b", type: "message"),
+                .streamResult(id: "a", type: "message"),
+                .streamRawResult(id: "b", type: "message"),
+                .streamRawResult(id: "a", type: "message"),
+                .streamResult(id: "b", type: "message"),
+                .streamResult(id: "a", type: "message"),
+                .streamRawResult(id: "b", type: "complete"),
+                .streamRawResult(id: "a", type: "complete"),
+                .streamResult(id: "b", type: "complete"),
+                .streamResult(id: "a", type: "complete"),
+            ])
     }
 
-    @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *) // Required for .contains()
+    @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *)  // Required for .contains()
     @Test(.timeLimit(.minutes(1)))
     func unaryInterceptorIsCalledWithMetrics() async {
         let trackedSteps = Locked([InterceptorStep]())
@@ -142,20 +146,22 @@ struct InterceptorIntegrationTests {
                 )
             },
         ])
-        let response = await client.unary(request: .with { request in
-            request.responseDefinition = .with { response in
-                response.responseData = Data(repeating: 0, count: 10)
-            }
-        })
+        let response = await client.unary(
+            request: .with { request in
+                request.responseDefinition = .with { response in
+                    response.responseData = Data(repeating: 0, count: 10)
+                }
+            })
         #expect(response.error == nil)
 
         // Subset of steps is tested since URLSession does not guarantee metric callback ordering.
-        #expect(trackedSteps.value.contains(
-            [.responseMetrics(id: "b"), .responseMetrics(id: "a")]
-        ))
+        #expect(
+            trackedSteps.value.contains(
+                [.responseMetrics(id: "b"), .responseMetrics(id: "a")]
+            ))
     }
 
-    @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *) // Required for .contains()
+    @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *)  // Required for .contains()
     @Test(.timeLimit(.minutes(1)))
     func streamInterceptorIsCalledWithMetrics() async throws {
         let trackedSteps = Locked([InterceptorStep]())
@@ -176,11 +182,12 @@ struct InterceptorIntegrationTests {
             },
         ])
         let stream = client.serverStream()
-        try stream.send(.with { request in
-            request.responseDefinition = .with { response in
-                response.responseData = [Data(repeating: 0, count: 10)]
-            }
-        })
+        try stream.send(
+            .with { request in
+                request.responseDefinition = .with { response in
+                    response.responseData = [Data(repeating: 0, count: 10)]
+                }
+            })
         for await result in stream.results() {
             if case .complete(let code, _, _) = result {
                 #expect(code == .ok)
@@ -190,9 +197,10 @@ struct InterceptorIntegrationTests {
         }
 
         // Subset of steps is tested since URLSession does not guarantee metric callback ordering.
-        #expect(trackedSteps.value.contains(
-            [.responseMetrics(id: "b"), .responseMetrics(id: "a")]
-        ))
+        #expect(
+            trackedSteps.value.contains(
+                [.responseMetrics(id: "b"), .responseMetrics(id: "a")]
+            ))
     }
 
     @Test
@@ -216,16 +224,18 @@ struct InterceptorIntegrationTests {
                 )
             },
         ])
-        let response = await client.unary(request: .with { request in
-            request.responseDefinition = .with { response in
-                response.responseData = Data(repeating: 0, count: 10)
-            }
-        })
-        #expect(response.error != nil) // Interceptor failed the request.
-        #expect(trackedSteps.value == [
-            .unaryRequest(id: "a"),
-            // Second interceptor is never called.
-        ])
+        let response = await client.unary(
+            request: .with { request in
+                request.responseDefinition = .with { response in
+                    response.responseData = Data(repeating: 0, count: 10)
+                }
+            })
+        #expect(response.error != nil)  // Interceptor failed the request.
+        #expect(
+            trackedSteps.value == [
+                .unaryRequest(id: "a")
+                // Second interceptor is never called.
+            ])
     }
 
     @Test
@@ -252,15 +262,16 @@ struct InterceptorIntegrationTests {
         for await result in client.serverStream().results() {
             switch result {
             case .complete(_, let error, _):
-                #expect(error != nil) // Interceptor failed the request.
+                #expect(error != nil)  // Interceptor failed the request.
             default:
                 Issue.record("Unexpected result")
             }
         }
-        #expect(trackedSteps.value == [
-            .streamStart(id: "a"),
-            // Second interceptor is never called.
-        ])
+        #expect(
+            trackedSteps.value == [
+                .streamStart(id: "a")
+                // Second interceptor is never called.
+            ])
     }
 
     @Test
@@ -270,7 +281,7 @@ struct InterceptorIntegrationTests {
             InterceptorFactory { _ in
                 StepTrackingInterceptor(
                     id: "a",
-                    requestDelay: .milliseconds(100), // Simulate async processing of headers.
+                    requestDelay: .milliseconds(100),  // Simulate async processing of headers.
                     trackUsing: trackedSteps
                 )
             },
@@ -285,11 +296,12 @@ struct InterceptorIntegrationTests {
 
         let stream = client.serverStream()
         // Send data immediately (before the first interceptor has finished processing headers).
-        try stream.send(.with { request in
-            request.responseDefinition = .with { response in
-                response.responseData = []
-            }
-        })
+        try stream.send(
+            .with { request in
+                request.responseDefinition = .with { response in
+                    response.responseData = []
+                }
+            })
         for await result in stream.results() {
             if case .complete(let code, _, _) = result {
                 #expect(code == .ok)
@@ -298,22 +310,23 @@ struct InterceptorIntegrationTests {
 
         // The client should wait for all interceptors to finish processing headers before it
         // passes any data through the chain.
-        #expect(trackedSteps.value == [
-            .streamStart(id: "a"),
-            .streamStart(id: "b"),
-            .streamInput(id: "a"),
-            .streamInput(id: "b"),
-            .streamRawInput(id: "a"),
-            .streamRawInput(id: "b"),
-            .streamRawResult(id: "b", type: "headers"),
-            .streamRawResult(id: "a", type: "headers"),
-            .streamResult(id: "b", type: "headers"),
-            .streamResult(id: "a", type: "headers"),
-            .streamRawResult(id: "b", type: "complete"),
-            .streamRawResult(id: "a", type: "complete"),
-            .streamResult(id: "b", type: "complete"),
-            .streamResult(id: "a", type: "complete"),
-        ])
+        #expect(
+            trackedSteps.value == [
+                .streamStart(id: "a"),
+                .streamStart(id: "b"),
+                .streamInput(id: "a"),
+                .streamInput(id: "b"),
+                .streamRawInput(id: "a"),
+                .streamRawInput(id: "b"),
+                .streamRawResult(id: "b", type: "headers"),
+                .streamRawResult(id: "a", type: "headers"),
+                .streamResult(id: "b", type: "headers"),
+                .streamResult(id: "a", type: "headers"),
+                .streamRawResult(id: "b", type: "complete"),
+                .streamRawResult(id: "a", type: "complete"),
+                .streamResult(id: "b", type: "complete"),
+                .streamResult(id: "a", type: "complete"),
+            ])
     }
 
     // MARK: - Private

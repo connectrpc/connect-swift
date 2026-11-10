@@ -45,18 +45,20 @@ enum ClientOnlyStreamValidation {
         if messageCount < 1 {
             return [
                 .complete(
-                    code: .internalError, error: ConnectError(
+                    code: .internalError,
+                    error: ConnectError(
                         code: .unimplemented, message: "unary stream has no messages"
                     ), trailers: nil
-                ),
+                )
             ]
         } else if messageCount > 1 {
             return [
                 .complete(
-                    code: .internalError, error: ConnectError(
+                    code: .internalError,
+                    error: ConnectError(
                         code: .unimplemented, message: "unary stream has multiple messages"
                     ), trailers: nil
-                ),
+                )
             ]
         } else {
             return results

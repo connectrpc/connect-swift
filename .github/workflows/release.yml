@@ -3,7 +3,7 @@ on:
   push:
     tags:
       - "*"
-  workflow_dispatch: {} # support manual runs
+  workflow_dispatch: {}  # support manual runs
 env:
   # Sets the Xcode version to use for the CI.
   # Available versions: https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md#xcode

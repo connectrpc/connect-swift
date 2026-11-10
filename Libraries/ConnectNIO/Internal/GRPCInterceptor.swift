@@ -37,14 +37,16 @@ extension GRPCInterceptor: UnaryInterceptor {
             request.message ?? Data(), using: self.config.requestCompression
         )
 
-        proceed(.success(HTTPRequest(
-            url: request.url,
-            headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: false),
-            message: envelopedRequestBody,
-            method: request.method,
-            trailers: nil,
-            idempotencyLevel: request.idempotencyLevel
-        )))
+        proceed(
+            .success(
+                HTTPRequest(
+                    url: request.url,
+                    headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: false),
+                    message: envelopedRequestBody,
+                    method: request.method,
+                    trailers: nil,
+                    idempotencyLevel: request.idempotencyLevel
+                )))
     }
 
     @Sendable
@@ -63,11 +65,14 @@ extension GRPCInterceptor: UnaryInterceptor {
             // If content-type looks like it could be a gRPC server's response, consider
             // this an internal error.
             let code: Code = self.contentTypeIsGRPC(contentType) ? .internalError : .unknown
-            proceed(HTTPResponse(
-                code: code, headers: response.headers, message: nil, trailers: response.trailers,
-                error: ConnectError(code: code, message: "unexpected content-type: \(contentType)"),
-                tracingInfo: response.tracingInfo
-            ))
+            proceed(
+                HTTPResponse(
+                    code: code, headers: response.headers, message: nil,
+                    trailers: response.trailers,
+                    error: ConnectError(
+                        code: code, message: "unexpected content-type: \(contentType)"),
+                    tracingInfo: response.tracingInfo
+                ))
             return
         }
 
@@ -77,64 +82,71 @@ extension GRPCInterceptor: UnaryInterceptor {
         )
         guard grpcCode == .ok, let rawData = response.message, !rawData.isEmpty else {
             if response.trailers.grpcStatus() == nil && response.message?.isEmpty == false {
-                proceed(HTTPResponse(
-                    code: .internalError,
-                    headers: response.headers,
-                    message: response.message,
-                    trailers: response.trailers,
-                    error: ConnectError(
+                proceed(
+                    HTTPResponse(
                         code: .internalError,
-                        message: "unary response message should be followed by trailers"
-                    ),
-                    tracingInfo: response.tracingInfo
-                ))
+                        headers: response.headers,
+                        message: response.message,
+                        trailers: response.trailers,
+                        error: ConnectError(
+                            code: .internalError,
+                            message: "unary response message should be followed by trailers"
+                        ),
+                        tracingInfo: response.tracingInfo
+                    ))
             } else if grpcCode == .ok {
-                proceed(HTTPResponse(
-                    code: .unimplemented,
-                    headers: response.headers,
-                    message: response.message,
-                    trailers: response.trailers,
-                    error: ConnectError(
-                        code: .unimplemented, message: "unary response has no message"
-                    ),
-                    tracingInfo: response.tracingInfo
-                ))
+                proceed(
+                    HTTPResponse(
+                        code: .unimplemented,
+                        headers: response.headers,
+                        message: response.message,
+                        trailers: response.trailers,
+                        error: ConnectError(
+                            code: .unimplemented, message: "unary response has no message"
+                        ),
+                        tracingInfo: response.tracingInfo
+                    ))
             } else {
-                proceed(HTTPResponse(
-                    code: grpcCode,
-                    headers: response.headers,
-                    message: response.message,
-                    trailers: response.trailers,
-                    error: connectError ?? response.error,
-                    tracingInfo: response.tracingInfo
-                ))
+                proceed(
+                    HTTPResponse(
+                        code: grpcCode,
+                        headers: response.headers,
+                        message: response.message,
+                        trailers: response.trailers,
+                        error: connectError ?? response.error,
+                        tracingInfo: response.tracingInfo
+                    ))
             }
             return
         }
 
-        let compressionPool = response
+        let compressionPool =
+            response
             .headers[HeaderConstants.grpcContentEncoding]?
             .first
             .flatMap { self.config.responseCompressionPool(forName: $0) }
         if compressionPool == nil && Envelope.isCompressed(rawData) {
-            proceed(HTTPResponse(
-                code: .internalError, headers: response.headers, message: nil,
-                trailers: response.trailers, error: ConnectError(
-                    code: .internalError, message: "received unexpected compressed message"
-                ), tracingInfo: response.tracingInfo
-            ))
+            proceed(
+                HTTPResponse(
+                    code: .internalError, headers: response.headers, message: nil,
+                    trailers: response.trailers,
+                    error: ConnectError(
+                        code: .internalError, message: "received unexpected compressed message"
+                    ), tracingInfo: response.tracingInfo
+                ))
             return
         } else if Envelope.containsMultipleGRPCMessages(rawData) {
-            proceed(HTTPResponse(
-                code: .unimplemented,
-                headers: response.headers,
-                message: nil,
-                trailers: response.trailers,
-                error: ConnectError(
-                    code: .unimplemented, message: "unary response has multiple messages"
-                ),
-                tracingInfo: response.tracingInfo
-            ))
+            proceed(
+                HTTPResponse(
+                    code: .unimplemented,
+                    headers: response.headers,
+                    message: nil,
+                    trailers: response.trailers,
+                    error: ConnectError(
+                        code: .unimplemented, message: "unary response has multiple messages"
+                    ),
+                    tracingInfo: response.tracingInfo
+                ))
             return
         }
 
@@ -142,23 +154,25 @@ extension GRPCInterceptor: UnaryInterceptor {
             let messageData = try Envelope.unpackMessage(
                 rawData, compressionPool: compressionPool
             ).unpacked
-            proceed(HTTPResponse(
-                code: grpcCode,
-                headers: response.headers,
-                message: messageData,
-                trailers: response.trailers,
-                error: nil,
-                tracingInfo: response.tracingInfo
-            ))
+            proceed(
+                HTTPResponse(
+                    code: grpcCode,
+                    headers: response.headers,
+                    message: messageData,
+                    trailers: response.trailers,
+                    error: nil,
+                    tracingInfo: response.tracingInfo
+                ))
         } catch let error {
-            proceed(HTTPResponse(
-                code: .unknown,
-                headers: response.headers,
-                message: response.message,
-                trailers: response.trailers,
-                error: error,
-                tracingInfo: response.tracingInfo
-            ))
+            proceed(
+                HTTPResponse(
+                    code: .unknown,
+                    headers: response.headers,
+                    message: response.message,
+                    trailers: response.trailers,
+                    error: error,
+                    tracingInfo: response.tracingInfo
+                ))
         }
     }
 }
@@ -169,14 +183,16 @@ extension GRPCInterceptor: StreamInterceptor {
         _ request: HTTPRequest<Void>,
         proceed: @escaping (Result<HTTPRequest<Void>, ConnectError>) -> Void
     ) {
-        proceed(.success(HTTPRequest(
-            url: request.url,
-            headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: false),
-            message: request.message,
-            method: request.method,
-            trailers: nil,
-            idempotencyLevel: request.idempotencyLevel
-        )))
+        proceed(
+            .success(
+                HTTPRequest(
+                    url: request.url,
+                    headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: false),
+                    message: request.message,
+                    method: request.method,
+                    trailers: nil,
+                    idempotencyLevel: request.idempotencyLevel
+                )))
     }
 
     @Sendable
@@ -198,11 +214,13 @@ extension GRPCInterceptor: StreamInterceptor {
                 // If content-type looks like it could be a gRPC server's response, consider
                 // this an internal error.
                 let code: Code = self.contentTypeIsGRPC(contentType) ? .internalError : .unknown
-                proceed(.complete(
-                    code: code, error: ConnectError(
-                        code: code, message: "unexpected content-type: \(contentType)"
-                    ), trailers: headers
-                ))
+                proceed(
+                    .complete(
+                        code: code,
+                        error: ConnectError(
+                            code: code, message: "unexpected content-type: \(contentType)"
+                        ), trailers: headers
+                    ))
                 return
             }
 
@@ -214,11 +232,14 @@ extension GRPCInterceptor: StreamInterceptor {
                     HeaderConstants.grpcContentEncoding
                 ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
                 if responseCompressionPool == nil && Envelope.isCompressed(rawData) {
-                    proceed(.complete(
-                        code: .internalError, error: ConnectError(
-                            code: .internalError, message: "received unexpected compressed message"
-                        ), trailers: [:]
-                    ))
+                    proceed(
+                        .complete(
+                            code: .internalError,
+                            error: ConnectError(
+                                code: .internalError,
+                                message: "received unexpected compressed message"
+                            ), trailers: [:]
+                        ))
                     return
                 }
 
@@ -243,17 +264,19 @@ extension GRPCInterceptor: StreamInterceptor {
                 trailers: trailers
             )
             if grpcCode == .ok {
-                proceed(.complete(
-                    code: .ok,
-                    error: nil,
-                    trailers: trailers
-                ))
+                proceed(
+                    .complete(
+                        code: .ok,
+                        error: nil,
+                        trailers: trailers
+                    ))
             } else {
-                proceed(.complete(
-                    code: grpcCode,
-                    error: connectError ?? error,
-                    trailers: trailers
-                ))
+                proceed(
+                    .complete(
+                        code: grpcCode,
+                        error: connectError ?? error,
+                        trailers: trailers
+                    ))
             }
         }
     }
@@ -262,13 +285,13 @@ extension GRPCInterceptor: StreamInterceptor {
 
     private func contentTypeIsGRPC(_ contentType: String) -> Bool {
         return contentType == "application/grpc"
-        || contentType.hasPrefix("application/grpc+")
+            || contentType.hasPrefix("application/grpc+")
     }
 
     private func contentTypeIsExpectedGRPC(_ contentType: String) -> Bool {
         let codecName = self.config.codec.name()
         return (codecName == "proto" && contentType == "application/grpc")
-        || contentType == "application/grpc+\(codecName)"
+            || contentType == "application/grpc+\(codecName)"
     }
 }
 

@@ -62,41 +62,44 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
         let urlRequest = URLRequest(httpRequest: request)
         let task = self.session.dataTask(with: urlRequest) { data, urlResponse, error in
             if let httpURLResponse = urlResponse as? HTTPURLResponse {
-                onResponse(HTTPResponse(
-                    code: Code.fromURLSessionCode(httpURLResponse.statusCode),
-                    headers: httpURLResponse.formattedLowercasedHeaders(),
-                    message: data,
-                    trailers: [:], // URLSession does not support trailers
-                    error: error,
-                    tracingInfo: .init(httpStatus: httpURLResponse.statusCode)
-                ))
+                onResponse(
+                    HTTPResponse(
+                        code: Code.fromURLSessionCode(httpURLResponse.statusCode),
+                        headers: httpURLResponse.formattedLowercasedHeaders(),
+                        message: data,
+                        trailers: [:],  // URLSession does not support trailers
+                        error: error,
+                        tracingInfo: .init(httpStatus: httpURLResponse.statusCode)
+                    ))
             } else if let error = error {
                 let code = Code.fromURLSessionCode((error as NSError).code)
-                onResponse(HTTPResponse(
-                    code: code,
-                    headers: [:],
-                    message: data,
-                    trailers: [:],
-                    error: ConnectError(
+                onResponse(
+                    HTTPResponse(
                         code: code,
-                        message: error.localizedDescription,
-                        exception: error
-                    ),
-                    tracingInfo: nil
-                ))
+                        headers: [:],
+                        message: data,
+                        trailers: [:],
+                        error: ConnectError(
+                            code: code,
+                            message: error.localizedDescription,
+                            exception: error
+                        ),
+                        tracingInfo: nil
+                    ))
             } else {
-                onResponse(HTTPResponse(
-                    code: .unknown,
-                    headers: [:],
-                    message: data,
-                    trailers: [:],
-                    error: ConnectError(
+                onResponse(
+                    HTTPResponse(
                         code: .unknown,
-                        message: "unexpected response type \(type(of: urlResponse))",
-                        exception: error
-                    ),
-                    tracingInfo: nil
-                ))
+                        headers: [:],
+                        message: data,
+                        trailers: [:],
+                        error: ConnectError(
+                            code: .unknown,
+                            message: "unexpected response type \(type(of: urlResponse))",
+                            exception: error
+                        ),
+                        tracingInfo: nil
+                    ))
             }
         }
         self.lock.perform { self.metricsClosures[task.taskIdentifier] = onMetrics }
@@ -280,7 +283,7 @@ extension Code {
             NSURLErrorNotConnectedToInternet,
             NSURLErrorSecureConnectionFailed:
             return .unavailable
-        case ...100: // URLSession can return errors in this range
+        case ...100:  // URLSession can return errors in this range
             return .unknown
         default:
             return Self.fromHTTPStatus(code)

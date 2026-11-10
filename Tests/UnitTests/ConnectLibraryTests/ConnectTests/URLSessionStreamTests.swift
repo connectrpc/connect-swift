@@ -59,8 +59,9 @@ struct URLSessionStreamTests {
                         #expect(code == .unavailable)
                         let connectError = error as? ConnectError
                         #expect(
-                            connectError?.message ==
-                            "connection was reset and the streamed request body cannot be replayed"
+                            connectError?.message
+                                == "connection was reset and the streamed request body "
+                                + "cannot be replayed"
                         )
                         confirm()
                     }

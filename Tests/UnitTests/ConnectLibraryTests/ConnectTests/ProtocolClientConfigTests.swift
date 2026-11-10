@@ -53,37 +53,37 @@ struct ProtocolClientConfigTests {
         #expect(
             ProtocolClientConfig(host: "https://connectrpc.com")
                 .createURL(forPath: rpcPath).absoluteString
-            == "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
+                == "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
         )
         #expect(
             ProtocolClientConfig(host: "https://connectrpc.com/")
                 .createURL(forPath: rpcPath).absoluteString
-            == "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
+                == "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
         )
         #expect(
             ProtocolClientConfig(host: "https://connectrpc.com/a")
                 .createURL(forPath: rpcPath).absoluteString
-            == "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
+                == "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
         )
         #expect(
             ProtocolClientConfig(host: "https://connectrpc.com/a/")
                 .createURL(forPath: rpcPath).absoluteString
-            == "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
+                == "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
         )
         #expect(
             ProtocolClientConfig(host: "https://connectrpc.com/a/b/c")
                 .createURL(forPath: rpcPath).absoluteString
-            == "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
+                == "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
         )
         #expect(
             ProtocolClientConfig(host: "https://connectrpc.com/a/b/c/")
                 .createURL(forPath: rpcPath).absoluteString
-            == "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
+                == "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
         )
         #expect(
             ProtocolClientConfig(host: "connectrpc.com/a/b/c")
                 .createURL(forPath: rpcPath).absoluteString
-            == "connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
+                == "connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
         )
     }
 
@@ -138,26 +138,30 @@ struct ProtocolClientConfigTests {
             trailers: nil,
             idempotencyLevel: .noSideEffects
         )
-        #expect(ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .alwaysEnabled
-        ).shouldUseUnaryGET(for: request))
-        #expect(ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
-        ).shouldUseUnaryGET(for: request))
-        #expect(ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
-        ).shouldUseUnaryGET(for: request) == false)
-        #expect(ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .disabled
-        ).shouldUseUnaryGET(for: request) == false)
+        #expect(
+            ProtocolClientConfig(
+                host: "https://connectrpc.com",
+                networkProtocol: .connect,
+                unaryGET: .alwaysEnabled
+            ).shouldUseUnaryGET(for: request))
+        #expect(
+            ProtocolClientConfig(
+                host: "https://connectrpc.com",
+                networkProtocol: .connect,
+                unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
+            ).shouldUseUnaryGET(for: request))
+        #expect(
+            ProtocolClientConfig(
+                host: "https://connectrpc.com",
+                networkProtocol: .connect,
+                unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
+            ).shouldUseUnaryGET(for: request) == false)
+        #expect(
+            ProtocolClientConfig(
+                host: "https://connectrpc.com",
+                networkProtocol: .connect,
+                unaryGET: .disabled
+            ).shouldUseUnaryGET(for: request) == false)
     }
 
     @Test
@@ -170,26 +174,30 @@ struct ProtocolClientConfigTests {
             trailers: nil,
             idempotencyLevel: .idempotent
         )
-        #expect(ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .alwaysEnabled
-        ).shouldUseUnaryGET(for: request) == false)
-        #expect(ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
-        ).shouldUseUnaryGET(for: request) == false)
-        #expect(ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
-        ).shouldUseUnaryGET(for: request) == false)
-        #expect(ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .disabled
-        ).shouldUseUnaryGET(for: request) == false)
+        #expect(
+            ProtocolClientConfig(
+                host: "https://connectrpc.com",
+                networkProtocol: .connect,
+                unaryGET: .alwaysEnabled
+            ).shouldUseUnaryGET(for: request) == false)
+        #expect(
+            ProtocolClientConfig(
+                host: "https://connectrpc.com",
+                networkProtocol: .connect,
+                unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
+            ).shouldUseUnaryGET(for: request) == false)
+        #expect(
+            ProtocolClientConfig(
+                host: "https://connectrpc.com",
+                networkProtocol: .connect,
+                unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
+            ).shouldUseUnaryGET(for: request) == false)
+        #expect(
+            ProtocolClientConfig(
+                host: "https://connectrpc.com",
+                networkProtocol: .connect,
+                unaryGET: .disabled
+            ).shouldUseUnaryGET(for: request) == false)
     }
 
     @Test
@@ -202,26 +210,30 @@ struct ProtocolClientConfigTests {
             trailers: nil,
             idempotencyLevel: .unknown
         )
-        #expect(ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .alwaysEnabled
-        ).shouldUseUnaryGET(for: request) == false)
-        #expect(ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
-        ).shouldUseUnaryGET(for: request) == false)
-        #expect(ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
-        ).shouldUseUnaryGET(for: request) == false)
-        #expect(ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .disabled
-        ).shouldUseUnaryGET(for: request) == false)
+        #expect(
+            ProtocolClientConfig(
+                host: "https://connectrpc.com",
+                networkProtocol: .connect,
+                unaryGET: .alwaysEnabled
+            ).shouldUseUnaryGET(for: request) == false)
+        #expect(
+            ProtocolClientConfig(
+                host: "https://connectrpc.com",
+                networkProtocol: .connect,
+                unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
+            ).shouldUseUnaryGET(for: request) == false)
+        #expect(
+            ProtocolClientConfig(
+                host: "https://connectrpc.com",
+                networkProtocol: .connect,
+                unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
+            ).shouldUseUnaryGET(for: request) == false)
+        #expect(
+            ProtocolClientConfig(
+                host: "https://connectrpc.com",
+                networkProtocol: .connect,
+                unaryGET: .disabled
+            ).shouldUseUnaryGET(for: request) == false)
     }
 
     @Test
@@ -246,7 +258,7 @@ struct ProtocolClientConfigTests {
         #expect(requestWithoutCompression.method == .get)
         #expect(
             requestWithoutCompression.url.absoluteString
-            == "https://connectrpc.com?connect=v1&base64=1&encoding=json&message=AAEC"
+                == "https://connectrpc.com?connect=v1&base64=1&encoding=json&message=AAEC"
         )
     }
 
@@ -280,7 +292,7 @@ struct ProtocolClientConfigTests {
     func transformToGETWithRequestCompression() {
         let compressedRequest = HTTPRequest<Data?>(
             url: URL(string: "https://connectrpc.com")!,
-            headers: [HeaderConstants.contentEncoding: ["gzip"]], // mimics inceptor behavior
+            headers: [HeaderConstants.contentEncoding: ["gzip"]],  // mimics inceptor behavior
             message: Data([0x0, 0x1, 0x2]),
             method: .post,
             trailers: nil,

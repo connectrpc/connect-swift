@@ -109,7 +109,8 @@ extension Generator: SwiftProtobufPluginLibrary.CodeGenerator {
             currentFile: descriptor,
             protoFileToModuleMappings: self.options.protoToModuleMappings
         )
-        self.neededModules = self.options.protoToModuleMappings
+        self.neededModules =
+            self.options.protoToModuleMappings
             .neededModules(forFile: descriptor) ?? []
         self.services = descriptor.services
         self.printer = SwiftProtobufPluginLibrary.CodePrinter(indent: "    ".unicodeScalars)
@@ -151,9 +152,9 @@ extension Generator: SwiftProtobufPluginLibrary.CodeGenerator {
         return minEdition...maxEdition
     }
 
-    public var supportedFeatures: [
-        SwiftProtobufPluginLibrary.Google_Protobuf_Compiler_CodeGeneratorResponse.Feature
-    ] {
+    public var supportedFeatures:
+        [SwiftProtobufPluginLibrary.Google_Protobuf_Compiler_CodeGeneratorResponse.Feature]
+    {
         return [
             .proto3Optional,
             .supportsEditions,

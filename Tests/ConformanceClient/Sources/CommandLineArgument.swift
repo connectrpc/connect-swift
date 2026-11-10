@@ -52,11 +52,14 @@ extension CommandLineArgument where RawValue == String {
             throw "'\(self.key)' argument must be specified"
         }
 
-        guard let argumentValue = self.init(
-            rawValue: argument
-                .replacingOccurrences(of: "\(self.key)=", with: "")
-                .trimmingCharacters(in: .whitespaces)
-        ) else {
+        guard
+            let argumentValue = self.init(
+                rawValue:
+                    argument
+                    .replacingOccurrences(of: "\(self.key)=", with: "")
+                    .trimmingCharacters(in: .whitespaces)
+            )
+        else {
             throw """
             Invalid argument passed for '\(self.key)' argument. \
             Expected \(self.allCases.map(\.rawValue)), got '\(argument)'

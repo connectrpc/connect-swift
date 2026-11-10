@@ -18,6 +18,7 @@ LICENSE_IGNORE := -e Package.swift \
     -e Libraries/Connect/Internal/GeneratedSources\/ \
     -e Tests/ConformanceClient/GeneratedSources\/ \
     -e Tests/UnitTests/ConnectLibraryTests/GeneratedSources\/
+SWIFT_FORMAT_PATHS := Package.swift Examples Libraries Plugins Tests
 
 .PHONY: buildpackage
 buildpackage: ## Build all targets in the Swift package
@@ -42,6 +43,10 @@ cleangenerated: ## Delete all generated outputs
 	rm -rf ./Libraries/Connect/Internal/GeneratedSources/*
 	rm -rf ./Tests/ConformanceClient/GeneratedSources/*
 	rm -rf ./Tests/UnitTests/ConnectLibraryTests/GeneratedSources/*
+
+.PHONY: format
+format: ## Format Swift sources with swift-format
+	swift format format --in-place --parallel --recursive $(SWIFT_FORMAT_PATHS)
 
 .PHONY: generate
 generate: cleangenerated ## Regenerate outputs for all .proto files
@@ -73,6 +78,10 @@ licenseheaders: $(BIN)/license-headers ## Add/reformat license headers in source
 $(BIN)/license-headers: Makefile
 	mkdir -p $(@D)
 	GOBIN=$(abspath $(BIN)) go install github.com/bufbuild/buf/private/pkg/licenseheader/cmd/license-header@$(LICENSE_HEADER_VERSION)
+
+.PHONY: lintformat
+lintformat: ## Check that Swift sources are formatted with swift-format
+	swift format lint --strict --parallel --recursive $(SWIFT_FORMAT_PATHS)
 
 .PHONY: testconformance
 testconformance: ## Run all conformance tests

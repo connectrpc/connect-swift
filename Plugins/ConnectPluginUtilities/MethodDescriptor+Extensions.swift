@@ -21,8 +21,8 @@ extension MethodDescriptor {
 
     public func name(using options: GeneratorOptions) -> String {
         return options.keepMethodCasing
-        ? self.name
-        : NamingUtils.toLowerCamelCase(self.name)
+            ? self.name
+            : NamingUtils.toLowerCamelCase(self.name)
     }
 
     public func callbackSignature(
@@ -35,32 +35,33 @@ extension MethodDescriptor {
         // Note that the method name is escaped to avoid using Swift keywords.
         if self.clientStreaming && self.serverStreaming {
             return """
-            func `\(methodName)`\
-            (headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
-            onResult: @escaping @Sendable (Connect.StreamResult<\(outputName)>) -> Void) \
-            -> any Connect.BidirectionalStreamInterface<\(inputName)>
-            """
+                func `\(methodName)`\
+                (headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
+                onResult: @escaping @Sendable (Connect.StreamResult<\(outputName)>) -> Void) \
+                -> any Connect.BidirectionalStreamInterface<\(inputName)>
+                """
         } else if self.serverStreaming {
             return """
-            func `\(methodName)`\
-            (headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
-            onResult: @escaping @Sendable (Connect.StreamResult<\(outputName)>) -> Void) \
-            -> any Connect.ServerOnlyStreamInterface<\(inputName)>
-            """
+                func `\(methodName)`\
+                (headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
+                onResult: @escaping @Sendable (Connect.StreamResult<\(outputName)>) -> Void) \
+                -> any Connect.ServerOnlyStreamInterface<\(inputName)>
+                """
         } else if self.clientStreaming {
             return """
-            func `\(methodName)`\
-            (headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
-            onResult: @escaping @Sendable (Connect.StreamResult<\(outputName)>) -> Void) \
-            -> any Connect.ClientOnlyStreamInterface<\(inputName)>
-            """
+                func `\(methodName)`\
+                (headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
+                onResult: @escaping @Sendable (Connect.StreamResult<\(outputName)>) -> Void) \
+                -> any Connect.ClientOnlyStreamInterface<\(inputName)>
+                """
         } else {
             return """
-            func `\(methodName)`\
-            (request: \(inputName), headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
-            completion: @escaping @Sendable (ResponseMessage<\(outputName)>) -> Void) \
-            -> Connect.Cancelable
-            """
+                func `\(methodName)`\
+                (request: \(inputName), \
+                headers: Connect.Headers\(includeDefaults ? " = [:]" : ""), \
+                completion: @escaping @Sendable (ResponseMessage<\(outputName)>) -> Void) \
+                -> Connect.Cancelable
+                """
         }
     }
 
@@ -74,28 +75,29 @@ extension MethodDescriptor {
         // Note that the method name is escaped to avoid using Swift keywords.
         if self.clientStreaming && self.serverStreaming {
             return """
-            func `\(methodName)`\
-            (headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
-            -> any Connect.BidirectionalAsyncStreamInterface<\(inputName), \(outputName)>
-            """
+                func `\(methodName)`\
+                (headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
+                -> any Connect.BidirectionalAsyncStreamInterface<\(inputName), \(outputName)>
+                """
         } else if self.serverStreaming {
             return """
-            func `\(methodName)`\
-            (headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
-            -> any Connect.ServerOnlyAsyncStreamInterface<\(inputName), \(outputName)>
-            """
+                func `\(methodName)`\
+                (headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
+                -> any Connect.ServerOnlyAsyncStreamInterface<\(inputName), \(outputName)>
+                """
         } else if self.clientStreaming {
             return """
-            func `\(methodName)`\
-            (headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
-            -> any Connect.ClientOnlyAsyncStreamInterface<\(inputName), \(outputName)>
-            """
+                func `\(methodName)`\
+                (headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
+                -> any Connect.ClientOnlyAsyncStreamInterface<\(inputName), \(outputName)>
+                """
         } else {
             return """
-            func `\(methodName)`\
-            (request: \(inputName), headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
-            async -> ResponseMessage<\(outputName)>
-            """
+                func `\(methodName)`\
+                (request: \(inputName), \
+                headers: Connect.Headers\(includeDefaults ? " = [:]" : "")) \
+                async -> ResponseMessage<\(outputName)>
+                """
         }
     }
 }

@@ -50,7 +50,7 @@ extension GzipCompressionPool: CompressionPool {
             throw GzipError.failedToInitialize
         }
 
-        let chunkSize = 16_384 // Standard chunk size
+        let chunkSize = 16_384  // Standard chunk size
         var output = Data(capacity: chunkSize)
         repeat {
             if stream.total_out >= output.count {

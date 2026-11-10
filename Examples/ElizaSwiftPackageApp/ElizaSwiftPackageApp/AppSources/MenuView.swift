@@ -42,8 +42,8 @@ struct MenuView: View {
         let config = ProtocolClientConfig(
             host: host,
             networkProtocol: networkProtocol,
-            codec: ProtoCodec(), // Protobuf binary, or JSONCodec() for JSON
-            unaryGET: .disabled // Can enable to use cacheable unary HTTP GET requests
+            codec: ProtoCodec(),  // Protobuf binary, or JSONCodec() for JSON
+            unaryGET: .disabled  // Can enable to use cacheable unary HTTP GET requests
         )
         // For gRPC, use the NIO HTTP client:
         if case .custom = networkProtocol {
