@@ -18,84 +18,84 @@ import SwiftProtobuf
 import Testing
 
 struct JSONCodecTests {
-    private let message: Connectrpc_Conformance_V1_RawHTTPRequest = .with { proto in
-        proto.body = .unary(
-            Connectrpc_Conformance_V1_MessageContents.with { message in
-                message.binary = Data([0x0, 0x1, 0x2, 0x3])
-                message.compression = .gzip
-            })
-        proto.uri = "foo/bar"
-        proto.headers = [
-            .with { header in
-                header.name = "x-header"
-                header.value = ["a"]
-            }
-        ]
-        proto.rawQueryParams = [.init()]
-    }
+  private let message: Connectrpc_Conformance_V1_RawHTTPRequest = .with { proto in
+    proto.body = .unary(
+      Connectrpc_Conformance_V1_MessageContents.with { message in
+        message.binary = Data([0x0, 0x1, 0x2, 0x3])
+        message.compression = .gzip
+      })
+    proto.uri = "foo/bar"
+    proto.headers = [
+      .with { header in
+        header.name = "x-header"
+        header.value = ["a"]
+      }
+    ]
+    proto.rawQueryParams = [.init()]
+  }
 
-    @Test
-    func serializingAndDeserializingWithDefaultOptions() throws {
-        let codec = JSONCodec()
-        let serialized = try codec.serialize(message: self.message)
-        #expect(try codec.deserialize(source: serialized) == self.message)
-    }
+  @Test
+  func serializingAndDeserializingWithDefaultOptions() throws {
+    let codec = JSONCodec()
+    let serialized = try codec.serialize(message: self.message)
+    #expect(try codec.deserialize(source: serialized) == self.message)
+  }
 
-    @Test
-    func serializingAndDeserializingWithEnumsAsInts() throws {
-        let codec = JSONCodec(alwaysEncodeEnumsAsInts: true, preserveProtobufFieldNames: false)
-        let serialized = try codec.serialize(message: self.message)
-        let dictionary = try #require(
-            try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
-        )
-        #expect((dictionary["unary"] as? [String: Any])?["compression"] as? Int == 2)
-        #expect(try codec.deserialize(source: serialized) == self.message)
-    }
+  @Test
+  func serializingAndDeserializingWithEnumsAsInts() throws {
+    let codec = JSONCodec(alwaysEncodeEnumsAsInts: true, preserveProtobufFieldNames: false)
+    let serialized = try codec.serialize(message: self.message)
+    let dictionary = try #require(
+      try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
+    )
+    #expect((dictionary["unary"] as? [String: Any])?["compression"] as? Int == 2)
+    #expect(try codec.deserialize(source: serialized) == self.message)
+  }
 
-    @Test
-    func serializingAndDeserializingWithEnumsAsStrings() throws {
-        let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: false)
-        let serialized = try codec.serialize(message: self.message)
-        let dictionary = try #require(
-            try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
-        )
-        #expect(
-            (dictionary["unary"] as? [String: Any])?["compression"] as? String == "COMPRESSION_GZIP"
-        )
-        #expect(try codec.deserialize(source: serialized) == self.message)
-    }
+  @Test
+  func serializingAndDeserializingWithEnumsAsStrings() throws {
+    let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: false)
+    let serialized = try codec.serialize(message: self.message)
+    let dictionary = try #require(
+      try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
+    )
+    #expect(
+      (dictionary["unary"] as? [String: Any])?["compression"] as? String == "COMPRESSION_GZIP"
+    )
+    #expect(try codec.deserialize(source: serialized) == self.message)
+  }
 
-    @Test
-    func serializingAndDeserializingWithProtobufFieldNames() throws {
-        let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: true)
-        let serialized = try codec.serialize(message: self.message)
-        let dictionary = try #require(
-            try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
-        )
-        #expect(
-            Set(dictionary.keys).isSuperset(of: [
-                "headers",
-                "unary",
-                "uri",
-                "raw_query_params",
-            ]))
-        #expect(try codec.deserialize(source: serialized) == self.message)
-    }
+  @Test
+  func serializingAndDeserializingWithProtobufFieldNames() throws {
+    let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: true)
+    let serialized = try codec.serialize(message: self.message)
+    let dictionary = try #require(
+      try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
+    )
+    #expect(
+      Set(dictionary.keys).isSuperset(of: [
+        "headers",
+        "unary",
+        "uri",
+        "raw_query_params",
+      ]))
+    #expect(try codec.deserialize(source: serialized) == self.message)
+  }
 
-    @Test
-    func serializingAndDeserializingWithCamelCaseFieldNames() throws {
-        let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: false)
-        let serialized = try codec.serialize(message: self.message)
-        let dictionary = try #require(
-            try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
-        )
-        #expect(
-            Set(dictionary.keys).isSuperset(of: [
-                "headers",
-                "unary",
-                "uri",
-                "rawQueryParams",
-            ]))
-        #expect(try codec.deserialize(source: serialized) == self.message)
-    }
+  @Test
+  func serializingAndDeserializingWithCamelCaseFieldNames() throws {
+    let codec = JSONCodec(alwaysEncodeEnumsAsInts: false, preserveProtobufFieldNames: false)
+    let serialized = try codec.serialize(message: self.message)
+    let dictionary = try #require(
+      try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
+    )
+    #expect(
+      Set(dictionary.keys).isSuperset(of: [
+        "headers",
+        "unary",
+        "uri",
+        "rawQueryParams",
+      ]))
+    #expect(try codec.deserialize(source: serialized) == self.message)
+  }
 }

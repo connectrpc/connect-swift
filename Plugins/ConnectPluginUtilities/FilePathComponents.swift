@@ -14,46 +14,46 @@
 
 /// Used to split a file path into its specific components.
 public struct FilePathComponents {
-    /// Example: "/foo/bar" from a "/foo/bar/baz.proto" file path.
-    let directory: String
-    /// Example: "baz" from a "/foo/bar/baz.proto" file path.
-    let base: String
-    /// Example: ".proto" from a "/foo/bar/baz.proto" file path.
-    let suffix: String
+  /// Example: "/foo/bar" from a "/foo/bar/baz.proto" file path.
+  let directory: String
+  /// Example: "baz" from a "/foo/bar/baz.proto" file path.
+  let base: String
+  /// Example: ".proto" from a "/foo/bar/baz.proto" file path.
+  let suffix: String
 
-    /// Parse the path components from a file path.
-    ///
-    /// - parameter path: For example, "/foo/bar/baz.proto" or "foo/bar/baz.proto".
-    public init(path: String) {
-        let allComponents = path.components(separatedBy: "/")
-        let fileNameComponents = allComponents.last!.split(separator: ".")
-        self.directory = allComponents.dropLast().joined(separator: "/")
-        self.base = fileNameComponents.dropLast().joined(separator: ".")
-        self.suffix = fileNameComponents.count > 1 ? "." + fileNameComponents.last! : ""
+  /// Parse the path components from a file path.
+  ///
+  /// - parameter path: For example, "/foo/bar/baz.proto" or "foo/bar/baz.proto".
+  public init(path: String) {
+    let allComponents = path.components(separatedBy: "/")
+    let fileNameComponents = allComponents.last!.split(separator: ".")
+    self.directory = allComponents.dropLast().joined(separator: "/")
+    self.base = fileNameComponents.dropLast().joined(separator: ".")
+    self.suffix = fileNameComponents.count > 1 ? "." + fileNameComponents.last! : ""
+  }
+
+  public func outputFilePath(
+    withExtension pathExtension: String,
+    using option: GeneratorOptions.FileNaming
+  ) -> String {
+    if self.directory.isEmpty {
+      return "\(self.base)\(pathExtension)"
     }
 
-    public func outputFilePath(
-        withExtension pathExtension: String,
-        using option: GeneratorOptions.FileNaming
-    ) -> String {
-        if self.directory.isEmpty {
-            return "\(self.base)\(pathExtension)"
-        }
+    switch option {
+    case .dropPath:
+      return "\(self.base)\(pathExtension)"
 
-        switch option {
-        case .dropPath:
-            return "\(self.base)\(pathExtension)"
+    case .fullPath:
+      return "\(self.directory)/\(self.base)\(pathExtension)"
 
-        case .fullPath:
-            return "\(self.directory)/\(self.base)\(pathExtension)"
-
-        case .pathToUnderscores:
-            let underscoredDirectory = self.directory.replacingOccurrences(of: "/", with: "_")
-            if underscoredDirectory.hasPrefix("_") {
-                return "\(underscoredDirectory.dropFirst())_\(self.base)\(pathExtension)"
-            } else {
-                return "\(underscoredDirectory)_\(self.base)\(pathExtension)"
-            }
-        }
+    case .pathToUnderscores:
+      let underscoredDirectory = self.directory.replacingOccurrences(of: "/", with: "_")
+      if underscoredDirectory.hasPrefix("_") {
+        return "\(underscoredDirectory.dropFirst())_\(self.base)\(pathExtension)"
+      } else {
+        return "\(underscoredDirectory)_\(self.base)\(pathExtension)"
+      }
     }
+  }
 }

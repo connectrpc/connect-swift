@@ -17,37 +17,37 @@ import Foundation
 import Testing
 
 struct ConnectEndStreamResponseTests {
-    @Test
-    func lowercasesAllHeaderKeys() throws {
-        let dictionary = [
-            "metadata": [
-                "sOmEkEy": ["foo"],
-                "otherKey1": ["BAR", "bAz"],
-            ]
-        ]
-        let data = try JSONSerialization.data(withJSONObject: dictionary)
-        let response = try JSONDecoder().decode(ConnectEndStreamResponse.self, from: data)
-        #expect(response.error == nil)
-        #expect(response.metadata == ["somekey": ["foo"], "otherkey1": ["BAR", "bAz"]])
-    }
+  @Test
+  func lowercasesAllHeaderKeys() throws {
+    let dictionary = [
+      "metadata": [
+        "sOmEkEy": ["foo"],
+        "otherKey1": ["BAR", "bAz"],
+      ]
+    ]
+    let data = try JSONSerialization.data(withJSONObject: dictionary)
+    let response = try JSONDecoder().decode(ConnectEndStreamResponse.self, from: data)
+    #expect(response.error == nil)
+    #expect(response.metadata == ["somekey": ["foo"], "otherkey1": ["BAR", "bAz"]])
+  }
 
-    @Test
-    func allowsOmittedErrorAndMetadata() throws {
-        let data = try JSONSerialization.data(withJSONObject: [String: Any]())
-        let response = try JSONDecoder().decode(ConnectEndStreamResponse.self, from: data)
-        #expect(response.error == nil)
-        #expect(response.metadata == nil)
-    }
+  @Test
+  func allowsOmittedErrorAndMetadata() throws {
+    let data = try JSONSerialization.data(withJSONObject: [String: Any]())
+    let response = try JSONDecoder().decode(ConnectEndStreamResponse.self, from: data)
+    #expect(response.error == nil)
+    #expect(response.metadata == nil)
+  }
 
-    @Test
-    func deserializesError() throws {
-        let dictionary = [
-            "error": [
-                "code": "permission_denied"
-            ]
-        ]
-        let data = try JSONSerialization.data(withJSONObject: dictionary)
-        let response = try JSONDecoder().decode(ConnectEndStreamResponse.self, from: data)
-        #expect(response.error?.code == .permissionDenied)
-    }
+  @Test
+  func deserializesError() throws {
+    let dictionary = [
+      "error": [
+        "code": "permission_denied"
+      ]
+    ]
+    let data = try JSONSerialization.data(withJSONObject: dictionary)
+    let response = try JSONDecoder().decode(ConnectEndStreamResponse.self, from: data)
+    #expect(response.error?.code == .permissionDenied)
+  }
 }

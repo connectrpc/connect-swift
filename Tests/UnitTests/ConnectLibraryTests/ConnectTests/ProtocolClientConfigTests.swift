@@ -21,295 +21,295 @@ private final class NoopInterceptor1: UnaryInterceptor, StreamInterceptor {}
 private final class NoopInterceptor2: UnaryInterceptor, StreamInterceptor {}
 
 struct ProtocolClientConfigTests {
-    @Test
-    func defaultResponseCompressionPoolIncludesGzip() {
-        let config = ProtocolClientConfig(host: "https://connectrpc.com")
-        #expect(config.responseCompressionPools[0] is GzipCompressionPool)
-        #expect(config.acceptCompressionPoolNames() == ["gzip"])
-    }
+  @Test
+  func defaultResponseCompressionPoolIncludesGzip() {
+    let config = ProtocolClientConfig(host: "https://connectrpc.com")
+    #expect(config.responseCompressionPools[0] is GzipCompressionPool)
+    #expect(config.acceptCompressionPoolNames() == ["gzip"])
+  }
 
-    @Test
-    func shouldCompressDataLargerThanMinBytes() {
-        let data = Data(repeating: 0xa, count: 50)
-        let compression = ProtocolClientConfig.RequestCompression(
-            minBytes: 10, pool: GzipCompressionPool()
-        )
-        #expect(compression.shouldCompress(data))
-    }
+  @Test
+  func shouldCompressDataLargerThanMinBytes() {
+    let data = Data(repeating: 0xa, count: 50)
+    let compression = ProtocolClientConfig.RequestCompression(
+      minBytes: 10, pool: GzipCompressionPool()
+    )
+    #expect(compression.shouldCompress(data))
+  }
 
-    @Test
-    func shouldNotCompressDataSmallerThanMinBytes() {
-        let data = Data(repeating: 0xa, count: 50)
-        let compression = ProtocolClientConfig.RequestCompression(
-            minBytes: 100, pool: GzipCompressionPool()
-        )
-        #expect(compression.shouldCompress(data) == false)
-    }
+  @Test
+  func shouldNotCompressDataSmallerThanMinBytes() {
+    let data = Data(repeating: 0xa, count: 50)
+    let compression = ProtocolClientConfig.RequestCompression(
+      minBytes: 100, pool: GzipCompressionPool()
+    )
+    #expect(compression.shouldCompress(data) == false)
+  }
 
-    @Test
-    func creatingURLsWithVariousHosts() {
-        let rpcPath = Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.unary.path
+  @Test
+  func creatingURLsWithVariousHosts() {
+    let rpcPath = Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.unary.path
 
-        #expect(
-            ProtocolClientConfig(host: "https://connectrpc.com")
-                .createURL(forPath: rpcPath).absoluteString
-                == "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
-        )
-        #expect(
-            ProtocolClientConfig(host: "https://connectrpc.com/")
-                .createURL(forPath: rpcPath).absoluteString
-                == "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
-        )
-        #expect(
-            ProtocolClientConfig(host: "https://connectrpc.com/a")
-                .createURL(forPath: rpcPath).absoluteString
-                == "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
-        )
-        #expect(
-            ProtocolClientConfig(host: "https://connectrpc.com/a/")
-                .createURL(forPath: rpcPath).absoluteString
-                == "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
-        )
-        #expect(
-            ProtocolClientConfig(host: "https://connectrpc.com/a/b/c")
-                .createURL(forPath: rpcPath).absoluteString
-                == "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
-        )
-        #expect(
-            ProtocolClientConfig(host: "https://connectrpc.com/a/b/c/")
-                .createURL(forPath: rpcPath).absoluteString
-                == "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
-        )
-        #expect(
-            ProtocolClientConfig(host: "connectrpc.com/a/b/c")
-                .createURL(forPath: rpcPath).absoluteString
-                == "connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
-        )
-    }
+    #expect(
+      ProtocolClientConfig(host: "https://connectrpc.com")
+        .createURL(forPath: rpcPath).absoluteString
+        == "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
+    )
+    #expect(
+      ProtocolClientConfig(host: "https://connectrpc.com/")
+        .createURL(forPath: rpcPath).absoluteString
+        == "https://connectrpc.com/connectrpc.conformance.v1.ConformanceService/Unary"
+    )
+    #expect(
+      ProtocolClientConfig(host: "https://connectrpc.com/a")
+        .createURL(forPath: rpcPath).absoluteString
+        == "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
+    )
+    #expect(
+      ProtocolClientConfig(host: "https://connectrpc.com/a/")
+        .createURL(forPath: rpcPath).absoluteString
+        == "https://connectrpc.com/a/connectrpc.conformance.v1.ConformanceService/Unary"
+    )
+    #expect(
+      ProtocolClientConfig(host: "https://connectrpc.com/a/b/c")
+        .createURL(forPath: rpcPath).absoluteString
+        == "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
+    )
+    #expect(
+      ProtocolClientConfig(host: "https://connectrpc.com/a/b/c/")
+        .createURL(forPath: rpcPath).absoluteString
+        == "https://connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
+    )
+    #expect(
+      ProtocolClientConfig(host: "connectrpc.com/a/b/c")
+        .createURL(forPath: rpcPath).absoluteString
+        == "connectrpc.com/a/b/c/connectrpc.conformance.v1.ConformanceService/Unary"
+    )
+  }
 
-    @Test
-    func addsConnectInterceptorLastWhenUsingConnectProtocol() {
-        let config = ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            interceptors: [InterceptorFactory { _ in NoopInterceptor1() }]
-        )
-        #expect(config.interceptors[0].createUnary(with: config) is NoopInterceptor1)
-        #expect(config.interceptors[1].createUnary(with: config) is ConnectInterceptor)
-        #expect(config.interceptors[0].createStream(with: config) is NoopInterceptor1)
-        #expect(config.interceptors[1].createStream(with: config) is ConnectInterceptor)
-    }
+  @Test
+  func addsConnectInterceptorLastWhenUsingConnectProtocol() {
+    let config = ProtocolClientConfig(
+      host: "https://connectrpc.com",
+      networkProtocol: .connect,
+      interceptors: [InterceptorFactory { _ in NoopInterceptor1() }]
+    )
+    #expect(config.interceptors[0].createUnary(with: config) is NoopInterceptor1)
+    #expect(config.interceptors[1].createUnary(with: config) is ConnectInterceptor)
+    #expect(config.interceptors[0].createStream(with: config) is NoopInterceptor1)
+    #expect(config.interceptors[1].createStream(with: config) is ConnectInterceptor)
+  }
 
-    @Test
-    func addsGRPCWebInterceptorLastWhenUsingGRPCWebProtocol() {
-        let config = ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .grpcWeb,
-            interceptors: [InterceptorFactory { _ in NoopInterceptor1() }]
-        )
-        #expect(config.interceptors[0].createUnary(with: config) is NoopInterceptor1)
-        #expect(config.interceptors[1].createUnary(with: config) is GRPCWebInterceptor)
-        #expect(config.interceptors[0].createStream(with: config) is NoopInterceptor1)
-        #expect(config.interceptors[1].createStream(with: config) is GRPCWebInterceptor)
-    }
+  @Test
+  func addsGRPCWebInterceptorLastWhenUsingGRPCWebProtocol() {
+    let config = ProtocolClientConfig(
+      host: "https://connectrpc.com",
+      networkProtocol: .grpcWeb,
+      interceptors: [InterceptorFactory { _ in NoopInterceptor1() }]
+    )
+    #expect(config.interceptors[0].createUnary(with: config) is NoopInterceptor1)
+    #expect(config.interceptors[1].createUnary(with: config) is GRPCWebInterceptor)
+    #expect(config.interceptors[0].createStream(with: config) is NoopInterceptor1)
+    #expect(config.interceptors[1].createStream(with: config) is GRPCWebInterceptor)
+  }
 
-    @Test
-    func addsProtocolInterceptorLastWhenUsingOtherProtocol() {
-        let config = ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .custom(
-                name: "custom", protocolInterceptor: InterceptorFactory { _ in NoopInterceptor2() }
-            ),
-            interceptors: [InterceptorFactory { _ in NoopInterceptor1() }]
-        )
-        #expect(config.interceptors[0].createUnary(with: config) is NoopInterceptor1)
-        #expect(config.interceptors[1].createUnary(with: config) is NoopInterceptor2)
-        #expect(config.interceptors[0].createStream(with: config) is NoopInterceptor1)
-        #expect(config.interceptors[1].createStream(with: config) is NoopInterceptor2)
-    }
+  @Test
+  func addsProtocolInterceptorLastWhenUsingOtherProtocol() {
+    let config = ProtocolClientConfig(
+      host: "https://connectrpc.com",
+      networkProtocol: .custom(
+        name: "custom", protocolInterceptor: InterceptorFactory { _ in NoopInterceptor2() }
+      ),
+      interceptors: [InterceptorFactory { _ in NoopInterceptor1() }]
+    )
+    #expect(config.interceptors[0].createUnary(with: config) is NoopInterceptor1)
+    #expect(config.interceptors[1].createUnary(with: config) is NoopInterceptor2)
+    #expect(config.interceptors[0].createStream(with: config) is NoopInterceptor1)
+    #expect(config.interceptors[1].createStream(with: config) is NoopInterceptor2)
+  }
 
-    @Test
-    func unaryGETRequestWithNoSideEffects() {
-        let request = HTTPRequest<Data?>(
-            url: URL(string: "https://connectrpc.com")!,
-            headers: Headers(),
-            message: Data([0x0, 0x1, 0x2]),
-            method: .post,
-            trailers: nil,
-            idempotencyLevel: .noSideEffects
-        )
-        #expect(
-            ProtocolClientConfig(
-                host: "https://connectrpc.com",
-                networkProtocol: .connect,
-                unaryGET: .alwaysEnabled
-            ).shouldUseUnaryGET(for: request))
-        #expect(
-            ProtocolClientConfig(
-                host: "https://connectrpc.com",
-                networkProtocol: .connect,
-                unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
-            ).shouldUseUnaryGET(for: request))
-        #expect(
-            ProtocolClientConfig(
-                host: "https://connectrpc.com",
-                networkProtocol: .connect,
-                unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
-            ).shouldUseUnaryGET(for: request) == false)
-        #expect(
-            ProtocolClientConfig(
-                host: "https://connectrpc.com",
-                networkProtocol: .connect,
-                unaryGET: .disabled
-            ).shouldUseUnaryGET(for: request) == false)
-    }
+  @Test
+  func unaryGETRequestWithNoSideEffects() {
+    let request = HTTPRequest<Data?>(
+      url: URL(string: "https://connectrpc.com")!,
+      headers: Headers(),
+      message: Data([0x0, 0x1, 0x2]),
+      method: .post,
+      trailers: nil,
+      idempotencyLevel: .noSideEffects
+    )
+    #expect(
+      ProtocolClientConfig(
+        host: "https://connectrpc.com",
+        networkProtocol: .connect,
+        unaryGET: .alwaysEnabled
+      ).shouldUseUnaryGET(for: request))
+    #expect(
+      ProtocolClientConfig(
+        host: "https://connectrpc.com",
+        networkProtocol: .connect,
+        unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
+      ).shouldUseUnaryGET(for: request))
+    #expect(
+      ProtocolClientConfig(
+        host: "https://connectrpc.com",
+        networkProtocol: .connect,
+        unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
+      ).shouldUseUnaryGET(for: request) == false)
+    #expect(
+      ProtocolClientConfig(
+        host: "https://connectrpc.com",
+        networkProtocol: .connect,
+        unaryGET: .disabled
+      ).shouldUseUnaryGET(for: request) == false)
+  }
 
-    @Test
-    func unaryGETRequestWithIdempotentSideEffects() {
-        let request = HTTPRequest<Data?>(
-            url: URL(string: "https://connectrpc.com")!,
-            headers: Headers(),
-            message: Data([0x0, 0x1, 0x2]),
-            method: .post,
-            trailers: nil,
-            idempotencyLevel: .idempotent
-        )
-        #expect(
-            ProtocolClientConfig(
-                host: "https://connectrpc.com",
-                networkProtocol: .connect,
-                unaryGET: .alwaysEnabled
-            ).shouldUseUnaryGET(for: request) == false)
-        #expect(
-            ProtocolClientConfig(
-                host: "https://connectrpc.com",
-                networkProtocol: .connect,
-                unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
-            ).shouldUseUnaryGET(for: request) == false)
-        #expect(
-            ProtocolClientConfig(
-                host: "https://connectrpc.com",
-                networkProtocol: .connect,
-                unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
-            ).shouldUseUnaryGET(for: request) == false)
-        #expect(
-            ProtocolClientConfig(
-                host: "https://connectrpc.com",
-                networkProtocol: .connect,
-                unaryGET: .disabled
-            ).shouldUseUnaryGET(for: request) == false)
-    }
+  @Test
+  func unaryGETRequestWithIdempotentSideEffects() {
+    let request = HTTPRequest<Data?>(
+      url: URL(string: "https://connectrpc.com")!,
+      headers: Headers(),
+      message: Data([0x0, 0x1, 0x2]),
+      method: .post,
+      trailers: nil,
+      idempotencyLevel: .idempotent
+    )
+    #expect(
+      ProtocolClientConfig(
+        host: "https://connectrpc.com",
+        networkProtocol: .connect,
+        unaryGET: .alwaysEnabled
+      ).shouldUseUnaryGET(for: request) == false)
+    #expect(
+      ProtocolClientConfig(
+        host: "https://connectrpc.com",
+        networkProtocol: .connect,
+        unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
+      ).shouldUseUnaryGET(for: request) == false)
+    #expect(
+      ProtocolClientConfig(
+        host: "https://connectrpc.com",
+        networkProtocol: .connect,
+        unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
+      ).shouldUseUnaryGET(for: request) == false)
+    #expect(
+      ProtocolClientConfig(
+        host: "https://connectrpc.com",
+        networkProtocol: .connect,
+        unaryGET: .disabled
+      ).shouldUseUnaryGET(for: request) == false)
+  }
 
-    @Test
-    func unaryGETRequestWithUnknownSideEffects() {
-        let request = HTTPRequest<Data?>(
-            url: URL(string: "https://connectrpc.com")!,
-            headers: Headers(),
-            message: Data([0x0, 0x1, 0x2]),
-            method: .post,
-            trailers: nil,
-            idempotencyLevel: .unknown
-        )
-        #expect(
-            ProtocolClientConfig(
-                host: "https://connectrpc.com",
-                networkProtocol: .connect,
-                unaryGET: .alwaysEnabled
-            ).shouldUseUnaryGET(for: request) == false)
-        #expect(
-            ProtocolClientConfig(
-                host: "https://connectrpc.com",
-                networkProtocol: .connect,
-                unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
-            ).shouldUseUnaryGET(for: request) == false)
-        #expect(
-            ProtocolClientConfig(
-                host: "https://connectrpc.com",
-                networkProtocol: .connect,
-                unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
-            ).shouldUseUnaryGET(for: request) == false)
-        #expect(
-            ProtocolClientConfig(
-                host: "https://connectrpc.com",
-                networkProtocol: .connect,
-                unaryGET: .disabled
-            ).shouldUseUnaryGET(for: request) == false)
-    }
+  @Test
+  func unaryGETRequestWithUnknownSideEffects() {
+    let request = HTTPRequest<Data?>(
+      url: URL(string: "https://connectrpc.com")!,
+      headers: Headers(),
+      message: Data([0x0, 0x1, 0x2]),
+      method: .post,
+      trailers: nil,
+      idempotencyLevel: .unknown
+    )
+    #expect(
+      ProtocolClientConfig(
+        host: "https://connectrpc.com",
+        networkProtocol: .connect,
+        unaryGET: .alwaysEnabled
+      ).shouldUseUnaryGET(for: request) == false)
+    #expect(
+      ProtocolClientConfig(
+        host: "https://connectrpc.com",
+        networkProtocol: .connect,
+        unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 100)
+      ).shouldUseUnaryGET(for: request) == false)
+    #expect(
+      ProtocolClientConfig(
+        host: "https://connectrpc.com",
+        networkProtocol: .connect,
+        unaryGET: .enabledForLimitedPayloadSizes(maxBytes: 2)
+      ).shouldUseUnaryGET(for: request) == false)
+    #expect(
+      ProtocolClientConfig(
+        host: "https://connectrpc.com",
+        networkProtocol: .connect,
+        unaryGET: .disabled
+      ).shouldUseUnaryGET(for: request) == false)
+  }
 
-    @Test
-    func transformToGETWithoutRequestCompression() {
-        let request = HTTPRequest<Data?>(
-            url: URL(string: "https://connectrpc.com")!,
-            headers: Headers(),
-            message: Data([0x0, 0x1, 0x2]),
-            method: .post,
-            trailers: nil,
-            idempotencyLevel: .noSideEffects
-        )
+  @Test
+  func transformToGETWithoutRequestCompression() {
+    let request = HTTPRequest<Data?>(
+      url: URL(string: "https://connectrpc.com")!,
+      headers: Headers(),
+      message: Data([0x0, 0x1, 0x2]),
+      method: .post,
+      trailers: nil,
+      idempotencyLevel: .noSideEffects
+    )
 
-        let config = ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .alwaysEnabled
-        )
+    let config = ProtocolClientConfig(
+      host: "https://connectrpc.com",
+      networkProtocol: .connect,
+      unaryGET: .alwaysEnabled
+    )
 
-        let requestWithoutCompression = config.transformToGETIfNeeded(request)
+    let requestWithoutCompression = config.transformToGETIfNeeded(request)
 
-        #expect(requestWithoutCompression.method == .get)
-        #expect(
-            requestWithoutCompression.url.absoluteString
-                == "https://connectrpc.com?connect=v1&base64=1&encoding=json&message=AAEC"
-        )
-    }
+    #expect(requestWithoutCompression.method == .get)
+    #expect(
+      requestWithoutCompression.url.absoluteString
+        == "https://connectrpc.com?connect=v1&base64=1&encoding=json&message=AAEC"
+    )
+  }
 
-    @Test
-    func transformToGETUsesURLSafeBase64() {
-        // Data bytes [0x3E, 0x3F, 0xBF, 0xFF] produce "+P+//w==" in standard base64
-        // and "Pj-_vw" in raw URL-safe base64 (RFC 4648 §5)
-        let request = HTTPRequest<Data?>(
-            url: URL(string: "https://connectrpc.com")!,
-            headers: Headers(),
-            message: Data([0x3E, 0x3F, 0xBF, 0xFF]),
-            method: .post,
-            trailers: nil,
-            idempotencyLevel: .noSideEffects
-        )
-        let config = ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .alwaysEnabled
-        )
-        let getRequest = config.transformToGETIfNeeded(request)
-        let url = getRequest.url.absoluteString
-        // Must NOT contain + or / (standard base64 chars)
-        #expect(url.contains("+") == false, "URL must use URL-safe base64, not standard base64")
-        #expect(url.contains("/message/") == false, "URL must use URL-safe base64")
-        // Must contain the URL-safe base64 encoded message
-        #expect(url.contains("message=Pj-__w"), "Expected raw URL-safe base64 encoding")
-    }
+  @Test
+  func transformToGETUsesURLSafeBase64() {
+    // Data bytes [0x3E, 0x3F, 0xBF, 0xFF] produce "+P+//w==" in standard base64
+    // and "Pj-_vw" in raw URL-safe base64 (RFC 4648 §5)
+    let request = HTTPRequest<Data?>(
+      url: URL(string: "https://connectrpc.com")!,
+      headers: Headers(),
+      message: Data([0x3E, 0x3F, 0xBF, 0xFF]),
+      method: .post,
+      trailers: nil,
+      idempotencyLevel: .noSideEffects
+    )
+    let config = ProtocolClientConfig(
+      host: "https://connectrpc.com",
+      networkProtocol: .connect,
+      unaryGET: .alwaysEnabled
+    )
+    let getRequest = config.transformToGETIfNeeded(request)
+    let url = getRequest.url.absoluteString
+    // Must NOT contain + or / (standard base64 chars)
+    #expect(url.contains("+") == false, "URL must use URL-safe base64, not standard base64")
+    #expect(url.contains("/message/") == false, "URL must use URL-safe base64")
+    // Must contain the URL-safe base64 encoded message
+    #expect(url.contains("message=Pj-__w"), "Expected raw URL-safe base64 encoding")
+  }
 
-    @Test
-    func transformToGETWithRequestCompression() {
-        let compressedRequest = HTTPRequest<Data?>(
-            url: URL(string: "https://connectrpc.com")!,
-            headers: [HeaderConstants.contentEncoding: ["gzip"]],  // mimics inceptor behavior
-            message: Data([0x0, 0x1, 0x2]),
-            method: .post,
-            trailers: nil,
-            idempotencyLevel: .noSideEffects
-        )
+  @Test
+  func transformToGETWithRequestCompression() {
+    let compressedRequest = HTTPRequest<Data?>(
+      url: URL(string: "https://connectrpc.com")!,
+      headers: [HeaderConstants.contentEncoding: ["gzip"]],  // mimics inceptor behavior
+      message: Data([0x0, 0x1, 0x2]),
+      method: .post,
+      trailers: nil,
+      idempotencyLevel: .noSideEffects
+    )
 
-        let config = ProtocolClientConfig(
-            host: "https://connectrpc.com",
-            networkProtocol: .connect,
-            unaryGET: .alwaysEnabled
-        )
+    let config = ProtocolClientConfig(
+      host: "https://connectrpc.com",
+      networkProtocol: .connect,
+      unaryGET: .alwaysEnabled
+    )
 
-        let requestWithCompression = config.transformToGETIfNeeded(compressedRequest)
+    let requestWithCompression = config.transformToGETIfNeeded(compressedRequest)
 
-        #expect(requestWithCompression.method == .get)
-        let expectedURL =
-            "https://connectrpc.com?connect=v1&base64=1&compression=gzip&encoding=json&message=AAEC"
-        #expect(requestWithCompression.url.absoluteString == expectedURL)
-    }
+    #expect(requestWithCompression.method == .get)
+    let expectedURL =
+      "https://connectrpc.com?connect=v1&base64=1&compression=gzip&encoding=json&message=AAEC"
+    #expect(requestWithCompression.url.absoluteString == expectedURL)
+  }
 }

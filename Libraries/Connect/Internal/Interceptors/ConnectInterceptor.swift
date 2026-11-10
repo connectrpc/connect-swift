@@ -17,304 +17,303 @@ import Foundation
 /// Implementation of the Connect protocol as an interceptor.
 /// https://connectrpc.com/docs/protocol
 final class ConnectInterceptor: Interceptor {
-    private let config: ProtocolClientConfig
-    private let streamResponseHeaders = Locked<Headers?>(nil)
+  private let config: ProtocolClientConfig
+  private let streamResponseHeaders = Locked<Headers?>(nil)
 
-    fileprivate static let protocolVersion = "1"
+  fileprivate static let protocolVersion = "1"
 
-    init(config: ProtocolClientConfig) {
-        self.config = config
-    }
+  init(config: ProtocolClientConfig) {
+    self.config = config
+  }
 }
 
 extension ConnectInterceptor: UnaryInterceptor {
-    @Sendable
-    func handleUnaryRawRequest(
-        _ request: HTTPRequest<Data?>,
-        proceed: @escaping (Result<HTTPRequest<Data?>, ConnectError>) -> Void
-    ) {
-        var headers = request.headers
-        headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
-        headers[HeaderConstants.acceptEncoding] = self.config.acceptCompressionPoolNames()
-        if let timeout = self.config.timeout {
-            headers[HeaderConstants.connectTimeoutMs] = ["\(Int(timeout * 1_000))"]
-        }
-
-        let requestBody = request.message ?? Data()
-        let finalRequestBody: Data
-        if let compression = self.config.requestCompression,
-            compression.shouldCompress(requestBody)
-        {
-            do {
-                finalRequestBody = try compression.pool.compress(data: requestBody)
-                headers[HeaderConstants.contentEncoding] = [compression.pool.name()]
-            } catch {
-                finalRequestBody = requestBody
-            }
-        } else {
-            finalRequestBody = requestBody
-        }
-
-        proceed(
-            .success(
-                self.config.transformToGETIfNeeded(
-                    HTTPRequest(
-                        url: request.url,
-                        headers: headers,
-                        message: finalRequestBody,
-                        method: request.method,
-                        trailers: nil,
-                        idempotencyLevel: request.idempotencyLevel
-                    ))))
+  @Sendable
+  func handleUnaryRawRequest(
+    _ request: HTTPRequest<Data?>,
+    proceed: @escaping (Result<HTTPRequest<Data?>, ConnectError>) -> Void
+  ) {
+    var headers = request.headers
+    headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
+    headers[HeaderConstants.acceptEncoding] = self.config.acceptCompressionPoolNames()
+    if let timeout = self.config.timeout {
+      headers[HeaderConstants.connectTimeoutMs] = ["\(Int(timeout * 1_000))"]
     }
 
-    @Sendable
-    func handleUnaryRawResponse(
-        _ response: HTTPResponse,
-        proceed: @escaping (HTTPResponse) -> Void
-    ) {
-        let trailerPrefix = "trailer-"
-        let headers = response.headers.filter { header in
-            return header.key != HeaderConstants.contentEncoding
-                && !header.key.hasPrefix(trailerPrefix)
-        }
-        let trailers = response.headers
-            .filter { $0.key.hasPrefix(trailerPrefix) }
-            .reduce(
-                into: Trailers(),
-                { trailers, current in
-                    trailers[
-                        String(current.key.dropFirst(trailerPrefix.count))
-                    ] = current.value
-                })
-
-        let finalResponse: HTTPResponse
-        let contentType = response.headers[HeaderConstants.contentType]?.first ?? ""
-        if response.code == .ok && !contentType.hasPrefix("application/\(self.config.codec.name())")
-        {
-            // If content-type looks like it could be an RPC server's response, consider
-            // this an internal error.
-            let code: Code = contentType.hasPrefix("application/") ? .internalError : .unknown
-            finalResponse = HTTPResponse(
-                code: code, headers: headers, message: nil, trailers: trailers,
-                error: ConnectError(code: code, message: "unexpected content-type: \(contentType)"),
-                tracingInfo: response.tracingInfo
-            )
-        } else if let encoding = response.headers[HeaderConstants.contentEncoding]?.first {
-            if let compressionPool = self.config.responseCompressionPool(forName: encoding),
-                let message = response.message.flatMap({ try? compressionPool.decompress(data: $0) }
-                )
-            {
-                finalResponse = HTTPResponse(
-                    code: response.code,
-                    headers: headers,
-                    message: message,
-                    trailers: trailers,
-                    error: response.error,
-                    tracingInfo: response.tracingInfo
-                )
-            } else {
-                finalResponse = HTTPResponse(
-                    code: .internalError,
-                    headers: headers,
-                    message: nil,
-                    trailers: trailers,
-                    error: ConnectError(code: .internalError, message: "unexpected encoding"),
-                    tracingInfo: response.tracingInfo
-                )
-            }
-        } else {
-            finalResponse = HTTPResponse(
-                code: response.code,
-                headers: headers,
-                message: response.message,
-                trailers: trailers,
-                error: response.error,
-                tracingInfo: response.tracingInfo
-            )
-        }
-        proceed(finalResponse)
+    let requestBody = request.message ?? Data()
+    let finalRequestBody: Data
+    if let compression = self.config.requestCompression,
+      compression.shouldCompress(requestBody)
+    {
+      do {
+        finalRequestBody = try compression.pool.compress(data: requestBody)
+        headers[HeaderConstants.contentEncoding] = [compression.pool.name()]
+      } catch {
+        finalRequestBody = requestBody
+      }
+    } else {
+      finalRequestBody = requestBody
     }
+
+    proceed(
+      .success(
+        self.config.transformToGETIfNeeded(
+          HTTPRequest(
+            url: request.url,
+            headers: headers,
+            message: finalRequestBody,
+            method: request.method,
+            trailers: nil,
+            idempotencyLevel: request.idempotencyLevel
+          ))))
+  }
+
+  @Sendable
+  func handleUnaryRawResponse(
+    _ response: HTTPResponse,
+    proceed: @escaping (HTTPResponse) -> Void
+  ) {
+    let trailerPrefix = "trailer-"
+    let headers = response.headers.filter { header in
+      return header.key != HeaderConstants.contentEncoding
+        && !header.key.hasPrefix(trailerPrefix)
+    }
+    let trailers = response.headers
+      .filter { $0.key.hasPrefix(trailerPrefix) }
+      .reduce(
+        into: Trailers(),
+        { trailers, current in
+          trailers[
+            String(current.key.dropFirst(trailerPrefix.count))
+          ] = current.value
+        })
+
+    let finalResponse: HTTPResponse
+    let contentType = response.headers[HeaderConstants.contentType]?.first ?? ""
+    if response.code == .ok && !contentType.hasPrefix("application/\(self.config.codec.name())") {
+      // If content-type looks like it could be an RPC server's response, consider
+      // this an internal error.
+      let code: Code = contentType.hasPrefix("application/") ? .internalError : .unknown
+      finalResponse = HTTPResponse(
+        code: code, headers: headers, message: nil, trailers: trailers,
+        error: ConnectError(code: code, message: "unexpected content-type: \(contentType)"),
+        tracingInfo: response.tracingInfo
+      )
+    } else if let encoding = response.headers[HeaderConstants.contentEncoding]?.first {
+      if let compressionPool = self.config.responseCompressionPool(forName: encoding),
+        let message = response.message.flatMap({ try? compressionPool.decompress(data: $0) }
+        )
+      {
+        finalResponse = HTTPResponse(
+          code: response.code,
+          headers: headers,
+          message: message,
+          trailers: trailers,
+          error: response.error,
+          tracingInfo: response.tracingInfo
+        )
+      } else {
+        finalResponse = HTTPResponse(
+          code: .internalError,
+          headers: headers,
+          message: nil,
+          trailers: trailers,
+          error: ConnectError(code: .internalError, message: "unexpected encoding"),
+          tracingInfo: response.tracingInfo
+        )
+      }
+    } else {
+      finalResponse = HTTPResponse(
+        code: response.code,
+        headers: headers,
+        message: response.message,
+        trailers: trailers,
+        error: response.error,
+        tracingInfo: response.tracingInfo
+      )
+    }
+    proceed(finalResponse)
+  }
 }
 
 extension ConnectInterceptor: StreamInterceptor {
-    @Sendable
-    func handleStreamStart(
-        _ request: HTTPRequest<Void>,
-        proceed: @escaping (Result<HTTPRequest<Void>, ConnectError>) -> Void
-    ) {
-        var headers = request.headers
-        headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
-        headers[HeaderConstants.connectStreamingContentEncoding] = self.config
-            .requestCompression.map { [$0.pool.name()] }
-        headers[HeaderConstants.connectStreamingAcceptEncoding] = self.config
-            .acceptCompressionPoolNames()
-        if let timeout = self.config.timeout {
-            headers[HeaderConstants.connectTimeoutMs] = ["\(Int(timeout * 1_000))"]
-        }
+  @Sendable
+  func handleStreamStart(
+    _ request: HTTPRequest<Void>,
+    proceed: @escaping (Result<HTTPRequest<Void>, ConnectError>) -> Void
+  ) {
+    var headers = request.headers
+    headers[HeaderConstants.connectProtocolVersion] = [Self.protocolVersion]
+    headers[HeaderConstants.connectStreamingContentEncoding] = self.config
+      .requestCompression.map { [$0.pool.name()] }
+    headers[HeaderConstants.connectStreamingAcceptEncoding] = self.config
+      .acceptCompressionPoolNames()
+    if let timeout = self.config.timeout {
+      headers[HeaderConstants.connectTimeoutMs] = ["\(Int(timeout * 1_000))"]
+    }
+    proceed(
+      .success(
+        HTTPRequest(
+          url: request.url,
+          headers: headers,
+          message: request.message,
+          method: request.method,
+          trailers: nil,
+          idempotencyLevel: request.idempotencyLevel
+        )))
+  }
+
+  @Sendable
+  func handleStreamRawInput(_ input: Data, proceed: @escaping (Data) -> Void) {
+    proceed(Envelope.packMessage(input, using: self.config.requestCompression))
+  }
+
+  @Sendable
+  func handleStreamRawResult(
+    _ result: StreamResult<Data>,
+    proceed: @escaping (StreamResult<Data>) -> Void
+  ) {
+    switch result {
+    case .headers(let headers):
+      self.streamResponseHeaders.value = headers
+
+      let contentType = headers[HeaderConstants.contentType]?.first ?? ""
+      if contentType != "application/connect+\(self.config.codec.name())" {
+        // If content-type looks like it could be an RPC server's response, consider
+        // this an internal error.
+        let code: Code =
+          contentType.hasPrefix("application/connect+")
+          ? .internalError
+          : .unknown
         proceed(
-            .success(
-                HTTPRequest(
-                    url: request.url,
-                    headers: headers,
-                    message: request.message,
-                    method: request.method,
-                    trailers: nil,
-                    idempotencyLevel: request.idempotencyLevel
-                )))
-    }
-
-    @Sendable
-    func handleStreamRawInput(_ input: Data, proceed: @escaping (Data) -> Void) {
-        proceed(Envelope.packMessage(input, using: self.config.requestCompression))
-    }
-
-    @Sendable
-    func handleStreamRawResult(
-        _ result: StreamResult<Data>,
-        proceed: @escaping (StreamResult<Data>) -> Void
-    ) {
-        switch result {
-        case .headers(let headers):
-            self.streamResponseHeaders.value = headers
-
-            let contentType = headers[HeaderConstants.contentType]?.first ?? ""
-            if contentType != "application/connect+\(self.config.codec.name())" {
-                // If content-type looks like it could be an RPC server's response, consider
-                // this an internal error.
-                let code: Code =
-                    contentType.hasPrefix("application/connect+")
-                    ? .internalError
-                    : .unknown
-                proceed(
-                    .complete(
-                        code: code,
-                        error: ConnectError(
-                            code: code, message: "unexpected content-type: \(contentType)"
-                        ), trailers: nil
-                    ))
-            } else {
-                proceed(result)
-            }
-        case .message(let data):
-            do {
-                let responseCompressionPool = self.streamResponseHeaders.value?[
-                    HeaderConstants.connectStreamingContentEncoding
-                ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
-                if responseCompressionPool == nil && Envelope.isCompressed(data) {
-                    proceed(
-                        .complete(
-                            code: .internalError,
-                            error: ConnectError(
-                                code: .internalError,
-                                message: "received unexpected compressed message"
-                            ), trailers: nil
-                        ))
-                    return
-                }
-
-                let (headerByte, message) = try Envelope.unpackMessage(
-                    data, compressionPool: responseCompressionPool
-                )
-                let isEndStream = 0b00000010 & headerByte != 0
-                if isEndStream {
-                    // Expect a valid Connect end stream response, which can simply be {}.
-                    // https://connectrpc.com/docs/protocol#error-end-stream
-                    let response = try JSONDecoder().decode(
-                        ConnectEndStreamResponse.self, from: message
-                    )
-                    proceed(
-                        .complete(
-                            code: response.error?.code ?? .ok,
-                            error: response.error,
-                            trailers: response.metadata
-                        ))
-                } else {
-                    proceed(.message(message))
-                }
-            } catch let error {
-                // TODO: Close the stream here?
-                proceed(.complete(code: .unknown, error: error, trailers: nil))
-            }
-
-        case .complete(let code, let error, let trailers):
-            if code != .ok && error == nil {
-                proceed(
-                    .complete(
-                        code: code,
-                        error: ConnectError.from(
-                            code: code,
-                            headers: self.streamResponseHeaders.value,
-                            trailers: trailers,
-                            source: nil
-                        ),
-                        trailers: trailers
-                    ))
-            } else {
-                proceed(result)
-            }
+          .complete(
+            code: code,
+            error: ConnectError(
+              code: code, message: "unexpected content-type: \(contentType)"
+            ), trailers: nil
+          ))
+      } else {
+        proceed(result)
+      }
+    case .message(let data):
+      do {
+        let responseCompressionPool = self.streamResponseHeaders.value?[
+          HeaderConstants.connectStreamingContentEncoding
+        ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
+        if responseCompressionPool == nil && Envelope.isCompressed(data) {
+          proceed(
+            .complete(
+              code: .internalError,
+              error: ConnectError(
+                code: .internalError,
+                message: "received unexpected compressed message"
+              ), trailers: nil
+            ))
+          return
         }
+
+        let (headerByte, message) = try Envelope.unpackMessage(
+          data, compressionPool: responseCompressionPool
+        )
+        let isEndStream = 0b00000010 & headerByte != 0
+        if isEndStream {
+          // Expect a valid Connect end stream response, which can simply be {}.
+          // https://connectrpc.com/docs/protocol#error-end-stream
+          let response = try JSONDecoder().decode(
+            ConnectEndStreamResponse.self, from: message
+          )
+          proceed(
+            .complete(
+              code: response.error?.code ?? .ok,
+              error: response.error,
+              trailers: response.metadata
+            ))
+        } else {
+          proceed(.message(message))
+        }
+      } catch let error {
+        // TODO: Close the stream here?
+        proceed(.complete(code: .unknown, error: error, trailers: nil))
+      }
+
+    case .complete(let code, let error, let trailers):
+      if code != .ok && error == nil {
+        proceed(
+          .complete(
+            code: code,
+            error: ConnectError.from(
+              code: code,
+              headers: self.streamResponseHeaders.value,
+              trailers: trailers,
+              source: nil
+            ),
+            trailers: trailers
+          ))
+      } else {
+        proceed(result)
+      }
     }
+  }
 }
 
 extension ProtocolClientConfig {
-    func transformToGETIfNeeded(_ request: HTTPRequest<Data?>) -> HTTPRequest<Data?> {
-        guard self.shouldUseUnaryGET(for: request) else {
-            return request
-        }
-
-        var components = URLComponents(url: request.url, resolvingAgainstBaseURL: true)
-
-        // Order matches the Connect protocol.
-        var queryItems: [URLQueryItem] = [
-            URLQueryItem(name: "connect", value: "v\(ConnectInterceptor.protocolVersion)"),
-            URLQueryItem(name: "base64", value: "1"),
-        ]
-        if let contentEncoding = request.headers[HeaderConstants.contentEncoding]?.first {
-            queryItems.append(URLQueryItem(name: "compression", value: contentEncoding))
-        }
-        queryItems.append(URLQueryItem(name: "encoding", value: self.codec.name()))
-        queryItems.append(
-            URLQueryItem(name: "message", value: request.message?.urlSafeBase64EncodedString())
-        )
-
-        components?.queryItems = queryItems
-
-        guard let url = components?.url else {
-            return request
-        }
-
-        var headers = request.headers
-        headers.removeValue(forKey: HeaderConstants.contentEncoding)
-        headers.removeValue(forKey: HeaderConstants.contentType)
-        headers.removeValue(forKey: HeaderConstants.connectProtocolVersion)
-
-        return HTTPRequest(
-            url: url,
-            headers: headers,
-            message: nil,
-            method: .get,
-            trailers: nil,
-            idempotencyLevel: request.idempotencyLevel
-        )
+  func transformToGETIfNeeded(_ request: HTTPRequest<Data?>) -> HTTPRequest<Data?> {
+    guard self.shouldUseUnaryGET(for: request) else {
+      return request
     }
+
+    var components = URLComponents(url: request.url, resolvingAgainstBaseURL: true)
+
+    // Order matches the Connect protocol.
+    var queryItems: [URLQueryItem] = [
+      URLQueryItem(name: "connect", value: "v\(ConnectInterceptor.protocolVersion)"),
+      URLQueryItem(name: "base64", value: "1"),
+    ]
+    if let contentEncoding = request.headers[HeaderConstants.contentEncoding]?.first {
+      queryItems.append(URLQueryItem(name: "compression", value: contentEncoding))
+    }
+    queryItems.append(URLQueryItem(name: "encoding", value: self.codec.name()))
+    queryItems.append(
+      URLQueryItem(name: "message", value: request.message?.urlSafeBase64EncodedString())
+    )
+
+    components?.queryItems = queryItems
+
+    guard let url = components?.url else {
+      return request
+    }
+
+    var headers = request.headers
+    headers.removeValue(forKey: HeaderConstants.contentEncoding)
+    headers.removeValue(forKey: HeaderConstants.contentType)
+    headers.removeValue(forKey: HeaderConstants.connectProtocolVersion)
+
+    return HTTPRequest(
+      url: url,
+      headers: headers,
+      message: nil,
+      method: .get,
+      trailers: nil,
+      idempotencyLevel: request.idempotencyLevel
+    )
+  }
 }
 
 extension ProtocolClientConfig {
-    func shouldUseUnaryGET(for request: HTTPRequest<Data?>) -> Bool {
-        guard
-            case .connect = self.networkProtocol, request.idempotencyLevel == .noSideEffects
-        else {
-            return false
-        }
-
-        switch self.unaryGET {
-        case .disabled:
-            return false
-        case .alwaysEnabled:
-            return true
-        case .enabledForLimitedPayloadSizes(let maxBytes):
-            return (request.message?.count ?? 0) <= maxBytes
-        }
+  func shouldUseUnaryGET(for request: HTTPRequest<Data?>) -> Bool {
+    guard
+      case .connect = self.networkProtocol, request.idempotencyLevel == .noSideEffects
+    else {
+      return false
     }
+
+    switch self.unaryGET {
+    case .disabled:
+      return false
+    case .alwaysEnabled:
+      return true
+    case .enabledForLimitedPayloadSizes(let maxBytes):
+      return (request.message?.count ?? 0) <= maxBytes
+    }
+  }
 }

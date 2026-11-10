@@ -20,251 +20,251 @@ import Testing
 
 /// Test suite that validates the behavior of generated mock classes.
 struct ConnectMocksTests {
-    // MARK: - Unary
+  // MARK: - Unary
 
-    @Test
-    func mockUnaryCallbacks() {
-        let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
-        client.mockUnary = { request in
-            #expect(request.hasResponseDefinition)
-            return ResponseMessage(result: .success(.with { $0.payload.data = Data([0x0]) }))
-        }
-
-        let receivedMessage = Locked<Connectrpc_Conformance_V1_UnaryResponse?>(nil)
-        client.unary(request: .with { $0.responseDefinition = .init() }) { response in
-            receivedMessage.value = response.message
-        }
-        #expect(receivedMessage.value?.payload.data.count == 1)
+  @Test
+  func mockUnaryCallbacks() {
+    let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
+    client.mockUnary = { request in
+      #expect(request.hasResponseDefinition)
+      return ResponseMessage(result: .success(.with { $0.payload.data = Data([0x0]) }))
     }
 
-    @Test
-    func mockUnaryAsyncAwait() async {
-        let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
-        client.mockAsyncUnary = { request in
-            #expect(request.hasResponseDefinition)
-            return ResponseMessage(result: .success(.with { $0.payload.data = Data([0x0]) }))
-        }
+    let receivedMessage = Locked<Connectrpc_Conformance_V1_UnaryResponse?>(nil)
+    client.unary(request: .with { $0.responseDefinition = .init() }) { response in
+      receivedMessage.value = response.message
+    }
+    #expect(receivedMessage.value?.payload.data.count == 1)
+  }
 
-        let response = await client.unary(request: .with { $0.responseDefinition = .init() })
-        #expect(response.message?.payload.data.count == 1)
+  @Test
+  func mockUnaryAsyncAwait() async {
+    let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
+    client.mockAsyncUnary = { request in
+      #expect(request.hasResponseDefinition)
+      return ResponseMessage(result: .success(.with { $0.payload.data = Data([0x0]) }))
     }
 
-    // MARK: - Bidirectional stream
+    let response = await client.unary(request: .with { $0.responseDefinition = .init() })
+    #expect(response.message?.payload.data.count == 1)
+  }
 
-    @Test
-    func mockBidirectionalStreamCallbacks() {
-        let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
-        let expectedInputs: [Connectrpc_Conformance_V1_BidiStreamRequest] = [
-            .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 123)] },
-            .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 456)] },
-        ]
-        let expectedResults: [StreamResult<Connectrpc_Conformance_V1_BidiStreamResponse>] =
-            [
-                .headers(["x-header": ["123"]]),
-                .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
-                .message(.with { $0.payload.data = Data(repeating: 0, count: 456) }),
-                .complete(code: .ok, error: nil, trailers: nil),
-            ]
-        #expect(client.mockBidiStream.isClosed == false)
+  // MARK: - Bidirectional stream
 
-        var sentInputs = [Connectrpc_Conformance_V1_BidiStreamRequest]()
-        var closeCalled = false
-        client.mockBidiStream.onSend = { sentInputs.append($0) }
-        client.mockBidiStream.onClose = { closeCalled = true }
-        client.mockBidiStream.outputs = Array(expectedResults)
+  @Test
+  func mockBidirectionalStreamCallbacks() {
+    let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
+    let expectedInputs: [Connectrpc_Conformance_V1_BidiStreamRequest] = [
+      .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 123)] },
+      .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 456)] },
+    ]
+    let expectedResults: [StreamResult<Connectrpc_Conformance_V1_BidiStreamResponse>] =
+      [
+        .headers(["x-header": ["123"]]),
+        .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
+        .message(.with { $0.payload.data = Data(repeating: 0, count: 456) }),
+        .complete(code: .ok, error: nil, trailers: nil),
+      ]
+    #expect(client.mockBidiStream.isClosed == false)
 
-        let receivedResults = Locked(
-            [StreamResult<Connectrpc_Conformance_V1_BidiStreamResponse>]()
-        )
-        let stream = client.bidiStream { result in
-            receivedResults.perform { $0.append(result) }
-        }
-        stream.send(expectedInputs[0])
-        stream.send(expectedInputs[1])
-        stream.close()
+    var sentInputs = [Connectrpc_Conformance_V1_BidiStreamRequest]()
+    var closeCalled = false
+    client.mockBidiStream.onSend = { sentInputs.append($0) }
+    client.mockBidiStream.onClose = { closeCalled = true }
+    client.mockBidiStream.outputs = Array(expectedResults)
 
-        #expect(sentInputs == expectedInputs)
-        #expect(client.mockBidiStream.inputs == expectedInputs)
-        #expect(receivedResults.value == expectedResults)
-        #expect(closeCalled)
-        #expect(client.mockBidiStream.isClosed)
+    let receivedResults = Locked(
+      [StreamResult<Connectrpc_Conformance_V1_BidiStreamResponse>]()
+    )
+    let stream = client.bidiStream { result in
+      receivedResults.perform { $0.append(result) }
+    }
+    stream.send(expectedInputs[0])
+    stream.send(expectedInputs[1])
+    stream.close()
+
+    #expect(sentInputs == expectedInputs)
+    #expect(client.mockBidiStream.inputs == expectedInputs)
+    #expect(receivedResults.value == expectedResults)
+    #expect(closeCalled)
+    #expect(client.mockBidiStream.isClosed)
+  }
+
+  @Test
+  func mockBidirectionalStreamAsyncAwait() async throws {
+    let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
+    let expectedInputs: [Connectrpc_Conformance_V1_BidiStreamRequest] = [
+      .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 123)] },
+      .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 456)] },
+    ]
+    var expectedResults: [StreamResult<Connectrpc_Conformance_V1_BidiStreamResponse>] =
+      [
+        .headers(["x-header": ["123"]]),
+        .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
+        .message(.with { $0.payload.data = Data(repeating: 0, count: 456) }),
+        .complete(code: .ok, error: nil, trailers: nil),
+      ]
+    #expect(client.mockAsyncBidiStream.isClosed == false)
+
+    var sentInputs = [Connectrpc_Conformance_V1_BidiStreamRequest]()
+    var closeCalled = false
+    client.mockAsyncBidiStream.onSend = { sentInputs.append($0) }
+    client.mockAsyncBidiStream.onClose = { closeCalled = true }
+    client.mockAsyncBidiStream.outputs = Array(expectedResults)
+
+    let stream = client.bidiStream()
+    try stream.send(expectedInputs[0])
+    try stream.send(expectedInputs[1])
+    stream.close()
+
+    for await result in stream.results() {
+      #expect(result == expectedResults.removeFirst())
     }
 
-    @Test
-    func mockBidirectionalStreamAsyncAwait() async throws {
-        let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
-        let expectedInputs: [Connectrpc_Conformance_V1_BidiStreamRequest] = [
-            .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 123)] },
-            .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 456)] },
-        ]
-        var expectedResults: [StreamResult<Connectrpc_Conformance_V1_BidiStreamResponse>] =
-            [
-                .headers(["x-header": ["123"]]),
-                .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
-                .message(.with { $0.payload.data = Data(repeating: 0, count: 456) }),
-                .complete(code: .ok, error: nil, trailers: nil),
-            ]
-        #expect(client.mockAsyncBidiStream.isClosed == false)
+    #expect(sentInputs == expectedInputs)
+    #expect(client.mockAsyncBidiStream.inputs == expectedInputs)
+    #expect(expectedResults.isEmpty)
+    #expect(closeCalled)
+    #expect(client.mockAsyncBidiStream.isClosed)
+  }
 
-        var sentInputs = [Connectrpc_Conformance_V1_BidiStreamRequest]()
-        var closeCalled = false
-        client.mockAsyncBidiStream.onSend = { sentInputs.append($0) }
-        client.mockAsyncBidiStream.onClose = { closeCalled = true }
-        client.mockAsyncBidiStream.outputs = Array(expectedResults)
+  @Test
+  func mockBidirectionalStreamAsyncAwaitWithResultsRequestedBeforeSending() async throws {
+    let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
+    var expectedResults: [StreamResult<Connectrpc_Conformance_V1_BidiStreamResponse>] =
+      [
+        .headers(["x-header": ["123"]]),
+        .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
+        .complete(code: .ok, error: nil, trailers: nil),
+      ]
 
-        let stream = client.bidiStream()
-        try stream.send(expectedInputs[0])
-        try stream.send(expectedInputs[1])
-        stream.close()
+    // Deliberately request the results before sending inputs or configuring outputs.
+    let stream = client.bidiStream()
+    _ = stream.results()
+    client.mockAsyncBidiStream.outputs = Array(expectedResults)
+    try stream.send(.init())
+    try stream.send(.init())
 
-        for await result in stream.results() {
-            #expect(result == expectedResults.removeFirst())
-        }
-
-        #expect(sentInputs == expectedInputs)
-        #expect(client.mockAsyncBidiStream.inputs == expectedInputs)
-        #expect(expectedResults.isEmpty)
-        #expect(closeCalled)
-        #expect(client.mockAsyncBidiStream.isClosed)
+    // Requesting the results again must return the same stream, carrying the outputs.
+    for await result in stream.results() {
+      #expect(result == expectedResults.removeFirst())
     }
 
-    @Test
-    func mockBidirectionalStreamAsyncAwaitWithResultsRequestedBeforeSending() async throws {
-        let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
-        var expectedResults: [StreamResult<Connectrpc_Conformance_V1_BidiStreamResponse>] =
-            [
-                .headers(["x-header": ["123"]]),
-                .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
-                .complete(code: .ok, error: nil, trailers: nil),
-            ]
+    #expect(client.mockAsyncBidiStream.inputs.count == 2)
+    #expect(expectedResults.isEmpty)
+  }
 
-        // Deliberately request the results before sending inputs or configuring outputs.
-        let stream = client.bidiStream()
-        _ = stream.results()
-        client.mockAsyncBidiStream.outputs = Array(expectedResults)
-        try stream.send(.init())
-        try stream.send(.init())
+  // MARK: - Client-only stream
 
-        // Requesting the results again must return the same stream, carrying the outputs.
-        for await result in stream.results() {
-            #expect(result == expectedResults.removeFirst())
-        }
+  @Test
+  func mockClientOnlyStreamAsyncAwait() async throws {
+    let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
+    var expectedResults: [StreamResult<Connectrpc_Conformance_V1_ClientStreamResponse>] =
+      [
+        .headers(["x-header": ["123"]]),
+        .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
+        .complete(code: .ok, error: nil, trailers: nil),
+      ]
+    client.mockAsyncClientStream.outputs = Array(expectedResults)
 
-        #expect(client.mockAsyncBidiStream.inputs.count == 2)
-        #expect(expectedResults.isEmpty)
+    let stream = client.clientStream()
+    try stream.send(.init())
+    stream.closeAndReceive()
+
+    for await result in stream.results() {
+      #expect(result == expectedResults.removeFirst())
     }
 
-    // MARK: - Client-only stream
+    #expect(client.mockAsyncClientStream.inputs.count == 1)
+    #expect(expectedResults.isEmpty)
+    #expect(client.mockAsyncClientStream.isClosed)
+  }
 
-    @Test
-    func mockClientOnlyStreamAsyncAwait() async throws {
-        let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
-        var expectedResults: [StreamResult<Connectrpc_Conformance_V1_ClientStreamResponse>] =
-            [
-                .headers(["x-header": ["123"]]),
-                .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
-                .complete(code: .ok, error: nil, trailers: nil),
-            ]
-        client.mockAsyncClientStream.outputs = Array(expectedResults)
+  // MARK: - Server-only stream
 
-        let stream = client.clientStream()
-        try stream.send(.init())
-        stream.closeAndReceive()
+  @Test
+  func mockServerOnlyStreamCallbacks() {
+    let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
+    let expectedInputs: [Connectrpc_Conformance_V1_ServerStreamRequest] = [
+      .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 123)] }
+    ]
+    let expectedResults: [StreamResult<Connectrpc_Conformance_V1_ServerStreamResponse>] = [
+      .headers(["x-header": ["123"]]),
+      .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
+      .message(.with { $0.payload.data = Data(repeating: 0, count: 456) }),
+      .complete(code: .ok, error: nil, trailers: nil),
+    ]
 
-        for await result in stream.results() {
-            #expect(result == expectedResults.removeFirst())
-        }
+    var sentInputs = [Connectrpc_Conformance_V1_ServerStreamRequest]()
+    client.mockServerStream.onSend = { sentInputs.append($0) }
+    client.mockServerStream.outputs = Array(expectedResults)
 
-        #expect(client.mockAsyncClientStream.inputs.count == 1)
-        #expect(expectedResults.isEmpty)
-        #expect(client.mockAsyncClientStream.isClosed)
+    let receivedResults = Locked(
+      [
+        StreamResult<Connectrpc_Conformance_V1_ServerStreamResponse>
+      ]())
+    let stream = client.serverStream { result in
+      receivedResults.perform { $0.append(result) }
+    }
+    stream.send(expectedInputs[0])
+
+    #expect(sentInputs == expectedInputs)
+    #expect(client.mockServerStream.inputs == expectedInputs)
+    #expect(receivedResults.value == expectedResults)
+  }
+
+  @Test
+  func mockServerOnlyStreamAsyncAwait() async throws {
+    let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
+    let expectedInputs: [Connectrpc_Conformance_V1_ServerStreamRequest] = [
+      .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 123)] }
+    ]
+    var expectedResults: [StreamResult<Connectrpc_Conformance_V1_ServerStreamResponse>] =
+      [
+        .headers(["x-header": ["123"]]),
+        .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
+        .message(.with { $0.payload.data = Data(repeating: 0, count: 456) }),
+        .complete(code: .ok, error: nil, trailers: nil),
+      ]
+
+    var sentInputs = [Connectrpc_Conformance_V1_ServerStreamRequest]()
+    client.mockAsyncServerStream.onSend = { sentInputs.append($0) }
+    client.mockAsyncServerStream.outputs = Array(expectedResults)
+
+    let stream = client.serverStream()
+    try stream.send(expectedInputs[0])
+
+    for await result in stream.results() {
+      #expect(result == expectedResults.removeFirst())
     }
 
-    // MARK: - Server-only stream
+    #expect(sentInputs == expectedInputs)
+    #expect(client.mockAsyncServerStream.inputs == expectedInputs)
+    #expect(expectedResults.isEmpty)
+  }
 
-    @Test
-    func mockServerOnlyStreamCallbacks() {
-        let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
-        let expectedInputs: [Connectrpc_Conformance_V1_ServerStreamRequest] = [
-            .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 123)] }
-        ]
-        let expectedResults: [StreamResult<Connectrpc_Conformance_V1_ServerStreamResponse>] = [
-            .headers(["x-header": ["123"]]),
-            .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
-            .message(.with { $0.payload.data = Data(repeating: 0, count: 456) }),
-            .complete(code: .ok, error: nil, trailers: nil),
-        ]
+  @Test
+  func mockServerOnlyStreamAsyncAwaitWithResultsRequestedBeforeSending() async throws {
+    let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
+    var expectedResults: [StreamResult<Connectrpc_Conformance_V1_ServerStreamResponse>] =
+      [
+        .headers(["x-header": ["123"]]),
+        .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
+        .complete(code: .ok, error: nil, trailers: nil),
+      ]
 
-        var sentInputs = [Connectrpc_Conformance_V1_ServerStreamRequest]()
-        client.mockServerStream.onSend = { sentInputs.append($0) }
-        client.mockServerStream.outputs = Array(expectedResults)
+    // Deliberately request the results before sending an input or configuring outputs.
+    let stream = client.serverStream()
+    _ = stream.results()
+    client.mockAsyncServerStream.outputs = Array(expectedResults)
+    try stream.send(.init())
 
-        let receivedResults = Locked(
-            [
-                StreamResult<Connectrpc_Conformance_V1_ServerStreamResponse>
-            ]())
-        let stream = client.serverStream { result in
-            receivedResults.perform { $0.append(result) }
-        }
-        stream.send(expectedInputs[0])
-
-        #expect(sentInputs == expectedInputs)
-        #expect(client.mockServerStream.inputs == expectedInputs)
-        #expect(receivedResults.value == expectedResults)
+    // Requesting the results again must return the same stream, carrying the outputs.
+    for await result in stream.results() {
+      #expect(result == expectedResults.removeFirst())
     }
 
-    @Test
-    func mockServerOnlyStreamAsyncAwait() async throws {
-        let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
-        let expectedInputs: [Connectrpc_Conformance_V1_ServerStreamRequest] = [
-            .with { $0.responseDefinition.responseData = [Data(repeating: 0, count: 123)] }
-        ]
-        var expectedResults: [StreamResult<Connectrpc_Conformance_V1_ServerStreamResponse>] =
-            [
-                .headers(["x-header": ["123"]]),
-                .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
-                .message(.with { $0.payload.data = Data(repeating: 0, count: 456) }),
-                .complete(code: .ok, error: nil, trailers: nil),
-            ]
-
-        var sentInputs = [Connectrpc_Conformance_V1_ServerStreamRequest]()
-        client.mockAsyncServerStream.onSend = { sentInputs.append($0) }
-        client.mockAsyncServerStream.outputs = Array(expectedResults)
-
-        let stream = client.serverStream()
-        try stream.send(expectedInputs[0])
-
-        for await result in stream.results() {
-            #expect(result == expectedResults.removeFirst())
-        }
-
-        #expect(sentInputs == expectedInputs)
-        #expect(client.mockAsyncServerStream.inputs == expectedInputs)
-        #expect(expectedResults.isEmpty)
-    }
-
-    @Test
-    func mockServerOnlyStreamAsyncAwaitWithResultsRequestedBeforeSending() async throws {
-        let client = Connectrpc_Conformance_V1_ConformanceServiceClientMock()
-        var expectedResults: [StreamResult<Connectrpc_Conformance_V1_ServerStreamResponse>] =
-            [
-                .headers(["x-header": ["123"]]),
-                .message(.with { $0.payload.data = Data(repeating: 0, count: 123) }),
-                .complete(code: .ok, error: nil, trailers: nil),
-            ]
-
-        // Deliberately request the results before sending an input or configuring outputs.
-        let stream = client.serverStream()
-        _ = stream.results()
-        client.mockAsyncServerStream.outputs = Array(expectedResults)
-        try stream.send(.init())
-
-        // Requesting the results again must return the same stream, carrying the outputs.
-        for await result in stream.results() {
-            #expect(result == expectedResults.removeFirst())
-        }
-
-        #expect(client.mockAsyncServerStream.inputs.count == 1)
-        #expect(expectedResults.isEmpty)
-    }
+    #expect(client.mockAsyncServerStream.inputs.count == 1)
+    #expect(expectedResults.isEmpty)
+  }
 }

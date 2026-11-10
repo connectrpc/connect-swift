@@ -24,11 +24,11 @@ import SwiftProtobuf
 /// To return data over the stream, outputs can be specified using `init(outputs: ...)` or by
 /// subclassing and overriding `results()`.
 open class MockClientOnlyAsyncStream<
-    Input: ProtobufMessage,
-    Output: ProtobufMessage
+  Input: ProtobufMessage,
+  Output: ProtobufMessage
 >: MockBidirectionalAsyncStream<Input, Output>, ClientOnlyAsyncStreamInterface, @unchecked Sendable
 {
-    open func closeAndReceive() {
-        self.close()
-    }
+  open func closeAndReceive() {
+    self.close()
+  }
 }

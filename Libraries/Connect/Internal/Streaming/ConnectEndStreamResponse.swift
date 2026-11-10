@@ -15,26 +15,26 @@
 /// Structure modeling the final JSON message that is returned by Connect streams:
 /// https://connectrpc.com/docs/protocol#error-end-stream
 struct ConnectEndStreamResponse: Sendable {
-    /// Connect error that was returned with the response.
-    let error: ConnectError?
-    /// Additional metadata that was passed with the response. Keys are guaranteed to be lowercased.
-    let metadata: Trailers?
+  /// Connect error that was returned with the response.
+  let error: ConnectError?
+  /// Additional metadata that was passed with the response. Keys are guaranteed to be lowercased.
+  let metadata: Trailers?
 }
 
 extension ConnectEndStreamResponse: Decodable {
-    private enum CodingKeys: String, CodingKey {
-        case error = "error"
-        case metadata = "metadata"
-    }
+  private enum CodingKeys: String, CodingKey {
+    case error = "error"
+    case metadata = "metadata"
+  }
 
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let rawMetadata = try container.decodeIfPresent(Trailers.self, forKey: .metadata)
-        self.init(
-            error: try container.decodeIfPresent(ConnectError.self, forKey: .error),
-            metadata: rawMetadata?.reduce(into: Trailers()) { trailers, current in
-                trailers[current.key.lowercased()] = current.value
-            }
-        )
-    }
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let rawMetadata = try container.decodeIfPresent(Trailers.self, forKey: .metadata)
+    self.init(
+      error: try container.decodeIfPresent(ConnectError.self, forKey: .error),
+      metadata: rawMetadata?.reduce(into: Trailers()) { trailers, current in
+        trailers[current.key.lowercased()] = current.value
+      }
+    )
+  }
 }

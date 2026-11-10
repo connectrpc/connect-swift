@@ -15,40 +15,40 @@
 import Foundation
 
 extension Headers {
-    /// Adds required headers to gRPC and gRPC-Web requests/streams.
-    ///
-    /// - parameter config: The configuration to use for adding headers (i.e., for compression
-    ///                     headers).
-    /// - parameter grpcWeb: Should be true if using gRPC-Web, false if gRPC.
-    ///
-    /// - returns: A set of updated headers.
-    package func addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
-        var headers = self
-        headers[HeaderConstants.grpcAcceptEncoding] =
-            config
-            .acceptCompressionPoolNames()
-        headers[HeaderConstants.grpcContentEncoding] = config.requestCompression
-            .map { [$0.pool.name()] }
-        if let timeout = config.timeout {
-            headers[HeaderConstants.grpcTimeout] = ["\(Int(timeout * 1_000))m"]
-        }
-        if grpcWeb {
-            headers[HeaderConstants.contentType] = [
-                "application/grpc-web+\(config.codec.name())"
-            ]
-        } else {
-            headers[HeaderConstants.contentType] = [
-                "application/grpc+\(config.codec.name())"
-            ]
-            headers[HeaderConstants.grpcTE] = ["trailers"]
-        }
-
-        // Note that we do not comply with the recommended structure for user-agent:
-        // https://github.com/grpc/grpc/blob/v1.51.1/doc/PROTOCOL-HTTP2.md#user-agents
-        // But this behavior matches connect-web:
-        // https://github.com/bufbuild/connect-web/blob/v0.4.0/packages/connect-core/src/grpc-web-create-request-header.ts#L33-L36
-        // swiftlint:disable:previous line_length
-        headers[HeaderConstants.xUserAgent] = ["@connectrpc/connect-swift"]
-        return headers
+  /// Adds required headers to gRPC and gRPC-Web requests/streams.
+  ///
+  /// - parameter config: The configuration to use for adding headers (i.e., for compression
+  ///                     headers).
+  /// - parameter grpcWeb: Should be true if using gRPC-Web, false if gRPC.
+  ///
+  /// - returns: A set of updated headers.
+  package func addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
+    var headers = self
+    headers[HeaderConstants.grpcAcceptEncoding] =
+      config
+      .acceptCompressionPoolNames()
+    headers[HeaderConstants.grpcContentEncoding] = config.requestCompression
+      .map { [$0.pool.name()] }
+    if let timeout = config.timeout {
+      headers[HeaderConstants.grpcTimeout] = ["\(Int(timeout * 1_000))m"]
     }
+    if grpcWeb {
+      headers[HeaderConstants.contentType] = [
+        "application/grpc-web+\(config.codec.name())"
+      ]
+    } else {
+      headers[HeaderConstants.contentType] = [
+        "application/grpc+\(config.codec.name())"
+      ]
+      headers[HeaderConstants.grpcTE] = ["trailers"]
+    }
+
+    // Note that we do not comply with the recommended structure for user-agent:
+    // https://github.com/grpc/grpc/blob/v1.51.1/doc/PROTOCOL-HTTP2.md#user-agents
+    // But this behavior matches connect-web:
+    // https://github.com/bufbuild/connect-web/blob/v0.4.0/packages/connect-core/src/grpc-web-create-request-header.ts#L33-L36
+    // swiftlint:disable:previous line_length
+    headers[HeaderConstants.xUserAgent] = ["@connectrpc/connect-swift"]
+    return headers
+  }
 }

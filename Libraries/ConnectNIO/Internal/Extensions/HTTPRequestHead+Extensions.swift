@@ -17,24 +17,24 @@ import Foundation
 import NIOHTTP1
 
 extension HTTPRequestHead {
-    static func fromConnect(
-        _ request: Connect.HTTPRequest<Data?>, nioHeaders: NIOHTTP1.HTTPHeaders
-    ) -> Self {
-        switch request.method {
-        case .get:
-            return HTTPRequestHead(
-                version: .http1_1,
-                method: .GET,
-                uri: "\(request.url.path)?\(request.url.query ?? "")",
-                headers: nioHeaders
-            )
-        case .post:
-            return HTTPRequestHead(
-                version: .http1_1,
-                method: .POST,
-                uri: request.url.path,
-                headers: nioHeaders
-            )
-        }
+  static func fromConnect(
+    _ request: Connect.HTTPRequest<Data?>, nioHeaders: NIOHTTP1.HTTPHeaders
+  ) -> Self {
+    switch request.method {
+    case .get:
+      return HTTPRequestHead(
+        version: .http1_1,
+        method: .GET,
+        uri: "\(request.url.path)?\(request.url.query ?? "")",
+        headers: nioHeaders
+      )
+    case .post:
+      return HTTPRequestHead(
+        version: .http1_1,
+        method: .POST,
+        uri: request.url.path,
+        headers: nioHeaders
+      )
     }
+  }
 }

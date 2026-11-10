@@ -16,21 +16,21 @@ import SwiftProtobuf
 
 /// Represents a bidirectional stream that can send request messages and initiate closes.
 public protocol BidirectionalStreamInterface<Input> {
-    /// The input (request) message type.
-    associatedtype Input: ProtobufMessage
+  /// The input (request) message type.
+  associatedtype Input: ProtobufMessage
 
-    /// Send a request to the server over the stream.
-    ///
-    /// - parameter input: The request message to send.
-    ///
-    /// - returns: An instance of this stream, for syntactic sugar.
-    @discardableResult
-    func send(_ input: Input) -> Self
+  /// Send a request to the server over the stream.
+  ///
+  /// - parameter input: The request message to send.
+  ///
+  /// - returns: An instance of this stream, for syntactic sugar.
+  @discardableResult
+  func send(_ input: Input) -> Self
 
-    /// Close the stream. No calls to `send()` are valid after calling `close()`.
-    func close()
+  /// Close the stream. No calls to `send()` are valid after calling `close()`.
+  func close()
 
-    /// Cancel the stream and return a canceled code.
-    /// No calls to `send()` are valid after calling `cancel()`.
-    func cancel()
+  /// Cancel the stream and return a canceled code.
+  /// No calls to `send()` are valid after calling `cancel()`.
+  func cancel()
 }

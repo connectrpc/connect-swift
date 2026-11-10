@@ -13,13 +13,13 @@
 // limitations under the License.
 
 extension Trailers {
-    /// Identifies the status code from gRPC and gRPC-Web trailers.
-    ///
-    /// - returns: The gRPC status code, if specified.
-    package func grpcStatus() -> Code? {
-        return self[HeaderConstants.grpcStatus]?
-            .first
-            .flatMap(Int.init)
-            .flatMap { Code(rawValue: $0) }
-    }
+  /// Identifies the status code from gRPC and gRPC-Web trailers.
+  ///
+  /// - returns: The gRPC status code, if specified.
+  package func grpcStatus() -> Code? {
+    return self[HeaderConstants.grpcStatus]?
+      .first
+      .flatMap(Int.init)
+      .flatMap { Code(rawValue: $0) }
+  }
 }

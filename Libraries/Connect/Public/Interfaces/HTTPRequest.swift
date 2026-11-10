@@ -16,28 +16,28 @@ import Foundation
 
 /// Request used for sending data to the server.
 public struct HTTPRequest<Input: Sendable>: Sendable {
-    /// Target URL for the request.
-    public let url: URL
-    /// Additional outbound headers for the request.
-    public let headers: Headers
-    /// Data to send with the request.
-    public let message: Input
-    /// HTTP method to use for the request.
-    public let method: HTTPMethod
-    /// Outbound trailers for the request.
-    public let trailers: Trailers?
-    /// Idempotency level of the request.
-    public let idempotencyLevel: IdempotencyLevel
+  /// Target URL for the request.
+  public let url: URL
+  /// Additional outbound headers for the request.
+  public let headers: Headers
+  /// Data to send with the request.
+  public let message: Input
+  /// HTTP method to use for the request.
+  public let method: HTTPMethod
+  /// Outbound trailers for the request.
+  public let trailers: Trailers?
+  /// Idempotency level of the request.
+  public let idempotencyLevel: IdempotencyLevel
 
-    public init(
-        url: URL, headers: Headers, message: Input, method: HTTPMethod,
-        trailers: Trailers?, idempotencyLevel: IdempotencyLevel
-    ) {
-        self.url = url
-        self.headers = headers
-        self.message = message
-        self.method = method
-        self.trailers = trailers
-        self.idempotencyLevel = idempotencyLevel
-    }
+  public init(
+    url: URL, headers: Headers, message: Input, method: HTTPMethod,
+    trailers: Trailers?, idempotencyLevel: IdempotencyLevel
+  ) {
+    self.url = url
+    self.headers = headers
+    self.message = message
+    self.method = method
+    self.trailers = trailers
+    self.idempotencyLevel = idempotencyLevel
+  }
 }

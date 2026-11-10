@@ -19,20 +19,20 @@ import Testing
 private typealias TestMessage = Connectrpc_Conformance_V1_UnaryResponse
 
 struct UnaryAsyncWrapperTests {
-    @Test
-    func singleCallbackResumesWithItsResponse() async {
-        let invocations = Locked(0)
-        let expectedMessage = TestMessage.with { $0.payload.data = Data(repeating: 42, count: 4) }
-        let wrapper = UnaryAsyncWrapper<TestMessage> { completion in
-            invocations.perform { $0 += 1 }
-            completion(ResponseMessage(code: .ok, result: .success(expectedMessage)))
-            return Cancelable {}
-        }
-
-        let response = await wrapper.send()
-        #expect(invocations.value == 1)
-        #expect(response.code == .ok)
-        #expect(response.error == nil)
-        #expect(response.message == expectedMessage)
+  @Test
+  func singleCallbackResumesWithItsResponse() async {
+    let invocations = Locked(0)
+    let expectedMessage = TestMessage.with { $0.payload.data = Data(repeating: 42, count: 4) }
+    let wrapper = UnaryAsyncWrapper<TestMessage> { completion in
+      invocations.perform { $0 += 1 }
+      completion(ResponseMessage(code: .ok, result: .success(expectedMessage)))
+      return Cancelable {}
     }
+
+    let response = await wrapper.send()
+    #expect(invocations.value == 1)
+    #expect(response.code == .ok)
+    #expect(response.error == nil)
+    #expect(response.message == expectedMessage)
+  }
 }

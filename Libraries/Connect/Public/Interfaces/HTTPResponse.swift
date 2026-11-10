@@ -16,41 +16,41 @@ import Foundation
 
 /// Unary HTTP response received from the server.
 public struct HTTPResponse: Sendable {
-    /// The status code of the response.
-    /// See https://connectrpc.com/docs/protocol/#error-codes for more info.
-    public let code: Code
-    /// Response headers specified by the server.
-    public let headers: Headers
-    /// Body data provided by the server.
-    public let message: Data?
-    /// Trailers provided by the server.
-    public let trailers: Trailers
-    /// The accompanying error, if the request failed.
-    public let error: Swift.Error?
-    /// Tracing information that can be used for logging or debugging network-level details.
-    /// This information is expected to change when switching protocols (i.e., from Connect to
-    /// gRPC-Web), as each protocol has different HTTP semantics.
-    /// Nil in cases where no response was received from the server.
-    public let tracingInfo: TracingInfo?
+  /// The status code of the response.
+  /// See https://connectrpc.com/docs/protocol/#error-codes for more info.
+  public let code: Code
+  /// Response headers specified by the server.
+  public let headers: Headers
+  /// Body data provided by the server.
+  public let message: Data?
+  /// Trailers provided by the server.
+  public let trailers: Trailers
+  /// The accompanying error, if the request failed.
+  public let error: Swift.Error?
+  /// Tracing information that can be used for logging or debugging network-level details.
+  /// This information is expected to change when switching protocols (i.e., from Connect to
+  /// gRPC-Web), as each protocol has different HTTP semantics.
+  /// Nil in cases where no response was received from the server.
+  public let tracingInfo: TracingInfo?
 
-    public struct TracingInfo: Equatable, Sendable {
-        /// HTTP status received from the server.
-        public let httpStatus: Int
+  public struct TracingInfo: Equatable, Sendable {
+    /// HTTP status received from the server.
+    public let httpStatus: Int
 
-        public init(httpStatus: Int) {
-            self.httpStatus = httpStatus
-        }
+    public init(httpStatus: Int) {
+      self.httpStatus = httpStatus
     }
+  }
 
-    public init(
-        code: Code, headers: Headers, message: Data?,
-        trailers: Trailers, error: Swift.Error?, tracingInfo: TracingInfo?
-    ) {
-        self.code = code
-        self.headers = headers
-        self.message = message
-        self.trailers = trailers
-        self.error = error
-        self.tracingInfo = tracingInfo
-    }
+  public init(
+    code: Code, headers: Headers, message: Data?,
+    trailers: Trailers, error: Swift.Error?, tracingInfo: TracingInfo?
+  ) {
+    self.code = code
+    self.headers = headers
+    self.message = message
+    self.trailers = trailers
+    self.error = error
+    self.tracingInfo = tracingInfo
+  }
 }

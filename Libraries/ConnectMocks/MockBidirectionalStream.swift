@@ -24,40 +24,40 @@ import SwiftProtobuf
 ///
 /// To return data over the stream, outputs can be specified using `init(outputs: ...)`.
 open class MockBidirectionalStream<
-    Input: ProtobufMessage,
-    Output: ProtobufMessage
+  Input: ProtobufMessage,
+  Output: ProtobufMessage
 >: BidirectionalStreamInterface, @unchecked Sendable {
-    /// Closure that is called when `close()` is invoked.
-    public var onClose: (() -> Void)?
-    /// Closure that is called when `send()` is invoked.
-    public var onSend: ((Input) -> Void)?
-    /// The list of outputs to return to the client once one input has been sent.
-    public var outputs: [StreamResult<Output>]
+  /// Closure that is called when `close()` is invoked.
+  public var onClose: (() -> Void)?
+  /// Closure that is called when `send()` is invoked.
+  public var onSend: ((Input) -> Void)?
+  /// The list of outputs to return to the client once one input has been sent.
+  public var outputs: [StreamResult<Output>]
 
-    /// All inputs that have been sent through the stream.
-    @Published public private(set) var inputs = [Input]()
-    /// True if `close()` has been called.
-    @Published public private(set) var isClosed = false
+  /// All inputs that have been sent through the stream.
+  @Published public private(set) var inputs = [Input]()
+  /// True if `close()` has been called.
+  @Published public private(set) var isClosed = false
 
-    /// Designated initializer.
-    ///
-    /// - parameter outputs: The list of outputs to return to the client once one input has been
-    ///                      sent.
-    public init(outputs: [StreamResult<Output>] = []) {
-        self.outputs = outputs
-    }
+  /// Designated initializer.
+  ///
+  /// - parameter outputs: The list of outputs to return to the client once one input has been
+  ///                      sent.
+  public init(outputs: [StreamResult<Output>] = []) {
+    self.outputs = outputs
+  }
 
-    @discardableResult
-    open func send(_ input: Input) -> Self {
-        self.inputs.append(input)
-        self.onSend?(input)
-        return self
-    }
+  @discardableResult
+  open func send(_ input: Input) -> Self {
+    self.inputs.append(input)
+    self.onSend?(input)
+    return self
+  }
 
-    open func close() {
-        self.isClosed = true
-        self.onClose?()
-    }
+  open func close() {
+    self.isClosed = true
+    self.onClose?()
+  }
 
-    open func cancel() {}
+  open func cancel() {}
 }

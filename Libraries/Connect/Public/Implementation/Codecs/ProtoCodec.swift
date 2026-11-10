@@ -17,29 +17,29 @@ import SwiftProtobuf
 
 /// Codec providing functionality for serializing to/from Protobuf binary.
 public struct ProtoCodec {
-    private let deterministicEncodingOptions: BinaryEncodingOptions = {
-        var encodingOptions = BinaryEncodingOptions()
-        encodingOptions.useDeterministicOrdering = true
-        return encodingOptions
-    }()
+  private let deterministicEncodingOptions: BinaryEncodingOptions = {
+    var encodingOptions = BinaryEncodingOptions()
+    encodingOptions.useDeterministicOrdering = true
+    return encodingOptions
+  }()
 
-    public init() {}
+  public init() {}
 }
 
 extension ProtoCodec: Codec {
-    public func name() -> String {
-        return "proto"
-    }
+  public func name() -> String {
+    return "proto"
+  }
 
-    public func serialize<Input: ProtobufMessage>(message: Input) throws -> Data {
-        return try message.serializedData()
-    }
+  public func serialize<Input: ProtobufMessage>(message: Input) throws -> Data {
+    return try message.serializedData()
+  }
 
-    public func deterministicallySerialize<Input: ProtobufMessage>(message: Input) throws -> Data {
-        return try message.serializedData(options: self.deterministicEncodingOptions)
-    }
+  public func deterministicallySerialize<Input: ProtobufMessage>(message: Input) throws -> Data {
+    return try message.serializedData(options: self.deterministicEncodingOptions)
+  }
 
-    public func deserialize<Output: ProtobufMessage>(source: Data) throws -> Output {
-        return try Output(serializedBytes: source)
-    }
+  public func deserialize<Output: ProtobufMessage>(source: Data) throws -> Output {
+    return try Output(serializedBytes: source)
+  }
 }

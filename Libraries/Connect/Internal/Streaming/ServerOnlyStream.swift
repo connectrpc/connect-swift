@@ -16,22 +16,22 @@ import SwiftProtobuf
 
 /// Concrete **internal** implementation of `ServerOnlyStreamInterface`.
 final class ServerOnlyStream<Message: ProtobufMessage>: Sendable {
-    private let bidirectionalStream: BidirectionalStream<Message>
+  private let bidirectionalStream: BidirectionalStream<Message>
 
-    init(bidirectionalStream: BidirectionalStream<Message>) {
-        self.bidirectionalStream = bidirectionalStream
-    }
+  init(bidirectionalStream: BidirectionalStream<Message>) {
+    self.bidirectionalStream = bidirectionalStream
+  }
 }
 
 extension ServerOnlyStream: ServerOnlyStreamInterface {
-    typealias Input = Message
+  typealias Input = Message
 
-    func send(_ input: Message) {
-        self.bidirectionalStream.send(input)
-        self.bidirectionalStream.close()
-    }
+  func send(_ input: Message) {
+    self.bidirectionalStream.send(input)
+    self.bidirectionalStream.close()
+  }
 
-    func cancel() {
-        self.bidirectionalStream.cancel()
-    }
+  func cancel() {
+    self.bidirectionalStream.cancel()
+  }
 }

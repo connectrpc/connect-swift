@@ -17,73 +17,73 @@ import Foundation
 import Testing
 
 struct TimeoutTimerTests {
-    /// Generous multiple of the 50ms deadline configured by `makeConfig()`. `confirmation()`
-    /// validates its count when the body returns rather than waiting, so the body must outlast
-    /// the deadline on its own.
-    private static let waitNanoseconds: UInt64 = 500_000_000
+  /// Generous multiple of the 50ms deadline configured by `makeConfig()`. `confirmation()`
+  /// validates its count when the body returns rather than waiting, so the body must outlast
+  /// the deadline on its own.
+  private static let waitNanoseconds: UInt64 = 500_000_000
 
-    @Test
-    func returnsNilWhenTimeoutIsNotConfigured() {
-        #expect(TimeoutTimer(config: ProtocolClientConfig(host: "http://localhost")) == nil)
+  @Test
+  func returnsNilWhenTimeoutIsNotConfigured() {
+    #expect(TimeoutTimer(config: ProtocolClientConfig(host: "http://localhost")) == nil)
+  }
+
+  @Test
+  func firesAfterTheDeadline() async throws {
+    let timer = try #require(TimeoutTimer(config: Self.makeConfig()))
+    let timedOutWhenInvoked = Locked<Bool?>(nil)
+
+    await confirmation("Deadline callback runs") { confirmed in
+      timer.start {
+        timedOutWhenInvoked.value = timer.timedOut
+        confirmed()
+      }
+      try? await Task.sleep(nanoseconds: Self.waitNanoseconds)
     }
 
-    @Test
-    func firesAfterTheDeadline() async throws {
+    #expect(timer.timedOut)
+    // `ProtocolClient` reads `timedOut` from within the cancelation this callback triggers.
+    #expect(timedOutWhenInvoked.value == true)
+  }
+
+  @Test
+  func cancelAfterStartPreventsFiring() async throws {
+    let timer = try #require(TimeoutTimer(config: Self.makeConfig()))
+
+    await confirmation("Deadline callback never runs", expectedCount: 0) { confirmed in
+      timer.start { confirmed() }
+      timer.cancel()
+      try? await Task.sleep(nanoseconds: Self.waitNanoseconds)
+    }
+
+    #expect(!timer.timedOut)
+  }
+
+  @Test
+  func cancelBeforeStartPreventsFiring() async throws {
+    let timer = try #require(TimeoutTimer(config: Self.makeConfig()))
+
+    await confirmation("Deadline callback never runs", expectedCount: 0) { confirmed in
+      timer.cancel()
+      timer.start { confirmed() }
+      try? await Task.sleep(nanoseconds: Self.waitNanoseconds)
+    }
+
+    #expect(!timer.timedOut)
+  }
+
+  @Test
+  func deallocationPreventsFiring() async throws {
+    try await confirmation("Deadline callback never runs", expectedCount: 0) { confirmed in
+      do {
         let timer = try #require(TimeoutTimer(config: Self.makeConfig()))
-        let timedOutWhenInvoked = Locked<Bool?>(nil)
+        timer.start { confirmed() }
+      }
 
-        await confirmation("Deadline callback runs") { confirmed in
-            timer.start {
-                timedOutWhenInvoked.value = timer.timedOut
-                confirmed()
-            }
-            try? await Task.sleep(nanoseconds: Self.waitNanoseconds)
-        }
-
-        #expect(timer.timedOut)
-        // `ProtocolClient` reads `timedOut` from within the cancelation this callback triggers.
-        #expect(timedOutWhenInvoked.value == true)
+      try? await Task.sleep(nanoseconds: Self.waitNanoseconds)
     }
+  }
 
-    @Test
-    func cancelAfterStartPreventsFiring() async throws {
-        let timer = try #require(TimeoutTimer(config: Self.makeConfig()))
-
-        await confirmation("Deadline callback never runs", expectedCount: 0) { confirmed in
-            timer.start { confirmed() }
-            timer.cancel()
-            try? await Task.sleep(nanoseconds: Self.waitNanoseconds)
-        }
-
-        #expect(!timer.timedOut)
-    }
-
-    @Test
-    func cancelBeforeStartPreventsFiring() async throws {
-        let timer = try #require(TimeoutTimer(config: Self.makeConfig()))
-
-        await confirmation("Deadline callback never runs", expectedCount: 0) { confirmed in
-            timer.cancel()
-            timer.start { confirmed() }
-            try? await Task.sleep(nanoseconds: Self.waitNanoseconds)
-        }
-
-        #expect(!timer.timedOut)
-    }
-
-    @Test
-    func deallocationPreventsFiring() async throws {
-        try await confirmation("Deadline callback never runs", expectedCount: 0) { confirmed in
-            do {
-                let timer = try #require(TimeoutTimer(config: Self.makeConfig()))
-                timer.start { confirmed() }
-            }
-
-            try? await Task.sleep(nanoseconds: Self.waitNanoseconds)
-        }
-    }
-
-    private static func makeConfig() -> ProtocolClientConfig {
-        return ProtocolClientConfig(host: "http://localhost", timeout: 0.05)
-    }
+  private static func makeConfig() -> ProtocolClientConfig {
+    return ProtocolClientConfig(host: "http://localhost", timeout: 0.05)
+  }
 }

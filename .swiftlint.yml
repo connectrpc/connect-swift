@@ -113,7 +113,7 @@ custom_rules:
     name: "Commas should never have a space before them"
     regex: '\s+,'
   spaces_over_tabs:
-    name: "Use (4) spaces instead of tabs"
+    name: "Use spaces instead of tabs"
     regex: '\t'
   swift_testing_over_xctest:
     name: "Use Swift Testing rather than XCTest for writing tests"

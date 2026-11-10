@@ -16,52 +16,52 @@ import Foundation
 
 /// Namespace for performing client-only stream validation.
 enum ClientOnlyStreamValidation {
-    /// Applies some validations which are only relevant for client-only streams.
-    ///
-    /// Should be called after all values have been received over a client stream. Since client
-    /// streams only expect 1 result, all values returned from the server should be buffered before
-    /// being validated here and returned to the caller.
-    ///
-    /// - parameter results: The buffered list of results to validate.
-    ///
-    /// - returns: The list of stream results which should be returned to the caller.
-    static func validatedFinalClientStreamResults<T>(
-        _ results: [StreamResult<T>]
-    ) -> [StreamResult<T>] {
-        var messageCount = 0
-        for result in results {
-            switch result {
-            case .headers:
-                continue
-            case .message:
-                messageCount += 1
-            case .complete(let code, _, _):
-                if code != .ok {
-                    return results
-                }
-            }
+  /// Applies some validations which are only relevant for client-only streams.
+  ///
+  /// Should be called after all values have been received over a client stream. Since client
+  /// streams only expect 1 result, all values returned from the server should be buffered before
+  /// being validated here and returned to the caller.
+  ///
+  /// - parameter results: The buffered list of results to validate.
+  ///
+  /// - returns: The list of stream results which should be returned to the caller.
+  static func validatedFinalClientStreamResults<T>(
+    _ results: [StreamResult<T>]
+  ) -> [StreamResult<T>] {
+    var messageCount = 0
+    for result in results {
+      switch result {
+      case .headers:
+        continue
+      case .message:
+        messageCount += 1
+      case .complete(let code, _, _):
+        if code != .ok {
+          return results
         }
-
-        if messageCount < 1 {
-            return [
-                .complete(
-                    code: .internalError,
-                    error: ConnectError(
-                        code: .unimplemented, message: "unary stream has no messages"
-                    ), trailers: nil
-                )
-            ]
-        } else if messageCount > 1 {
-            return [
-                .complete(
-                    code: .internalError,
-                    error: ConnectError(
-                        code: .unimplemented, message: "unary stream has multiple messages"
-                    ), trailers: nil
-                )
-            ]
-        } else {
-            return results
-        }
+      }
     }
+
+    if messageCount < 1 {
+      return [
+        .complete(
+          code: .internalError,
+          error: ConnectError(
+            code: .unimplemented, message: "unary stream has no messages"
+          ), trailers: nil
+        )
+      ]
+    } else if messageCount > 1 {
+      return [
+        .complete(
+          code: .internalError,
+          error: ConnectError(
+            code: .unimplemented, message: "unary stream has multiple messages"
+          ), trailers: nil
+        )
+      ]
+    } else {
+      return results
+    }
+  }
 }

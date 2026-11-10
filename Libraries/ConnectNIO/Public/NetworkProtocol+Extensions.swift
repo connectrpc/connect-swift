@@ -15,15 +15,15 @@
 import Connect
 
 extension NetworkProtocol {
-    /// The gRPC protocol:
-    /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
-    ///
-    /// IMPORTANT: This protocol must be used in conjunction with an HTTP client that supports
-    /// trailers, such as the `NIOHTTPClient` included in this library.
-    public static var grpc: Self {
-        return .custom(
-            name: "gRPC",
-            protocolInterceptor: InterceptorFactory { GRPCInterceptor(config: $0) }
-        )
-    }
+  /// The gRPC protocol:
+  /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
+  ///
+  /// IMPORTANT: This protocol must be used in conjunction with an HTTP client that supports
+  /// trailers, such as the `NIOHTTPClient` included in this library.
+  public static var grpc: Self {
+    return .custom(
+      name: "gRPC",
+      protocolInterceptor: InterceptorFactory { GRPCInterceptor(config: $0) }
+    )
+  }
 }

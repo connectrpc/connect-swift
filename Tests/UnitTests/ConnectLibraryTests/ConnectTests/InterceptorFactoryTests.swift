@@ -22,44 +22,44 @@ private final class MockStreamInterceptor: StreamInterceptor {}
 private final class MockUnaryAndStreamInterceptor: UnaryInterceptor, StreamInterceptor {}
 
 struct InterceptorFactoryTests {
-    private let config = ProtocolClientConfig(host: "localhost")
+  private let config = ProtocolClientConfig(host: "localhost")
 
-    @Test
-    func instantiatesUnaryInterceptorForUnary() {
-        let factory = InterceptorFactory { _ in MockUnaryInterceptor() }
-        #expect(
-            factory.createUnary(with: self.config) is MockUnaryInterceptor
-        )
-    }
+  @Test
+  func instantiatesUnaryInterceptorForUnary() {
+    let factory = InterceptorFactory { _ in MockUnaryInterceptor() }
+    #expect(
+      factory.createUnary(with: self.config) is MockUnaryInterceptor
+    )
+  }
 
-    @Test
-    func instantiatesStreamInterceptorForStream() {
-        let factory = InterceptorFactory { _ in MockStreamInterceptor() }
-        #expect(
-            factory.createStream(with: self.config) is MockStreamInterceptor
-        )
-    }
+  @Test
+  func instantiatesStreamInterceptorForStream() {
+    let factory = InterceptorFactory { _ in MockStreamInterceptor() }
+    #expect(
+      factory.createStream(with: self.config) is MockStreamInterceptor
+    )
+  }
 
-    @Test
-    func instantiatesCombinedInterceptorForStreamAndUnary() {
-        let factory = InterceptorFactory { _ in MockUnaryAndStreamInterceptor() }
-        #expect(
-            factory.createUnary(with: self.config) is MockUnaryAndStreamInterceptor
-        )
-        #expect(
-            factory.createStream(with: self.config) is MockUnaryAndStreamInterceptor
-        )
-    }
+  @Test
+  func instantiatesCombinedInterceptorForStreamAndUnary() {
+    let factory = InterceptorFactory { _ in MockUnaryAndStreamInterceptor() }
+    #expect(
+      factory.createUnary(with: self.config) is MockUnaryAndStreamInterceptor
+    )
+    #expect(
+      factory.createStream(with: self.config) is MockUnaryAndStreamInterceptor
+    )
+  }
 
-    @Test
-    func doesNotInstantiateUnaryInterceptorForStream() {
-        let factory = InterceptorFactory { _ in MockUnaryInterceptor() }
-        #expect(factory.createStream(with: self.config) == nil)
-    }
+  @Test
+  func doesNotInstantiateUnaryInterceptorForStream() {
+    let factory = InterceptorFactory { _ in MockUnaryInterceptor() }
+    #expect(factory.createStream(with: self.config) == nil)
+  }
 
-    @Test
-    func doesNotInstantiateStreamInterceptorForUnary() {
-        let factory = InterceptorFactory { _ in MockStreamInterceptor() }
-        #expect(factory.createUnary(with: self.config) == nil)
-    }
+  @Test
+  func doesNotInstantiateStreamInterceptorForUnary() {
+    let factory = InterceptorFactory { _ in MockStreamInterceptor() }
+    #expect(factory.createUnary(with: self.config) == nil)
+  }
 }

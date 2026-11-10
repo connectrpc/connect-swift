@@ -15,57 +15,57 @@
 // MARK: - Arguments
 
 enum ClientTypeArg: String, CaseIterable, CommandLineArgument {
-    case swiftNIO = "nio"
-    case urlSession = "urlsession"
+  case swiftNIO = "nio"
+  case urlSession = "urlsession"
 
-    static let key = "httpclient"
+  static let key = "httpclient"
 }
 
 enum VerboseArg: String, CaseIterable, CommandLineArgument {
-    case disabled = "false"
-    case enabled = "true"
+  case disabled = "false"
+  case enabled = "true"
 
-    static let key = "verbose"
+  static let key = "verbose"
 }
 
 // MARK: - Protocol interface
 
 protocol CommandLineArgument: RawRepresentable, CaseIterable {
-    static var key: String { get }
+  static var key: String { get }
 
-    static func fromCommandLineArguments(_ arguments: [String]) throws -> Self
+  static func fromCommandLineArguments(_ arguments: [String]) throws -> Self
 }
 
 extension CommandLineArgument where RawValue == String {
-    static func fromCommandLineArguments(
-        _ arguments: [String],
-        defaultingTo defaultValue: Self
-    ) throws -> Self {
-        guard arguments.contains(where: { $0.hasPrefix(self.key) }) else {
-            return defaultValue
-        }
-        return try self.fromCommandLineArguments(arguments)
+  static func fromCommandLineArguments(
+    _ arguments: [String],
+    defaultingTo defaultValue: Self
+  ) throws -> Self {
+    guard arguments.contains(where: { $0.hasPrefix(self.key) }) else {
+      return defaultValue
+    }
+    return try self.fromCommandLineArguments(arguments)
+  }
+
+  static func fromCommandLineArguments(_ arguments: [String]) throws -> Self {
+    guard let argument = arguments.first(where: { $0.hasPrefix(self.key) }) else {
+      throw "'\(self.key)' argument must be specified"
     }
 
-    static func fromCommandLineArguments(_ arguments: [String]) throws -> Self {
-        guard let argument = arguments.first(where: { $0.hasPrefix(self.key) }) else {
-            throw "'\(self.key)' argument must be specified"
-        }
-
-        guard
-            let argumentValue = self.init(
-                rawValue:
-                    argument
-                    .replacingOccurrences(of: "\(self.key)=", with: "")
-                    .trimmingCharacters(in: .whitespaces)
-            )
-        else {
-            throw """
-            Invalid argument passed for '\(self.key)' argument. \
-            Expected \(self.allCases.map(\.rawValue)), got '\(argument)'
-            """
-        }
-
-        return argumentValue
+    guard
+      let argumentValue = self.init(
+        rawValue:
+          argument
+          .replacingOccurrences(of: "\(self.key)=", with: "")
+          .trimmingCharacters(in: .whitespaces)
+      )
+    else {
+      throw """
+      Invalid argument passed for '\(self.key)' argument. \
+      Expected \(self.allCases.map(\.rawValue)), got '\(argument)'
+      """
     }
+
+    return argumentValue
+  }
 }

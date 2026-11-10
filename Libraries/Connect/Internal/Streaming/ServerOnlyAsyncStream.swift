@@ -16,24 +16,24 @@ import SwiftProtobuf
 
 /// Concrete **internal** implementation of `ServerOnlyAsyncStreamInterface`.
 final class ServerOnlyAsyncStream<Input: ProtobufMessage, Output: ProtobufMessage>: Sendable {
-    private let bidirectionalStream: BidirectionalAsyncStream<Input, Output>
+  private let bidirectionalStream: BidirectionalAsyncStream<Input, Output>
 
-    init(bidirectionalStream: BidirectionalAsyncStream<Input, Output>) {
-        self.bidirectionalStream = bidirectionalStream
-    }
+  init(bidirectionalStream: BidirectionalAsyncStream<Input, Output>) {
+    self.bidirectionalStream = bidirectionalStream
+  }
 }
 
 extension ServerOnlyAsyncStream: ServerOnlyAsyncStreamInterface {
-    func send(_ input: Input) throws {
-        try self.bidirectionalStream.send(input)
-        self.bidirectionalStream.close()
-    }
+  func send(_ input: Input) throws {
+    try self.bidirectionalStream.send(input)
+    self.bidirectionalStream.close()
+  }
 
-    func results() -> AsyncStream<StreamResult<Output>> {
-        return self.bidirectionalStream.results()
-    }
+  func results() -> AsyncStream<StreamResult<Output>> {
+    return self.bidirectionalStream.results()
+  }
 
-    func cancel() {
-        self.bidirectionalStream.cancel()
-    }
+  func cancel() {
+    self.bidirectionalStream.cancel()
+  }
 }
