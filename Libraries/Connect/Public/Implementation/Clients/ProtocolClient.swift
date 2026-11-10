@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import Foundation
-import os.log
 import SwiftProtobuf
 
 /// Concrete implementation of the `ProtocolClientInterface`.
@@ -83,7 +82,7 @@ extension ProtocolClient: ProtocolClientInterface {
                     )))
                 } catch let error {
                     proceed(.failure(ConnectError(
-                        code: .unknown, message: "request serialization failed",
+                        code: .internalError, message: "request serialization failed",
                         exception: error, details: [], metadata: [:]
                     )))
                 }
@@ -102,7 +101,7 @@ extension ProtocolClient: ProtocolClientInterface {
                     case .success(let value):
                         interceptedRequest = value
                     case .failure(let error):
-                        completion(ResponseMessage(result: .failure(error)))
+                        completion(ResponseMessage(code: error.code, result: .failure(error)))
                         return
                     }
 
@@ -277,17 +276,42 @@ extension ProtocolClient: ProtocolClientInterface {
             }
             onResult(output)
         }
+        let pendingRequestCallbacks = PendingRequestCallbacks()
+        // Ends the stream with `error` and cancels the underlying request, unless the stream has
+        // already completed.
+        let failStream: @Sendable (ConnectError) -> Void = { error in
+            let shouldFail = hasCompleted.perform { hasCompleted in
+                if hasCompleted {
+                    return false
+                }
+                hasCompleted = true
+                return true
+            }
+            guard shouldFail else {
+                return
+            }
+            pendingRequestCallbacks.enqueue { $0.cancel() }
+            onResult(.complete(code: error.code, error: error, trailers: nil))
+        }
+        let toTyped: @Sendable (
+            StreamResult<Data>, @escaping @Sendable (StreamResult<Output>) -> Void
+        ) -> Void = { interceptedResult, proceed in
+            do {
+                proceed(try interceptedResult.toTyped(Output.self, using: codec))
+            } catch let error {
+                failStream(ConnectError(
+                    code: .internalError, message: "failed to deserialize stream message",
+                    exception: error, details: [], metadata: [:]
+                ))
+            }
+        }
         let responseCallbacks = ResponseCallbacks(
             receiveResponseHeaders: { responseHeaders in
                 interceptorChain.executeLinkedInterceptors(
                     interceptorChain.interceptors.map { $0.handleStreamRawResult },
                     firstInFirstOut: false,
                     initial: .headers(responseHeaders),
-                    transform: { interceptedResult, proceed in
-                        if let typedResult = interceptedResult.toTyped(Output.self, using: codec) {
-                            proceed(typedResult)
-                        }
-                    },
+                    transform: toTyped,
                     then: interceptorChain.interceptors.map { $0.handleStreamResult },
                     finish: onResult
                 )
@@ -297,6 +321,12 @@ extension ProtocolClient: ProtocolClientInterface {
                     // Handle cases where multiple messages are received in a single chunk.
                     responseBuffer += data
                     while true {
+                        if hasCompleted.value {
+                            // Drop anything left over after the stream has ended.
+                            responseBuffer = Data()
+                            return
+                        }
+
                         let messageLength = Envelope.messageLength(forPackedData: responseBuffer)
                         if messageLength < 0 {
                             return
@@ -311,13 +341,7 @@ extension ProtocolClient: ProtocolClientInterface {
                             interceptorChain.interceptors.map { $0.handleStreamRawResult },
                             firstInFirstOut: false,
                             initial: .message(responseBuffer.prefix(prefixedMessageLength)),
-                            transform: { interceptedResult, proceed in
-                                if let typedResult = interceptedResult.toTyped(
-                                    Output.self, using: codec
-                                ) {
-                                    proceed(typedResult)
-                                }
-                            },
+                            transform: toTyped,
                             then: interceptorChain.interceptors.map { $0.handleStreamResult },
                             finish: onResult
                         )
@@ -355,18 +379,13 @@ extension ProtocolClient: ProtocolClientInterface {
                     interceptorChain.interceptors.map { $0.handleStreamRawResult },
                     firstInFirstOut: false,
                     initial: .complete(code: code, error: error, trailers: trailers),
-                    transform: { interceptedResult, proceed in
-                        if let typedResult = interceptedResult.toTyped(Output.self, using: codec) {
-                            proceed(typedResult)
-                        }
-                    },
+                    transform: toTyped,
                     then: interceptorChain.interceptors.map { $0.handleStreamResult },
                     finish: onResult
                 )
             }
         )
 
-        let pendingRequestCallbacks = PendingRequestCallbacks()
         var headers = headers
         headers[HeaderConstants.contentType] = ["application/connect+\(codec.name())"]
         let request = HTTPRequest<Void>(
@@ -419,11 +438,10 @@ extension ProtocolClient: ProtocolClientInterface {
                         do {
                             proceed(try codec.serialize(message: interceptedMessage))
                         } catch let error {
-                            os_log(
-                                .error,
-                                "Failed to send request message which could not be serialized: %@",
-                                error.localizedDescription
-                            )
+                            failStream(ConnectError(
+                                code: .internalError, message: "failed to serialize stream message",
+                                exception: error, details: [], metadata: [:]
+                            ))
                         }
                     },
                     then: interceptorChain.interceptors.map { $0.handleStreamRawInput },
@@ -496,10 +514,11 @@ private extension ResponseMessage where Output: ProtobufMessage {
                 )
             } catch let error {
                 self.init(
-                    code: response.code,
+                    code: .internalError,
                     headers: response.headers,
                     result: .failure(ConnectError(
-                        code: response.code, message: nil, exception: error,
+                        code: .internalError, message: "response deserialization failed",
+                        exception: error,
                         details: [], metadata: response.headers
                     )),
                     trailers: response.trailers
@@ -519,23 +538,14 @@ private extension ResponseMessage where Output: ProtobufMessage {
 private extension StreamResult<Data> {
     func toTyped<Message: ProtobufMessage>(
         _ type: Message.Type, using codec: Codec
-    ) -> StreamResult<Message>? {
+    ) throws -> StreamResult<Message> {
         switch self {
         case .complete(let code, let error, let trailers):
             return .complete(code: code, error: error, trailers: trailers)
         case .headers(let headers):
             return .headers(headers)
         case .message(let data):
-            do {
-                return .message(try codec.deserialize(source: data))
-            } catch let error {
-                os_log(
-                    .error,
-                    "Stream result failed to deserialize: %@",
-                    error.localizedDescription
-                )
-                return nil
-            }
+            return .message(try codec.deserialize(source: data))
         }
     }
 }
