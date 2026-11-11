@@ -14,7 +14,6 @@
 
 import Connect
 import Foundation
-import NIOConcurrencyHelpers
 
 /// Implementation of the gRPC protocol as an interceptor.
 /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md
@@ -34,13 +33,13 @@ extension GRPCInterceptor: UnaryInterceptor {
         proceed: @escaping (Result<HTTPRequest<Data?>, ConnectError>) -> Void
     ) {
         // gRPC unary payloads are enveloped.
-        let envelopedRequestBody = Envelope._packMessage(
+        let envelopedRequestBody = Envelope.packMessage(
             request.message ?? Data(), using: self.config.requestCompression
         )
 
         proceed(.success(HTTPRequest(
             url: request.url,
-            headers: request.headers._addingGRPCHeaders(using: self.config, grpcWeb: false),
+            headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: false),
             message: envelopedRequestBody,
             method: request.method,
             trailers: nil,
@@ -72,12 +71,12 @@ extension GRPCInterceptor: UnaryInterceptor {
             return
         }
 
-        let (grpcCode, connectError) = ConnectError._parseGRPCHeaders(
+        let (grpcCode, connectError) = ConnectError.parseGRPCHeaders(
             response.headers,
             trailers: response.trailers
         )
         guard grpcCode == .ok, let rawData = response.message, !rawData.isEmpty else {
-            if response.trailers._grpcStatus() == nil && response.message?.isEmpty == false {
+            if response.trailers.grpcStatus() == nil && response.message?.isEmpty == false {
                 proceed(HTTPResponse(
                     code: .internalError,
                     headers: response.headers,
@@ -117,7 +116,7 @@ extension GRPCInterceptor: UnaryInterceptor {
             .headers[HeaderConstants.grpcContentEncoding]?
             .first
             .flatMap { self.config.responseCompressionPool(forName: $0) }
-        if compressionPool == nil && Envelope._isCompressed(rawData) {
+        if compressionPool == nil && Envelope.isCompressed(rawData) {
             proceed(HTTPResponse(
                 code: .internalError, headers: response.headers, message: nil,
                 trailers: response.trailers, error: ConnectError(
@@ -140,7 +139,7 @@ extension GRPCInterceptor: UnaryInterceptor {
         }
 
         do {
-            let messageData = try Envelope._unpackMessage(
+            let messageData = try Envelope.unpackMessage(
                 rawData, compressionPool: compressionPool
             ).unpacked
             proceed(HTTPResponse(
@@ -172,7 +171,7 @@ extension GRPCInterceptor: StreamInterceptor {
     ) {
         proceed(.success(HTTPRequest(
             url: request.url,
-            headers: request.headers._addingGRPCHeaders(using: self.config, grpcWeb: false),
+            headers: request.headers.addingGRPCHeaders(using: self.config, grpcWeb: false),
             message: request.message,
             method: request.method,
             trailers: nil,
@@ -182,7 +181,7 @@ extension GRPCInterceptor: StreamInterceptor {
 
     @Sendable
     func handleStreamRawInput(_ input: Data, proceed: @escaping (Data) -> Void) {
-        proceed(Envelope._packMessage(input, using: self.config.requestCompression))
+        proceed(Envelope.packMessage(input, using: self.config.requestCompression))
     }
 
     @Sendable
@@ -214,7 +213,7 @@ extension GRPCInterceptor: StreamInterceptor {
                 let responseCompressionPool = self.streamResponseHeaders.value?[
                     HeaderConstants.grpcContentEncoding
                 ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
-                if responseCompressionPool == nil && Envelope._isCompressed(rawData) {
+                if responseCompressionPool == nil && Envelope.isCompressed(rawData) {
                     proceed(.complete(
                         code: .internalError, error: ConnectError(
                             code: .internalError, message: "received unexpected compressed message"
@@ -223,7 +222,7 @@ extension GRPCInterceptor: StreamInterceptor {
                     return
                 }
 
-                let unpackedMessage = try Envelope._unpackMessage(
+                let unpackedMessage = try Envelope.unpackMessage(
                     rawData, compressionPool: responseCompressionPool
                 ).unpacked
                 proceed(.message(unpackedMessage))
@@ -239,7 +238,7 @@ extension GRPCInterceptor: StreamInterceptor {
                 return
             }
 
-            let (grpcCode, connectError) = ConnectError._parseGRPCHeaders(
+            let (grpcCode, connectError) = ConnectError.parseGRPCHeaders(
                 self.streamResponseHeaders.value,
                 trailers: trailers
             )
@@ -275,22 +274,7 @@ extension GRPCInterceptor: StreamInterceptor {
 
 private extension Envelope {
     static func containsMultipleGRPCMessages(_ packedData: Data) -> Bool {
-        let messageLength = self._messageLength(forPackedData: packedData)
-        return packedData.count > messageLength + self._prefixLength
-    }
-}
-
-private final class Locked<T>: @unchecked Sendable {
-    private let lock = NIOLock()
-    private var wrappedValue: T
-
-    /// Thread-safe access to the underlying value.
-    var value: T {
-        get { self.lock.withLock { self.wrappedValue } }
-        set { self.lock.withLock { self.wrappedValue = newValue } }
-    }
-
-    init(_ value: T) {
-        self.wrappedValue = value
+        let messageLength = self.messageLength(forPackedData: packedData)
+        return packedData.count > messageLength + self.prefixLength
     }
 }

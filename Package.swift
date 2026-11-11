@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.9
 
 // Copyright 2022-2025 The Connect Authors
 //

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Combine
 import Connect
 import SwiftProtobuf
 
@@ -28,8 +27,10 @@ open class MockBidirectionalAsyncStream<
     Input: ProtobufMessage,
     Output: ProtobufMessage
 >: BidirectionalAsyncStreamInterface, @unchecked Sendable {
-    /// Used to store cancellables from the stream.
-    private var cancellables = [AnyCancellable]()
+    /// The stream returned by `results()`, created on that function's first call and then reused.
+    private var resultsStream: AsyncStream<StreamResult<Output>>?
+    /// Set to `nil` once `outputs` have been emitted so that they are emitted only one time.
+    private var resultsContinuation: AsyncStream<StreamResult<Output>>.Continuation?
 
     /// Closure that is called when `close()` is invoked.
     public var onClose: (() -> Void)?
@@ -40,9 +41,9 @@ open class MockBidirectionalAsyncStream<
     public var outputs: [StreamResult<Output>]
 
     /// All inputs that have been sent through the stream.
-    @Published public private(set) var inputs = [Input]()
+    public private(set) var inputs = [Input]()
     /// True if `close()` has been called.
-    @Published public private(set) var isClosed = false
+    public private(set) var isClosed = false
 
     /// Designated initializer.
     ///
@@ -56,22 +57,23 @@ open class MockBidirectionalAsyncStream<
     open func send(_ input: Input) throws -> Self {
         self.inputs.append(input)
         self.onSend?(input)
+        self.emitOutputsIfReady()
         return self
     }
 
+    /// Returns the same stream on every call, matching the production implementation.
+    /// `outputs` are emitted and the stream is finished once an input has been sent,
+    /// regardless of whether `send()` or this function is called first.
     open func results() -> AsyncStream<Connect.StreamResult<Output>> {
-        // Wait until a request is sent over the stream to return the results.
-        return AsyncStream { continuation in
-            self.$inputs
-                .first { !$0.isEmpty }
-                .sink { _ in
-                    for output in self.outputs {
-                        continuation.yield(output)
-                    }
-                    continuation.finish()
-                }
-                .store(in: &self.cancellables)
+        if let resultsStream = self.resultsStream {
+            return resultsStream
         }
+
+        let (stream, continuation) = AsyncStream.makeStream(of: StreamResult<Output>.self)
+        self.resultsStream = stream
+        self.resultsContinuation = continuation
+        self.emitOutputsIfReady()
+        return stream
     }
 
     open func close() {
@@ -80,4 +82,16 @@ open class MockBidirectionalAsyncStream<
     }
 
     open func cancel() {}
+
+    private func emitOutputsIfReady() {
+        guard !self.inputs.isEmpty, let continuation = self.resultsContinuation else {
+            return
+        }
+
+        self.resultsContinuation = nil
+        for output in self.outputs {
+            continuation.yield(output)
+        }
+        continuation.finish()
+    }
 }
