@@ -4,3 +4,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # One PR per week for all action bumps, instead of one macOS CI run per action.
+    groups:
+      github-actions:
+        patterns:
+          - "*"
