@@ -27,7 +27,11 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     private lazy var bootstrap = self.createBootstrap()
     private let host: String
     private let lock = NIOConcurrencyHelpers.NIOLock()
-    private let loopGroupOwner: EventLoopGroupOwner
+    /// One loop of NIO's process-wide singleton group, which is never shut down. Requests can
+    /// outlive the client which started them - a caller may hold a `Cancelable` or a stream past
+    /// it, and NIO completes an in-flight connect on its own - so a loop that was shut down with
+    /// the client would have that late work scheduled onto it after it had stopped.
+    let eventLoop: NIOCore.EventLoop = NIOPosix.MultiThreadedEventLoopGroup.singleton.next()
     private let port: Int
     private let timeout: TimeInterval?
     private let useSSL: Bool
@@ -35,32 +39,12 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     private var pendingRequests = [(NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer?) -> Void]()
     private var state = State.disconnected
 
-    /// Exposed for testing.
-    var eventLoopGroup: NIOCore.EventLoopGroup {
-        return self.loopGroupOwner.eventLoopGroup
-    }
-
     private enum State {
         case disconnected
         case connecting
         case connected(
             channel: NIOCore.Channel, multiplexer: NIOHTTP2.NIOHTTP2Handler.StreamMultiplexer
         )
-    }
-
-    /// The connection details parsed from the host and port passed to an initializer.
-    private struct Endpoint {
-        let host: String
-        let port: Int
-        let useSSL: Bool
-
-        init(host: String, port: Int?) {
-            let baseURL = URL(string: host)!
-            let useSSL = baseURL.scheme?.lowercased() == "https"
-            self.host = baseURL.host!
-            self.port = port ?? baseURL.port ?? (useSSL ? 443 : 80)
-            self.useSSL = useSSL
-        }
     }
 
     /// Designated initializer for the client.
@@ -73,28 +57,12 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     /// - parameter timeout: Optional timeout after which to terminate requests/streams if no
     ///                      activity has occurred in the request or response path.
     public init(host: String, port: Int? = nil, timeout: TimeInterval? = nil) {
-        let endpoint = Endpoint(host: host, port: port)
-        self.host = endpoint.host
-        self.port = endpoint.port
-        self.useSSL = endpoint.useSSL
+        let baseURL = URL(string: host)!
+        let useSSL = baseURL.scheme?.lowercased() == "https"
+        self.host = baseURL.host!
+        self.port = port ?? baseURL.port ?? (useSSL ? 443 : 80)
         self.timeout = timeout
-        self.loopGroupOwner = EventLoopGroupOwner()
-    }
-
-    /// Initializer which uses an externally managed event loop group rather than creating one.
-    /// The injected group is never shut down by the client, so it may safely be shared.
-    ///
-    /// - parameter eventLoopGroup: The group whose event loops the client should use.
-    init(
-        host: String, port: Int? = nil, timeout: TimeInterval? = nil,
-        eventLoopGroup: NIOCore.EventLoopGroup
-    ) {
-        let endpoint = Endpoint(host: host, port: port)
-        self.host = endpoint.host
-        self.port = endpoint.port
-        self.useSSL = endpoint.useSSL
-        self.timeout = timeout
-        self.loopGroupOwner = EventLoopGroupOwner(group: eventLoopGroup, isGroupOwned: false)
+        self.useSSL = useSSL
     }
 
     /// Called before the first request/stream is initialized, and the result is stored for reuse
@@ -108,7 +76,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         ? self.createTLSConfiguration(forHost: host)
         : nil
 
-        return NIOPosix.ClientBootstrap(group: self.loopGroupOwner.eventLoopGroup)
+        return NIOPosix.ClientBootstrap(group: self.eventLoop)
             .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
             .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .channelInitializer { channel in
@@ -150,7 +118,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         onMetrics: @escaping @Sendable (Connect.HTTPMetrics) -> Void,
         onResponse: @escaping @Sendable (Connect.HTTPResponse) -> Void
     ) -> Connect.Cancelable {
-        let eventLoop = self.loopGroupOwner.next()
+        let eventLoop = self.eventLoop
         let handler = ConnectUnaryChannelHandler(
             request: request,
             eventLoop: eventLoop,
@@ -160,7 +128,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         self.sendOrQueueRequest { [weak self] multiplexer in
             if let multiplexer = multiplexer {
                 self?.startMultiplexChannel(
-                    for: request.url, on: eventLoop.loop, using: multiplexer, with: handler
+                    for: request.url, on: eventLoop, using: multiplexer, with: handler
                 )
             } else {
                 onResponse(.init(
@@ -180,7 +148,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         request: Connect.HTTPRequest<Data?>,
         responseCallbacks: Connect.ResponseCallbacks
     ) -> Connect.RequestCallbacks<Data> {
-        let eventLoop = self.loopGroupOwner.next()
+        let eventLoop = self.eventLoop
         let handler = ConnectStreamChannelHandler(
             request: request,
             responseCallbacks: responseCallbacks,
@@ -189,7 +157,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         self.sendOrQueueRequest { [weak self] multiplexer in
             if let multiplexer = multiplexer {
                 self?.startMultiplexChannel(
-                    for: request.url, on: eventLoop.loop, using: multiplexer, with: handler
+                    for: request.url, on: eventLoop, using: multiplexer, with: handler
                 )
             } else {
                 responseCallbacks.receiveClose(.unavailable, [:], ConnectError.disconnected())
@@ -224,27 +192,28 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         }
 
         self.state = .connecting
-        // NIO completes an in-flight connect itself, hopping back onto the loop from the DNS
-        // offload queue, so registering it keeps the group alive until it settles. Captured
-        // strongly: the owner must outlive a client released mid-connect.
-        let loopGroupOwner = self.loopGroupOwner
-        loopGroupOwner.beginWork()
         self.bootstrap
             .connect(host: self.host, port: self.port)
             .whenComplete { [weak self] result in
-                defer { loopGroupOwner.endWork() }
                 do {
                     switch result {
                     case .success(let channel):
+                        guard let self else {
+                            // The event loop outlives the client, so nothing else would close a
+                            // connection which is established after the client is gone.
+                            channel.close(mode: .all, promise: nil)
+                            return
+                        }
+
                         let multiplexer = try channel.pipeline.syncOperations
                             .handler(type: NIOHTTP2.NIOHTTP2Handler.self)
                             .syncMultiplexer()
                         channel.closeFuture.whenComplete { [weak self] _ in
                             self?.lock.withLock { self?.state = .disconnected }
                         }
-                        self?.lock.withLock {
-                            self?.state = .connected(channel: channel, multiplexer: multiplexer)
-                            self?.flushOrFailPendingRequests(using: multiplexer)
+                        self.lock.withLock {
+                            self.state = .connected(channel: channel, multiplexer: multiplexer)
+                            self.flushOrFailPendingRequests(using: multiplexer)
                         }
                     case .failure(let error):
                         throw error
@@ -307,8 +276,6 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 channel.close(mode: .all, promise: nil)
             }
         }
-        // Outside `self.lock`: this lock may be taken before the owner's, never the reverse.
-        self.loopGroupOwner.shutDown()
     }
 }
 
