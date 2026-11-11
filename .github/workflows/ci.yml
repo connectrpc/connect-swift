@@ -7,14 +7,14 @@ on:
   workflow_dispatch: {} # support manual runs
 env:
   # Sets the Xcode version to use for the CI.
-  # Available versions: https://github.com/actions/runner-images/blob/main/images/macos/xcode-27-arm64-Readme.md#xcode
+  # Available versions: https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md#xcode
   # Ref: https://www.jessesquires.com/blog/2020/01/06/selecting-an-xcode-version-on-github-ci/
-  DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
+  DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
 permissions:
   contents: read
 jobs:
   build-eliza-swiftpm-example:
-    runs-on: xcode-27
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
       - name: Build Eliza Swift PM example
@@ -22,31 +22,31 @@ jobs:
           cd Examples/ElizaSwiftPackageApp
           set -o pipefail && xcodebuild -scheme ElizaSwiftPackageApp build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcbeautify
   build-library-ios:
-    runs-on: xcode-27
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
       - name: Build Connect iOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 18 Pro,OS=latest' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' | xcbeautify
   build-library-macos:
-    runs-on: xcode-27
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
       - name: Build Connect macOS library
         run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=macOS' | xcbeautify
   build-library-tvos:
-    runs-on: xcode-27
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
       - name: Build Connect tvOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV 4K (4th generation),OS=latest' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV 4K (3rd generation),OS=latest' | xcbeautify
   build-library-watchos:
-    runs-on: xcode-27
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
       - name: Build Connect watchOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Ultra 4 (49mm),OS=latest' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Ultra 3 (49mm),OS=latest' | xcbeautify
   build-plugin-and-generate:
-    runs-on: xcode-27
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
       - uses: bufbuild/buf-action@v1
@@ -61,7 +61,7 @@ jobs:
           git update-index --refresh --add --remove
           git diff-index --quiet HEAD --
   run-conformance-tests:
-    runs-on: xcode-27
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
       - name: Install conformance runner
@@ -69,7 +69,7 @@ jobs:
       - name: Run conformance tests
         run: make testconformance
   run-unit-tests:
-    runs-on: xcode-27
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
