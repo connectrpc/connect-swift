@@ -24,29 +24,29 @@ import SwiftProtobuf
 ///
 /// To return data over the stream, outputs can be specified using `init(outputs: ...)`.
 open class MockServerOnlyStream<
-  Input: ProtobufMessage,
-  Output: ProtobufMessage
+    Input: ProtobufMessage,
+    Output: ProtobufMessage
 >: ServerOnlyStreamInterface, @unchecked Sendable {
-  /// Closure that is called when `send()` is invoked.
-  public var onSend: ((Input) -> Void)?
-  /// The list of outputs to return to the client once one input has been sent.
-  public var outputs: [StreamResult<Output>]
+    /// Closure that is called when `send()` is invoked.
+    public var onSend: ((Input) -> Void)?
+    /// The list of outputs to return to the client once one input has been sent.
+    public var outputs: [StreamResult<Output>]
 
-  /// All inputs that have been sent through the stream.
-  @Published public private(set) var inputs = [Input]()
+    /// All inputs that have been sent through the stream.
+    @Published public private(set) var inputs = [Input]()
 
-  /// Designated initializer.
-  ///
-  /// - parameter outputs: The list of outputs to return to the client once one input has been
-  ///                      sent.
-  public init(outputs: [StreamResult<Output>] = []) {
-    self.outputs = outputs
-  }
+    /// Designated initializer.
+    ///
+    /// - parameter outputs: The list of outputs to return to the client once one input has been
+    ///                      sent.
+    public init(outputs: [StreamResult<Output>] = []) {
+        self.outputs = outputs
+    }
 
-  open func send(_ input: Input) {
-    self.inputs.append(input)
-    self.onSend?(input)
-  }
+    open func send(_ input: Input) {
+        self.inputs.append(input)
+        self.onSend?(input)
+    }
 
-  open func cancel() {}
+    open func cancel() {}
 }

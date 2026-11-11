@@ -18,158 +18,158 @@ import ConnectNIO
 import SwiftUI
 
 private enum MessagingConnectionType: Int, CaseIterable {
-  case connectUnary
-  case connectStreaming
-  case grpcUnary
-  case grpcStreaming
-  case grpcWebUnary
-  case grpcWebStreaming
+    case connectUnary
+    case connectStreaming
+    case grpcUnary
+    case grpcStreaming
+    case grpcWebUnary
+    case grpcWebStreaming
 }
 
 extension MessagingConnectionType: Identifiable {
-  typealias ID = RawValue
+    typealias ID = RawValue
 
-  var id: ID {
-    return self.rawValue
-  }
+    var id: ID {
+        return self.rawValue
+    }
 }
 
 struct MenuView: View {
-  private static func createClient(withProtocol networkProtocol: NetworkProtocol)
-    -> Connectrpc_Eliza_V1_ElizaServiceClient
-  {
-    let host = "https://demo.connectrpc.com"
-    let config = ProtocolClientConfig(
-      host: host,
-      networkProtocol: networkProtocol,
-      codec: ProtoCodec(),  // Protobuf binary, or JSONCodec() for JSON
-      unaryGET: .disabled  // Can enable to use cacheable unary HTTP GET requests
-    )
-    // For gRPC, use the NIO HTTP client:
-    if case .custom = networkProtocol {
-      return Connectrpc_Eliza_V1_ElizaServiceClient(
-        client: ProtocolClient(
-          httpClient: NIOHTTPClient(host: host),
-          config: config
+    private static func createClient(withProtocol networkProtocol: NetworkProtocol)
+        -> Connectrpc_Eliza_V1_ElizaServiceClient
+    {
+        let host = "https://demo.connectrpc.com"
+        let config = ProtocolClientConfig(
+            host: host,
+            networkProtocol: networkProtocol,
+            codec: ProtoCodec(),  // Protobuf binary, or JSONCodec() for JSON
+            unaryGET: .disabled  // Can enable to use cacheable unary HTTP GET requests
         )
-      )
-    }
-    return Connectrpc_Eliza_V1_ElizaServiceClient(
-      client: ProtocolClient(
-        httpClient: URLSessionHTTPClient(),
-        config: config
-      )
-    )
-  }
-
-  var body: some View {
-    NavigationView {
-      VStack(spacing: 15) {
-        Text("Connect Demo")
-          .font(.title)
-
-        Text("Select a protocol to use for chatting with Eliza, a conversational bot.")
-          .font(.body)
-          .foregroundColor(.gray)
-          .multilineTextAlignment(.center)
-          .padding([.leading, .trailing])
-
-        List(MessagingConnectionType.allCases) { connectionType in
-          switch connectionType {
-          case .connectUnary:
-            NavigationLink(
-              "Connect (Unary)",
-              destination: LazyNavigationView {
-                MessagingView(
-                  viewModel: UnaryMessagingViewModel(
-                    client: Self.createClient(withProtocol: .connect)
-                  )
+        // For gRPC, use the NIO HTTP client:
+        if case .custom = networkProtocol {
+            return Connectrpc_Eliza_V1_ElizaServiceClient(
+                client: ProtocolClient(
+                    httpClient: NIOHTTPClient(host: host),
+                    config: config
                 )
-              }
-              .navigationTitle("Eliza Chat (Unary)")
             )
-
-          case .connectStreaming:
-            NavigationLink(
-              "Connect (Streaming)",
-              destination: LazyNavigationView {
-                MessagingView(
-                  viewModel: BidirectionalStreamingMessagingViewModel(
-                    client: Self.createClient(withProtocol: .connect)
-                  )
-                )
-              }
-              .navigationTitle("Eliza Chat (Streaming)")
-            )
-
-          case .grpcUnary:
-            NavigationLink(
-              "gRPC (Unary)",
-              destination: LazyNavigationView {
-                MessagingView(
-                  viewModel: UnaryMessagingViewModel(
-                    client: Self.createClient(withProtocol: .grpc)
-                  )
-                )
-              }
-              .navigationTitle("Eliza Chat (gRPC Unary)")
-            )
-
-          case .grpcWebUnary:
-            NavigationLink(
-              "gRPC Web (Unary)",
-              destination: LazyNavigationView {
-                MessagingView(
-                  viewModel: UnaryMessagingViewModel(
-                    client: Self.createClient(withProtocol: .grpcWeb)
-                  )
-                )
-              }
-              .navigationTitle("Eliza Chat (gRPC-W Unary)")
-            )
-
-          case .grpcStreaming:
-            NavigationLink(
-              "gRPC (Streaming)",
-              destination: LazyNavigationView {
-                MessagingView(
-                  viewModel: BidirectionalStreamingMessagingViewModel(
-                    client: Self.createClient(withProtocol: .grpc)
-                  )
-                )
-              }
-              .navigationTitle("Eliza Chat (gRPC Streaming)")
-            )
-
-          case .grpcWebStreaming:
-            NavigationLink(
-              "gRPC Web (Streaming)",
-              destination: LazyNavigationView {
-                MessagingView(
-                  viewModel: BidirectionalStreamingMessagingViewModel(
-                    client: Self.createClient(withProtocol: .grpcWeb)
-                  )
-                )
-              }
-              .navigationTitle("Eliza Chat (gRPC-W Streaming)")
-            )
-          }
         }
-      }
+        return Connectrpc_Eliza_V1_ElizaServiceClient(
+            client: ProtocolClient(
+                httpClient: URLSessionHTTPClient(),
+                config: config
+            )
+        )
     }
-  }
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 15) {
+                Text("Connect Demo")
+                    .font(.title)
+
+                Text("Select a protocol to use for chatting with Eliza, a conversational bot.")
+                    .font(.body)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .padding([.leading, .trailing])
+
+                List(MessagingConnectionType.allCases) { connectionType in
+                    switch connectionType {
+                    case .connectUnary:
+                        NavigationLink(
+                            "Connect (Unary)",
+                            destination: LazyNavigationView {
+                                MessagingView(
+                                    viewModel: UnaryMessagingViewModel(
+                                        client: Self.createClient(withProtocol: .connect)
+                                    )
+                                )
+                            }
+                            .navigationTitle("Eliza Chat (Unary)")
+                        )
+
+                    case .connectStreaming:
+                        NavigationLink(
+                            "Connect (Streaming)",
+                            destination: LazyNavigationView {
+                                MessagingView(
+                                    viewModel: BidirectionalStreamingMessagingViewModel(
+                                        client: Self.createClient(withProtocol: .connect)
+                                    )
+                                )
+                            }
+                            .navigationTitle("Eliza Chat (Streaming)")
+                        )
+
+                    case .grpcUnary:
+                        NavigationLink(
+                            "gRPC (Unary)",
+                            destination: LazyNavigationView {
+                                MessagingView(
+                                    viewModel: UnaryMessagingViewModel(
+                                        client: Self.createClient(withProtocol: .grpc)
+                                    )
+                                )
+                            }
+                            .navigationTitle("Eliza Chat (gRPC Unary)")
+                        )
+
+                    case .grpcWebUnary:
+                        NavigationLink(
+                            "gRPC Web (Unary)",
+                            destination: LazyNavigationView {
+                                MessagingView(
+                                    viewModel: UnaryMessagingViewModel(
+                                        client: Self.createClient(withProtocol: .grpcWeb)
+                                    )
+                                )
+                            }
+                            .navigationTitle("Eliza Chat (gRPC-W Unary)")
+                        )
+
+                    case .grpcStreaming:
+                        NavigationLink(
+                            "gRPC (Streaming)",
+                            destination: LazyNavigationView {
+                                MessagingView(
+                                    viewModel: BidirectionalStreamingMessagingViewModel(
+                                        client: Self.createClient(withProtocol: .grpc)
+                                    )
+                                )
+                            }
+                            .navigationTitle("Eliza Chat (gRPC Streaming)")
+                        )
+
+                    case .grpcWebStreaming:
+                        NavigationLink(
+                            "gRPC Web (Streaming)",
+                            destination: LazyNavigationView {
+                                MessagingView(
+                                    viewModel: BidirectionalStreamingMessagingViewModel(
+                                        client: Self.createClient(withProtocol: .grpcWeb)
+                                    )
+                                )
+                            }
+                            .navigationTitle("Eliza Chat (gRPC-W Streaming)")
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 /// Workaround wrapper that allows `NavigationLink` destinations to be instantiated only when
 /// they are used, rather than all at once when the containing view is instantiated.
 private struct LazyNavigationView<Content: View>: View {
-  @ViewBuilder private let build: () -> Content
+    @ViewBuilder private let build: () -> Content
 
-  init(@ViewBuilder _ build: @escaping () -> Content) {
-    self.build = build
-  }
+    init(@ViewBuilder _ build: @escaping () -> Content) {
+        self.build = build
+    }
 
-  var body: Content {
-    self.build()
-  }
+    var body: Content {
+        self.build()
+    }
 }

@@ -24,63 +24,63 @@ import SwiftProtobuf
 /// To return data over the stream, outputs can be specified using `init(outputs: ...)` or by
 /// subclassing and overriding `results()`.
 open class MockServerOnlyAsyncStream<
-  Input: ProtobufMessage,
-  Output: ProtobufMessage
+    Input: ProtobufMessage,
+    Output: ProtobufMessage
 >: ServerOnlyAsyncStreamInterface, @unchecked Sendable {
-  /// The stream returned by `results()`, created on that function's first call and then reused.
-  private var resultsStream: AsyncStream<StreamResult<Output>>?
-  /// Set to `nil` once `outputs` have been emitted so that they are emitted only one time.
-  private var resultsContinuation: AsyncStream<StreamResult<Output>>.Continuation?
+    /// The stream returned by `results()`, created on that function's first call and then reused.
+    private var resultsStream: AsyncStream<StreamResult<Output>>?
+    /// Set to `nil` once `outputs` have been emitted so that they are emitted only one time.
+    private var resultsContinuation: AsyncStream<StreamResult<Output>>.Continuation?
 
-  /// Closure that is called when `send()` is invoked.
-  public var onSend: ((Input) -> Void)?
-  /// The list of outputs to return to calls to the `results()` function
-  /// once one input has been sent.
-  public var outputs: [StreamResult<Output>]
+    /// Closure that is called when `send()` is invoked.
+    public var onSend: ((Input) -> Void)?
+    /// The list of outputs to return to calls to the `results()` function
+    /// once one input has been sent.
+    public var outputs: [StreamResult<Output>]
 
-  /// All inputs that have been sent through the stream.
-  public private(set) var inputs = [Input]()
+    /// All inputs that have been sent through the stream.
+    public private(set) var inputs = [Input]()
 
-  /// Designated initializer.
-  ///
-  /// - parameter outputs: The list of outputs to return to calls to the `results()` function once
-  ///                      one input has been sent.
-  public init(outputs: [StreamResult<Output>] = []) {
-    self.outputs = outputs
-  }
-
-  open func send(_ input: Input) throws {
-    self.inputs.append(input)
-    self.onSend?(input)
-    self.emitOutputsIfReady()
-  }
-
-  /// Returns the same stream on every call, matching the production implementation.
-  /// `outputs` are emitted and the stream is finished once an input has been sent,
-  /// regardless of whether `send()` or this function is called first.
-  open func results() -> AsyncStream<Connect.StreamResult<Output>> {
-    if let resultsStream = self.resultsStream {
-      return resultsStream
+    /// Designated initializer.
+    ///
+    /// - parameter outputs: The list of outputs to return to calls to the `results()` function once
+    ///                      one input has been sent.
+    public init(outputs: [StreamResult<Output>] = []) {
+        self.outputs = outputs
     }
 
-    let (stream, continuation) = AsyncStream.makeStream(of: StreamResult<Output>.self)
-    self.resultsStream = stream
-    self.resultsContinuation = continuation
-    self.emitOutputsIfReady()
-    return stream
-  }
-
-  open func cancel() {}
-
-  private func emitOutputsIfReady() {
-    guard !self.inputs.isEmpty, let continuation = self.resultsContinuation else {
-      return
+    open func send(_ input: Input) throws {
+        self.inputs.append(input)
+        self.onSend?(input)
+        self.emitOutputsIfReady()
     }
 
-    self.resultsContinuation = nil
-    for output in self.outputs {
-      continuation.yield(output)
+    /// Returns the same stream on every call, matching the production implementation.
+    /// `outputs` are emitted and the stream is finished once an input has been sent,
+    /// regardless of whether `send()` or this function is called first.
+    open func results() -> AsyncStream<Connect.StreamResult<Output>> {
+        if let resultsStream = self.resultsStream {
+            return resultsStream
+        }
+
+        let (stream, continuation) = AsyncStream.makeStream(of: StreamResult<Output>.self)
+        self.resultsStream = stream
+        self.resultsContinuation = continuation
+        self.emitOutputsIfReady()
+        return stream
     }
-    continuation.finish()
-  }
+
+    open func cancel() {}
+
+    private func emitOutputsIfReady() {
+        guard !self.inputs.isEmpty, let continuation = self.resultsContinuation else {
+            return
+        }
+
+        self.resultsContinuation = nil
+        for output in self.outputs {
+            continuation.yield(output)
+        }
+        continuation.finish()
+    }
 }

@@ -19,30 +19,30 @@
 /// to only instantiate instances when necessary (for example, a stream-only interceptor should not
 /// be instantiated for a unary request).
 public struct InterceptorFactory: Sendable {
-  private let factory: @Sendable (ProtocolClientConfig) -> Interceptor
-  private let interceptorType: Interceptor.Type
+    private let factory: @Sendable (ProtocolClientConfig) -> Interceptor
+    private let interceptorType: Interceptor.Type
 
-  /// Initialize a new factory which may be used to produce instances of an interceptor type.
-  ///
-  /// - parameter factory: Closure to use to produce a new interceptor instance given a config.
-  public init<T: Interceptor>(factory: @escaping @Sendable (ProtocolClientConfig) -> T) {
-    self.factory = factory
-    self.interceptorType = T.self
-  }
-
-  // MARK: - Internal
-
-  func createUnary(with config: ProtocolClientConfig) -> UnaryInterceptor? {
-    if self.interceptorType.self is UnaryInterceptor.Type {
-      return self.factory(config) as? UnaryInterceptor
+    /// Initialize a new factory which may be used to produce instances of an interceptor type.
+    ///
+    /// - parameter factory: Closure to use to produce a new interceptor instance given a config.
+    public init<T: Interceptor>(factory: @escaping @Sendable (ProtocolClientConfig) -> T) {
+        self.factory = factory
+        self.interceptorType = T.self
     }
-    return nil
-  }
 
-  func createStream(with config: ProtocolClientConfig) -> StreamInterceptor? {
-    if self.interceptorType.self is StreamInterceptor.Type {
-      return self.factory(config) as? StreamInterceptor
+    // MARK: - Internal
+
+    func createUnary(with config: ProtocolClientConfig) -> UnaryInterceptor? {
+        if self.interceptorType.self is UnaryInterceptor.Type {
+            return self.factory(config) as? UnaryInterceptor
+        }
+        return nil
     }
-    return nil
-  }
+
+    func createStream(with config: ProtocolClientConfig) -> StreamInterceptor? {
+        if self.interceptorType.self is StreamInterceptor.Type {
+            return self.factory(config) as? StreamInterceptor
+        }
+        return nil
+    }
 }

@@ -17,28 +17,28 @@ import Foundation
 /// Class containing an internal lock which can be used to ensure thread-safe access to an
 /// underlying value. Conforms to `Sendable`, making it accessible from `@Sendable` closures.
 package final class Locked<Wrapped>: @unchecked Sendable {
-  private let lock = Lock()
-  private var wrappedValue: Wrapped
+    private let lock = Lock()
+    private var wrappedValue: Wrapped
 
-  /// Thread-safe access to the underlying value.
-  package var value: Wrapped {
-    get { self.lock.perform { self.wrappedValue } }
-    set { self.lock.perform { self.wrappedValue = newValue } }
-  }
-
-  /// Perform an action with the underlying value, potentially updating that value.
-  ///
-  /// - parameter action: Closure to perform with the underlying value.
-  ///
-  /// - returns: The value returned by the closure.
-  @discardableResult
-  package func perform<Result>(action: @escaping (inout Wrapped) -> Result) -> Result {
-    return self.lock.perform {
-      action(&self.wrappedValue)
+    /// Thread-safe access to the underlying value.
+    package var value: Wrapped {
+        get { self.lock.perform { self.wrappedValue } }
+        set { self.lock.perform { self.wrappedValue = newValue } }
     }
-  }
 
-  package init(_ value: Wrapped) {
-    self.wrappedValue = value
-  }
+    /// Perform an action with the underlying value, potentially updating that value.
+    ///
+    /// - parameter action: Closure to perform with the underlying value.
+    ///
+    /// - returns: The value returned by the closure.
+    @discardableResult
+    package func perform<Result>(action: @escaping (inout Wrapped) -> Result) -> Result {
+        return self.lock.perform {
+            action(&self.wrappedValue)
+        }
+    }
+
+    package init(_ value: Wrapped) {
+        self.wrappedValue = value
+    }
 }

@@ -15,24 +15,24 @@
 import SwiftProtobufPluginLibrary
 
 extension ServiceDescriptor {
-  public var servicePath: String {
-    if self.file.package.isEmpty {
-      return self.name
-    } else {
-      return "\(self.file.package).\(self.name)"
+    public var servicePath: String {
+        if self.file.package.isEmpty {
+            return self.name
+        } else {
+            return "\(self.file.package).\(self.name)"
+        }
     }
-  }
 
-  public func implementationName(using namer: SwiftProtobufNamer) -> String {
-    let upperCamelName = NamingUtils.toUpperCamelCase(self.name) + "Client"
-    if self.file.package.isEmpty {
-      return upperCamelName
-    } else {
-      return namer.typePrefix(forFile: self.file) + upperCamelName
+    public func implementationName(using namer: SwiftProtobufNamer) -> String {
+        let upperCamelName = NamingUtils.toUpperCamelCase(self.name) + "Client"
+        if self.file.package.isEmpty {
+            return upperCamelName
+        } else {
+            return namer.typePrefix(forFile: self.file) + upperCamelName
+        }
     }
-  }
 
-  public func protocolName(using namer: SwiftProtobufNamer) -> String {
-    return self.implementationName(using: namer) + "Interface"
-  }
+    public func protocolName(using namer: SwiftProtobufNamer) -> String {
+        return self.implementationName(using: namer) + "Interface"
+    }
 }

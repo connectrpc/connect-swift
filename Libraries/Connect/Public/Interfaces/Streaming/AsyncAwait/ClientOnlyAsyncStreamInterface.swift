@@ -17,32 +17,32 @@ import SwiftProtobuf
 /// Represents a client-only stream (a stream where the client streams data to the server and
 /// eventually receives a response) that can be interacted with using async/await.
 public protocol ClientOnlyAsyncStreamInterface<Input, Output>: Sendable {
-  /// The input (request) message type.
-  associatedtype Input: ProtobufMessage
+    /// The input (request) message type.
+    associatedtype Input: ProtobufMessage
 
-  /// The output (response) message type.
-  associatedtype Output: ProtobufMessage
+    /// The output (response) message type.
+    associatedtype Output: ProtobufMessage
 
-  /// Send a request to the server over the stream.
-  ///
-  /// - parameter input: The request message to send.
-  ///
-  /// - returns: An instance of this stream, for syntactic sugar.
-  @discardableResult
-  func send(_ input: Input) throws -> Self
+    /// Send a request to the server over the stream.
+    ///
+    /// - parameter input: The request message to send.
+    ///
+    /// - returns: An instance of this stream, for syntactic sugar.
+    @discardableResult
+    func send(_ input: Input) throws -> Self
 
-  /// Obtain an await-able list of results from the stream using async/await.
-  ///
-  /// Example usage: `for await result in stream.results() {...}`
-  ///
-  /// - returns: An `AsyncStream` that contains all outputs/results from the stream.
-  func results() -> AsyncStream<StreamResult<Output>>
+    /// Obtain an await-able list of results from the stream using async/await.
+    ///
+    /// Example usage: `for await result in stream.results() {...}`
+    ///
+    /// - returns: An `AsyncStream` that contains all outputs/results from the stream.
+    func results() -> AsyncStream<StreamResult<Output>>
 
-  /// Close the stream and await a response.
-  /// No calls to `send()` are valid after calling `closeAndReceive()`.
-  func closeAndReceive()
+    /// Close the stream and await a response.
+    /// No calls to `send()` are valid after calling `closeAndReceive()`.
+    func closeAndReceive()
 
-  /// Cancel the stream and return a canceled code.
-  /// No calls to `send()` are valid after calling `cancel()`.
-  func cancel()
+    /// Cancel the stream and return a canceled code.
+    /// No calls to `send()` are valid after calling `cancel()`.
+    func cancel()
 }

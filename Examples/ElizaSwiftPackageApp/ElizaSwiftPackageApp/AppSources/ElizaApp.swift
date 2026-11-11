@@ -16,9 +16,9 @@ import SwiftUI
 
 @main
 struct ElizaApp: App {
-  var body: some Scene {
-    WindowGroup {
-      MenuView()
+    var body: some Scene {
+        WindowGroup {
+            MenuView()
+        }
     }
-  }
 }

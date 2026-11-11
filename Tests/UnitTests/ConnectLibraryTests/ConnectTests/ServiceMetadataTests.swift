@@ -16,58 +16,58 @@ import Connect
 import Testing
 
 struct ServiceMetadataTests {
-  @Test
-  func methodSpecsAreGeneratedCorrectlyForService() {
-    #expect(
-      Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.unary
-        == MethodSpec(
-          name: "Unary",
-          service: "connectrpc.conformance.v1.ConformanceService",
-          type: .unary
+    @Test
+    func methodSpecsAreGeneratedCorrectlyForService() {
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.unary
+                == MethodSpec(
+                    name: "Unary",
+                    service: "connectrpc.conformance.v1.ConformanceService",
+                    type: .unary
+                )
         )
-    )
-    #expect(
-      Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.unary.path
-        == "connectrpc.conformance.v1.ConformanceService/Unary"
-    )
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.unary.path
+                == "connectrpc.conformance.v1.ConformanceService/Unary"
+        )
 
-    #expect(
-      Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.serverStream
-        == MethodSpec(
-          name: "ServerStream",
-          service: "connectrpc.conformance.v1.ConformanceService",
-          type: .serverStream
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.serverStream
+                == MethodSpec(
+                    name: "ServerStream",
+                    service: "connectrpc.conformance.v1.ConformanceService",
+                    type: .serverStream
+                )
         )
-    )
-    #expect(
-      Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.serverStream.path
-        == "connectrpc.conformance.v1.ConformanceService/ServerStream"
-    )
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.serverStream.path
+                == "connectrpc.conformance.v1.ConformanceService/ServerStream"
+        )
 
-    #expect(
-      Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.clientStream
-        == MethodSpec(
-          name: "ClientStream",
-          service: "connectrpc.conformance.v1.ConformanceService",
-          type: .clientStream
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.clientStream
+                == MethodSpec(
+                    name: "ClientStream",
+                    service: "connectrpc.conformance.v1.ConformanceService",
+                    type: .clientStream
+                )
         )
-    )
-    #expect(
-      Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.clientStream.path
-        == "connectrpc.conformance.v1.ConformanceService/ClientStream"
-    )
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.clientStream.path
+                == "connectrpc.conformance.v1.ConformanceService/ClientStream"
+        )
 
-    #expect(
-      Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.bidiStream
-        == MethodSpec(
-          name: "BidiStream",
-          service: "connectrpc.conformance.v1.ConformanceService",
-          type: .bidirectionalStream
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.bidiStream
+                == MethodSpec(
+                    name: "BidiStream",
+                    service: "connectrpc.conformance.v1.ConformanceService",
+                    type: .bidirectionalStream
+                )
         )
-    )
-    #expect(
-      Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.bidiStream.path
-        == "connectrpc.conformance.v1.ConformanceService/BidiStream"
-    )
-  }
+        #expect(
+            Connectrpc_Conformance_V1_ConformanceServiceClient.Metadata.Methods.bidiStream.path
+                == "connectrpc.conformance.v1.ConformanceService/BidiStream"
+        )
+    }
 }

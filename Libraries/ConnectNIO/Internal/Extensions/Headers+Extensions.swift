@@ -19,28 +19,28 @@ import NIOHTTP1
 // MARK: - NIO type extensions
 
 extension NIOHTTP1.HTTPHeaders {
-  mutating func addNIOHeadersFromConnect(_ headers: Connect.Headers) {
-    for (name, value) in headers {
-      self.add(name: name, value: value.joined(separator: ","))
+    mutating func addNIOHeadersFromConnect(_ headers: Connect.Headers) {
+        for (name, value) in headers {
+            self.add(name: name, value: value.joined(separator: ","))
+        }
     }
-  }
 }
 
 // MARK: - Connect type extensions
 
 extension Headers {
-  static func fromNIOHeaders(_ nioHeaders: NIOHTTP1.HTTPHeaders) -> Self {
-    return nioHeaders.reduce(into: [:]) { headers, current in
-      let headerName = current.name.lowercased()
-      for value in current.value.components(separatedBy: ",") {
-        headers[headerName, default: []].append(value.trimmingCharacters(in: .whitespaces))
-      }
+    static func fromNIOHeaders(_ nioHeaders: NIOHTTP1.HTTPHeaders) -> Self {
+        return nioHeaders.reduce(into: [:]) { headers, current in
+            let headerName = current.name.lowercased()
+            for value in current.value.components(separatedBy: ",") {
+                headers[headerName, default: []].append(value.trimmingCharacters(in: .whitespaces))
+            }
+        }
     }
-  }
 }
 
 extension Code {
-  static func fromNIOStatus(_ nioStatus: NIOHTTP1.HTTPResponseStatus) -> Self {
-    return .fromHTTPStatus(Int(nioStatus.code))
-  }
+    static func fromNIOStatus(_ nioStatus: NIOHTTP1.HTTPResponseStatus) -> Self {
+        return .fromHTTPStatus(Int(nioStatus.code))
+    }
 }

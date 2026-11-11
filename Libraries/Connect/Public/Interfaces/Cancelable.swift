@@ -14,10 +14,10 @@
 
 /// Type that wraps an action that can be canceled.
 public struct Cancelable: Sendable {
-  /// Cancel the current action.
-  public let cancel: @Sendable () -> Void
+    /// Cancel the current action.
+    public let cancel: @Sendable () -> Void
 
-  public init(cancel: @escaping @Sendable () -> Void) {
-    self.cancel = cancel
-  }
+    public init(cancel: @escaping @Sendable () -> Void) {
+        self.cancel = cancel
+    }
 }

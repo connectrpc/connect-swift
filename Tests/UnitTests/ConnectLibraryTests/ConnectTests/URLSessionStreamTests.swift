@@ -17,73 +17,73 @@ import Foundation
 import Testing
 
 struct URLSessionStreamTests {
-  /// `URLSession` requests a body stream via `urlSession(_:task:needNewBodyStream:)` both for the
-  /// initial send and when it resends a request after a recoverable error. A streamed request
-  /// body cannot be replayed, and returning the same already-opened stream on a resend crashes
-  /// CFNetwork. The stream must therefore be vended only once.
-  @Test
-  func vendsRequestBodyStreamOnlyOnce() {
-    let stream = URLSessionStream(
-      request: URLRequest(url: URL(string: "https://connectrpc.com")!),
-      session: URLSession(configuration: .ephemeral),
-      responseCallbacks: ResponseCallbacks(
-        receiveResponseHeaders: { _ in },
-        receiveResponseData: { _ in },
-        receiveResponseMetrics: { _ in },
-        receiveClose: { _, _, _ in }
-      )
-    )
-    defer { stream.cancel() }
-
-    #expect(stream.requestBodyStream != nil, "The initial body stream should be vended.")
-    #expect(
-      stream.requestBodyStream == nil,
-      "A resend must not reuse the already-opened body stream."
-    )
-  }
-
-  /// A second `needNewBodyStream` cancels the task because the bound body cannot be replayed.
-  /// That cancelation must surface as `.unavailable` (retriable connection failure), not
-  /// `.canceled`, and `receiveClose` must fire exactly once.
-  @Test
-  func resendCancelationIsRemappedToUnavailableExactlyOnce() async {
-    await confirmation("receiveClose", expectedCount: 1) { confirm in
-      let stream = URLSessionStream(
-        request: URLRequest(url: URL(string: "https://connectrpc.com")!),
-        session: URLSession(configuration: .ephemeral),
-        responseCallbacks: ResponseCallbacks(
-          receiveResponseHeaders: { _ in },
-          receiveResponseData: { _ in },
-          receiveResponseMetrics: { _ in },
-          receiveClose: { code, _, error in
-            #expect(code == .unavailable)
-            let connectError = error as? ConnectError
-            #expect(
-              connectError?.message
-                == "connection was reset and the streamed request body "
-                + "cannot be replayed"
+    /// `URLSession` requests a body stream via `urlSession(_:task:needNewBodyStream:)` both for the
+    /// initial send and when it resends a request after a recoverable error. A streamed request
+    /// body cannot be replayed, and returning the same already-opened stream on a resend crashes
+    /// CFNetwork. The stream must therefore be vended only once.
+    @Test
+    func vendsRequestBodyStreamOnlyOnce() {
+        let stream = URLSessionStream(
+            request: URLRequest(url: URL(string: "https://connectrpc.com")!),
+            session: URLSession(configuration: .ephemeral),
+            responseCallbacks: ResponseCallbacks(
+                receiveResponseHeaders: { _ in },
+                receiveResponseData: { _ in },
+                receiveResponseMetrics: { _ in },
+                receiveClose: { _, _, _ in }
             )
-            confirm()
-          }
         )
-      )
-      defer { stream.cancel() }
+        defer { stream.cancel() }
 
-      #expect(stream.requestBodyStream != nil)
-      #expect(stream.requestBodyStream == nil)
-
-      // Simulate the cancelation error URLSession delivers after `task.cancel()` from the
-      // resend path. `URLSessionStream` is not the session delegate in this unit test, so
-      // the callback is invoked directly.
-      stream.handleCompletion(
-        error: NSError(
-          domain: NSURLErrorDomain,
-          code: URLError.cancelled.rawValue,
-          userInfo: [NSLocalizedDescriptionKey: "cancelled"]
+        #expect(stream.requestBodyStream != nil, "The initial body stream should be vended.")
+        #expect(
+            stream.requestBodyStream == nil,
+            "A resend must not reuse the already-opened body stream."
         )
-      )
-      // Duplicate completion must be suppressed by `closedByServer`.
-      stream.handleCompletion(error: nil)
     }
-  }
+
+    /// A second `needNewBodyStream` cancels the task because the bound body cannot be replayed.
+    /// That cancelation must surface as `.unavailable` (retriable connection failure), not
+    /// `.canceled`, and `receiveClose` must fire exactly once.
+    @Test
+    func resendCancelationIsRemappedToUnavailableExactlyOnce() async {
+        await confirmation("receiveClose", expectedCount: 1) { confirm in
+            let stream = URLSessionStream(
+                request: URLRequest(url: URL(string: "https://connectrpc.com")!),
+                session: URLSession(configuration: .ephemeral),
+                responseCallbacks: ResponseCallbacks(
+                    receiveResponseHeaders: { _ in },
+                    receiveResponseData: { _ in },
+                    receiveResponseMetrics: { _ in },
+                    receiveClose: { code, _, error in
+                        #expect(code == .unavailable)
+                        let connectError = error as? ConnectError
+                        #expect(
+                            connectError?.message
+                                == "connection was reset and the streamed request body "
+                                + "cannot be replayed"
+                        )
+                        confirm()
+                    }
+                )
+            )
+            defer { stream.cancel() }
+
+            #expect(stream.requestBodyStream != nil)
+            #expect(stream.requestBodyStream == nil)
+
+            // Simulate the cancelation error URLSession delivers after `task.cancel()` from the
+            // resend path. `URLSessionStream` is not the session delegate in this unit test, so
+            // the callback is invoked directly.
+            stream.handleCompletion(
+                error: NSError(
+                    domain: NSURLErrorDomain,
+                    code: URLError.cancelled.rawValue,
+                    userInfo: [NSLocalizedDescriptionKey: "cancelled"]
+                )
+            )
+            // Duplicate completion must be suppressed by `closedByServer`.
+            stream.handleCompletion(error: nil)
+        }
+    }
 }

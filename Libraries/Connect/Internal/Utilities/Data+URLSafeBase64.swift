@@ -15,28 +15,28 @@
 import Foundation
 
 extension Data {
-  /// Returns a raw URL-safe base64 encoded string (RFC 4648 §5).
-  ///
-  /// Uses native `base64URLAlphabet` + `omitPaddingCharacter` when compiled
-  /// with Swift 6.3+ and running on platforms that support it (iOS 26.4+,
-  /// macOS 26.4+), with a string-replacement fallback otherwise.
-  func urlSafeBase64EncodedString() -> String {
-    #if compiler(>=6.3)
-      if #available(iOS 26.4, macOS 26.4, watchOS 26.4, tvOS 26.4, visionOS 26.4, *) {
-        return self.base64EncodedString(options: [
-          .base64URLAlphabet, .omitPaddingCharacter,
-        ])
-      } else {
-        return self.base64EncodedString()
-          .replacingOccurrences(of: "+", with: "-")
-          .replacingOccurrences(of: "/", with: "_")
-          .replacingOccurrences(of: "=", with: "")
-      }
-    #else
-      return self.base64EncodedString()
-        .replacingOccurrences(of: "+", with: "-")
-        .replacingOccurrences(of: "/", with: "_")
-        .replacingOccurrences(of: "=", with: "")
-    #endif
-  }
+    /// Returns a raw URL-safe base64 encoded string (RFC 4648 §5).
+    ///
+    /// Uses native `base64URLAlphabet` + `omitPaddingCharacter` when compiled
+    /// with Swift 6.3+ and running on platforms that support it (iOS 26.4+,
+    /// macOS 26.4+), with a string-replacement fallback otherwise.
+    func urlSafeBase64EncodedString() -> String {
+        #if compiler(>=6.3)
+            if #available(iOS 26.4, macOS 26.4, watchOS 26.4, tvOS 26.4, visionOS 26.4, *) {
+                return self.base64EncodedString(options: [
+                    .base64URLAlphabet, .omitPaddingCharacter,
+                ])
+            } else {
+                return self.base64EncodedString()
+                    .replacingOccurrences(of: "+", with: "-")
+                    .replacingOccurrences(of: "/", with: "_")
+                    .replacingOccurrences(of: "=", with: "")
+            }
+        #else
+            return self.base64EncodedString()
+                .replacingOccurrences(of: "+", with: "-")
+                .replacingOccurrences(of: "/", with: "_")
+                .replacingOccurrences(of: "=", with: "")
+        #endif
+    }
 }

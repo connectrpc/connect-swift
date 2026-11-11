@@ -22,77 +22,77 @@ import SwiftProtobuf
 /// https://forums.swift.org/t/how-to-use-withtaskcancellationhandler-properly/54341/37
 /// https://stackoverflow.com/q/71898080
 actor UnaryAsyncWrapper<Output: ProtobufMessage> {
-  private var cancelable: Cancelable?
-  private let sendUnary: PerformClosure
+    private var cancelable: Cancelable?
+    private let sendUnary: PerformClosure
 
-  /// Accepts a closure to be called upon completion of a request and returns a cancelable which,
-  /// when invoked, will cancel the underlying request.
-  typealias PerformClosure =
-    @Sendable (
-      @escaping @Sendable (ResponseMessage<Output>) -> Void
-    ) -> Cancelable
+    /// Accepts a closure to be called upon completion of a request and returns a cancelable which,
+    /// when invoked, will cancel the underlying request.
+    typealias PerformClosure =
+        @Sendable (
+            @escaping @Sendable (ResponseMessage<Output>) -> Void
+        ) -> Cancelable
 
-  init(sendUnary: @escaping PerformClosure) {
-    self.sendUnary = sendUnary
-  }
-
-  /// Provides an `async` interface for performing the `sendUnary` request.
-  /// Canceling the request in the context of an async `Task` will appropriately cancel the
-  /// outbound request and return a response with a `.canceled` status code.
-  ///
-  /// - returns: The response/result of the request.
-  func send() async -> ResponseMessage<Output> {
-    await withTaskCancellationHandler {
-      await withCheckedContinuation { continuation in
-        guard !Task.isCancelled else {
-          continuation.resume(
-            returning: ResponseMessage(
-              code: .canceled,
-              result: .failure(.canceled())
-            )
-          )
-          return
-        }
-
-        let hasResumed = Locked(false)
-        self.cancelable = self.sendUnary { response in
-          // In some circumstances where a request timeout and a server
-          // error occur at nearly the same moment, the underlying
-          // `swift-nio` system will trigger this callback twice. Only one
-          // caller may resume `continuation`; resuming it twice is a crash.
-          //
-          // Claiming that right must be a *single* atomic operation. A
-          // separate check and set would let two concurrent callbacks both
-          // observe `false` and both proceed to resume.
-          let shouldResume = hasResumed.perform { hasResumed -> Bool in
-            if hasResumed {
-              return false
-            }
-            hasResumed = true
-            return true
-          }
-          guard shouldResume else {
-            os_log(
-              .fault,
-              """
-              `sendUnary` received duplicate callback and \
-              attempted to resume its continuation twice.
-              """
-            )
-            return
-          }
-          // Deliberately outside the lock: `Locked` is backed by
-          // `os_unfair_lock`, and resuming a continuation while holding it
-          // risks priority inversion.
-          continuation.resume(returning: response)
-        }
-      }
-    } onCancel: {
-      // When `Task.cancel` signals for this function to be canceled,
-      // the underlying function will be canceled as well.
-      Task(priority: .high) {
-        await self.cancelable?.cancel()
-      }
+    init(sendUnary: @escaping PerformClosure) {
+        self.sendUnary = sendUnary
     }
-  }
+
+    /// Provides an `async` interface for performing the `sendUnary` request.
+    /// Canceling the request in the context of an async `Task` will appropriately cancel the
+    /// outbound request and return a response with a `.canceled` status code.
+    ///
+    /// - returns: The response/result of the request.
+    func send() async -> ResponseMessage<Output> {
+        await withTaskCancellationHandler {
+            await withCheckedContinuation { continuation in
+                guard !Task.isCancelled else {
+                    continuation.resume(
+                        returning: ResponseMessage(
+                            code: .canceled,
+                            result: .failure(.canceled())
+                        )
+                    )
+                    return
+                }
+
+                let hasResumed = Locked(false)
+                self.cancelable = self.sendUnary { response in
+                    // In some circumstances where a request timeout and a server
+                    // error occur at nearly the same moment, the underlying
+                    // `swift-nio` system will trigger this callback twice. Only one
+                    // caller may resume `continuation`; resuming it twice is a crash.
+                    //
+                    // Claiming that right must be a *single* atomic operation. A
+                    // separate check and set would let two concurrent callbacks both
+                    // observe `false` and both proceed to resume.
+                    let shouldResume = hasResumed.perform { hasResumed -> Bool in
+                        if hasResumed {
+                            return false
+                        }
+                        hasResumed = true
+                        return true
+                    }
+                    guard shouldResume else {
+                        os_log(
+                            .fault,
+                            """
+                            `sendUnary` received duplicate callback and \
+                            attempted to resume its continuation twice.
+                            """
+                        )
+                        return
+                    }
+                    // Deliberately outside the lock: `Locked` is backed by
+                    // `os_unfair_lock`, and resuming a continuation while holding it
+                    // risks priority inversion.
+                    continuation.resume(returning: response)
+                }
+            }
+        } onCancel: {
+            // When `Task.cancel` signals for this function to be canceled,
+            // the underlying function will be canceled as well.
+            Task(priority: .high) {
+                await self.cancelable?.cancel()
+            }
+        }
+    }
 }

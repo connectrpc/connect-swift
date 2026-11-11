@@ -14,25 +14,25 @@
 
 /// Protocols that are supported by the library.
 public enum NetworkProtocol: Sendable {
-  /// The Connect protocol:
-  /// https://connectrpc.com/docs/protocol
-  case connect
-  /// The gRPC-Web protocol:
-  /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
-  case grpcWeb
-  /// A custom protocol that is implemented via an interceptor.
-  case custom(name: String, protocolInterceptor: InterceptorFactory)
+    /// The Connect protocol:
+    /// https://connectrpc.com/docs/protocol
+    case connect
+    /// The gRPC-Web protocol:
+    /// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
+    case grpcWeb
+    /// A custom protocol that is implemented via an interceptor.
+    case custom(name: String, protocolInterceptor: InterceptorFactory)
 }
 
 extension NetworkProtocol: CustomStringConvertible {
-  public var description: String {
-    switch self {
-    case .connect:
-      return "Connect"
-    case .grpcWeb:
-      return "gRPC-Web"
-    case .custom(let name, _):
-      return name
+    public var description: String {
+        switch self {
+        case .connect:
+            return "Connect"
+        case .grpcWeb:
+            return "gRPC-Web"
+        case .custom(let name, _):
+            return name
+        }
     }
-  }
 }

@@ -17,47 +17,47 @@ import Foundation
 import Testing
 
 struct GzipCompressionPoolTests {
-  @Test
-  func decompressingGzippedFile() throws {
-    let compressedData = try self.gzippedFileData()
-    let decompressedText = try #require(
-      String(
-        data: try GzipCompressionPool().decompress(data: compressedData),
-        encoding: .utf8
-      ))
-    #expect(decompressedText == self.expectedUnzippedFileText())
-  }
+    @Test
+    func decompressingGzippedFile() throws {
+        let compressedData = try self.gzippedFileData()
+        let decompressedText = try #require(
+            String(
+                data: try GzipCompressionPool().decompress(data: compressedData),
+                encoding: .utf8
+            ))
+        #expect(decompressedText == self.expectedUnzippedFileText())
+    }
 
-  @Test
-  func compressingAndDecompressingData() throws {
-    let original = try #require(self.expectedUnzippedFileText().data(using: .utf8))
-    let compressionPool = GzipCompressionPool()
-    let compressed = try compressionPool.compress(data: original)
-    #expect(compressed.starts(with: [0x1f, 0x8b]))  // Indicates gzip
-    #expect(compressed.count != original.count)
+    @Test
+    func compressingAndDecompressingData() throws {
+        let original = try #require(self.expectedUnzippedFileText().data(using: .utf8))
+        let compressionPool = GzipCompressionPool()
+        let compressed = try compressionPool.compress(data: original)
+        #expect(compressed.starts(with: [0x1f, 0x8b]))  // Indicates gzip
+        #expect(compressed.count != original.count)
 
-    let decompressed = try compressionPool.decompress(data: compressed)
-    #expect(decompressed == original)
-  }
+        let decompressed = try compressionPool.decompress(data: compressed)
+        #expect(decompressed == original)
+    }
 
-  @Test
-  func doesNotGzipDataThatIsAlreadyGzipped() throws {
-    let compressed = try self.gzippedFileData()
-    #expect(try compressed == GzipCompressionPool().compress(data: compressed))
-  }
+    @Test
+    func doesNotGzipDataThatIsAlreadyGzipped() throws {
+        let compressed = try self.gzippedFileData()
+        #expect(try compressed == GzipCompressionPool().compress(data: compressed))
+    }
 
-  // MARK: - Private
+    // MARK: - Private
 
-  private func expectedUnzippedFileText() -> String {
-    return "the quiccccccck brown fox juuuuuuuuuumps over the lazy doggggggggggggggg\n"
-  }
+    private func expectedUnzippedFileText() -> String {
+        return "the quiccccccck brown fox juuuuuuuuuumps over the lazy doggggggggggggggg\n"
+    }
 
-  private func gzippedFileData() throws -> Data {
-    let gzippedFileURL = try #require(
-      Bundle.module.url(
-        forResource: "gzip-test.txt.gz", withExtension: nil, subdirectory: "TestResources"
-      )
-    )
-    return try Data(contentsOf: gzippedFileURL)
-  }
+    private func gzippedFileData() throws -> Data {
+        let gzippedFileURL = try #require(
+            Bundle.module.url(
+                forResource: "gzip-test.txt.gz", withExtension: nil, subdirectory: "TestResources"
+            )
+        )
+        return try Data(contentsOf: gzippedFileURL)
+    }
 }

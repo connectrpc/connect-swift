@@ -16,27 +16,27 @@ import SwiftProtobuf
 
 /// Concrete **internal** implementation of `BidirectionalStreamInterface`.
 final class BidirectionalStream<Message: ProtobufMessage>: Sendable {
-  private let requestCallbacks: RequestCallbacks<Message>
+    private let requestCallbacks: RequestCallbacks<Message>
 
-  init(requestCallbacks: RequestCallbacks<Message>) {
-    self.requestCallbacks = requestCallbacks
-  }
+    init(requestCallbacks: RequestCallbacks<Message>) {
+        self.requestCallbacks = requestCallbacks
+    }
 }
 
 extension BidirectionalStream: BidirectionalStreamInterface {
-  typealias Input = Message
+    typealias Input = Message
 
-  @discardableResult
-  func send(_ input: Input) -> Self {
-    self.requestCallbacks.sendData(input)
-    return self
-  }
+    @discardableResult
+    func send(_ input: Input) -> Self {
+        self.requestCallbacks.sendData(input)
+        return self
+    }
 
-  func close() {
-    self.requestCallbacks.sendClose()
-  }
+    func close() {
+        self.requestCallbacks.sendClose()
+    }
 
-  func cancel() {
-    self.requestCallbacks.cancel()
-  }
+    func cancel() {
+        self.requestCallbacks.cancel()
+    }
 }

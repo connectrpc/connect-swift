@@ -23,10 +23,10 @@ import SwiftProtobuf
 ///
 /// To return data over the stream, outputs can be specified using `init(outputs: ...)`.
 open class MockClientOnlyStream<
-  Input: ProtobufMessage,
-  Output: ProtobufMessage
+    Input: ProtobufMessage,
+    Output: ProtobufMessage
 >: MockBidirectionalStream<Input, Output>, ClientOnlyStreamInterface, @unchecked Sendable {
-  open func closeAndReceive() {
-    self.close()
-  }
+    open func closeAndReceive() {
+        self.close()
+    }
 }
