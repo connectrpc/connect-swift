@@ -49,6 +49,11 @@ jobs:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/cache@v6
+        with:
+          path: .build
+          key: ${{ runner.os }}-${{ github.job }}-${{ env.DEVELOPER_DIR }}-${{ hashFiles('Package.resolved') }}
+          restore-keys: ${{ runner.os }}-${{ github.job }}-${{ env.DEVELOPER_DIR }}-
       - uses: bufbuild/buf-setup-action@v1.50.0
         with:
           github_token: ${{ github.token }}
