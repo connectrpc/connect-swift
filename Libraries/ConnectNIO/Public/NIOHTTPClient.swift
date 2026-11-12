@@ -24,14 +24,15 @@ import os.log
 
 /// HTTP client powered by Swift NIO which supports trailers (unlike URLSession).
 open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
-    private lazy var bootstrap = self.createBootstrap()
-    private let host: String
-    private let lock = NIOConcurrencyHelpers.NIOLock()
     /// One loop of NIO's process-wide singleton group, which is never shut down. Requests can
     /// outlive the client which started them - a caller may hold a `Cancelable` or a stream past
     /// it, and NIO completes an in-flight connect on its own - so a loop that was shut down with
     /// the client would have that late work scheduled onto it after it had stopped.
     let eventLoop: NIOCore.EventLoop = NIOPosix.MultiThreadedEventLoopGroup.singleton.next()
+
+    private lazy var bootstrap = self.createBootstrap()
+    private let host: String
+    private let lock = NIOConcurrencyHelpers.NIOLock()
     private let port: Int
     private let timeout: TimeInterval?
     private let useSSL: Bool

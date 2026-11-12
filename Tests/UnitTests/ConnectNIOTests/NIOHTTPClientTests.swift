@@ -37,6 +37,7 @@ struct NIOHTTPClientTests {
     @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *)
     @Test(.timeLimit(.minutes(1)))
     func closesConnectionEstablishedAfterClientIsReleased() async throws {
+        let address = "127.0.0.1"
         let (connections, continuation) = AsyncStream.makeStream(of: NIOCore.Channel.self)
         let server = try await NIOPosix.ServerBootstrap(
             group: NIOPosix.MultiThreadedEventLoopGroup.singleton
@@ -45,18 +46,18 @@ struct NIOHTTPClientTests {
             continuation.yield(channel)
             return channel.eventLoop.makeSucceededVoidFuture()
         }
-        .bind(host: "127.0.0.1", port: 0)
+        .bind(host: address, port: 0)
         .get()
         defer { server.close(promise: nil) }
 
-        let host = "http://127.0.0.1"
         let port = try #require(server.localAddress?.port)
+        let baseURL = "http://\(address):\(port)"
         // Scoped so the client is released while its connection is still being established.
         do {
-            let client = NIOHTTPClient(host: host, port: port)
+            let client = NIOHTTPClient(host: baseURL)
             _ = client.unary(
                 request: HTTPRequest(
-                    url: try #require(URL(string: "\(host):\(port)/test")), headers: [:],
+                    url: try #require(URL(string: "\(baseURL)/test")), headers: [:],
                     message: nil, method: .post, trailers: nil, idempotencyLevel: .unknown
                 ),
                 onMetrics: { _ in },
