@@ -88,6 +88,12 @@ final class URLSessionStream: NSObject, @unchecked Sendable {
 
         writeStream.schedule(in: .current, forMode: .default)
         writeStream.open()
+    }
+
+    /// Starts the request. The session asks its delegate for the request body as soon as the
+    /// task is resumed, so this must only be called once the delegate can look this stream up
+    /// by its `taskID`.
+    func start() {
         self.task.resume()
     }
 

@@ -117,6 +117,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
             self.streams[urlSessionStream.taskID] = urlSessionStream
             self.metricsClosures[urlSessionStream.taskID] = responseCallbacks.receiveResponseMetrics
         }
+        urlSessionStream.start()
         return RequestCallbacks(
             cancel: { [weak urlSessionStream] in urlSessionStream?.cancel() },
             sendData: { [weak urlSessionStream] data in
