@@ -20,9 +20,10 @@ struct TimeoutTests {
     @Test
     func unaryRequestTimesOut() async {
         let client = self.makeClient()
-        let response = await client.unary(request: .with { request in
-            request.responseDefinition = .with { _ in }
-        })
+        let response = await client.unary(
+            request: .with { request in
+                request.responseDefinition = .with { _ in }
+            })
 
         #expect(response.code == .deadlineExceeded)
         #expect(response.error?.code == .deadlineExceeded)
@@ -33,9 +34,10 @@ struct TimeoutTests {
     func streamRequestTimesOut() async throws {
         let client = self.makeClient()
         let stream = client.serverStream()
-        try stream.send(.with { request in
-            request.responseDefinition = .with { _ in }
-        })
+        try stream.send(
+            .with { request in
+                request.responseDefinition = .with { _ in }
+            })
 
         var completion: StreamResult<Connectrpc_Conformance_V1_ServerStreamResponse>?
         for await result in stream.results() {
@@ -81,14 +83,15 @@ private final class TimeoutHTTPClient: HTTPClientInterface, @unchecked Sendable 
             guard shouldRespond else {
                 return
             }
-            onResponse(HTTPResponse(
-                code: .canceled,
-                headers: [:],
-                message: nil,
-                trailers: [:],
-                error: ConnectError.canceled(),
-                tracingInfo: nil
-            ))
+            onResponse(
+                HTTPResponse(
+                    code: .canceled,
+                    headers: [:],
+                    message: nil,
+                    trailers: [:],
+                    error: ConnectError.canceled(),
+                    tracingInfo: nil
+                ))
         }
     }
 
@@ -112,7 +115,7 @@ private final class TimeoutHTTPClient: HTTPClientInterface, @unchecked Sendable 
                 responseCallbacks.receiveClose(.canceled, [:], ConnectError.canceled())
             },
             sendData: { _ in },
-            sendClose: { }
+            sendClose: {}
         )
     }
 }

@@ -273,8 +273,9 @@ final class ConformanceInvoker: Sendable {
     }
 
     private func invokeClientStream() async throws -> ConformanceResult {
-        let stream = self.client.clientStream(headers: .fromConformanceHeaders(
-            self.context.requestHeaders)
+        let stream = self.client.clientStream(
+            headers: .fromConformanceHeaders(
+                self.context.requestHeaders)
         )
         for requestMessage in self.context.requestMessages {
             let streamRequest = try Connectrpc_Conformance_V1_ClientStreamRequest(
@@ -430,8 +431,8 @@ private enum SharedURLSessionHTTPClient {
     }()
 }
 
-private extension Connect.Headers {
-    static func fromConformanceHeaders(
+extension Connect.Headers {
+    fileprivate static func fromConformanceHeaders(
         _ conformanceHeaders: [Connectrpc_Conformance_V1_Header]
     ) -> Self {
         return conformanceHeaders.reduce(into: Headers()) { partialResult, conformanceHeader in
@@ -439,18 +440,19 @@ private extension Connect.Headers {
         }
     }
 
-    func toConformanceHeaders() -> [Connectrpc_Conformance_V1_Header] {
+    fileprivate func toConformanceHeaders() -> [Connectrpc_Conformance_V1_Header] {
         return self.reduce(into: [Connectrpc_Conformance_V1_Header]()) { partialResult, header in
-            partialResult.append(.with { conformanceHeader in
-                conformanceHeader.name = header.key
-                conformanceHeader.value = header.value
-            })
+            partialResult.append(
+                .with { conformanceHeader in
+                    conformanceHeader.name = header.key
+                    conformanceHeader.value = header.value
+                })
         }
     }
 }
 
-private extension Connect.ConnectError {
-    func toConformanceError() -> Connectrpc_Conformance_V1_Error {
+extension Connect.ConnectError {
+    fileprivate func toConformanceError() -> Connectrpc_Conformance_V1_Error {
         return .with { conformanceError in
             conformanceError.code = .init(rawValue: self.code.rawValue)!
             conformanceError.message = self.message ?? ""
@@ -459,10 +461,12 @@ private extension Connect.ConnectError {
                     continue
                 }
 
-                conformanceError.details.append(.with { anyMessage in
-                    anyMessage.typeURL = "\(SwiftProtobuf.defaultAnyTypeURLPrefix)/\(detail.type)"
-                    anyMessage.value = payload
-                })
+                conformanceError.details.append(
+                    .with { anyMessage in
+                        anyMessage.typeURL =
+                            "\(SwiftProtobuf.defaultAnyTypeURLPrefix)/\(detail.type)"
+                        anyMessage.value = payload
+                    })
             }
         }
     }

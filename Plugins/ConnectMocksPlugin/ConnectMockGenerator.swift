@@ -128,10 +128,10 @@ final class ConnectMockGenerator: Generator {
 
         self.printLine(
             "\(self.typeVisibility) "
-            + method.callbackSignature(
-                using: self.namer, includeDefaults: true, options: self.options
-            )
-            + " {"
+                + method.callbackSignature(
+                    using: self.namer, includeDefaults: true, options: self.options
+                )
+                + " {"
         )
         self.indent {
             let mockProperty = method.callbackMockPropertyName()
@@ -160,10 +160,10 @@ final class ConnectMockGenerator: Generator {
         }
         self.printLine(
             "\(self.typeVisibility) "
-            + method.asyncAwaitSignature(
-                using: self.namer, includeDefaults: true, options: self.options
-            )
-            + " {"
+                + method.asyncAwaitSignature(
+                    using: self.namer, includeDefaults: true, options: self.options
+                )
+                + " {"
         )
         self.indent {
             if method.clientStreaming || method.serverStreaming {
@@ -176,22 +176,22 @@ final class ConnectMockGenerator: Generator {
     }
 }
 
-private extension ServiceDescriptor {
-    func mockName(using namer: SwiftProtobufNamer) -> String {
+extension ServiceDescriptor {
+    fileprivate func mockName(using namer: SwiftProtobufNamer) -> String {
         return self.implementationName(using: namer) + "Mock"
     }
 }
 
-private extension MethodDescriptor {
-    func callbackMockPropertyName() -> String {
+extension MethodDescriptor {
+    fileprivate func callbackMockPropertyName() -> String {
         return "mock" + NamingUtils.toUpperCamelCase(self.name)
     }
 
-    func asyncAwaitMockPropertyName() -> String {
+    fileprivate func asyncAwaitMockPropertyName() -> String {
         return "mockAsync" + NamingUtils.toUpperCamelCase(self.name)
     }
 
-    func callbackMockPropertyValue(using namer: SwiftProtobufNamer) -> String {
+    fileprivate func callbackMockPropertyValue(using namer: SwiftProtobufNamer) -> String {
         let inputName = namer.fullName(message: self.inputType)
         let outputName = namer.fullName(message: self.outputType)
         if self.clientStreaming && self.serverStreaming {
@@ -202,14 +202,14 @@ private extension MethodDescriptor {
             return "MockClientOnlyStream<\(inputName), \(outputName)>()"
         } else {
             return """
-            { (_: \(inputName)) -> ResponseMessage<\(outputName)> in \
-            .init(result: .success(.init())) \
-            }
-            """
+                { (_: \(inputName)) -> ResponseMessage<\(outputName)> in \
+                .init(result: .success(.init())) \
+                }
+                """
         }
     }
 
-    func asyncAwaitMockPropertyValue(using namer: SwiftProtobufNamer) -> String {
+    fileprivate func asyncAwaitMockPropertyValue(using namer: SwiftProtobufNamer) -> String {
         let inputName = namer.fullName(message: self.inputType)
         let outputName = namer.fullName(message: self.outputType)
         if self.clientStreaming && self.serverStreaming {
@@ -220,29 +220,30 @@ private extension MethodDescriptor {
             return "MockClientOnlyAsyncStream<\(inputName), \(outputName)>()"
         } else {
             return """
-            { (_: \(inputName)) -> ResponseMessage<\(outputName)> in \
-            .init(result: .success(.init())) \
-            }
-            """
+                { (_: \(inputName)) -> ResponseMessage<\(outputName)> in \
+                .init(result: .success(.init())) \
+                }
+                """
         }
     }
 
-    func callbackAvailabilityAnnotation() -> String? {
+    fileprivate func callbackAvailabilityAnnotation() -> String? {
         if self.options.deprecated {
             return """
-            @available(iOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
-            @available(macOS, introduced: 10.15, deprecated: 10.15, message: "This RPC has been marked as deprecated in its `.proto` file.")
-            @available(tvOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
-            @available(watchOS, introduced: 6, deprecated: 6, message: "This RPC has been marked as deprecated in its `.proto` file.")
-            """
+                @available(iOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
+                @available(macOS, introduced: 10.15, deprecated: 10.15, message: "This RPC has been marked as deprecated in its `.proto` file.")
+                @available(tvOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
+                @available(watchOS, introduced: 6, deprecated: 6, message: "This RPC has been marked as deprecated in its `.proto` file.")
+                """
         } else {
             return nil
         }
     }
 
-    func asyncAwaitAvailabilityAnnotation() -> String? {
+    fileprivate func asyncAwaitAvailabilityAnnotation() -> String? {
         if self.options.deprecated {
-            return "@available(iOS, introduced: 13, deprecated: 13, message: \"This RPC has been marked as deprecated in its `.proto` file.\")"
+            return
+                "@available(iOS, introduced: 13, deprecated: 13, message: \"This RPC has been marked as deprecated in its `.proto` file.\")"
         } else {
             return nil
         }

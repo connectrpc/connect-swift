@@ -167,8 +167,8 @@ private struct DecodableConnectError: Decodable {
     }
 }
 
-private extension ConnectError {
-    init(decodedError: DecodableConnectError, defaultCode: Code, metadata: Headers) {
+extension ConnectError {
+    fileprivate init(decodedError: DecodableConnectError, defaultCode: Code, metadata: Headers) {
         self.init(
             code: decodedError.code.flatMap(Code.fromName) ?? defaultCode,
             message: decodedError.message,
@@ -178,7 +178,9 @@ private extension ConnectError {
         )
     }
 
-    static func decode(from data: Data, defaultCode: Code, metadata: Headers) throws -> Self {
+    fileprivate static func decode(from data: Data, defaultCode: Code, metadata: Headers) throws
+        -> Self
+    {
         let decodedError = try Foundation.JSONDecoder()
             .decode(DecodableConnectError.self, from: data)
         return .init(decodedError: decodedError, defaultCode: defaultCode, metadata: metadata)

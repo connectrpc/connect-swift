@@ -24,7 +24,8 @@ extension Headers {
     /// - returns: A set of updated headers.
     package func addingGRPCHeaders(using config: ProtocolClientConfig, grpcWeb: Bool) -> Self {
         var headers = self
-        headers[HeaderConstants.grpcAcceptEncoding] = config
+        headers[HeaderConstants.grpcAcceptEncoding] =
+            config
             .acceptCompressionPoolNames()
         headers[HeaderConstants.grpcContentEncoding] = config.requestCompression
             .map { [$0.pool.name()] }
@@ -33,11 +34,11 @@ extension Headers {
         }
         if grpcWeb {
             headers[HeaderConstants.contentType] = [
-                "application/grpc-web+\(config.codec.name())",
+                "application/grpc-web+\(config.codec.name())"
             ]
         } else {
             headers[HeaderConstants.contentType] = [
-                "application/grpc+\(config.codec.name())",
+                "application/grpc+\(config.codec.name())"
             ]
             headers[HeaderConstants.grpcTE] = ["trailers"]
         }

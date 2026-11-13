@@ -42,8 +42,8 @@ extension StreamResult: Equatable where Output: Equatable {
             .complete(let code2, let error2, let trailers2)
         ):
             return code1 == code2
-            && trailers1 == trailers2
-            && (error1 != nil) == (error2 != nil)
+                && trailers1 == trailers2
+                && (error1 != nil) == (error2 != nil)
 
         case (.headers(let headers1), .headers(let headers2)):
             return headers1 == headers2

@@ -73,9 +73,10 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     /// - returns: The bootstrap that should be used for creating new connections.
     open func createBootstrap() -> NIOPosix.ClientBootstrap {
         let host = self.host
-        let tlsConfiguration: NIOSSL.TLSConfiguration? = self.useSSL
-        ? self.createTLSConfiguration(forHost: host)
-        : nil
+        let tlsConfiguration: NIOSSL.TLSConfiguration? =
+            self.useSSL
+            ? self.createTLSConfiguration(forHost: host)
+            : nil
 
         return NIOPosix.ClientBootstrap(group: self.eventLoop)
             .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
@@ -132,14 +133,15 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                     for: request.url, on: eventLoop, using: multiplexer, with: handler
                 )
             } else {
-                onResponse(.init(
-                    code: .unavailable,
-                    headers: [:],
-                    message: nil,
-                    trailers: [:],
-                    error: ConnectError.disconnected(),
-                    tracingInfo: nil
-                ))
+                onResponse(
+                    .init(
+                        code: .unavailable,
+                        headers: [:],
+                        message: nil,
+                        trailers: [:],
+                        error: ConnectError.disconnected(),
+                        tracingInfo: nil
+                    ))
             }
         }
         return Connect.Cancelable { handler.cancel() }
@@ -259,8 +261,8 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     ) -> [NIOCore.ChannelHandler] {
         var handlers: [NIOCore.ChannelHandler] = [
             self.useSSL
-            ? HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https)
-            : HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .http),
+                ? HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https)
+                : HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .http),
             connectHandler,
         ]
         if let timeout = self.timeout {
@@ -280,8 +282,8 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     }
 }
 
-private extension ConnectError {
-    static func disconnected() -> Self {
+extension ConnectError {
+    fileprivate static func disconnected() -> Self {
         .init(code: .unavailable, message: "client is not connected")
     }
 }

@@ -74,15 +74,15 @@ struct FilePathComponentsTests {
         #expect(components.suffix == testCase.expectedSuffix)
         #expect(
             components.outputFilePath(withExtension: ".connect.swift", using: .fullPath)
-            == testCase.expectedFullPathOutput
+                == testCase.expectedFullPathOutput
         )
         #expect(
             components.outputFilePath(withExtension: ".connect.swift", using: .dropPath)
-            == testCase.expectedDropPathOutput
+                == testCase.expectedDropPathOutput
         )
         #expect(
             components.outputFilePath(withExtension: ".connect.swift", using: .pathToUnderscores)
-            == testCase.expectedPathToUnderscoresOutput
+                == testCase.expectedPathToUnderscoresOutput
         )
     }
 }
