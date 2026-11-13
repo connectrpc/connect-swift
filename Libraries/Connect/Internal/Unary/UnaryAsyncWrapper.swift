@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import os.log
 import SwiftProtobuf
+import os.log
 
 /// Internal actor used to wrap closure-based unary API calls in a way that allows them
 /// to be used with async/await while properly supporting cancelation.
@@ -27,9 +27,10 @@ actor UnaryAsyncWrapper<Output: ProtobufMessage> {
 
     /// Accepts a closure to be called upon completion of a request and returns a cancelable which,
     /// when invoked, will cancel the underlying request.
-    typealias PerformClosure = @Sendable (
-        @escaping @Sendable (ResponseMessage<Output>) -> Void
-    ) -> Cancelable
+    typealias PerformClosure =
+        @Sendable (
+            @escaping @Sendable (ResponseMessage<Output>) -> Void
+        ) -> Cancelable
 
     init(sendUnary: @escaping PerformClosure) {
         self.sendUnary = sendUnary

@@ -23,7 +23,7 @@ struct ConnectEndStreamResponseTests {
             "metadata": [
                 "sOmEkEy": ["foo"],
                 "otherKey1": ["BAR", "bAz"],
-            ],
+            ]
         ]
         let data = try JSONSerialization.data(withJSONObject: dictionary)
         let response = try JSONDecoder().decode(ConnectEndStreamResponse.self, from: data)
@@ -43,8 +43,8 @@ struct ConnectEndStreamResponseTests {
     func deserializesError() throws {
         let dictionary = [
             "error": [
-                "code": "permission_denied",
-            ],
+                "code": "permission_denied"
+            ]
         ]
         let data = try JSONSerialization.data(withJSONObject: dictionary)
         let response = try JSONDecoder().decode(ConnectEndStreamResponse.self, from: data)

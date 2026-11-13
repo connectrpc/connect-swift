@@ -110,9 +110,11 @@ struct InterceptorChainIterationTests {
         chain.executeInterceptorsAndStopOnFailure(
             [
                 { _, proceed in
-                    proceed(.failure(.from(
-                        code: .unknown, headers: nil, trailers: nil, source: nil
-                    )))
+                    proceed(
+                        .failure(
+                            .from(
+                                code: .unknown, headers: nil, trailers: nil, source: nil
+                            )))
                 },
                 { value, proceed in proceed(.success(value + "b")) },
             ],
@@ -151,9 +153,11 @@ struct InterceptorChainIterationTests {
         chain.executeLinkedInterceptorsAndStopOnFailure(
             [
                 { _, proceed in
-                    proceed(.failure(.from(
-                        code: .unknown, headers: nil, trailers: nil, source: nil
-                    )))
+                    proceed(
+                        .failure(
+                            .from(
+                                code: .unknown, headers: nil, trailers: nil, source: nil
+                            )))
                 },
                 { value, proceed in proceed(.success(value + "2")) },
             ],
@@ -181,9 +185,11 @@ struct InterceptorChainIterationTests {
             firstInFirstOut: true,
             initial: "",
             transform: { _, proceed in
-                proceed(.failure(.from(
-                    code: .unknown, headers: nil, trailers: nil, source: nil
-                )))
+                proceed(
+                    .failure(
+                        .from(
+                            code: .unknown, headers: nil, trailers: nil, source: nil
+                        )))
             },
             then: [
                 { value, proceed in proceed(.success(value + 1)) },
@@ -208,9 +214,11 @@ struct InterceptorChainIterationTests {
             transform: { value1, proceed in proceed(.success(Int(value1)!)) },
             then: [
                 { _, proceed in
-                    proceed(.failure(.from(
-                        code: .unknown, headers: nil, trailers: nil, source: nil
-                    )))
+                    proceed(
+                        .failure(
+                            .from(
+                                code: .unknown, headers: nil, trailers: nil, source: nil
+                            )))
                 },
                 { value, proceed in proceed(.success(value + 3)) },
             ],

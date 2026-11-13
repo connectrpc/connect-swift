@@ -43,7 +43,7 @@ extension ConnectInterceptor: UnaryInterceptor {
         let requestBody = request.message ?? Data()
         let finalRequestBody: Data
         if let compression = self.config.requestCompression,
-           compression.shouldCompress(requestBody)
+            compression.shouldCompress(requestBody)
         {
             do {
                 finalRequestBody = try compression.pool.compress(data: requestBody)
@@ -55,14 +55,17 @@ extension ConnectInterceptor: UnaryInterceptor {
             finalRequestBody = requestBody
         }
 
-        proceed(.success(self.config.transformToGETIfNeeded(HTTPRequest(
-            url: request.url,
-            headers: headers,
-            message: finalRequestBody,
-            method: request.method,
-            trailers: nil,
-            idempotencyLevel: request.idempotencyLevel
-        ))))
+        proceed(
+            .success(
+                self.config.transformToGETIfNeeded(
+                    HTTPRequest(
+                        url: request.url,
+                        headers: headers,
+                        message: finalRequestBody,
+                        method: request.method,
+                        trailers: nil,
+                        idempotencyLevel: request.idempotencyLevel
+                    ))))
     }
 
     @Sendable
@@ -73,15 +76,17 @@ extension ConnectInterceptor: UnaryInterceptor {
         let trailerPrefix = "trailer-"
         let headers = response.headers.filter { header in
             return header.key != HeaderConstants.contentEncoding
-            && !header.key.hasPrefix(trailerPrefix)
+                && !header.key.hasPrefix(trailerPrefix)
         }
         let trailers = response.headers
             .filter { $0.key.hasPrefix(trailerPrefix) }
-            .reduce(into: Trailers(), { trailers, current in
-                trailers[
-                    String(current.key.dropFirst(trailerPrefix.count))
-                ] = current.value
-            })
+            .reduce(
+                into: Trailers(),
+                { trailers, current in
+                    trailers[
+                        String(current.key.dropFirst(trailerPrefix.count))
+                    ] = current.value
+                })
 
         let finalResponse: HTTPResponse
         let contentType = response.headers[HeaderConstants.contentType]?.first ?? ""
@@ -97,7 +102,8 @@ extension ConnectInterceptor: UnaryInterceptor {
             )
         } else if let encoding = response.headers[HeaderConstants.contentEncoding]?.first {
             if let compressionPool = self.config.responseCompressionPool(forName: encoding),
-               let message = response.message.flatMap({ try? compressionPool.decompress(data: $0) })
+                let message = response.message.flatMap({ try? compressionPool.decompress(data: $0) }
+                )
             {
                 finalResponse = HTTPResponse(
                     code: response.code,
@@ -146,14 +152,16 @@ extension ConnectInterceptor: StreamInterceptor {
         if let timeout = self.config.timeout {
             headers[HeaderConstants.connectTimeoutMs] = ["\(Int(timeout * 1_000))"]
         }
-        proceed(.success(HTTPRequest(
-            url: request.url,
-            headers: headers,
-            message: request.message,
-            method: request.method,
-            trailers: nil,
-            idempotencyLevel: request.idempotencyLevel
-        )))
+        proceed(
+            .success(
+                HTTPRequest(
+                    url: request.url,
+                    headers: headers,
+                    message: request.message,
+                    method: request.method,
+                    trailers: nil,
+                    idempotencyLevel: request.idempotencyLevel
+                )))
     }
 
     @Sendable
@@ -174,14 +182,17 @@ extension ConnectInterceptor: StreamInterceptor {
             if contentType != "application/connect+\(self.config.codec.name())" {
                 // If content-type looks like it could be an RPC server's response, consider
                 // this an internal error.
-                let code: Code = contentType.hasPrefix("application/connect+")
-                ? .internalError
-                : .unknown
-                proceed(.complete(
-                    code: code, error: ConnectError(
-                        code: code, message: "unexpected content-type: \(contentType)"
-                    ), trailers: nil
-                ))
+                let code: Code =
+                    contentType.hasPrefix("application/connect+")
+                    ? .internalError
+                    : .unknown
+                proceed(
+                    .complete(
+                        code: code,
+                        error: ConnectError(
+                            code: code, message: "unexpected content-type: \(contentType)"
+                        ), trailers: nil
+                    ))
             } else {
                 proceed(result)
             }
@@ -191,11 +202,14 @@ extension ConnectInterceptor: StreamInterceptor {
                     HeaderConstants.connectStreamingContentEncoding
                 ]?.first.flatMap { self.config.responseCompressionPool(forName: $0) }
                 if responseCompressionPool == nil && Envelope.isCompressed(data) {
-                    proceed(.complete(
-                        code: .internalError, error: ConnectError(
-                            code: .internalError, message: "received unexpected compressed message"
-                        ), trailers: nil
-                    ))
+                    proceed(
+                        .complete(
+                            code: .internalError,
+                            error: ConnectError(
+                                code: .internalError,
+                                message: "received unexpected compressed message"
+                            ), trailers: nil
+                        ))
                     return
                 }
 
@@ -209,11 +223,12 @@ extension ConnectInterceptor: StreamInterceptor {
                     let response = try JSONDecoder().decode(
                         ConnectEndStreamResponse.self, from: message
                     )
-                    proceed(.complete(
-                        code: response.error?.code ?? .ok,
-                        error: response.error,
-                        trailers: response.metadata
-                    ))
+                    proceed(
+                        .complete(
+                            code: response.error?.code ?? .ok,
+                            error: response.error,
+                            trailers: response.metadata
+                        ))
                 } else {
                     proceed(.message(message))
                 }
@@ -224,16 +239,17 @@ extension ConnectInterceptor: StreamInterceptor {
 
         case .complete(let code, let error, let trailers):
             if code != .ok && error == nil {
-                proceed(.complete(
-                    code: code,
-                    error: ConnectError.from(
+                proceed(
+                    .complete(
                         code: code,
-                        headers: self.streamResponseHeaders.value,
-                        trailers: trailers,
-                        source: nil
-                    ),
-                    trailers: trailers
-                ))
+                        error: ConnectError.from(
+                            code: code,
+                            headers: self.streamResponseHeaders.value,
+                            trailers: trailers,
+                            source: nil
+                        ),
+                        trailers: trailers
+                    ))
             } else {
                 proceed(result)
             }

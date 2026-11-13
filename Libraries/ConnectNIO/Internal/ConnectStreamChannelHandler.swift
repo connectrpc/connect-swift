@@ -161,30 +161,30 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
     }
 
     func handlerAdded(context: NIOCore.ChannelHandlerContext) {
-      self.context = context
+        self.context = context
     }
 
     func handlerRemoved(context: NIOCore.ChannelHandlerContext) {
-      self.context = nil
+        self.context = nil
     }
 
     func channelInactive(context: ChannelHandlerContext) {
-      let shouldNotify = !self.hasResponded
-      self.closeConnection()
-      if shouldNotify {
-          self.responseCallbacks.receiveClose(
-              .unavailable,
-              [:],
-              ConnectError(
-                  code: .unavailable,
-                  message: "Channel became inactive",
-                  exception: nil,
-                  details: [],
-                  metadata: [:]
-              )
-          )
-      }
-      context.fireChannelInactive()
+        let shouldNotify = !self.hasResponded
+        self.closeConnection()
+        if shouldNotify {
+            self.responseCallbacks.receiveClose(
+                .unavailable,
+                [:],
+                ConnectError(
+                    code: .unavailable,
+                    message: "Channel became inactive",
+                    exception: nil,
+                    details: [],
+                    metadata: [:]
+                )
+            )
+        }
+        context.fireChannelInactive()
     }
 
     func errorCaught(context: NIOCore.ChannelHandlerContext, error: Swift.Error) {

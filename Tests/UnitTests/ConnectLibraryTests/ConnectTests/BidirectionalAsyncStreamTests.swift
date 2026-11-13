@@ -29,9 +29,10 @@ struct BidirectionalAsyncStreamTests {
     func closesTheRequestWhenTheStreamCompletes() async {
         await confirmation("the request is closed") { closed in
             let stream = BidirectionalAsyncStream<Empty, Empty>()
-            stream.configureForSending(with: RequestCallbacks<Empty>(
-                cancel: {}, sendData: { _ in }, sendClose: { closed() }
-            ))
+            stream.configureForSending(
+                with: RequestCallbacks<Empty>(
+                    cancel: {}, sendData: { _ in }, sendClose: { closed() }
+                ))
 
             stream.handleResultFromServer(.complete(code: .ok, error: nil, trailers: nil))
         }
@@ -47,9 +48,10 @@ struct BidirectionalAsyncStreamTests {
     /// Separate function so the stream is deterministically released when it returns.
     private func consumeOneResultThenRelease(onClose: Confirmation) async {
         let stream = BidirectionalAsyncStream<Empty, Empty>()
-        stream.configureForSending(with: RequestCallbacks<Empty>(
-            cancel: {}, sendData: { _ in }, sendClose: { onClose() }
-        ))
+        stream.configureForSending(
+            with: RequestCallbacks<Empty>(
+                cancel: {}, sendData: { _ in }, sendClose: { onClose() }
+            ))
         stream.handleResultFromServer(.headers([:]))
         for await _ in stream.results() {
             break
