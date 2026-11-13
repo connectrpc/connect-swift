@@ -14,10 +14,12 @@ disabled_rules:
   - function_body_length
   - function_parameter_count
   - identifier_name
+  - line_length
   - opening_brace
   - nesting
   - redundant_string_enum_value
   - todo
+  - trailing_comma
   - type_body_length
   - type_name
   - unavailable_function
@@ -68,7 +70,6 @@ opt_in_rules:
   - redundant_type_annotation
   - single_test_class
   - sorted_first_last
-  - sorted_imports
   - static_operator
   - toggle_bool
   - unavailable_function
@@ -80,9 +81,6 @@ opt_in_rules:
 trailing_whitespace:
   ignores_comments: false
   ignores_empty_lines: false
-trailing_comma:
-  mandatory_comma: true
-line_length: 100
 private_over_fileprivate:
   validate_extensions: true
 modifier_order:
