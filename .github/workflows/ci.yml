@@ -93,6 +93,16 @@ jobs:
           cache-dependency-path: Makefile
       - name: Run unit tests
         run: make testunit
+  run-swift-format:
+    runs-on: ubuntu-latest
+    container:
+      # Not tracked by Dependabot; bump by hand. Formatting can differ between
+      # swift-format versions, so re-run `make format` when bumping.
+      image: swift:6.4-noble
+    steps:
+      - uses: actions/checkout@v7
+      - name: Run swift-format
+        run: swift format lint --strict --recursive --parallel .
   run-swiftlint:
     runs-on: ubuntu-latest
     container:
