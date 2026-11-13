@@ -1,0 +1,13 @@
+{
+  "indentConditionalCompilationBlocks": false,
+  "indentation": {
+    "spaces": 4
+  },
+  "orderedImports": {
+    "includeConditionalImports": false,
+    "shouldGroupImports": false
+  },
+  "spacesBeforeEndOfLineComments": 1,
+  "tabWidth": 4,
+  "version": 1
+}

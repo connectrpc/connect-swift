@@ -43,6 +43,10 @@ cleangenerated: ## Delete all generated outputs
 	rm -rf ./Tests/ConformanceClient/GeneratedSources/*
 	rm -rf ./Tests/UnitTests/ConnectLibraryTests/GeneratedSources/*
 
+.PHONY: format
+format: ## Format all .swift files in place with swift-format
+	swift format --in-place --recursive --parallel .
+
 .PHONY: generate
 generate: cleangenerated ## Regenerate outputs for all .proto files
 	cd Examples; buf generate https://github.com/connectrpc/examples-go.git#tag=$(EXAMPLES_PROTO_REF),subdir=proto
