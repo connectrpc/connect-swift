@@ -23,28 +23,41 @@ import Foundation
 final class TimeoutTimer: Sendable {
     private enum State {
         case ready
-        case started(Task<Void, Never>)
+        case started(Task<Void, Never>, deadline: DispatchTime)
         case timedOut
         case canceled
     }
 
     private let state = Locked<State>(.ready)
     private let timeout: TimeInterval
+    private let now: @Sendable () -> DispatchTime
 
+    // Checks the clock instead of waiting for the callback: the sleeping task can wake late,
+    // and the server may reset the request in that gap.
     var timedOut: Bool {
-        if case .timedOut = self.state.value {
-            return true
+        let now = self.now
+        return self.state.perform { state in
+            switch state {
+            case .timedOut:
+                return true
+            case .started(_, let deadline):
+                return now() >= deadline
+            case .ready, .canceled:
+                return false
+            }
         }
-
-        return false
     }
 
-    init?(config: ProtocolClientConfig) {
+    init?(
+        config: ProtocolClientConfig,
+        now: @escaping @Sendable () -> DispatchTime = { DispatchTime.now() }
+    ) {
         guard let timeout = config.timeout else {
             return nil
         }
 
         self.timeout = timeout
+        self.now = now
     }
 
     deinit {
@@ -55,6 +68,7 @@ final class TimeoutTimer: Sendable {
     func start(onTimeout: @escaping @Sendable () -> Void) {
         // Clamped: `timeout` is caller-supplied, and `UInt64(negativeDouble)` traps.
         let nanoseconds = UInt64(max(0, self.timeout * 1_000_000_000))
+        let deadline = self.now() + .nanoseconds(Int(clamping: nanoseconds))
         // Avoid capturing `self` so `deinit` disarms the orphaned timer.
         let state = self.state
         let task = Task {
@@ -87,7 +101,7 @@ final class TimeoutTimer: Sendable {
             case .timedOut, .canceled:
                 return true
             case .ready, .started:
-                state = .started(task)
+                state = .started(task, deadline: deadline)
                 return false
             }
         }
@@ -97,10 +111,12 @@ final class TimeoutTimer: Sendable {
     }
 
     func cancel() {
+        let now = self.now
         let task = self.state.perform { state -> Task<Void, Never>? in
             switch state {
-            case .started(let task):
-                state = .canceled
+            case .started(let task, let deadline):
+                // Keep reporting `timedOut` if the deadline passed before the task woke up.
+                state = now() >= deadline ? .timedOut : .canceled
                 return task
             case .ready:
                 state = .canceled

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import Connect
 import Foundation
 import SwiftProtobuf
 
@@ -19,6 +20,9 @@ import SwiftProtobuf
 
 nonisolated(unsafe) private let iso8601DateFormatter = ISO8601DateFormatter()
 private let prefixLength = MemoryLayout<UInt32>.size // 4
+// Must stay below the conformance runner's 20s response timeout so that a hung
+// RPC fails only its own test instead of every test queued behind it.
+private let testCaseDeadlineSeconds: UInt64 = 15
 
 private func logToStderr(_ message: String) {
     let date = Date()
@@ -36,6 +40,47 @@ private func nextMessageLength(using data: Data) -> Int {
     (data[0...3] as NSData).getBytes(&messageLength, length: prefixLength)
     messageLength = UInt32(bigEndian: messageLength)
     return Int(messageLength)
+}
+
+@available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
+private func invokeWithDeadline(
+    _ invoker: ConformanceInvoker,
+    testName: String
+) async throws -> ConformanceInvoker.ConformanceResult {
+    typealias Continuation = CheckedContinuation<ConformanceInvoker.ConformanceResult, Error>
+    let pending = Locked<Continuation?>(nil)
+    @Sendable
+    @discardableResult
+    func resumeOnce(with result: Result<ConformanceInvoker.ConformanceResult, Error>) -> Bool {
+        let continuation = pending.perform { continuation in
+            defer { continuation = nil }
+            return continuation
+        }
+        continuation?.resume(with: result)
+        return continuation != nil
+    }
+
+    // Unstructured tasks rather than a task group: a group would wait for the
+    // hung child to finish, and a stalled URLSession task may ignore cancellation.
+    return try await withCheckedThrowingContinuation { continuation in
+        pending.value = continuation
+        let work = Task { try await invoker.invokeRequest() }
+        let watchdog = Task {
+            try await Task.sleep(nanoseconds: testCaseDeadlineSeconds * 1_000_000_000)
+            let message = "test case did not complete within \(testCaseDeadlineSeconds)s"
+            // Resume before canceling so the canceled RPC can't report its own result first.
+            guard resumeOnce(with: .failure(message)) else {
+                return
+            }
+            logToStderr("\(testName): \(message)")
+            work.cancel()
+        }
+        Task {
+            let result = await work.result
+            watchdog.cancel()
+            resumeOnce(with: result)
+        }
+    }
 }
 
 @available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
@@ -79,7 +124,7 @@ private func main() async throws {
                 throw "Unexpected service specified: \(request.service)"
             }
 
-            let result = try await invoker.invokeRequest()
+            let result = try await invokeWithDeadline(invoker, testName: request.testName)
             response = .with { conformanceResponse in
                 conformanceResponse.testName = request.testName
                 conformanceResponse.response = result

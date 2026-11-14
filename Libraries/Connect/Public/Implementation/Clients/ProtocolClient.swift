@@ -122,7 +122,11 @@ extension ProtocolClient: ProtocolClientInterface {
                         },
                         onResponse: { initialResponse in
                             var initialResponse = initialResponse
-                            if initialResponse.code == .canceled && timeoutTimer?.timedOut == true {
+                            // The server may enforce the same deadline and reset the request before
+                            // our timer fires, which surfaces as a transport error.
+                            let failed = initialResponse.code == .canceled
+                                || initialResponse.error != nil
+                            if failed && timeoutTimer?.timedOut == true {
                                 initialResponse = .init(
                                     code: .deadlineExceeded,
                                     headers: initialResponse.headers,
@@ -347,7 +351,8 @@ extension ProtocolClient: ProtocolClientInterface {
 
                 var code = code
                 var error = error
-                if code == .canceled && timeoutTimer?.timedOut == true {
+                // See the unary path: a server-side reset can beat our timer.
+                if (code == .canceled || error != nil) && timeoutTimer?.timedOut == true {
                     code = .deadlineExceeded
                     error = ConnectError(
                         code: .deadlineExceeded,
