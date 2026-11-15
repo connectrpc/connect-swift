@@ -89,4 +89,4 @@ testconformance: ## Run all conformance tests
 testunit: ## Run all unit tests
 	go install connectrpc.com/conformance/cmd/referenceserver@$(CONFORMANCE_RUNNER_TAG)
 	echo "{\"protocol\": \"PROTOCOL_CONNECT\", \"httpVersion\": \"HTTP_VERSION_1\"}" | go run connectrpc.com/conformance/cmd/referenceserver@$(CONFORMANCE_RUNNER_TAG) -port 52107 -json &
-	swift test
+	swift test -Xswiftc -warnings-as-errors
