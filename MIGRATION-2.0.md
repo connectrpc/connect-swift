@@ -10,18 +10,54 @@ Swift 6.2 / Xcode 26 or later is required. Deployment targets are unchanged.
 
 ## Callback API
 
-The callback API is still available, and its signatures are unchanged. It is now built on the
-async API, which changes three things a caller can observe:
+The callback API is still available, and its signatures are unchanged, so code that calls it
+compiles as before. Each callback method is now a thin layer over the matching async method: it
+starts a Swift Concurrency task, calls the async method on that task, and passes the result to
+your closure. That brings some improvements, and a few changes worth checking your code for.
 
-- Completion handlers and `onResult` closures are called from a Swift Concurrency task, not
-  from the transport's queue (URLSession's delegate queue or a SwiftNIO event loop). Code that
-  relied on that queue must hop to it itself. Callbacks from different calls on the same client
-  can now run at the same time: `URLSessionHTTPClient` used to deliver them one at a time on a
-  serial queue, so state they share now needs its own synchronization. A stream's `onResult` is
-  still called in order, never concurrently.
-- A call returns before its request has started; the request starts on that task. Two unary
-  calls made back to back are no longer guaranteed to be sent in that order. Messages sent on
-  one stream still arrive in the order they were sent. A completion handler is never called
-  before the call that started it returns, even when the request fails right away.
-- A type that implements `ProtocolClientInterface` itself no longer has to implement the four
-  callback methods.
+### Improvements
+
+- **Your closures no longer run on the transport's queue.** Completion handlers and `onResult`
+  closures used to run on `URLSessionHTTPClient`'s serial delegate queue or on a SwiftNIO event
+  loop, so a slow closure held up every other request on the same client. They now run on a
+  task, and the transport keeps working while they do.
+- **A completion handler is always called after the call that started it has returned.**
+  Before, a request that failed before it was sent, for example because its message could not
+  be serialized, could call its completion handler synchronously, before the call returned.
+- **With `NIOHTTPClient` and a timeout, a unary call's completion handler is called once.**
+  Before, the timeout could occasionally fire after the response and call it a second time,
+  with `.deadlineExceeded`.
+- **A type that implements `ProtocolClientInterface` itself no longer has to implement the four
+  callback methods.** Default implementations call its four async methods.
+
+### What to check in your code
+
+- **Closures are called from a Swift Concurrency task, not from the transport's queue.**
+  Neither queue was the main thread, so code that updates the UI already had to hop to the main
+  actor, and still does. Code that checks it is on the old queue, for example with
+  `dispatchPrecondition` or `EventLoop.inEventLoop`, must stop doing so.
+- **Closures for different calls on the same client can run at the same time.**
+  `URLSessionHTTPClient` used to call them one at a time, so state they shared was safe without
+  a lock. Protect that state yourself. In Swift 6 language mode the compiler checks this,
+  because the closures are `@Sendable`; in Swift 5 mode it does not.
+- **A call returns before its request has started.** The request starts on the task, so two
+  unary calls made back to back are no longer sent in the order they were made. Sending them in
+  order never guaranteed that the server received them in order. If one call must finish before
+  the next starts, make the second call from the first one's completion handler, or use the
+  async API and `await` each call in turn.
+- **Don't block inside a closure.** A closure that waits on a semaphore or does slow synchronous
+  work holds one of the threads Swift Concurrency shares across your app, and there are only
+  about as many of those as CPU cores.
+- **Check the signatures of callback methods you implement yourself.** If one doesn't exactly
+  match the protocol requirement, for example because a closure parameter lacks `@Sendable`,
+  the compiler only warns that it nearly matches, and calls through the protocol use the default
+  implementation instead of yours.
+
+### What stays the same
+
+- Canceling a unary call's `Cancelable` completes the call with `.canceled`, and calling
+  `cancel()` on a stream ends the stream with `.canceled`.
+- A stream's `onResult` closure is called in order and never concurrently, ending with one
+  `.complete`.
+- Messages sent on one stream arrive in the order they were sent.
+- Dropping a stream handle doesn't stop the stream: results keep arriving until it completes.
