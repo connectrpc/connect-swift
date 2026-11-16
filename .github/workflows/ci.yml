@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Build Connect iOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'generic/platform=iOS Simulator' | xcbeautify
   build-library-macos:
     runs-on: macos-26
     steps:
@@ -38,17 +38,22 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Build Connect tvOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=tvOS Simulator,name=Apple TV 4K (3rd generation),OS=latest' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'generic/platform=tvOS Simulator' | xcbeautify
   build-library-watchos:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
       - name: Build Connect watchOS library
-        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'platform=watchOS Simulator,name=Apple Watch Ultra 3 (49mm),OS=latest' | xcbeautify
+        run: set -o pipefail && xcodebuild -scheme Connect-Package -destination 'generic/platform=watchOS Simulator' | xcbeautify
   build-plugin-and-generate:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/cache@v6
+        with:
+          path: .build
+          key: ${{ runner.os }}-${{ github.job }}-${{ env.DEVELOPER_DIR }}-${{ hashFiles('Package.resolved') }}
+          restore-keys: ${{ runner.os }}-${{ github.job }}-${{ env.DEVELOPER_DIR }}-
       - uses: bufbuild/buf-action@v1
         with:
           setup_only: true
@@ -64,6 +69,11 @@ jobs:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/cache@v6
+        with:
+          path: .build
+          key: ${{ runner.os }}-${{ github.job }}-${{ env.DEVELOPER_DIR }}-${{ hashFiles('Package.resolved') }}
+          restore-keys: ${{ runner.os }}-${{ github.job }}-${{ env.DEVELOPER_DIR }}-
       - name: Install conformance runner
         run: make installconformancerunner
       - name: Run conformance tests
@@ -72,15 +82,32 @@ jobs:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/cache@v6
+        with:
+          path: .build
+          key: ${{ runner.os }}-${{ github.job }}-${{ env.DEVELOPER_DIR }}-${{ hashFiles('Package.resolved') }}
+          restore-keys: ${{ runner.os }}-${{ github.job }}-${{ env.DEVELOPER_DIR }}-
       - uses: actions/setup-go@v7
         with:
           go-version: 1.24.x
+          cache-dependency-path: Makefile
       - name: Run unit tests
         run: make testunit
+  run-swift-format:
+    runs-on: ubuntu-latest
+    container:
+      # Not tracked by Dependabot; bump by hand. Formatting can differ between
+      # swift-format versions, so re-run `make format` when bumping.
+      image: swift:6.4-noble
+    steps:
+      - uses: actions/checkout@v7
+      - name: Run swift-format
+        run: swift format lint --strict --recursive --parallel .
   run-swiftlint:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/realm/swiftlint:0.65.0
+      # Not tracked by Dependabot; bump by hand.
+      image: ghcr.io/realm/swiftlint:0.65.1
     steps:
       - uses: actions/checkout@v7
       - name: Run SwiftLint

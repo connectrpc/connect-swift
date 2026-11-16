@@ -43,6 +43,10 @@ cleangenerated: ## Delete all generated outputs
 	rm -rf ./Tests/ConformanceClient/GeneratedSources/*
 	rm -rf ./Tests/UnitTests/ConnectLibraryTests/GeneratedSources/*
 
+.PHONY: format
+format: ## Format all .swift files in place with swift-format
+	swift format --in-place --recursive --parallel .
+
 .PHONY: generate
 generate: cleangenerated ## Regenerate outputs for all .proto files
 	cd Examples; buf generate https://github.com/connectrpc/examples-go.git#tag=$(EXAMPLES_PROTO_REF),subdir=proto
@@ -85,4 +89,4 @@ testconformance: ## Run all conformance tests
 testunit: ## Run all unit tests
 	go install connectrpc.com/conformance/cmd/referenceserver@$(CONFORMANCE_RUNNER_TAG)
 	echo "{\"protocol\": \"PROTOCOL_CONNECT\", \"httpVersion\": \"HTTP_VERSION_1\"}" | go run connectrpc.com/conformance/cmd/referenceserver@$(CONFORMANCE_RUNNER_TAG) -port 52107 -json &
-	swift test
+	swift test -Xswiftc -warnings-as-errors

@@ -159,10 +159,10 @@ final class ConnectClientGenerator: Generator {
 
         self.printLine(
             "\(self.visibility) "
-            + method.callbackSignature(
-                using: self.namer, includeDefaults: true, options: self.options
-            )
-            + " {"
+                + method.callbackSignature(
+                    using: self.namer, includeDefaults: true, options: self.options
+                )
+                + " {"
         )
         self.indent {
             self.printLine("return \(method.callbackReturnValue())")
@@ -177,10 +177,10 @@ final class ConnectClientGenerator: Generator {
         }
         self.printLine(
             "\(self.visibility) "
-            + method.asyncAwaitSignature(
-                using: self.namer, includeDefaults: true, options: self.options
-            )
-            + " {"
+                + method.asyncAwaitSignature(
+                    using: self.namer, includeDefaults: true, options: self.options
+                )
+                + " {"
         )
         self.indent {
             self.printLine("return \(method.asyncAwaitReturnValue())")
@@ -189,8 +189,8 @@ final class ConnectClientGenerator: Generator {
     }
 }
 
-private extension MethodDescriptor {
-    func specStreamType() -> String {
+extension MethodDescriptor {
+    fileprivate func specStreamType() -> String {
         if self.clientStreaming && self.serverStreaming {
             return ".bidirectionalStream"
         } else if self.serverStreaming {
@@ -202,7 +202,7 @@ private extension MethodDescriptor {
         }
     }
 
-    func idempotencyLevel() -> String {
+    fileprivate func idempotencyLevel() -> String {
         switch self.options.idempotencyLevel {
         case .idempotencyUnknown:
             return "unknown"
@@ -213,79 +213,77 @@ private extension MethodDescriptor {
         }
     }
 
-    func callbackAvailabilityAnnotation() -> String? {
+    fileprivate func callbackAvailabilityAnnotation() -> String? {
         if self.options.deprecated {
-            // swiftlint:disable line_length
             return """
-            @available(iOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
-            @available(macOS, introduced: 10.15, deprecated: 10.15, message: "This RPC has been marked as deprecated in its `.proto` file.")
-            @available(tvOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
-            @available(watchOS, introduced: 6, deprecated: 6, message: "This RPC has been marked as deprecated in its `.proto` file.")
-            """
-            // swiftlint:enable line_length
+                @available(iOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
+                @available(macOS, introduced: 10.15, deprecated: 10.15, message: "This RPC has been marked as deprecated in its `.proto` file.")
+                @available(tvOS, introduced: 13, deprecated: 13, message: "This RPC has been marked as deprecated in its `.proto` file.")
+                @available(watchOS, introduced: 6, deprecated: 6, message: "This RPC has been marked as deprecated in its `.proto` file.")
+                """
         } else {
             return nil
         }
     }
 
-    func asyncAwaitAvailabilityAnnotation() -> String? {
+    fileprivate func asyncAwaitAvailabilityAnnotation() -> String? {
         if self.options.deprecated {
-            // swiftlint:disable:next line_length
-            return "@available(iOS, introduced: 13, deprecated: 13, message: \"This RPC has been marked as deprecated in its `.proto` file.\")"
+            return
+                "@available(iOS, introduced: 13, deprecated: 13, message: \"This RPC has been marked as deprecated in its `.proto` file.\")"
         } else {
             return nil
         }
     }
 
-    func callbackReturnValue() -> String {
+    fileprivate func callbackReturnValue() -> String {
         if self.clientStreaming && self.serverStreaming {
             return """
-            self.client.bidirectionalStream(\
-            path: "\(self.methodPath)", headers: headers, onResult: onResult)
-            """
+                self.client.bidirectionalStream(\
+                path: "\(self.methodPath)", headers: headers, onResult: onResult)
+                """
         } else if self.serverStreaming {
             return """
-            self.client.serverOnlyStream(\
-            path: "\(self.methodPath)", headers: headers, onResult: onResult)
-            """
+                self.client.serverOnlyStream(\
+                path: "\(self.methodPath)", headers: headers, onResult: onResult)
+                """
         } else if self.clientStreaming {
             return """
-            self.client.clientOnlyStream(\
-            path: "\(self.methodPath)", headers: headers, onResult: onResult)
-            """
+                self.client.clientOnlyStream(\
+                path: "\(self.methodPath)", headers: headers, onResult: onResult)
+                """
         } else {
             return """
-            self.client.unary(\
-            path: "\(self.methodPath)", \
-            idempotencyLevel: .\(self.idempotencyLevel()), \
-            request: request, \
-            headers: headers, \
-            completion: completion)
-            """
+                self.client.unary(\
+                path: "\(self.methodPath)", \
+                idempotencyLevel: .\(self.idempotencyLevel()), \
+                request: request, \
+                headers: headers, \
+                completion: completion)
+                """
         }
     }
 
-    func asyncAwaitReturnValue() -> String {
+    fileprivate func asyncAwaitReturnValue() -> String {
         if self.clientStreaming && self.serverStreaming {
             return """
-            self.client.bidirectionalStream(path: "\(self.methodPath)", headers: headers)
-            """
+                self.client.bidirectionalStream(path: "\(self.methodPath)", headers: headers)
+                """
         } else if self.serverStreaming {
             return """
-            self.client.serverOnlyStream(path: "\(self.methodPath)", headers: headers)
-            """
+                self.client.serverOnlyStream(path: "\(self.methodPath)", headers: headers)
+                """
         } else if self.clientStreaming {
             return """
-            self.client.clientOnlyStream(path: "\(self.methodPath)", headers: headers)
-            """
+                self.client.clientOnlyStream(path: "\(self.methodPath)", headers: headers)
+                """
         } else {
             return """
-            await self.client.unary(\
-            path: "\(self.methodPath)", \
-            idempotencyLevel: .\(self.idempotencyLevel()), \
-            request: request, \
-            headers: headers)
-            """
+                await self.client.unary(\
+                path: "\(self.methodPath)", \
+                idempotencyLevel: .\(self.idempotencyLevel()), \
+                request: request, \
+                headers: headers)
+                """
         }
     }
 }

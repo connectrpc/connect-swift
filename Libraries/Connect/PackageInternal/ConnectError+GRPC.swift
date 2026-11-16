@@ -37,22 +37,25 @@ extension ConnectError {
         // Combine headers + trailers into metadata to make error parsing easier for consumers,
         // since gRPC can include error information in either headers or trailers.
         let metadata = (headers ?? [:]).merging(trailers ?? [:]) { $1 }
-        return (grpcCode, .init(
-            code: grpcCode,
-            message: metadata.grpcMessage(),
-            exception: nil,
-            details: metadata.connectErrorDetailsFromGRPC(),
-            metadata: metadata
-        ))
+        return (
+            grpcCode,
+            .init(
+                code: grpcCode,
+                message: metadata.grpcMessage(),
+                exception: nil,
+                details: metadata.connectErrorDetailsFromGRPC(),
+                metadata: metadata
+            )
+        )
     }
 }
 
-private extension Trailers {
-    func grpcMessage() -> String? {
+extension Trailers {
+    fileprivate func grpcMessage() -> String? {
         return self[HeaderConstants.grpcMessage]?.first?.grpcPercentDecoded()
     }
 
-    func connectErrorDetailsFromGRPC() -> [ConnectError.Detail] {
+    fileprivate func connectErrorDetailsFromGRPC() -> [ConnectError.Detail] {
         return self[HeaderConstants.grpcStatusDetails]?
             .first
             .flatMap { Data(base64Encoded: $0.addingBase64PaddingIfNeeded()) }
@@ -68,11 +71,11 @@ private extension Trailers {
                     payload: protoDetail.value
                 )
             }
-        ?? []
+            ?? []
     }
 }
 
-private extension String {
+extension String {
     /// grpcPercentEncode/grpcPercentDecode follows RFC 3986 Section 2.1 and the gRPC HTTP/2 spec.
     /// It's a variant of URL-encoding with fewer reserved characters. It's intended
     /// to take UTF-8 encoded text and escape non-ASCII bytes so that they're valid
@@ -87,7 +90,7 @@ private extension String {
     ///    https://datatracker.ietf.org/doc/html/rfc3986#section-2.1
     ///
     /// - returns: A decoded string using the above format.
-    func grpcPercentDecoded() -> Self {
+    fileprivate func grpcPercentDecoded() -> Self {
         let utf8 = self.utf8
         let endIndex = utf8.endIndex
         var characters = [UInt8]()
@@ -103,7 +106,7 @@ private extension String {
                 }
 
                 if let decoded = String(
-                    utf8[utf8.index(index, offsetBy: 1) ... secondIndex]
+                    utf8[utf8.index(index, offsetBy: 1)...secondIndex]
                 ).flatMap({ UInt8($0, radix: 16) }) {
                     characters.append(decoded)
                     index = utf8.index(after: secondIndex)

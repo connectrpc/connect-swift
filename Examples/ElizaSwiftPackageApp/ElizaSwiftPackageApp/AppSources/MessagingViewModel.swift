@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Foundation
 import Combine
 import Connect
-import os.log
+import Foundation
 import SwiftProtobuf
+import os.log
 
 private typealias ConverseRequest = Connectrpc_Eliza_V1_ConverseRequest
 private typealias ConverseResponse = Connectrpc_Eliza_V1_ConverseResponse
@@ -57,10 +57,11 @@ final class UnaryMessagingViewModel: MessagingViewModel {
 
         let response = await self.client.say(request: request, headers: [:])
         os_log(.debug, "Eliza unary response: %@", String(describing: response))
-        self.messages.append(Message(
-            message: response.message?.sentence ?? "No response", author: .eliza
-        ))
-     }
+        self.messages.append(
+            Message(
+                message: response.message?.sentence ?? "No response", author: .eliza
+            ))
+    }
 
     func endChat() {}
 }

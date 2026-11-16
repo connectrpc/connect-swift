@@ -19,16 +19,17 @@ import Testing
 
 struct JSONCodecTests {
     private let message: Connectrpc_Conformance_V1_RawHTTPRequest = .with { proto in
-        proto.body = .unary(Connectrpc_Conformance_V1_MessageContents.with { message in
-            message.binary = Data([0x0, 0x1, 0x2, 0x3])
-            message.compression = .gzip
-        })
+        proto.body = .unary(
+            Connectrpc_Conformance_V1_MessageContents.with { message in
+                message.binary = Data([0x0, 0x1, 0x2, 0x3])
+                message.compression = .gzip
+            })
         proto.uri = "foo/bar"
         proto.headers = [
             .with { header in
                 header.name = "x-header"
                 header.value = ["a"]
-            },
+            }
         ]
         proto.rawQueryParams = [.init()]
     }
@@ -71,12 +72,13 @@ struct JSONCodecTests {
         let dictionary = try #require(
             try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
         )
-        #expect(Set(dictionary.keys).isSuperset(of: [
-            "headers",
-            "unary",
-            "uri",
-            "raw_query_params",
-        ]))
+        #expect(
+            Set(dictionary.keys).isSuperset(of: [
+                "headers",
+                "unary",
+                "uri",
+                "raw_query_params",
+            ]))
         #expect(try codec.deserialize(source: serialized) == self.message)
     }
 
@@ -87,12 +89,13 @@ struct JSONCodecTests {
         let dictionary = try #require(
             try JSONSerialization.jsonObject(with: serialized) as? [String: Any]
         )
-        #expect(Set(dictionary.keys).isSuperset(of: [
-            "headers",
-            "unary",
-            "uri",
-            "rawQueryParams",
-        ]))
+        #expect(
+            Set(dictionary.keys).isSuperset(of: [
+                "headers",
+                "unary",
+                "uri",
+                "rawQueryParams",
+            ]))
         #expect(try codec.deserialize(source: serialized) == self.message)
     }
 }

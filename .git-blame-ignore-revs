@@ -1,0 +1,7 @@
+# Commits that `git blame` should skip. GitHub's blame view reads this file
+# automatically. For local use, run once per clone:
+#
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# Format all Swift sources with swift-format (#453)
+289d3127ff2b5e7c73937aa98d4416161f62cb8c

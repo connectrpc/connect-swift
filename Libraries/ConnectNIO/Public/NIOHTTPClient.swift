@@ -24,10 +24,15 @@ import os.log
 
 /// HTTP client powered by Swift NIO which supports trailers (unlike URLSession).
 open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
+    /// One loop of NIO's process-wide singleton group, which is never shut down. Requests can
+    /// outlive the client which started them - a caller may hold a `Cancelable` or a stream past
+    /// it, and NIO completes an in-flight connect on its own - so a loop that was shut down with
+    /// the client would have that late work scheduled onto it after it had stopped.
+    let eventLoop: NIOCore.EventLoop = NIOPosix.MultiThreadedEventLoopGroup.singleton.next()
+
     private lazy var bootstrap = self.createBootstrap()
     private let host: String
     private let lock = NIOConcurrencyHelpers.NIOLock()
-    private let loopGroup = NIOPosix.MultiThreadedEventLoopGroup(numberOfThreads: 1)
     private let port: Int
     private let timeout: TimeInterval?
     private let useSSL: Bool
@@ -68,11 +73,12 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     /// - returns: The bootstrap that should be used for creating new connections.
     open func createBootstrap() -> NIOPosix.ClientBootstrap {
         let host = self.host
-        let tlsConfiguration: NIOSSL.TLSConfiguration? = self.useSSL
-        ? self.createTLSConfiguration(forHost: host)
-        : nil
+        let tlsConfiguration: NIOSSL.TLSConfiguration? =
+            self.useSSL
+            ? self.createTLSConfiguration(forHost: host)
+            : nil
 
-        return NIOPosix.ClientBootstrap(group: self.loopGroup)
+        return NIOPosix.ClientBootstrap(group: self.eventLoop)
             .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
             .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .channelInitializer { channel in
@@ -114,7 +120,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         onMetrics: @escaping @Sendable (Connect.HTTPMetrics) -> Void,
         onResponse: @escaping @Sendable (Connect.HTTPResponse) -> Void
     ) -> Connect.Cancelable {
-        let eventLoop = self.loopGroup.next()
+        let eventLoop = self.eventLoop
         let handler = ConnectUnaryChannelHandler(
             request: request,
             eventLoop: eventLoop,
@@ -127,14 +133,15 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                     for: request.url, on: eventLoop, using: multiplexer, with: handler
                 )
             } else {
-                onResponse(.init(
-                    code: .unavailable,
-                    headers: [:],
-                    message: nil,
-                    trailers: [:],
-                    error: ConnectError.disconnected(),
-                    tracingInfo: nil
-                ))
+                onResponse(
+                    .init(
+                        code: .unavailable,
+                        headers: [:],
+                        message: nil,
+                        trailers: [:],
+                        error: ConnectError.disconnected(),
+                        tracingInfo: nil
+                    ))
             }
         }
         return Connect.Cancelable { handler.cancel() }
@@ -144,7 +151,7 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
         request: Connect.HTTPRequest<Data?>,
         responseCallbacks: Connect.ResponseCallbacks
     ) -> Connect.RequestCallbacks<Data> {
-        let eventLoop = self.loopGroup.next()
+        let eventLoop = self.eventLoop
         let handler = ConnectStreamChannelHandler(
             request: request,
             responseCallbacks: responseCallbacks,
@@ -194,15 +201,22 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 do {
                     switch result {
                     case .success(let channel):
+                        guard let self else {
+                            // The event loop outlives the client, so nothing else would close a
+                            // connection which is established after the client is gone.
+                            channel.close(mode: .all, promise: nil)
+                            return
+                        }
+
                         let multiplexer = try channel.pipeline.syncOperations
                             .handler(type: NIOHTTP2.NIOHTTP2Handler.self)
                             .syncMultiplexer()
                         channel.closeFuture.whenComplete { [weak self] _ in
                             self?.lock.withLock { self?.state = .disconnected }
                         }
-                        self?.lock.withLock {
-                            self?.state = .connected(channel: channel, multiplexer: multiplexer)
-                            self?.flushOrFailPendingRequests(using: multiplexer)
+                        self.lock.withLock {
+                            self.state = .connected(channel: channel, multiplexer: multiplexer)
+                            self.flushOrFailPendingRequests(using: multiplexer)
                         }
                     case .failure(let error):
                         throw error
@@ -247,8 +261,8 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
     ) -> [NIOCore.ChannelHandler] {
         var handlers: [NIOCore.ChannelHandler] = [
             self.useSSL
-            ? HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https)
-            : HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .http),
+                ? HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .https)
+                : HTTP2FramePayloadToHTTP1ClientCodec(httpProtocol: .http),
             connectHandler,
         ]
         if let timeout = self.timeout {
@@ -265,15 +279,11 @@ open class NIOHTTPClient: Connect.HTTPClientInterface, @unchecked Sendable {
                 channel.close(mode: .all, promise: nil)
             }
         }
-        // An event loop callback can release the client's last reference, running `deinit` on that
-        // event loop. The synchronous `syncShutdownGracefully()` call will trap there because the
-        // loop cannot wait for itself to stop, so initiate shutdown asynchronously.
-        self.loopGroup.shutdownGracefully { _ in }
     }
 }
 
-private extension ConnectError {
-    static func disconnected() -> Self {
+extension ConnectError {
+    fileprivate static func disconnected() -> Self {
         .init(code: .unavailable, message: "client is not connected")
     }
 }

@@ -137,8 +137,8 @@ extension GzipCompressionPool: CompressionPool {
     }
 }
 
-private extension Data {
-    func isGzipped() -> Bool {
+extension Data {
+    fileprivate func isGzipped() -> Bool {
         return self.starts(with: [0x1f, 0x8b])
     }
 }

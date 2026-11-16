@@ -111,6 +111,29 @@ and runs the tests:
 make testunit
 ```
 
+## Formatting
+
+Connect-Swift uses [swift-format][swift-format] to format `.swift` files, and
+the `run-swift-format` CI job fails if any file is not formatted. It ships with
+the Swift toolchain (Swift 6+), so there is nothing to install. Formatting can
+differ between versions, so use the same Swift version as the
+[`run-swift-format` CI job](./workflows/ci.yml).
+
+To format everything in place, run the following in the **root of the repo**:
+
+```sh
+make format
+```
+
+To see what CI will report without changing any files:
+
+```sh
+swift format lint --strict --recursive --parallel .
+```
+
+The style is configured in [`.swift-format`](../.swift-format). Generated
+sources opt out with a `// swift-format-ignore-file` comment.
+
 ## Linting
 
 Connect-Swift uses [SwiftLint][swiftlint] for linting `.swift` files. To
@@ -178,6 +201,7 @@ Releases should be tagged in `x.y.z` SemVer format.
 [commit-message]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
 [fork]: https://github.com/connectrpc/connect-swift/fork
 [open-issue]: https://github.com/connectrpc/connect-swift/issues/new
+[swift-format]: https://github.com/swiftlang/swift-format
 [swiftlint]: https://github.com/realm/SwiftLint
 [swiftlint-install]: https://github.com/realm/SwiftLint#installation
 [swift-plugin-library]: https://github.com/apple/swift-protobuf/tree/main/Sources/SwiftProtobufPluginLibrary

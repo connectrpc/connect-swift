@@ -62,41 +62,44 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
         let urlRequest = URLRequest(httpRequest: request)
         let task = self.session.dataTask(with: urlRequest) { data, urlResponse, error in
             if let httpURLResponse = urlResponse as? HTTPURLResponse {
-                onResponse(HTTPResponse(
-                    code: Code.fromURLSessionCode(httpURLResponse.statusCode),
-                    headers: httpURLResponse.formattedLowercasedHeaders(),
-                    message: data,
-                    trailers: [:], // URLSession does not support trailers
-                    error: error,
-                    tracingInfo: .init(httpStatus: httpURLResponse.statusCode)
-                ))
+                onResponse(
+                    HTTPResponse(
+                        code: Code.fromURLSessionCode(httpURLResponse.statusCode),
+                        headers: httpURLResponse.formattedLowercasedHeaders(),
+                        message: data,
+                        trailers: [:], // URLSession does not support trailers
+                        error: error,
+                        tracingInfo: .init(httpStatus: httpURLResponse.statusCode)
+                    ))
             } else if let error = error {
                 let code = Code.fromURLSessionCode((error as NSError).code)
-                onResponse(HTTPResponse(
-                    code: code,
-                    headers: [:],
-                    message: data,
-                    trailers: [:],
-                    error: ConnectError(
+                onResponse(
+                    HTTPResponse(
                         code: code,
-                        message: error.localizedDescription,
-                        exception: error
-                    ),
-                    tracingInfo: nil
-                ))
+                        headers: [:],
+                        message: data,
+                        trailers: [:],
+                        error: ConnectError(
+                            code: code,
+                            message: error.localizedDescription,
+                            exception: error
+                        ),
+                        tracingInfo: nil
+                    ))
             } else {
-                onResponse(HTTPResponse(
-                    code: .unknown,
-                    headers: [:],
-                    message: data,
-                    trailers: [:],
-                    error: ConnectError(
+                onResponse(
+                    HTTPResponse(
                         code: .unknown,
-                        message: "unexpected response type \(type(of: urlResponse))",
-                        exception: error
-                    ),
-                    tracingInfo: nil
-                ))
+                        headers: [:],
+                        message: data,
+                        trailers: [:],
+                        error: ConnectError(
+                            code: .unknown,
+                            message: "unexpected response type \(type(of: urlResponse))",
+                            exception: error
+                        ),
+                        tracingInfo: nil
+                    ))
             }
         }
         self.lock.perform { self.metricsClosures[task.taskIdentifier] = onMetrics }
@@ -117,6 +120,7 @@ open class URLSessionHTTPClient: NSObject, HTTPClientInterface, @unchecked Senda
             self.streams[urlSessionStream.taskID] = urlSessionStream
             self.metricsClosures[urlSessionStream.taskID] = responseCallbacks.receiveResponseMetrics
         }
+        urlSessionStream.start()
         return RequestCallbacks(
             cancel: { [weak urlSessionStream] in urlSessionStream?.cancel() },
             sendData: { [weak urlSessionStream] data in
@@ -288,8 +292,8 @@ extension Code {
     }
 }
 
-private extension HTTPRequest {
-    var isGRPC: Bool {
+extension HTTPRequest {
+    fileprivate var isGRPC: Bool {
         return self.headers[HeaderConstants.contentType]?.first.map { contentType in
             return contentType.hasPrefix("application/grpc")
                 && !contentType.hasPrefix("application/grpc-web")
@@ -297,8 +301,8 @@ private extension HTTPRequest {
     }
 }
 
-private extension URLRequest {
-    init(httpRequest: HTTPRequest<Data?>) {
+extension URLRequest {
+    fileprivate init(httpRequest: HTTPRequest<Data?>) {
         self.init(url: httpRequest.url)
         self.httpMethod = httpRequest.method.rawValue
         self.httpBody = httpRequest.message

@@ -96,11 +96,12 @@ struct ClientOnlyAsyncStreamTests {
         let calls = Locked([String]())
         let bidirectional = BidirectionalAsyncStream<Empty, Empty>()
         let clientOnly = ClientOnlyAsyncStream(bidirectionalStream: bidirectional)
-        bidirectional.configureForSending(with: RequestCallbacks<Empty>(
-            cancel: { calls.perform { $0.append("cancel") } },
-            sendData: { _ in calls.perform { $0.append("send") } },
-            sendClose: { calls.perform { $0.append("close") } }
-        ))
+        bidirectional.configureForSending(
+            with: RequestCallbacks<Empty>(
+                cancel: { calls.perform { $0.append("cancel") } },
+                sendData: { _ in calls.perform { $0.append("send") } },
+                sendClose: { calls.perform { $0.append("close") } }
+            ))
 
         try clientOnly.send(Empty())
         clientOnly.closeAndReceive()
@@ -124,9 +125,10 @@ struct ClientOnlyAsyncStreamTests {
     ) async -> [StreamResult<Empty>] {
         let bidirectional = BidirectionalAsyncStream<Empty, Empty>()
         let clientOnly = ClientOnlyAsyncStream(bidirectionalStream: bidirectional)
-        bidirectional.configureForSending(with: RequestCallbacks<Empty>(
-            cancel: {}, sendData: { _ in }, sendClose: {}
-        ))
+        bidirectional.configureForSending(
+            with: RequestCallbacks<Empty>(
+                cancel: {}, sendData: { _ in }, sendClose: {}
+            ))
 
         handleResults(clientOnly)
 

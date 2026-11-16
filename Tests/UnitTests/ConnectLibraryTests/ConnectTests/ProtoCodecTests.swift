@@ -19,15 +19,16 @@ import Testing
 
 struct ProtoCodecTests {
     private let message: Connectrpc_Conformance_V1_RawHTTPRequest = .with { proto in
-        proto.body = .unary(Connectrpc_Conformance_V1_MessageContents.with { message in
-            message.binary = Data([0x0, 0x1, 0x2, 0x3])
-        })
+        proto.body = .unary(
+            Connectrpc_Conformance_V1_MessageContents.with { message in
+                message.binary = Data([0x0, 0x1, 0x2, 0x3])
+            })
         proto.uri = "foo/bar"
         proto.headers = [
             .with { header in
                 header.name = "x-header"
                 header.value = ["a"]
-            },
+            }
         ]
     }
 

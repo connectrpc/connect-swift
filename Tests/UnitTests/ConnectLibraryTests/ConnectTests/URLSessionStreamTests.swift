@@ -59,8 +59,8 @@ struct URLSessionStreamTests {
                         #expect(code == .unavailable)
                         let connectError = error as? ConnectError
                         #expect(
-                            connectError?.message ==
-                            "connection was reset and the streamed request body cannot be replayed"
+                            connectError?.message
+                                == "connection was reset and the streamed request body cannot be replayed"
                         )
                         confirm()
                     }
@@ -84,5 +84,53 @@ struct URLSessionStreamTests {
             // Duplicate completion must be suppressed by `closedByServer`.
             stream.handleCompletion(error: nil)
         }
+    }
+
+    /// `URLSession` asks its delegate for the request body as soon as a task is resumed, and
+    /// `URLSessionHTTPClient` can only answer once it has registered the stream. A stream which
+    /// started its request on creation would race that registration, so it must wait for
+    /// `start()`.
+    @available(macOS 13, iOS 16, watchOS 9, tvOS 16, *)
+    @Test
+    func doesNotStartRequestUntilStarted() async throws {
+        let recorder = CreatedTaskRecorder()
+        let session = URLSession(
+            configuration: .ephemeral, delegate: recorder, delegateQueue: nil
+        )
+        defer { session.invalidateAndCancel() }
+
+        let stream = URLSessionStream(
+            request: URLRequest(url: URL(string: "https://connectrpc.com")!),
+            session: session,
+            responseCallbacks: ResponseCallbacks(
+                receiveResponseHeaders: { _ in },
+                receiveResponseData: { _ in },
+                receiveResponseMetrics: { _ in },
+                receiveClose: { _, _, _ in }
+            )
+        )
+        defer { stream.cancel() }
+
+        let task = try #require(await recorder.tasks.first { _ in true })
+        #expect(task.state == .suspended, "The request must not start before `start()`.")
+
+        stream.start()
+        #expect(task.state == .running)
+    }
+}
+
+/// Hands back each task its session creates, so a test can observe the task's state.
+@available(macOS 13, iOS 16, watchOS 9, tvOS 16, *)
+private final class CreatedTaskRecorder: NSObject, URLSessionTaskDelegate {
+    let tasks: AsyncStream<URLSessionTask>
+    private let continuation: AsyncStream<URLSessionTask>.Continuation
+
+    override init() {
+        (self.tasks, self.continuation) = AsyncStream.makeStream(of: URLSessionTask.self)
+        super.init()
+    }
+
+    func urlSession(_ session: URLSession, didCreateTask task: URLSessionTask) {
+        self.continuation.yield(task)
     }
 }

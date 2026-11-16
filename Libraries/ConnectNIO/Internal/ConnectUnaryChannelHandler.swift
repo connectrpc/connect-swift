@@ -52,14 +52,15 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
             }
 
             self.closeConnection()
-            self.onResponse(HTTPResponse(
-                code: .canceled,
-                headers: [:],
-                message: nil,
-                trailers: [:],
-                error: ConnectError.canceled(),
-                tracingInfo: nil
-            ))
+            self.onResponse(
+                HTTPResponse(
+                    code: .canceled,
+                    headers: [:],
+                    message: nil,
+                    trailers: [:],
+                    error: ConnectError.canceled(),
+                    tracingInfo: nil
+                ))
         }
     }
 
@@ -152,33 +153,34 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
     }
 
     func handlerAdded(context: NIOCore.ChannelHandlerContext) {
-      self.context = context
+        self.context = context
     }
 
     func handlerRemoved(context: NIOCore.ChannelHandlerContext) {
-      self.context = nil
+        self.context = nil
     }
 
     func channelInactive(context: ChannelHandlerContext) {
-      let shouldNotify = !self.hasResponded
-      self.closeConnection()
+        let shouldNotify = !self.hasResponded
+        self.closeConnection()
         if shouldNotify {
-          self.onResponse(.init(
-              code: .unavailable,
-              headers: [:],
-              message: nil,
-              trailers: [:],
-              error: ConnectError(
-                  code: .unavailable,
-                  message: "Channel became inactive",
-                  exception: nil,
-                  details: [],
-                  metadata: [:]
-              ),
-              tracingInfo: nil
-          ))
-      }
-      context.fireChannelInactive()
+            self.onResponse(
+                .init(
+                    code: .unavailable,
+                    headers: [:],
+                    message: nil,
+                    trailers: [:],
+                    error: ConnectError(
+                        code: .unavailable,
+                        message: "Channel became inactive",
+                        exception: nil,
+                        details: [],
+                        metadata: [:]
+                    ),
+                    tracingInfo: nil
+                ))
+        }
+        context.fireChannelInactive()
     }
 
     func errorCaught(context: NIOCore.ChannelHandlerContext, error: Swift.Error) {
@@ -196,13 +198,14 @@ final class ConnectUnaryChannelHandler: NIOCore.ChannelInboundHandler, @unchecke
         }
 
         self.closeConnection()
-        self.onResponse(.init(
-            code: .deadlineExceeded,
-            headers: [:],
-            message: nil,
-            trailers: [:],
-            error: ConnectError.deadlineExceeded(),
-            tracingInfo: nil
-        ))
+        self.onResponse(
+            .init(
+                code: .deadlineExceeded,
+                headers: [:],
+                message: nil,
+                trailers: [:],
+                error: ConnectError.deadlineExceeded(),
+                tracingInfo: nil
+            ))
     }
 }
