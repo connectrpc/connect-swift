@@ -15,9 +15,13 @@ async API, which changes three things a caller can observe:
 
 - Completion handlers and `onResult` closures are called from a Swift Concurrency task, not
   from the transport's queue (URLSession's delegate queue or a SwiftNIO event loop). Code that
-  relied on that queue must hop to it itself.
+  relied on that queue must hop to it itself. Callbacks from different calls on the same client
+  can now run at the same time: `URLSessionHTTPClient` used to deliver them one at a time on a
+  serial queue, so state they share now needs its own synchronization. A stream's `onResult` is
+  still called in order, never concurrently.
 - A call returns before its request has started; the request starts on that task. Two unary
   calls made back to back are no longer guaranteed to be sent in that order. Messages sent on
-  one stream still arrive in the order they were sent.
+  one stream still arrive in the order they were sent. A completion handler is never called
+  before the call that started it returns, even when the request fails right away.
 - A type that implements `ProtocolClientInterface` itself no longer has to implement the four
   callback methods.
