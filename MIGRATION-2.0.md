@@ -11,9 +11,11 @@ Swift 6.2 / Xcode 26 or later is required. Deployment targets are unchanged.
 ## Callback API
 
 The callback API is still available, and its signatures are unchanged, so code that calls it
-compiles as before. Each callback method is now a thin layer over the matching async method: it
-starts a Swift Concurrency task, calls the async method on that task, and passes the result to
-your closure. That brings some improvements, and a few changes worth checking your code for.
+compiles as before. Each callback method is now a thin layer over the matching async method. A
+unary call starts a Swift Concurrency task, awaits the async `unary` on it, and passes the
+response to your completion handler. A stream call opens the stream through the async API and
+starts a task that passes each result to your `onResult` closure. That brings some improvements,
+and a few changes worth checking your code for.
 
 ### Improvements
 
