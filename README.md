@@ -117,6 +117,11 @@ func testMessagingViewModel() async {
 }
 ```
 
+## Requirements
+
+- Swift 6.2 or later (Xcode 26 or later).
+- iOS 13, macOS 10.15, tvOS 13, or watchOS 6 or later.
+
 ## Code Generation
 
 This repo includes a code generator, `protoc-gen-connect-swift`, that works in tandem

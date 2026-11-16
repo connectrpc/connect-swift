@@ -1,4 +1,4 @@
-// swift-tools-version:5.9
+// swift-tools-version:6.2
 
 // Copyright 2022-2025 The Connect Authors
 //
@@ -176,5 +176,5 @@ let package = Package(
             path: "Plugins/ConnectSwiftPlugin"
         ),
     ],
-    swiftLanguageVersions: [.version("6"), .v5]
+    swiftLanguageModes: [.v6]
 )
