@@ -170,6 +170,8 @@ Comprehensive documentation for everything, including
 [streaming][streaming], and [error handling][error-handling]
 is available on the [connectrpc.com website][getting-started].
 
+Upgrading from 1.x? See the [2.0 migration guide](./MIGRATION-2.0.md).
+
 ## Example Apps
 
 Example apps are available in the [`Examples`](./Examples)
