@@ -40,11 +40,13 @@ your closure. That brings some improvements, and a few changes worth checking yo
   `URLSessionHTTPClient` used to call them one at a time, so state they shared was safe without
   a lock. Protect that state yourself. In Swift 6 language mode the compiler checks this,
   because the closures are `@Sendable`; in Swift 5 mode it does not.
-- **A call returns before its request has started.** The request starts on the task, so two
-  unary calls made back to back are no longer sent in the order they were made. Sending them in
-  order never guaranteed that the server received them in order. If one call must finish before
-  the next starts, make the second call from the first one's completion handler, or use the
-  async API and `await` each call in turn.
+- **Separate unary calls have no defined order.** That was always true on the wire, but a
+  callback unary call used to reach the transport before the method returned, so back-to-back
+  calls usually went out in call order. Now each call starts on its own task, so they may not.
+  If a call depends on another's result, make it after the first completes, from its completion
+  handler, or by awaiting both in turn with the async API. If later calls replace earlier ones,
+  such as repeated saves of a draft, don't rely on order: cancel the earlier call, or send a
+  version the server can check.
 - **Don't block inside a closure.** A closure that waits on a semaphore or does slow synchronous
   work holds one of the threads Swift Concurrency shares across your app, and there are only
   about as many of those as CPU cores.
