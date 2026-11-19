@@ -53,7 +53,7 @@ final class ConformanceInvoker: Sendable {
                 networkProtocol: try self.networkProtocol(for: request),
                 codec: try self.codec(for: request),
                 unaryGET: .alwaysEnabled,
-                timeout: request.hasTimeoutMs ? TimeInterval(request.timeoutMs / 1_000) : nil,
+                timeout: request.hasTimeoutMs ? TimeInterval(request.timeoutMs) / 1_000 : nil,
                 requestCompression: try self.requestCompression(for: request)
             )
         )
@@ -427,6 +427,9 @@ private enum SharedURLSessionHTTPClient {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.urlCache = nil
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        // The 60s default outlasts the conformance runner's 20s response timeout,
+        // so a stalled task would otherwise fail every queued test.
+        configuration.timeoutIntervalForRequest = 10
         return URLSessionHTTPClient(configuration: configuration)
     }()
 }
