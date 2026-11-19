@@ -148,6 +148,8 @@ let package = Package(
                 "Connect",
                 "ConnectNIO",
                 .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOEmbedded", package: "swift-nio"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
             ],
             path: "Tests/UnitTests/ConnectNIOTests"
