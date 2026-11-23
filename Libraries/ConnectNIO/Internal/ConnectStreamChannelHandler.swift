@@ -22,7 +22,9 @@ import NIOHTTP1
 final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @unchecked Sendable {
     private let eventLoop: NIOCore.EventLoop
     private let request: Connect.HTTPRequest<Data?>
-    private let responseCallbacks: Connect.ResponseCallbacks
+    /// Released once the close is reported. The callbacks keep the stream that owns this handler,
+    /// and that stream keeps this handler, so keeping them after the close leaks both.
+    private var responseCallbacks: Connect.ResponseCallbacks?
 
     private var context: NIOCore.ChannelHandlerContext?
     private var isClosed = false
@@ -82,7 +84,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             }
 
             self.closeConnection()
-            self.responseCallbacks.receiveClose(.canceled, [:], ConnectError.canceled())
+            self.receiveClose(.canceled, [:], ConnectError.canceled())
         }
     }
 
@@ -102,6 +104,13 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
         self.hasResponded = true
         self.isClosed = true
         self.context?.close(promise: nil)
+    }
+
+    /// Reports the close of the stream and releases the response callbacks.
+    private func receiveClose(_ code: Code, _ trailers: Trailers, _ error: Swift.Error?) {
+        let responseCallbacks = self.responseCallbacks
+        self.responseCallbacks = nil
+        responseCallbacks?.receiveClose(code, trailers, error)
     }
 
     // MARK: - ChannelInboundHandler
@@ -145,13 +154,13 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
         switch response {
         case .head(let head):
             self.receivedStatus = head.status
-            self.responseCallbacks.receiveResponseHeaders(.fromNIOHeaders(head.headers))
+            self.responseCallbacks?.receiveResponseHeaders(.fromNIOHeaders(head.headers))
             context.fireChannelRead(data)
         case .body(let byteBuffer):
-            self.responseCallbacks.receiveResponseData(Data(buffer: byteBuffer))
+            self.responseCallbacks?.receiveResponseData(Data(buffer: byteBuffer))
             context.fireChannelRead(data)
         case .end(let trailers):
-            self.responseCallbacks.receiveClose(
+            self.receiveClose(
                 self.receivedStatus.map { .fromNIOStatus($0) } ?? .ok,
                 trailers.map { .fromNIOHeaders($0) } ?? [:],
                 nil
@@ -172,7 +181,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
         let shouldNotify = !self.hasResponded
         self.closeConnection()
         if shouldNotify {
-            self.responseCallbacks.receiveClose(
+            self.receiveClose(
                 .unavailable,
                 [:],
                 ConnectError(
@@ -192,7 +201,7 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
             return
         }
 
-        self.responseCallbacks.receiveClose(
+        self.receiveClose(
             .fromHTTPStatus((error as NSError).code),
             [:],
             error
@@ -206,6 +215,6 @@ final class ConnectStreamChannelHandler: NIOCore.ChannelInboundHandler, @uncheck
         }
 
         self.closeConnection()
-        self.responseCallbacks.receiveClose(.deadlineExceeded, [:], ConnectError.deadlineExceeded())
+        self.receiveClose(.deadlineExceeded, [:], ConnectError.deadlineExceeded())
     }
 }
