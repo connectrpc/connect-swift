@@ -34,10 +34,62 @@ public final class ProtocolClient: Sendable {
 }
 
 extension ProtocolClient: ProtocolClientInterface {
-    // MARK: - Callbacks
-
-    @discardableResult
     public func unary<Input: ProtobufMessage, Output: ProtobufMessage>(
+        path: String,
+        idempotencyLevel: IdempotencyLevel,
+        request: Input,
+        headers: Headers
+    ) async -> ResponseMessage<Output> {
+        return await UnaryAsyncWrapper { completion in
+            self.performUnary(
+                path: path, idempotencyLevel: idempotencyLevel, request: request,
+                headers: headers, completion: completion
+            )
+        }.send()
+    }
+
+    public func bidirectionalStream<Input: ProtobufMessage, Output: ProtobufMessage>(
+        path: String,
+        headers: Headers
+    ) -> any BidirectionalAsyncStreamInterface<Input, Output> {
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
+            path: path, headers: headers,
+            onResult: { bidirectionalAsync.handleResultFromServer($0) }
+        )
+        return bidirectionalAsync.configureForSending(with: callbacks)
+    }
+
+    public func clientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>(
+        path: String,
+        headers: Headers
+    ) -> any ClientOnlyAsyncStreamInterface<Input, Output> {
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let clientOnlyAsync = ClientOnlyAsyncStream(bidirectionalStream: bidirectionalAsync)
+        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
+            path: path, headers: headers, onResult: { clientOnlyAsync.handleResultFromServer($0) }
+        )
+        bidirectionalAsync.configureForSending(with: callbacks)
+        return clientOnlyAsync
+    }
+
+    public func serverOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>(
+        path: String,
+        headers: Headers
+    ) -> any ServerOnlyAsyncStreamInterface<Input, Output> {
+        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
+        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
+            path: path, headers: headers,
+            onResult: { bidirectionalAsync.handleResultFromServer($0) }
+        )
+        return ServerOnlyAsyncStream(
+            bidirectionalStream: bidirectionalAsync.configureForSending(with: callbacks)
+        )
+    }
+
+    // MARK: - Private
+
+    private func performUnary<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
         idempotencyLevel: IdempotencyLevel,
         request: Input,
@@ -167,105 +219,6 @@ extension ProtocolClient: ProtocolClientInterface {
             }
         }
     }
-
-    public func bidirectionalStream<
-        Input: ProtobufMessage, Output: ProtobufMessage
-    >(
-        path: String,
-        headers: Headers,
-        onResult: @escaping @Sendable (StreamResult<Output>) -> Void
-    ) -> any BidirectionalStreamInterface<Input> {
-        return BidirectionalStream(
-            requestCallbacks: self.createRequestCallbacks(
-                path: path, headers: headers, onResult: onResult
-            ))
-    }
-
-    public func clientOnlyStream<
-        Input: ProtobufMessage, Output: ProtobufMessage
-    >(
-        path: String,
-        headers: Headers,
-        onResult: @escaping @Sendable (StreamResult<Output>) -> Void
-    ) -> any ClientOnlyStreamInterface<Input> {
-        let clientOnly = ClientOnlyStream<Input, Output>(onResult: onResult)
-        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
-            path: path, headers: headers, onResult: { clientOnly.handleResultFromServer($0) }
-        )
-        return clientOnly.configureForSending(with: callbacks)
-    }
-
-    public func serverOnlyStream<
-        Input: ProtobufMessage, Output: ProtobufMessage
-    >(
-        path: String,
-        headers: Headers,
-        onResult: @escaping @Sendable (StreamResult<Output>) -> Void
-    ) -> any ServerOnlyStreamInterface<Input> {
-        return ServerOnlyStream(
-            bidirectionalStream: BidirectionalStream(
-                requestCallbacks: self.createRequestCallbacks(
-                    path: path, headers: headers, onResult: onResult
-                )
-            ))
-    }
-
-    // MARK: - Async/await
-
-    public func unary<Input: ProtobufMessage, Output: ProtobufMessage>(
-        path: String,
-        idempotencyLevel: IdempotencyLevel,
-        request: Input,
-        headers: Headers
-    ) async -> ResponseMessage<Output> {
-        return await UnaryAsyncWrapper { completion in
-            self.unary(
-                path: path, idempotencyLevel: idempotencyLevel, request: request,
-                headers: headers, completion: completion
-            )
-        }.send()
-    }
-
-    public func bidirectionalStream<Input: ProtobufMessage, Output: ProtobufMessage>(
-        path: String,
-        headers: Headers
-    ) -> any BidirectionalAsyncStreamInterface<Input, Output> {
-        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
-        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
-            path: path, headers: headers,
-            onResult: { bidirectionalAsync.handleResultFromServer($0) }
-        )
-        return bidirectionalAsync.configureForSending(with: callbacks)
-    }
-
-    public func clientOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>(
-        path: String,
-        headers: Headers
-    ) -> any ClientOnlyAsyncStreamInterface<Input, Output> {
-        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
-        let clientOnlyAsync = ClientOnlyAsyncStream(bidirectionalStream: bidirectionalAsync)
-        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
-            path: path, headers: headers, onResult: { clientOnlyAsync.handleResultFromServer($0) }
-        )
-        bidirectionalAsync.configureForSending(with: callbacks)
-        return clientOnlyAsync
-    }
-
-    public func serverOnlyStream<Input: ProtobufMessage, Output: ProtobufMessage>(
-        path: String,
-        headers: Headers
-    ) -> any ServerOnlyAsyncStreamInterface<Input, Output> {
-        let bidirectionalAsync = BidirectionalAsyncStream<Input, Output>()
-        let callbacks: RequestCallbacks<Input> = self.createRequestCallbacks(
-            path: path, headers: headers,
-            onResult: { bidirectionalAsync.handleResultFromServer($0) }
-        )
-        return ServerOnlyAsyncStream(
-            bidirectionalStream: bidirectionalAsync.configureForSending(with: callbacks)
-        )
-    }
-
-    // MARK: - Private
 
     private func createRequestCallbacks<Input: ProtobufMessage, Output: ProtobufMessage>(
         path: String,
